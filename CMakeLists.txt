@@ -1,0 +1,173 @@
+cmake_minimum_required(VERSION 3.16)
+
+project("LibSGD")
+
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+
+message("### Configuring LibSGD for:")
+message("### CMAKE_SYSTEM_NAME:     ${CMAKE_SYSTEM_NAME}")
+message("### CMAKE_BUILD_TYPE:      ${CMAKE_BUILD_TYPE}")
+message("### CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+message("### CMAKE_SIZEOF_VOID_P:   ${CMAKE_SIZEOF_VOID_P}")
+
+# Config
+#
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(SGD_CONFIG_DEBUG 1)
+    add_compile_definitions(SGD_CONFIG_DEBUG=1)
+else ()
+    set(SGD_CONFIG_RELEASE 1)
+    add_compile_definitions(SGD_CONFIG_RELEASE=1)
+endif ()
+
+# System
+#
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(SGD_OS_WINDOWS 1)
+    add_compile_definitions(SGD_OS_WINDOWS=1)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(SGD_OS_LINUX 1)
+    add_compile_definitions(SGD_OS_LINUX=1)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
+    set(SGD_OS_EMSCRIPTEN 1)
+    add_compile_definitions(SGD_OS_EMSCRIPTEN=1)
+else ()
+    message(FATAL_ERROR "!!! Unrecognized system: ${CMAKE_SYSTEM_NAME}")
+endif ()
+
+# Compiler
+#
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    set(SGD_COMPILER_MSVC 1)
+    add_compile_definitions(SGD_COMPILER_MSVC=1)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(SGD_COMPILER_CLANG 1)
+    add_compile_definitions(SGD_COMPILER_CLANG=1)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(SGD_COMPILER_GCC 1)
+    add_compile_definitions(SGD_COMPILER_GCC=1)
+else ()
+    message(FATAL_ERROR "!!! Unsupported compiler: ${CMAKE_SYSTEM_NAME}")
+endif ()
+
+# Using C++ 17
+#
+set(CMAKE_CXX_STANDARD 17)
+
+# Add our root include directory
+#
+include_directories(${CMAKE_SOURCE_DIR})
+
+# Add our cmake 'find' scripts
+#
+#set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+
+# publish cmake project dir to c++
+#
+add_compile_definitions(SGD_CMAKE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+# Enable threads
+#
+if (SGD_COMPILER_MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+else ()
+    add_compile_options(-pthread)
+    add_link_options(-pthread)
+endif ()
+
+# Optimization levels and debug info
+#
+if (SGD_CONFIG_DEBUG)
+    if (SGD_OS_EMSCRIPTEN)
+        # Note: Install this chrome browser plugin for usable runtime debugging with -g option
+        #       https://chrome.google.com/webstore/detail/cc%20%20-devtools-support-dwa/pdcpmagijalfljmkmjngeonclgbbannb
+        add_compile_options(-O1 -g2)
+        add_link_options(-O1 -g2)
+    endif ()
+else ()
+    if (SGD_OS_EMSCRIPTEN)
+        add_compile_options(-O1)
+        add_link_options(-O1)
+    elseif (SGD_OS_LINUX)
+        add_compile_options(-O3)
+    endif ()
+endif ()
+
+# Miscellaneous emscripten settings.
+#
+if (SGD_OS_EMSCRIPTEN)
+    add_link_options(-fwasm-exceptions)
+
+    add_link_options(-sINITIAL_MEMORY=256Mb -sSTACK_SIZE=64kb -sEXIT_RUNTIME=1)
+
+    if (SGD_CONFIG_DEBUG)
+        add_link_options(--minify=0)
+    endif ()
+
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+
+    add_link_options(--emrun --shell-file "${CMAKE_SOURCE_DIR}/index_template.html")
+
+    # Have to do this as EM_KEEPALIVE doesn't work with extern globals in archives
+    #add_link_options(-sEXPORTED_FUNCTIONS=['_main','___heap_base','___stack_pointer'])
+
+    # Turns off interpreter
+    #add_link_options(-sDYNAMIC_EXECUTION=0)
+endif ()
+
+# Address sanitizer.
+#
+if (SGD_OS_LINUX)
+    set(SANITIZER_OPTIONS -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer)
+    add_compile_options(${SANITIZER_OPTIONS})
+    add_link_options(${SANITIZER_OPTIONS})
+    add_compile_definitions(SGD_ASAN_ENABLED=1)
+    message("### Address sanitizer enabled: ${SANITIZER_OPTIONS}")
+endif ()
+
+# Copy output exe file to whereever
+function(copy_output_file target dst_dir)
+
+    set(SRC $<TARGET_FILE:${target}>)
+    set(DST ${dst_dir}/$<TARGET_FILE_BASE_NAME:${target}>$<TARGET_FILE_SUFFIX:${target}>)
+
+    add_custom_command(TARGET ${target} POST_BUILD VERBATIM
+            COMMAND ${CMAKE_COMMAND} -E echo "Copying ${target} output file \"${SRC}\" to \"${DST}\""
+            COMMAND ${CMAKE_COMMAND} -E copy ${SRC} ${DST})
+endfunction()
+
+# Copy assets dir to output binary dir
+function(copy_assets_to_binary_dir target)
+
+    if (!SGD_OS_EMSCRIPTEN)
+
+        set(SRC $<TARGET_PROPERTY:${target},SOURCE_DIR>/assets)
+        set(DST $<TARGET_PROPERTY:${target},BINARY_DIR>/assets)
+
+        add_custom_command(TARGET ${target} PRE_LINK VERBATIM
+                COMMAND ${CMAKE_COMMAND} -E echo "Copying \"${SRC}\" directory to \"${DST}\""
+                COMMAND ${CMAKE_COMMAND} -E copy_directory ${SRC} ${DST})
+
+    else ()
+
+        set(SRC $<TARGET_PROPERTY:${target},SOURCE_DIR>/assets)
+
+        if (SGD_OS_EMSCRIPTEN)
+            target_link_options(${target} PUBLIC --preload-file "${SRC}@/assets")
+        endif ()
+
+    endif ()
+
+endfunction()
+
+add_subdirectory(external)
+
+add_subdirectory(core)          #
+add_subdirectory(geom)          # core
+add_subdirectory(dawn)          # geom
+#add_subdirectory(xrsession)     # dawn
+add_subdirectory(window)        # geom
+add_subdirectory(graphics)      # window
+add_subdirectory(libsgd)        # window
+
+add_subdirectory(emgdb)

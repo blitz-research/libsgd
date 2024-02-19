@@ -1,0 +1,116 @@
+#include "vec4.h"
+
+namespace sgd {
+
+template <class T> constexpr Vec4<T>::Vec4(T s) : x(s), y(s), z(s), w(s) {
+}
+
+template <class T> template <class C> constexpr Vec4<T>::Vec4(const Vec4<C>& v) : x(v.x), y(v.y), z(v.z), w(v.w) {
+}
+
+template <class T> constexpr Vec4<T>::Vec4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {
+}
+
+template <class T> constexpr Vec4<T>::Vec4(const Vec3<T>& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {
+}
+
+template <class T> Vec4<T> Vec4<T>::rgba(uint32_t rgba) {
+	constexpr T sc = T(1) / T(255);
+	return {T(rgba & 255) * sc, T((rgba >> 8) & 255) * sc, T((rgba >> 16) & 255) * sc, T(rgba >> 24) * sc};
+}
+
+template<class T> T* Vec4<T>::data() {
+	return &x;
+}
+
+template<class T> const T* Vec4<T>::data() const {
+	return &x;
+}
+
+template<class T> T& Vec4<T>::operator[](size_t index) {
+	SGD_ASSERT(index<4);
+	return data()[index];
+}
+
+template<class T> const T& Vec4<T>::operator[](size_t index) const {
+	SGD_ASSERT(index<4);
+	return data()[index];
+}
+
+// ***** Non-members *****
+
+template <class T> Vec4<T> operator-(CVec4<T> v) {
+	return {-v.x, -v.y, -v.z, -v.w};
+}
+
+template <class T> Vec4<T> operator*(CVec4<T> p, CVec4<T> q) {
+	return {p.x * q.x, p.y * q.y, p.z * q.z, p.w * q.w};
+}
+
+template <class T> Vec4<T> operator/(CVec4<T> p, CVec4<T> q) {
+	return {p.x / q.x, p.y / q.y, p.z / q.z, p.w / q.w};
+}
+
+template <class T> Vec4<T> operator+(CVec4<T> p, CVec4<T> q) {
+	return {p.x + q.x, p.y + q.y, p.z + q.z, p.w + q.w};
+}
+
+template <class T> Vec4<T> operator-(CVec4<T> p, CVec4<T> q) {
+	return {p.x - q.x, p.y - q.y, p.z - q.z, p.w - q.w};
+}
+
+template <class T> Vec4<T> operator*(CVec4<T> v, T s) {
+	return {v.x * s, v.y * s, v.z * s, v.w * s};
+}
+
+template <class T> Vec4<T> operator/(CVec4<T> v, T s) {
+	return {v.x / s, v.y / s, v.z / s, v.w / s};
+}
+
+template <class T> Vec4<T> operator+(CVec4<T> v, T s) {
+	return {v.x + s, v.y + s, v.z + s, v.w + s};
+}
+
+template <class T> Vec4<T> operator-(CVec4<T> v, T s) {
+	return {v.x - s, v.y - s, v.z - s, v.w - s};
+}
+
+template <class T> Vec4<T> operator*(T s, CVec4<T> v) {
+	return {s * v.x, s * v.y, s * v.z, s * v.w};
+}
+
+template <class T> Vec4<T> operator/(T s, CVec4<T> v) {
+	return {s / v.x, s / v.y, s / v.z, s / v.w};
+}
+
+template <class T> Vec4<T> operator+(T s, CVec4<T> v) {
+	return {s + v.x, s + v.y, s + v.z, s + v.w};
+}
+
+template <class T> Vec4<T> operator-(T s, CVec4<T> v) {
+	return {s - v.x, s - v.y, s - v.z, s - v.w};
+}
+
+template <class T> bool operator==(CVec4<T> p, CVec4<T> q) {
+	return p.x == q.x && p.y == q.y && p.z == q.z && p.w == q.w;
+}
+
+template <class T> bool operator!=(CVec4<T> lhs, CVec4<T> rhs) {
+	return !operator==(lhs, rhs);
+}
+
+template <class T> bool operator<(CVec4<T> p, CVec4<T> q) {
+	if (p.x < q.x) return true;
+	if (q.x < p.x) return false;
+	if (p.y < q.y) return true;
+	if (q.y < p.y) return false;
+	if (p.z < q.z) return true;
+	if (q.z < p.z) return false;
+	return p.w < q.w;
+}
+
+template <class T> std::ostream& operator<<(std::ostream& str, CVec4<T>& v) {
+	return str << '(' << v.x << ',' << v.y << ',' << v.z << ',' << v.w << ')';
+}
+
+} // namespace sgd

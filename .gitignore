@@ -1,0 +1,20 @@
+# Exes
+bin
+
+# Binary assets
+assets
+
+# Third party build files
+thirdparty-build
+
+# Default CLion output dir
+cmake-build-*
+
+# CLion config
+.idea
+
+# Default MSVC output dir
+out
+
+# MSVC config
+.vs

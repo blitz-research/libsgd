@@ -1,0 +1,121 @@
+﻿#pragma once
+
+#include "shared.h"
+
+#define SGD_SHARED(T)                                                                                                          \
+	struct T;                                                                                                                  \
+	using C##T = const T;                                                                                                      \
+	using T##Ptr = SharedPtr<T>;                                                                                               \
+	using C##T##Ptr = SharedPtr<const T>;
+
+//! @file
+
+namespace sgd {
+
+template <class T> struct SharedPtr {
+
+	SharedPtr() = default;
+
+	SharedPtr(T* ptr) : m_ptr(ptr) {
+		retain();
+	}
+
+	SharedPtr(const SharedPtr& shared) : m_ptr(shared.m_ptr) {
+		retain();
+	}
+
+	SharedPtr(SharedPtr&& shared) noexcept : m_ptr(shared.m_ptr) {
+		shared.m_ptr = nullptr;
+	}
+
+	template <class D> SharedPtr(const SharedPtr<D>& shared) : m_ptr(shared.m_ptr) {
+		retain();
+	}
+
+	template <class D> SharedPtr(SharedPtr<D>&& shared) noexcept : m_ptr(shared.m_ptr) {
+		shared.m_ptr = nullptr;
+	}
+
+	~SharedPtr() {
+		release();
+	}
+
+	SharedPtr& operator=(T* ptr) {
+		if (m_ptr == ptr) return *this;
+		release();
+		m_ptr = ptr;
+		retain();
+		return *this;
+	}
+
+	SharedPtr& operator=(const SharedPtr& shared) {
+		if (m_ptr == shared.m_ptr) return *this;
+		shared.m_ptr.retain();
+		release();
+		m_ptr = shared.m_ptr;
+		return *this;
+	}
+
+	SharedPtr& operator=(SharedPtr&& shared) noexcept {
+		if (m_ptr == shared.m_ptr) return *this;
+		release();
+		m_ptr = shared.m_ptr;
+		shared.m_ptr = nullptr;
+		return *this;
+	}
+
+	template <class D> SharedPtr& operator=(const SharedPtr<D>& shared) {
+		if (m_ptr == shared.m_ptr) return *this;
+		shared.m_pre.retain();
+		release();
+		m_ptr = shared.m_ptr;
+		return *this;
+	}
+
+	template <class D> SharedPtr& operator=(SharedPtr<D>&& shared) noexcept {
+		if (m_ptr == shared.m_ptr) return *this;
+		release();
+		m_ptr = shared.m_ptr;
+		shared.m_ptr = nullptr;
+		return *this;
+	}
+
+	T* operator->() const {
+		return m_ptr;
+	}
+
+	T& operator*() const {
+		return *m_ptr;
+	}
+
+	operator T*() const& {
+		return m_ptr;
+	}
+
+	// IMPORTANT! Can't convert temporary shared ptr to raw ptr!
+	// Might work if we null out m_ptr std::move-style, but let's not go there...
+	operator T*() && = delete;
+
+	T* get() const {
+		return m_ptr;
+	}
+
+private:
+	template <class> friend class SharedPtr;
+
+	T* m_ptr{};
+
+	void retain() {
+		if (m_ptr) m_ptr->retain();
+	}
+
+	void release() {
+		if (m_ptr) m_ptr->release();
+	}
+};
+
+template <class T> SharedPtr<T> shared(T* ptr) {
+	return ptr;
+}
+
+} // namespace sgd
