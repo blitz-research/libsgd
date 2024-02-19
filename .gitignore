@@ -4,9 +4,6 @@ bin
 # Binary assets
 assets
 
-# Third party build files
-thirdparty-build
-
 # Default CLion output dir
 cmake-build-*
 
