@@ -6,9 +6,9 @@
 
 namespace sgd {
 
-Material* loadMaterial(CPath path) {
+Expected<Material*, FileioEx> loadMaterial(CPath path) {
 
-	SGD_ASSERT(path.isDir());
+	if(!path.isDir()) return FileioEx("Directory does not exist");
 
 	auto material = new Material(&pbrMaterialDescriptor);
 

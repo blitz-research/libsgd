@@ -4,40 +4,51 @@ namespace sgd {
 
 namespace {
 
-Map<SGD_Handle, SharedPtr<Shared>> g_objects;
+constexpr int maxHandleTypes = 64;
 
-Map<Shared*, SGD_Handle> g_handles;
+using HandleMap = Map<int, SharedPtr<Shared>>;
+using ReverseMap = Map<Shared*, int>;
 
-SGD_Handle g_nextHandle;
+int g_nextHandle;
+
+HandleMap g_handleMaps[maxHandleTypes];
+ReverseMap g_reverseMaps[maxHandleTypes];
 
 } // namespace
 
-SGD_Handle createHandle(Shared* shared) {
-	auto it = g_handles.find(shared);
-	SGD_ASSERT(it == g_handles.end());
+SGD_Handle getHandle(HandleType type, Shared* shared) {
+	auto& rmap = g_reverseMaps[(int)type];
+	auto it = rmap.find(shared);
+	SGD_ASSERT(it != rmap.end());
+	return it->second;
+}
+
+SGD_Handle createHandle(HandleType type, Shared* shared) {
 	auto handle = ++g_nextHandle;
-	g_handles.insert(std::make_pair(shared, handle));
-	g_objects.insert(std::make_pair(handle, shared));
+	auto& map = g_handleMaps[(int)type];
+	auto& rmap = g_reverseMaps[(int)type];
+	SGD_ASSERT(map.find(handle) == map.end());
+	map.insert(std::make_pair(handle, shared));
+	rmap.insert(std::make_pair(shared, handle));
 	return handle;
 }
 
-void destroyHandle(SGD_Handle handle) {
-	auto it = g_objects.find(handle);
-	SGD_ASSERT(it != g_objects.end());
-	g_handles.erase(g_handles.find(it->second));
-	g_objects.erase(it);
-}
-
-SGD_Handle getHandle(Shared* shared) {
-	auto it = g_handles.find(shared);
-	SGD_ASSERT(it != g_handles.end());
+Shared* resolveHandle(HandleType type, SGD_Handle handle) {
+	auto& map = g_handleMaps[(int)type];
+	auto it = map.find(handle);
+	SGD_ASSERT(it != map.end());
 	return it->second;
 }
 
-Shared* getObject(SGD_Handle handle) {
-	auto it = g_objects.find(handle);
-	SGD_ASSERT(it != g_objects.end());
-	return it->second;
+void releaseHandle(HandleType type, SGD_Handle handle) {
+	auto& map = g_handleMaps[(int)type];
+	auto& rmap = g_reverseMaps[(int)type];
+	auto it = map.find(handle);
+	SGD_ASSERT(it != map.end());
+	auto rit = rmap.find(it->second);
+	SGD_ASSERT(rit != rmap.end());
+	map.erase(it);
+	rmap.erase(rit);
 }
 
 } // namespace sgd

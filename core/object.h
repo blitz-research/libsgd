@@ -26,6 +26,9 @@ struct ObjectType {
 	ObjectType* dynamicType() const override { return &staticType; }                                                           \
 	using Super = super;
 
+struct Object;
+using CObject = const Object;
+
 struct Object {
 	static inline ObjectType staticType{"Object", nullptr};
 
@@ -58,19 +61,20 @@ struct Object {
 		SGD_ASSERT(is<T>());
 		return static_cast<T*>(this);
 	}
-
+/*
 	template <class T> T* to() {
-		return is<T>() ? static_cast<T*>(this) : nullptr;
+		return this ? as<T>() : nullptr;
 	}
 
 	template <class T> const T* to() const {
-		return is<T>() ? static_cast<const T*>(this) : nullptr;
+		return this ? as<T>() : nullptr;
 	}
+ */
 };
 
 inline std::ostream& operator<<(std::ostream& os, const Object* object) {
-	os << object->dynamicType()->name << "@" << (const void*)object;
-	return os;
+	if(object) return os << object->dynamicType()->name << "@" << (const void*)object;
+	return os << "<nullptr>";
 }
 
 } // namespace sgd

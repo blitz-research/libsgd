@@ -48,35 +48,34 @@ BindGroup* createBindGroup0() {
 GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 
 	wgpu::RequestAdapterOptions opts{};
-	opts.backendType = wgpu::BackendType::D3D12;
+	opts.backendType = wgpu::BackendType::D3D11;
 
 	m_wgpuDevice = createWGPUDevice(opts);
 	m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->nativeWindow());
-	m_swapChainSize = m_window->size();
 	m_wgpuSwapChain =
-		createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, m_swapChainSize, preferredWGPUSwapChainFormat(m_wgpuDevice));
+		createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, m_window->size(), preferredWGPUSwapChainFormat(m_wgpuDevice));
+
+	m_colorBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
+	m_depthBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
 
 	m_window->sizeChanged.connect(this, [=](CVec2u size){
-		m_swapChainSize = size;
 		m_wgpuSwapChain =
-			createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, m_swapChainSize, preferredWGPUSwapChainFormat(m_wgpuDevice));
-		swapChainSizeChanged.emit(size);
+			createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, size, preferredWGPUSwapChainFormat(m_wgpuDevice));
+
+		m_colorBuffer->resize(size);
+		m_depthBuffer->resize(size);
 	});
 
 	m_bindGroup0 = createBindGroup0();
 }
 
-void GraphicsContext::beginRender(Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor, float clearDepth) {
+void GraphicsContext::beginRender(CVec4f clearColor, float clearDepth) {
 	SGD_ASSERT(!m_wgpuCommandEncoder);
 
-	m_colorBuffer = colorBuffer;
-	m_depthBuffer = depthBuffer;
 	m_clearColor = clearColor;
 	m_clearDepth = clearDepth;
 
 	m_wgpuCommandEncoder = m_wgpuDevice.CreateCommandEncoder();
-
-	GraphicsResource::validateAll(this);
 }
 
 void GraphicsContext::beginRenderPass(RenderPass rpass) {
@@ -136,15 +135,11 @@ void GraphicsContext::endRender() {
 	m_wgpuDevice.GetQueue().Submit(1, &commandBuffer);
 
 	m_wgpuCommandEncoder = {};
-
-	m_colorBuffer = {};
-	m_depthBuffer = {};
 }
 
 void GraphicsContext::present(Texture* texture) {
 	SGD_ASSERT(!m_wgpuCommandEncoder);
 
-	texture->validate(this);
 	copyTexture(m_wgpuDevice, texture->wgpuTexture(), m_wgpuSwapChain.GetCurrentTexture());
 
 #if !SGD_OS_EMSCRIPTEN

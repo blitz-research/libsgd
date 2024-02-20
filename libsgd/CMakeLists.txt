@@ -5,8 +5,6 @@ cmake_minimum_required(VERSION 3.16)
 project(libsgd)
 
 add_library(libsgd
-        beginextern.h
-        endextern.h
         graphics.cpp
         graphics.h
         internal.cpp

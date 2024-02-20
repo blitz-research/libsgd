@@ -19,14 +19,6 @@ struct GraphicsContext : Shared {
 
 	GraphicsContext(Window* window);
 
-	Signal<Vec2u> swapChainSizeChanged;
-
-	CVec2u swapChainSize() const {
-		return m_swapChainSize;
-	}
-
-	void beginRender(Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor, float clearDepth);
-
 	Texture* colorBuffer() const {
 		return m_colorBuffer;
 	}
@@ -34,6 +26,8 @@ struct GraphicsContext : Shared {
 	Texture* depthBuffer() const {
 		return m_depthBuffer;
 	}
+
+	void beginRender(CVec4f clearColor, float clearDepth);
 
 	void beginRenderPass(RenderPass renderPass);
 
@@ -67,7 +61,16 @@ struct GraphicsContext : Shared {
 
 private:
 	WindowPtr m_window;
-	Vec2u m_swapChainSize;
+
+	TexturePtr m_colorBuffer;
+	TexturePtr m_depthBuffer;
+
+	Vec4f m_clearColor;
+	float m_clearDepth;
+
+	BindGroupPtr m_bindGroup0;
+
+	RenderPass m_renderPass;
 
 	wgpu::Device m_wgpuDevice;
 	wgpu::Surface m_wgpuSurface;
@@ -75,15 +78,6 @@ private:
 
 	wgpu::CommandEncoder m_wgpuCommandEncoder;
 	wgpu::RenderPassEncoder m_wgpuRenderPassEncoder;
-
-	BindGroupPtr m_bindGroup0;
-
-	TexturePtr m_colorBuffer;
-	TexturePtr m_depthBuffer;
-	Vec4f m_clearColor;
-	float m_clearDepth;
-
-	RenderPass m_renderPass;
 };
 
 struct GraphicsResource : Shared {

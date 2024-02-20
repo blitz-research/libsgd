@@ -17,6 +17,8 @@ struct Renderer : GraphicsResource {
 		onRender(gc);
 	}
 
+	virtual void onUpdate() const {}
+
 protected:
 	mutable int m_renderPassMask{};
 

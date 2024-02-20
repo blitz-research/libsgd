@@ -4,8 +4,8 @@
 
 namespace sgd {
 
-Material* rgbaMaterial(uint32_t rgba, float metallic, float roughness);
+Expected<Material*, FileioEx> loadMaterial(CPath path);
 
-Material* loadMaterial(CPath path);
+Material* rgbaMaterial(uint32_t rgba, float metallic, float roughness);
 
 }

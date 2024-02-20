@@ -7,8 +7,6 @@ using namespace sgd;
 WindowPtr window;
 GraphicsContextPtr gc;
 
-TexturePtr colorBuffer;
-TexturePtr depthBuffer;
 MeshRendererPtr meshRenderer;
 
 CameraUniforms camera;
@@ -57,7 +55,7 @@ void render() {
 	camera.worldMatrix = Mat4f(AffineMat4f::TRS({0, 0, -3}));
 
 	camera.viewMatrix = inverse(camera.worldMatrix);
-	camera.projectionMatrix = Mat4f::perspective(45, (float)colorBuffer->size().x / (float)colorBuffer->size().y, .1, 100);
+	camera.projectionMatrix = Mat4f::perspective(45, (float)window->size().x / (float)window->size().y, .1, 100);
 	camera.inverseProjectionMatrix = inverse(camera.projectionMatrix);
 	camera.viewProjectionMatrix = camera.projectionMatrix * camera.viewMatrix;
 	gc->bindGroup0()->getBuffer(0)->update(&camera, 0, sizeof(camera));
@@ -71,8 +69,9 @@ void render() {
 		insts[0].color = {1, 1, 1, 1};
 		meshRenderer->unlockInstances();
 	}
+	GraphicsResource::validateAll(gc);
 
-	gc->beginRender(colorBuffer, depthBuffer, {0, 0, 0, 1}, 1);
+	gc->beginRender({0, 0, 0, 1}, 1);
 	{
 		gc->beginRenderPass(RenderPass::clear);
 		gc->endRenderPass();
@@ -83,7 +82,7 @@ void render() {
 	}
 	gc->endRender();
 
-	gc->present(colorBuffer);
+	gc->present(gc->colorBuffer());
 }
 
 void rrender() {
@@ -101,12 +100,7 @@ void start() {
 
 		gc = new GraphicsContext(window);
 
-		colorBuffer = new Texture(gc->swapChainSize(), 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
-		depthBuffer = new Texture(gc->swapChainSize(), 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
-
-		gc->swapChainSizeChanged.connect(gc, [=](CVec2u size) {
-			colorBuffer->resize(size);
-			depthBuffer->resize(size);
+		window->sizeChanged.connect(nullptr, [](CVec2u){
 			render();
 		});
 	}
@@ -123,16 +117,6 @@ void start() {
 		lighting.pointLights[0].color = {1, 1, 1, 1};
 		lighting.pointLights[0].falloff = 1;
 		lighting.pointLights[0].range = 25;
-#if 0
-		lighting.pointLights[1].position = {0, 2, -2.5, 1};
-		lighting.pointLights[1].color = {0, 1, 0, 1};
-		lighting.pointLights[1].falloff = 1;
-		lighting.pointLights[1].range = 25;
-		lighting.pointLights[2].position = {2, 0, -2.5, 1};
-		lighting.pointLights[2].color = {0, 0, 1, 1};
-		lighting.pointLights[2].falloff = 1;
-		lighting.pointLights[2].range = 25;
-#endif
 	}
 
 	{

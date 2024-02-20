@@ -9,12 +9,18 @@ add_library(graphics
         bindgroup.h
         buffer.cpp
         buffer.h
+        camera.cpp
+        camera.h
+        entity.cpp
+        entity.h
         gltfloader.cpp
         gltfloader.h
         graphics.cpp
         graphics.h
         graphicsutil.cpp
         graphicsutil.h
+        light.cpp
+        light.h
         material.cpp
         material.h
         materialutil.cpp
@@ -27,6 +33,8 @@ add_library(graphics
         meshrenderer.h
         meshutil.cpp
         meshutil.h
+        model.cpp
+        model.h
         pbrmaterial.cpp
         pbrmaterial.h
         renderer.cpp
@@ -35,6 +43,8 @@ add_library(graphics
         renderpipeline.h
         renderqueue.cpp
         renderqueue.h
+        scene.cpp
+        scene.h
         texture.cpp
         texture.h
         textureutil.cpp

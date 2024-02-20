@@ -12,6 +12,9 @@
 
 namespace sgd {
 
+template <class T> struct SharedPtr;
+template <class T> using CSharedPtr = SharedPtr<const T>;
+
 template <class T> struct SharedPtr {
 
 	SharedPtr() = default;
@@ -50,7 +53,7 @@ template <class T> struct SharedPtr {
 
 	SharedPtr& operator=(const SharedPtr& shared) {
 		if (m_ptr == shared.m_ptr) return *this;
-		shared.m_ptr.retain();
+		shared.retain();
 		release();
 		m_ptr = shared.m_ptr;
 		return *this;
@@ -66,7 +69,7 @@ template <class T> struct SharedPtr {
 
 	template <class D> SharedPtr& operator=(const SharedPtr<D>& shared) {
 		if (m_ptr == shared.m_ptr) return *this;
-		shared.m_pre.retain();
+		shared.retain();
 		release();
 		m_ptr = shared.m_ptr;
 		return *this;
@@ -94,27 +97,31 @@ template <class T> struct SharedPtr {
 
 	// IMPORTANT! Can't convert temporary shared ptr to raw ptr!
 	// Might work if we null out m_ptr std::move-style, but let's not go there...
-	operator T*() && = delete;
+// 	operator T*() && = delete;
 
-	T* get() const {
-		return m_ptr;
-	}
+//	T* get() const {
+//		return m_ptr;
+//	}
 
 private:
 	template <class> friend class SharedPtr;
 
 	T* m_ptr{};
 
-	void retain() {
+	void retain() const {
 		if (m_ptr) m_ptr->retain();
 	}
 
-	void release() {
+	void release() const {
 		if (m_ptr) m_ptr->release();
 	}
 };
 
 template <class T> SharedPtr<T> shared(T* ptr) {
+	return ptr;
+}
+
+template <class T> CSharedPtr<T> shared(const T* ptr) {
 	return ptr;
 }
 
