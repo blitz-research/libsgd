@@ -11,8 +11,12 @@ add_library(graphics
         buffer.h
         camera.cpp
         camera.h
+
         entity.cpp
         entity.h
+        entityutil.cpp
+        entityutil.h
+
         gltfloader.cpp
         gltfloader.h
         graphics.cpp
@@ -35,6 +39,8 @@ add_library(graphics
         meshutil.h
         model.cpp
         model.h
+        modelrenderer.cpp
+        modelrenderer.h
         pbrmaterial.cpp
         pbrmaterial.h
         renderer.cpp
@@ -45,6 +51,10 @@ add_library(graphics
         renderqueue.h
         scene.cpp
         scene.h
+        skybox.cpp
+        skybox.h
+        skyboxrenderer.cpp
+        skyboxrenderer.h
         texture.cpp
         texture.h
         textureutil.cpp
@@ -53,11 +63,19 @@ add_library(graphics
         shaders/meshrenderer.wgsl
         shaders/pbrmaterial.wgsl
         shaders/scene.wgsl
-        shaders/skybox.wgsl
+        shaders/skyboxrenderer.wgsl
         shaders/uniforms.h
 
         exports.h
-        )
+        skyboxrenderer.cpp
+        skyboxrenderer.h
+        skybox.cpp
+        skybox.h
+        modelrenderer.cpp
+        modelrenderer.h
+        entityutil.cpp
+        entityutil.h
+)
 
 target_link_libraries(graphics window dawn tinygltf stb)
 

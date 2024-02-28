@@ -1,32 +1,39 @@
-#include <libsgd/libsgd.h>
+#include <sgd/sgd.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 
-void sgd_Main() {
-	puts("sgd_Main!");
-
-	for(;;) {
-
-		int mask = sgd_PollEvents();
-
-		if(mask & SGD_WINDOW_EVENT_MASK_CLOSE_CLICKED) exit(0);
-
-		if(mask & SGD_WINDOW_EVENT_MASK_SIZE_CHANGED) {
-			printf("Window size changed: %i, %i\n", sgd_WindowWidth(), sgd_WindowHeight());
-			fflush(stdout);
-		}
-
-		sgd_Render();
-	}
-
-	exit(0);
-}
-
 int main() {
 	puts("Hello World!");
 
-	sgd_CreateWindow(640, 480, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE);
+	sgd_CreateWindow(1280, 720, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE);
 
-	sgd_Run(&sgd_Main);
+	sgd_CreateScene();
+
+	SGD_Texture skyTexture = sgd_LoadTexture("skybox2-4k.png", 2, 0x807);
+	sgd_SetSceneEnvTexture(skyTexture);
+
+	SGD_Skybox skybox= sgd_CreateSkybox();
+	sgd_SetSkyboxTexture(skybox, skyTexture);
+
+	SGD_Material material = sgd_LoadMaterial("Marble008_1K-JPG");
+	SGD_Mesh mesh = sgd_CreateSphereMesh(1, 64, 32, material);
+	sgd_TransformMeshTexCoords(mesh, 4, 2, 0, 0);
+	SGD_Model model = sgd_CreateModel();
+	sgd_MoveEntity(model, 0, 0, 3);
+	sgd_SetModelMesh(model, mesh);
+
+	SGD_Light light = sgd_CreateLight();
+	sgd_MoveEntity(light, 0, 1, 1.5);
+	sgd_SetLightRange(light, 25);
+
+	for (;;) {
+		if (sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) break;
+
+		sgd_TurnEntity(model, 0, .01, 0);
+
+		sgd_RenderScene();
+
+		sgd_Present();
+	}
 }

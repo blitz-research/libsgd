@@ -12,43 +12,6 @@ MeshRendererPtr meshRenderer;
 CameraUniforms camera;
 LightingUniforms lighting;
 
-#if 0
-MaterialPtr loadMaterial(Path path) {
-
-	String prefix = path.path() + "/" + path.path();
-
-	MaterialPtr material = new Material(&pbrMaterialDescriptor);
-
-	material->setTexture("albedoTexture",
-						 loadTexture(Path(prefix + "_Color.jpg"), TextureFormat::srgba8, TextureFlags::filter).result());
-
-	if (pathExists(Path(prefix + "_Metalness.jpg"))) {
-		material->setTexture("metallicTexture",
-							 loadTexture(Path(prefix + "_Metalness.jpg"), TextureFormat::rgba8, TextureFlags::filter).result());
-		material->setFloat("metallicFactor1f", 1);
-	}
-
-	if (pathExists(Path(prefix + "_Roughness.jpg"))) {
-		material->setTexture("roughnessTexture",
-							 loadTexture(Path(prefix + "_Roughness.jpg"), TextureFormat::rgba8, TextureFlags::filter).result());
-		material->setFloat("roughnessFactor1f", 1);
-	}
-
-	if (pathExists(Path(prefix + "_AmbientOcclusion.jpg"))) {
-		material->setTexture(
-			"occlusionTexture",
-			loadTexture(Path(prefix + "_AmbientOcclusion.jpg"), TextureFormat::rgba8, TextureFlags::filter).result());
-	}
-
-	if (pathExists(Path(prefix + "_NormalGL.jpg"))) {
-		material->setTexture("normalTexture",
-							 loadTexture(Path(prefix + "_NormalGL.jpg"), TextureFormat::rgba8, TextureFlags::filter).result());
-	}
-
-	return material;
-}
-#endif
-
 void render() {
 
 	static float camRot;
@@ -120,8 +83,8 @@ void start() {
 	}
 
 	{
-		//MaterialPtr material = loadMaterial(Path("Bricks076C_1K-JPG"));
-		MaterialPtr material = loadMaterial(Path("Marble008_1K-JPG"));
+		MaterialPtr material = loadMaterial(Path("Bricks076C_1K-JPG")).result();
+		//MaterialPtr material = loadMaterial(Path("Marble008_1K-JPG")).result();
 		// MaterialPtr material = loadMaterial(Path("Facade001_1K-JPG"));
 		//MaterialPtr material = loadMaterial(Path("Facade018A_1K-JPG"));
 		//MaterialPtr material = loadMaterial(Path("PavingStones131_1K-JPG"));

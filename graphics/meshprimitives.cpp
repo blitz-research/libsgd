@@ -24,10 +24,9 @@ Mesh* createBoxMesh(CBoxf box, Material* material) {
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;
 
-	auto sz = size(box);
-	Vec3f verts[]{{-sz.x / 2, sz.y / 2, -sz.z / 2},	 {sz.x / 2, sz.y / 2, -sz.z / 2}, {sz.x / 2, -sz.y / 2, -sz.z / 2},
-				  {-sz.x / 2, -sz.y / 2, -sz.z / 2}, {-sz.x / 2, sz.y / 2, sz.z / 2}, {sz.x / 2, sz.y / 2, sz.z / 2},
-				  {sz.x / 2, -sz.y / 2, sz.z / 2},	 {-sz.x / 2, -sz.y / 2, sz.z / 2}};
+	Vec3f verts[]{{box.min.x / 2, box.max.y / 2, box.min.z / 2},	 {box.max.x / 2, box.max.y / 2, box.min.z / 2}, {box.max.x / 2, box.min.y / 2, box.min.z / 2},
+				  {box.min.x / 2, box.min.y / 2, box.min.z / 2}, {box.min.x / 2, box.max.y / 2, box.max.z / 2}, {box.max.x / 2, box.max.y / 2, box.max.z / 2},
+				  {box.max.x / 2, box.min.y / 2, box.max.z / 2},	 {box.min.x / 2, box.min.y / 2, box.max.z / 2}};
 
 	Vec3f norms[]{{0, 0, -1}, {1, 0, 0}, {0, 0, 1}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}};
 

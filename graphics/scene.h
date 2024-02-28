@@ -14,6 +14,11 @@ SGD_SHARED(GraphicsContext);
 
 SGD_SHARED(Scene);
 
+enum struct RendererType {
+	skybox,
+	model,
+};
+
 struct Scene : Shared {
 	SGD_OBJECT_TYPE(Scene, Shared);
 
@@ -28,8 +33,8 @@ struct Scene : Shared {
 	void add(Entity* entity);
 	void remove(Entity* entity);
 
-	Renderer* getRenderer(CObject* key);
-	void addRenderer(CObject* key, Renderer*);
+	void setRenderer(RendererType type, Renderer* renderer);
+	Renderer* getRenderer(RendererType type);
 
 	void render();
 
@@ -42,11 +47,10 @@ private:
 	Vector<CameraPtr> m_cameras;
 	Vector<LightPtr> m_lights;
 
-	Map<CObject*, RendererPtr> m_renderers;
+	Vector<RendererPtr> m_renderers{8};
 
-	void updateCameraUniforms();
-
-	void updateLightingUniforms();
+	void updateCameraUniforms() const;
+	void updateLightingUniforms() const;
 };
 
 } // namespace sgd

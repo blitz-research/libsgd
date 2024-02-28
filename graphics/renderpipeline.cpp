@@ -21,12 +21,15 @@ wgpu::RenderPipeline getRenderPipeline(GraphicsContext* gc, BindGroup* bindGroup
 	auto& pipeline = cache[hash];
 	if (pipeline) return pipeline;
 
+	bindGroup0->validate(gc);
+	bindGroup1->validate(gc);
+	bindGroup2->validate(gc);
+
 	wgpu::RenderPipelineDescriptor pipelineDescriptor;
 
 	// Blend state
 	wgpu::BlendState blendState;
 	switch (blendMode) {
-	case BlendMode::clear:
 	case BlendMode::opaque:
 		blendState.color.srcFactor = wgpu::BlendFactor::One;
 		blendState.color.dstFactor = wgpu::BlendFactor::Zero;
@@ -79,9 +82,8 @@ wgpu::RenderPipeline getRenderPipeline(GraphicsContext* gc, BindGroup* bindGroup
 	depthStencilState.depthCompare = (wgpu::CompareFunction)depthFunc;
 	switch (blendMode) {
 	case BlendMode::opaque:
-		depthStencilState.depthWriteEnabled = true;
+		depthStencilState.depthWriteEnabled = (depthFunc != DepthFunc::undefined);
 		break;
-	case BlendMode::clear:
 	case BlendMode::alpha:
 	case BlendMode::additive:
 	case BlendMode::multiply:

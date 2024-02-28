@@ -4,11 +4,6 @@
 #include "pbrmaterial.h"
 #include "textureutil.h"
 
-#define TINYGLTF_NOEXCEPTION
-#define TINYGLTF_IMPLEMENTATION
-#define TINYGLTF_NO_STB_IMAGE_WRITE
-#define TINYGLTF_NO_INCLUDE_STB_IMAGE
-#include <stb_image.h>
 #include <tiny_gltf.h>
 
 namespace sgd {
@@ -58,33 +53,16 @@ void transformMesh(Vector<Vertex>::iterator begin, Vector<Vertex>::iterator end,
 	}
 }
 
-bool materialsEqual(const tinygltf::Material& x, const tinygltf::Material& y) {
-	return (x.pbrMetallicRoughness == y.pbrMetallicRoughness) && (x.normalTexture == y.normalTexture) &&
-		   (x.occlusionTexture == y.occlusionTexture) && (x.emissiveTexture == y.emissiveTexture) &&
-		   tinygltf::Equals(x.emissiveFactor, y.emissiveFactor) && (x.alphaMode == y.alphaMode) &&
-		   TINYGLTF_DOUBLE_EQUAL(x.alphaCutoff, y.alphaCutoff) && (x.doubleSided == y.doubleSided); /* &&
-			(x.extensions == y.extensions) && (x.extras == y.extras) && (x.values == y.values) &&
-			(x.additionalValues == y.additionalValues) && (x.name == y.name);*/
-}
-
 struct GLTFLoader {
 
 	tinygltf::Model gltfModel;
 	Vector<Vertex> loadedVertices;
 	Vector<Vector<Triangle>> loadedTriangles; // keyed by material index
 
-	int materialIndex(const tinygltf::Material& gltfMat) {
-		for (int i = 0; i < gltfModel.materials.size(); ++i) {
-			if (!materialsEqual(gltfModel.materials[i], gltfMat)) continue;
-			return i;
-		}
-		SGD_ABORT();
-	}
-
 	void loadPrimitive(const tinygltf::Primitive& gltfPrim) {
-		if (gltfPrim.material < 0) return; // SGD_ABORT();
+		if (gltfPrim.material < 0) return;
 
-		auto materialId = materialIndex(gltfModel.materials[gltfPrim.material]);
+		auto materialId = gltfPrim.material;
 
 		// Vertices
 		size_t v0 = loadedVertices.size();

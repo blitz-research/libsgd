@@ -8,10 +8,11 @@ namespace sgd {
 
 //! TextureFormat enum
 enum struct TextureFormat {
-	rgba8 = 0,
-	srgba8 = 1,
-	rgba16f = 2,
-	depth32f = 3,
+	undefined = 0,
+	rgba8,
+	srgba8,
+	rgba16f,
+	depth32f,
 };
 
 //! TextureFlags enum

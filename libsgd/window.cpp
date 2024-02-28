@@ -1,53 +1,50 @@
-#include "window.h"
-
 #include "internal.h"
+
+#include <sgd/window.h>
 
 #include <window/exports.h>
 
-#include <thread>
-
 namespace {
 
-volatile std::atomic<sgd::Vec2u> g_windowSize;
+sgd::Vec2u g_windowSize;
 
-volatile std::atomic_int g_windowEvents;
+int g_windowEvents;
 
 } // namespace
 
-SGD_API void sgd_CreateWindow(int width, int height, SGD_String title, int flags) {
-	SGD_ASSERT(!sgd::mainWindow);
+void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flags) {
+	if(sgd::mainWindow) sgd_Error("Window has already been created");
 
 	sgd::mainWindow = new sgd::Window(sgd::Vec2u(width, height), title, (sgd::WindowFlags)flags);
 
 	sgd::mainWindow->sizeChanged.connect(nullptr, [](sgd::CVec2u size) {
 		g_windowSize = size;
-		g_windowEvents |= SGD_WINDOW_EVENT_MASK_SIZE_CHANGED;
+		g_windowEvents |= SGD_EVENT_MASK_SIZE_CHANGED;
 	});
 
 	sgd::mainWindow->closeClicked.connect(nullptr, [] { //
-		g_windowEvents |= SGD_WINDOW_EVENT_MASK_CLOSE_CLICKED;
+		g_windowEvents |= SGD_EVENT_MASK_CLOSE_CLICKED;
 	});
 
 	g_windowSize = sgd::mainWindow->size();
 }
 
-SGD_API int sgd_WindowWidth() {
-	SGD_ASSERT(sgd::mainWindow);
+int SGD_DECL sgd_WindowWidth() {
+	if(!sgd::mainWindow) sgd_Error("Window has not been created");
 
-	return g_windowSize.load().x;
+	return g_windowSize.x;
 }
 
-SGD_API int sgd_WindowHeight() {
-	SGD_ASSERT(sgd::mainWindow);
+int SGD_DECL sgd_WindowHeight() {
+	if(!sgd::mainWindow) sgd_Error("Window has not been created");
 
-	return g_windowSize.load().y;
+	return g_windowSize.y;
 }
 
-SGD_API int sgd_PollEvents() {
-	SGD_ASSERT(sgd::mainWindow);
+int SGD_DECL sgd_PollEvents() {
+	if(!sgd::mainWindow) sgd_Error("Window has not been created");
 
-	g_windowEvents=0;
-
+	g_windowEvents = 0;
 	sgd::mainWindow->pollEvents();
 
 	return g_windowEvents;

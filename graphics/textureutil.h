@@ -5,7 +5,7 @@
 namespace sgd {
 
 inline uint32_t bytesPerTexel(TextureFormat format) {
-	uint32_t bpp[]{4, 4, 16, 4};
+	uint32_t bpp[]{0, 4, 4, 16, 4};
 	return bpp[(int)format];
 }
 

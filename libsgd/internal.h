@@ -1,41 +1,41 @@
-#if !__cplusplus
-#error This file must only be included by c++ code
-#endif
-
 #pragma once
 
-#include <core/exports.h>
+#include <graphics/exports.h>
+#include <window/exports.h>
 
-#include "types.h"
+#include <sgd/types.h>
 
 namespace sgd {
 
-SGD_SHARED(Window);
-SGD_SHARED(Scene);
-
-inline Window* mainWindow;
-
-inline Scene* mainScene;
-
-SGD_SHARED(Material);
-SGD_SHARED(Mesh);
-SGD_SHARED(Entity);
+inline WindowPtr mainWindow;
+inline GraphicsContextPtr mainGC;
+inline ScenePtr mainScene;
 
 enum struct HandleType {
+	object,
+	texture,
 	material,
 	mesh,
 	entity,
 };
 
-template <class T> HandleType handleType();
+template<class T> const char *handleTypeName();
+template<class T> HandleType handleType();
 
-//clang-format off
-#define SGD_HANDLE_TYPE(C, H) template <> HandleType handleType<C>() { return H; }
-//clang-format on
+// clang-format off
+#define SGD_TYPE_INFO(T, H) \
+template<> inline const char* handleTypeName<T>() { return #T; } \
+template<> inline HandleType handleType<T>() { return H; }
+// clang-format on
 
-SGD_HANDLE_TYPE(Material, HandleType::material);
-SGD_HANDLE_TYPE(Mesh, HandleType::mesh);
-SGD_HANDLE_TYPE(Entity, HandleType::entity);
+SGD_TYPE_INFO(Texture, HandleType::texture);
+SGD_TYPE_INFO(Material, HandleType::material);
+SGD_TYPE_INFO(Mesh, HandleType::mesh);
+SGD_TYPE_INFO(Entity, HandleType::entity);
+SGD_TYPE_INFO(Camera, HandleType::entity);
+SGD_TYPE_INFO(Light, HandleType::entity);
+SGD_TYPE_INFO(Model, HandleType::entity);
+SGD_TYPE_INFO(Skybox, HandleType::entity);
 
 SGD_Handle getHandle(HandleType type, Shared* shared);
 
@@ -55,12 +55,14 @@ template<class T> SGD_Handle createHandle(T* shared) {
 
 template<class T> T* resolveHandle(SGD_Handle handle) {
 	auto shared = resolveHandle(handleType<T>(), handle);
-	SGD_ASSERT(!shared || shared->template as<T>());
-	return shared ? shared->template as<T>() : nullptr;
+	if(!shared) sgd_Error((sgd::String("Invalid ") + handleTypeName<T>() + " handle").c_str());
+	return shared->template as<T>();
 }
 
 template<class T> T* releaseHandle(SGD_Handle handle) {
-	resoleaseHandle(handleType<T>(), handle);
+	releaseHandle(handleType<T>(), handle);
 }
+
+void error(CString error);
 
 }

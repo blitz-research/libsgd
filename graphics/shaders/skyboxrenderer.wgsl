@@ -26,7 +26,7 @@ struct Varying {
 
     let tv = camera_uniforms.inverseProjectionMatrix * vec4f(in.clipCoords, 0, 1);
 
-    let cubeVec = camera_uniforms.worldMatrix * vec4f(tv.xyz / tv.w, 0);
+    var cubeVec = camera_uniforms.worldMatrix * vec4f(tv.xyz / tv.w, 0);
 
     return textureSample(skybox_skyboxTexture, skybox_skyboxSampler, cubeVec.xyz);
 }

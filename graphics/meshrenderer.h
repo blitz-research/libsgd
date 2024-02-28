@@ -15,7 +15,7 @@ SGD_SHARED(MeshRenderer);
 struct MeshRenderer : Renderer{
 	SGD_OBJECT_TYPE(MeshRenderer, Renderer);
 
-	MeshRenderer(CMesh* mesh);
+	explicit MeshRenderer(CMesh* mesh);
 
 	MeshInstance* lockInstances(uint32_t numInstances);
 	void unlockInstances();

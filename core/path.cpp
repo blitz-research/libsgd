@@ -22,6 +22,8 @@ String join(CString x, CString y) {
 }
 
 std::filesystem::path appPath() {
+	static std::filesystem::path path;
+	if(!path.empty()) return path;
 
 #if SGD_OS_WINDOWS
 
@@ -31,7 +33,7 @@ std::filesystem::path appPath() {
 	for (int i = 0; buf[i]; ++i) {
 		if (buf[i] == '\\') buf[i] = '/';
 	}
-	return buf;
+	return path = buf;
 
 #elif SGD_OS_LINUX
 
@@ -42,12 +44,11 @@ std::filesystem::path appPath() {
 	int i = readlink(lnk, buf, PATH_MAX);
 	if (i > PATH_MAX) SGD_ABORT();
 	buf[i] = 0;
-
-	return buf;
+	return path = buf;
 
 #elif SGD_OS_EMSCRIPTEN
 
-	return "/";
+	return path = "/";
 
 #else
 	SGD_ABORT();
@@ -60,7 +61,20 @@ Path::Path(String path) : m_str(std::move(path)) {
 }
 
 std::filesystem::path Path::resolve() const {
-	return appPath().parent_path() / "assets" / m_str;
+
+	// Check . dir...
+	auto path = std::filesystem::current_path() / m_str;
+	if(std::filesystem::exists(path)) return path;
+
+	// Check ./assets dir...
+	path = std::filesystem::current_path() / "assets" / m_str;
+	if(std::filesystem::exists(path)) return path;
+
+	// Check exe/assets dir...
+	path = appPath().parent_path() / m_str;
+	if(std::filesystem::exists(path)) return path;
+
+	return {};
 }
 
 bool Path::exists() const {

@@ -111,9 +111,17 @@ void BindGroup::onValidate(GraphicsContext* gc) const {
 }
 
 BindGroup* emptyBindGroup(uint32_t index) {
-	static const BindGroupDescriptor descs[]{{0, {}, {}, {}}, {1, {}, {}, {}}, {2, {}, {}, {}}};
-	static BindGroup* bindGroups[]{new BindGroup(&descs[0]), new BindGroup(&descs[1]), new BindGroup(&descs[2])};
-	return bindGroups[index];
+
+	static BindGroupPtr bindGroups[3];
+
+	if(bindGroups[index]) return bindGroups[index];
+
+	static const BindGroupDescriptor descs[]{ //
+		{0, {}, {}, {}}, //
+		{1, {}, {}, {}}, //
+		{2, {}, {}, {}}};
+
+	return bindGroups[index] = new BindGroup(&descs[index]);
 }
 
 } // namespace sgd

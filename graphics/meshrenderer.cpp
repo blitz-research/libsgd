@@ -45,8 +45,6 @@ static BindGroupDescriptor bindGroupDescriptor //
 
 RenderPass renderPass(BlendMode blendMode) {
 	switch (blendMode) {
-	case BlendMode::clear:
-		return RenderPass::clear;
 	case BlendMode::opaque:
 		return RenderPass::opaque;
 	case BlendMode::alpha:
@@ -94,8 +92,7 @@ void MeshRenderer::onValidate(GraphicsContext* gc) const {
 		auto pipeline = getRenderPipeline(gc, surf.material->bindGroup(), m_bindGroup, surf.material->blendMode(),
 										  surf.material->depthFunc(), surf.material->cullMode(), DrawMode::triangleList);
 
-		m_renderOps[rpass].push_back(
-			{pipeline, surf.material->bindGroup(), surf.firstTriangle * 3, surf.triangleCount * 3});
+		m_renderOps[rpass].push_back({pipeline, surf.material->bindGroup(), surf.firstTriangle * 3, surf.triangleCount * 3});
 
 		m_renderPassMask |= 1 << rpass;
 	}

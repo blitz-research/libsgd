@@ -67,9 +67,9 @@ include_directories(${CMAKE_SOURCE_DIR})
 add_compile_definitions(SGD_CMAKE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
 
 # Enable threads
-#
 if (SGD_COMPILER_MSVC)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+    # Static CRT
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 else ()
     add_compile_options(-pthread)
     add_link_options(-pthread)
@@ -139,12 +139,12 @@ endfunction()
 # Copy assets dir to output binary dir
 function(copy_assets_to_binary_dir target)
 
-    if (!SGD_OS_EMSCRIPTEN)
+    if (NOT SGD_OS_EMSCRIPTEN)
 
         set(SRC $<TARGET_PROPERTY:${target},SOURCE_DIR>/assets)
         set(DST $<TARGET_PROPERTY:${target},BINARY_DIR>/assets)
 
-        add_custom_command(TARGET ${target} PRE_LINK VERBATIM
+        add_custom_command(TARGET ${target} POST_BUILD VERBATIM
                 COMMAND ${CMAKE_COMMAND} -E echo "Copying \"${SRC}\" directory to \"${DST}\""
                 COMMAND ${CMAKE_COMMAND} -E copy_directory ${SRC} ${DST})
 

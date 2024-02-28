@@ -58,16 +58,14 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec3f, metallic: f32
     let spower = pow(2.0, glossiness * 12.0);       // specular power
     let fnorm = (spower + 2.0) / 8.0;               // normalization factor
 
-    let ambdiffuse = lighting_uniforms.ambientLightColor.rgb * lighting_uniforms.ambientLightColor.a * diffuse;
+    let ambDiffuse = lighting_uniforms.ambientLightColor.rgb * lighting_uniforms.ambientLightColor.a * diffuse;
 
     let mips = f32(textureNumLevels(lighting_envTexture));
-    let tv = reflect(-vvec, normal);
-    let env = textureSampleLevel(lighting_envTexture, lighting_envSampler, tv, roughness * mips).rgb;
+    let ambEnv = textureSampleLevel(lighting_envTexture, lighting_envSampler,  reflect(-vvec, normal), roughness * mips).rgb;
 	let fschlick0 = specular + (1.0 - specular) * pow(1.0 - ndotv, 5.0) * glossiness;
+	let ambSpecular = ambEnv * fschlick0;
 
-	let ambspecular = fschlick0 * env;
-
-	var color = (ambdiffuse + ambspecular) * occlusion;
+	var color = (ambDiffuse + ambSpecular) * occlusion;
 
 	for(var i: u32 = 0; i < lighting_uniforms.numPointLights; i += 1) {
 	    let light = lighting_uniforms.pointLights[i];
@@ -80,7 +78,6 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec3f, metallic: f32
 
         // Attenuation - this is seems like the most practially useful:
         // https://lisyarus.github.io/blog/graphics/2022/07/30/point-light-attenuation.html
-        const F = 1.0;
         let s = d / light.range;
         let s2 = 1.0 - s * s;
         let atten = light.color.a * s2 * s2 / (1.0 + light.falloff * s);

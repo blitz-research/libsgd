@@ -10,7 +10,7 @@ namespace sgd {
 
 namespace {
 
-constexpr auto shaderSource{
+auto shaderSource{
 #include "shaders/scene.wgsl"
 };
 
@@ -48,7 +48,7 @@ BindGroup* createBindGroup0() {
 GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 
 	wgpu::RequestAdapterOptions opts{};
-	opts.backendType = wgpu::BackendType::D3D11;
+	opts.backendType = wgpu::BackendType::D3D12;
 
 	m_wgpuDevice = createWGPUDevice(opts);
 	m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->nativeWindow());

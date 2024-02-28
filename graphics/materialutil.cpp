@@ -8,13 +8,11 @@ namespace sgd {
 
 Expected<Material*, FileioEx> loadMaterial(CPath path) {
 
-	if(!path.isDir()) return FileioEx("Directory does not exist");
+	if(!path.isDir()) return FileioEx("Material directory does not exist");
 
 	auto material = new Material(&pbrMaterialDescriptor);
 
 	auto prefix = path / path.stem();
-
-	log() << "### prefix:"<<prefix.str();
 
 	if ((prefix + "_Color.jpg").exists()) {
 		material->setTexture("albedoTexture",

@@ -20,7 +20,7 @@ MaterialDescriptor::MaterialDescriptor(CString typeName,							   //
 	  uniformOffsets(uniformOffsets),			//
 	  textureIndices(textureIndices),			//
 	  initFunc(initFunc) {
-	log() << "### Material typeName:" << typeName;
+//	log() << "### Material typeName:" << typeName;
 	g_materialDescriptors[typeName] = this;
 }
 

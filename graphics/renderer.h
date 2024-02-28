@@ -10,19 +10,22 @@ SGD_SHARED(Renderer);
 
 struct Renderer : GraphicsResource {
 
-	int renderPassMask() const {return m_renderPassMask;}
+	Property<bool> enabled{true};
+
+	virtual void onUpdate() const {
+	}
 
 	void render(GraphicsContext* gc) const {
-		if(!(1 << (int)gc->renderPass() & m_renderPassMask)) return;
+		if (!(1 << (int)gc->renderPass() & m_renderPassMask)) return;
 		onRender(gc);
 	}
 
-	virtual void onUpdate() const {}
-
 protected:
-	mutable int m_renderPassMask{};
+	mutable int m_renderPassMask{~0};
+
+	Renderer() = default;
 
 	virtual void onRender(GraphicsContext* gc) const = 0;
 };
 
-}
+} // namespace sgd

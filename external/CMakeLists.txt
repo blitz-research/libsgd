@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+project(external)
+
 include(FetchContent)
 
 set(FETCHCONTENT_QUIET OFF)
@@ -68,65 +70,10 @@ FetchContent_Declare(tinygltf
         EXCLUDE_FROM_ALL
         )
 
+set(TINYGLTF_HEADER_ONLY ON)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
 
 FetchContent_MakeAvailable(tinygltf)
-
-##### target: lib-dawn #####
-
-add_library(lib-dawn INTERFACE)
-
-if (SGD_OS_EMSCRIPTEN)
-
-    target_link_options(lib-dawn INTERFACE -sUSE_WEBGPU=1)
-
-else ()
-
-    FetchContent_Declare(dawn
-            GIT_REPOSITORY https://github.com/blitz-research/dawn.git
-            GIT_TAG swapchain-fix
-#            GIT_TAG openxr-dev
-            GIT_SUBMODULES ""
-            GIT_SHALLOW TRUE
-            GIT_PROGRESS TRUE
-            EXCLUDE_FROM_ALL
-            )
-
-    set(DAWN_FETCH_DEPENDENCIES ON)
-    set(DAWN_BUILD_SAMPLES OFF)
-    set(DAWN_USE_GLFW OFF)
-    if (CMAKE_SIZEOF_VOID_P EQUAL 4)
-        set(DAWN_ENABLE_VULKAN OFF)
-    endif ()
-
-    set(TINT_BUILD_CMD_TOOLS OFF)
-    set(TINT_BUILD_DOCS OFF)
-    set(TINT_BUILD_TESTS OFF)
-
-    #[[
-    FetchContent_GetProperties(dawn)
-    if(NOT dawn_POPULATED)
-        # Fetch the content using previously declared details
-        message("### FetchContent_Populate")
-        FetchContent_Populate(dawn)
-
-        # Set custom variables, policies, etc.
-        # ...
-
-        # Bring the populated content into the build
-        message("### FetchContent add_subdirectory SOURCE_DIR:${dawn_SOURCE_DIR} BINARY_DIR:${dawn_BINARY_DIR}")
-
-        add_subdirectory(${dawn_SOURCE_DIR} ${dawn_BINARY_DIR} EXCLUDE_FROM_ALL)
-    endif()
-    ]]
-
-    FetchContent_MakeAvailable(dawn)
-
-    target_link_libraries(lib-dawn INTERFACE webgpu_cpp webgpu_dawn dawn_native)
-
-    target_include_directories(lib-dawn INTERFACE ${DAWN_INCLUDE_DIR})
-
-endif ()
 
 ##### openxr_loader ####
 
@@ -145,3 +92,49 @@ if (SGD_OS_WINDOWS)
 
 endif ()
 ]]
+
+##### target: lib-dawn #####
+
+add_library(lib-dawn INTERFACE)
+
+if (SGD_OS_EMSCRIPTEN)
+
+    target_link_options(lib-dawn INTERFACE -sUSE_WEBGPU=1)
+
+else ()
+
+    FetchContent_Declare(dawn
+            GIT_REPOSITORY https://github.com/blitz-research/dawn.git
+            GIT_TAG swapchain-fix
+            #            GIT_TAG openxr-dev
+            GIT_SUBMODULES ""
+            GIT_SHALLOW TRUE
+            GIT_PROGRESS TRUE
+            EXCLUDE_FROM_ALL
+            )
+
+    set(DAWN_FETCH_DEPENDENCIES ON)
+    set(DAWN_BUILD_SAMPLES OFF)
+    set(DAWN_USE_GLFW OFF)
+
+    if (SGD_OS_WINDOWS)
+        set(DAWN_ENABLE_D3D12 ON)
+        set(DAWN_ENABLE_D3D11 ON)
+        set(DAWN_ENABLE_VULKAN ON)
+    else ()
+        set(ENABLE_OPENGLES ON)
+        set(ENABLE_DESKTOP_GL ON)
+        set(ENABLE_VULKAN ON)
+    endif ()
+
+    set(TINT_BUILD_CMD_TOOLS OFF)
+    set(TINT_BUILD_DOCS OFF)
+    set(TINT_BUILD_TESTS OFF)
+
+    FetchContent_MakeAvailable(dawn)
+
+    target_link_libraries(lib-dawn INTERFACE dawn_native webgpu_dawn webgpu_cpp)
+
+    target_include_directories(lib-dawn INTERFACE ${DAWN_INCLUDE_DIR})
+
+endif ()

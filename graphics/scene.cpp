@@ -1,5 +1,4 @@
 #include "scene.h"
-
 #include "camera.h"
 #include "entity.h"
 #include "light.h"
@@ -7,9 +6,16 @@
 #include "renderer.h"
 #include "shaders/uniforms.h"
 
+#include <window/exports.h>
+
 namespace sgd {
 
 Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
+	// No-op white envTexture
+	auto texture = new Texture({1, 1}, 6, TextureFormat::rgba8, TextureFlags::cube);
+	uint32_t data[] = {~0u, ~0u, ~0u, ~0u, ~0u, ~0u};
+	texture->update(data, 4);
+	envTexture = texture;
 }
 
 void Scene::add(Entity* entity) {
@@ -44,25 +50,27 @@ void Scene::remove(Entity* entity) {
 	}
 }
 
-Renderer* Scene::getRenderer(CObject* key) {
-	auto it = m_renderers.find(key);
-	return it != m_renderers.end() ? it->second : nullptr;
+void Scene::setRenderer(RendererType type, Renderer* renderer) {
+	m_renderers[(uint32_t)type] = renderer;
 }
 
-void Scene::addRenderer(CObject* key, Renderer* renderer) {
-	log() << __FUNCTION__;
-	SGD_ASSERT(m_renderers.find(key) == m_renderers.end());
-	m_renderers.insert(std::make_pair(key, renderer));
+Renderer* Scene::getRenderer(RendererType type) {
+	return (uint32_t)type < 8 ? m_renderers[(uint32_t)type] : nullptr;
+	;
 }
 
-void Scene::updateCameraUniforms() {
+void Scene::updateCameraUniforms() const {
 
 	CameraUniforms uniforms;
 
 	auto aspect = (float)m_gc->colorBuffer()->size().x / (float)m_gc->colorBuffer()->size().y;
 
 	if (m_cameras.empty()) {
-		AffineMat4f matrix;
+		auto curs = m_gc->window()->cursorPos() / Vec2f(m_gc->window()->size());
+
+		curs = curs * Vec2f(twoPi, pi) - Vec2f(pi, halfPi);
+
+		auto matrix = AffineMat4f::rotation({-curs.y, -curs.x, 0});
 
 		uniforms.worldMatrix = Mat4f(matrix);
 		uniforms.viewMatrix = Mat4f(inverse(matrix));
@@ -85,13 +93,14 @@ void Scene::updateCameraUniforms() {
 	m_gc->bindGroup0()->getBuffer(0)->update(&uniforms, 0, sizeof(uniforms));
 }
 
-void Scene::updateLightingUniforms() {
+void Scene::updateLightingUniforms() const {
 
 	LightingUniforms uniforms;
 	uniforms.ambientLightColor = ambientLightColor();
 
 	int i = 0;
 	for (auto light : m_lights) {
+		if (!light->visible()) continue;
 
 		uniforms.pointLights[i].position = Vec4f(light->worldMatrix().t, 1);
 		uniforms.pointLights[i].color = light->color();
@@ -107,11 +116,13 @@ void Scene::updateLightingUniforms() {
 
 void Scene::render() {
 
+	for (auto r : m_renderers) {
+		if (r && r->enabled()) r->onUpdate();
+	}
+
 	updateCameraUniforms();
 
 	updateLightingUniforms();
-
-	for (auto it : m_renderers) it.second->onUpdate();
 
 	GraphicsResource::validateAll(m_gc);
 
@@ -121,7 +132,9 @@ void Scene::render() {
 
 		m_gc->beginRenderPass(pass);
 
-		for (auto it : m_renderers) it.second->render(m_gc);
+		for (auto r : m_renderers) {
+			if (r && r->enabled()) r->render(m_gc);
+		}
 
 		m_gc->endRenderPass();
 	}

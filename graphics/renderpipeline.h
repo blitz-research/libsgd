@@ -7,7 +7,6 @@
 namespace sgd {
 
 enum struct BlendMode {
-	clear,
 	opaque,
 	alpha,
 	additive,

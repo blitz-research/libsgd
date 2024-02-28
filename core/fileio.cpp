@@ -20,7 +20,7 @@ Expected<String, FileioEx> loadString(CPath path) {
 	auto size = std::filesystem::file_size(fpath, ec);
 	if (ec) {
 		// Read from stream instead here?
-		return FileioEx{"IO error examining file"};
+		return FileioEx{"IO error examining file '"+path.str()+"'"};
 	}
 	std::ifstream fs(fpath, std::ios::binary);
 	if (!fs.is_open()) return FileioEx{"IO error opening file"};
@@ -49,7 +49,7 @@ Expected<Data, FileioEx> loadData(CPath path) {
 	auto size = std::filesystem::file_size(fpath, ec);
 	if (ec) {
 		// Read from stream instead here?
-		return FileioEx{"IO error examining file"};
+		return FileioEx{"IO error examining file '"+path.str()+"'"};
 	}
 	std::ifstream fs(fpath, std::ios::binary);
 	if (!fs.is_open()) return FileioEx{"IO error opening file"};

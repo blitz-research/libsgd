@@ -1,8 +1,8 @@
 #include "internal.h"
 
-namespace sgd {
-
 namespace {
+
+using namespace sgd;
 
 constexpr int maxHandleTypes = 64;
 
@@ -14,7 +14,31 @@ int g_nextHandle;
 HandleMap g_handleMaps[maxHandleTypes];
 ReverseMap g_reverseMaps[maxHandleTypes];
 
+void(SGD_DECL *g_errorHandler)(SGD_String error, void* context);
+
+void* g_errorContext;
+
 } // namespace
+
+void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL *handler)(SGD_String error, void* context), void* context) {
+	g_errorHandler = handler;
+	g_errorContext = context;
+}
+
+void SGD_DECL sgd_Error(SGD_String error) {
+	if(g_errorHandler) {
+		g_errorHandler(error, g_errorContext);
+	}else {
+		sgd::alert(sgd::String("Unhandled SGD error: ")+error);
+	}
+	std::exit(1);
+}
+
+namespace sgd {
+
+void error(CString message) {
+	sgd_Error(message.c_str());
+}
 
 SGD_Handle getHandle(HandleType type, Shared* shared) {
 	auto& rmap = g_reverseMaps[(int)type];
@@ -36,8 +60,7 @@ SGD_Handle createHandle(HandleType type, Shared* shared) {
 Shared* resolveHandle(HandleType type, SGD_Handle handle) {
 	auto& map = g_handleMaps[(int)type];
 	auto it = map.find(handle);
-	SGD_ASSERT(it != map.end());
-	return it->second;
+	return it!= map.end() ? it->second : nullptr;
 }
 
 void releaseHandle(HandleType type, SGD_Handle handle) {

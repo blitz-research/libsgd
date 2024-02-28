@@ -19,6 +19,10 @@ struct GraphicsContext : Shared {
 
 	GraphicsContext(Window* window);
 
+	Window* window() const {
+		return m_window;
+	}
+
 	Texture* colorBuffer() const {
 		return m_colorBuffer;
 	}
