@@ -10,7 +10,7 @@ int main() {
 
 	sgd_CreateScene();
 
-	SGD_Texture skyTexture = sgd_LoadTexture("skybox2-4k.png", 2, 0x807);
+	SGD_Texture skyTexture = sgd_LoadTexture("skybox-4k.png", 2, 0x807);
 	sgd_SetSceneEnvTexture(skyTexture);
 
 	SGD_Skybox skybox= sgd_CreateSkybox();

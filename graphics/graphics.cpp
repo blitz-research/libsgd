@@ -48,7 +48,11 @@ BindGroup* createBindGroup0() {
 GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 
 	wgpu::RequestAdapterOptions opts{};
-	opts.backendType = wgpu::BackendType::D3D12;
+#ifdef SGD_OS_WINDOWS
+		opts.backendType = wgpu::BackendType::D3D12;
+#else SGD_OS_LINUX
+		opts.backendType = wgpu::BackendType::Vulkan;
+#endif
 
 	m_wgpuDevice = createWGPUDevice(opts);
 	m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());

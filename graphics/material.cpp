@@ -4,7 +4,7 @@ namespace sgd {
 
 namespace {
 
-Map<String, MaterialDescriptor*> g_materialDescriptors;
+Map<String, MaterialDescriptor*>* g_materialDescs;
 
 }
 
@@ -21,7 +21,8 @@ MaterialDescriptor::MaterialDescriptor(CString typeName,							   //
 	  textureIndices(textureIndices),			//
 	  initFunc(initFunc) {
 //	log() << "### Material typeName:" << typeName;
-	g_materialDescriptors[typeName] = this;
+	if(!g_materialDescs) g_materialDescs= new Map<String, MaterialDescriptor*>();
+	(*g_materialDescs)[typeName] = this;
 }
 
 Material::Material(const MaterialDescriptor* desc)
@@ -35,7 +36,7 @@ Material::Material(const MaterialDescriptor* desc)
 	m_desc->initFunc(this);
 }
 
-Material::Material(CString typeName) : Material(g_materialDescriptors[typeName]) {
+Material::Material(CString typeName) : Material((*g_materialDescs)[typeName]) {
 }
 
 void Material::setBlendMode(BlendMode blendMode) {
