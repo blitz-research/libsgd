@@ -84,8 +84,38 @@ function(create_bundled_lib output_lib input_lib)
                 OUTPUT ${output_file}
                 DEPENDS ${static_libs}
                 VERBATIM)
+
+    elseif(SGD_OS_LINUX)
+
+        file(WRITE ${CMAKE_BINARY_DIR}/${output_lib}.ar.in
+                "CREATE ${output_file}\n" )
+
+        foreach(target IN LISTS static_libs)
+            file(APPEND ${CMAKE_BINARY_DIR}/${output_lib}.ar.in
+                    "ADDLIB $<TARGET_FILE:${target}>\n")
+        endforeach()
+
+        file(APPEND ${CMAKE_BINARY_DIR}/${output_lib}.ar.in "SAVE\n")
+        file(APPEND ${CMAKE_BINARY_DIR}/${output_lib}.ar.in "END\n")
+
+        file(GENERATE
+                OUTPUT ${CMAKE_BINARY_DIR}/${output_lib}.ar
+                INPUT ${CMAKE_BINARY_DIR}/${output_lib}.ar.in)
+
+        if (CMAKE_INTERPROCEDURAL_OPTIMIZATION)
+            set(ar_tool ${CMAKE_CXX_COMPILER_AR})
+        endif()
+
+        add_custom_command(
+                COMMAND ${CMAKE_AR} -M < ${CMAKE_BINARY_DIR}/${output_lib}.ar
+                OUTPUT ${output_file}
+                DEPENDS ${static_libs}
+                VERBATIM)
+
     else()
+
         message(FATAL_ERROR "!!! OOPS")
+
     endif ()
 
     add_custom_target(${output_lib} DEPENDS ${output_file})

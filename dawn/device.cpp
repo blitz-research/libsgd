@@ -1,5 +1,7 @@
 #include "device.h"
 
+#include <GLFW/glfw3.h>
+
 #if SGD_OS_WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -85,7 +87,7 @@ wgpu::TextureFormat preferredWGPUSwapChainFormat(const wgpu::Device& device) {
 	return wgpu::TextureFormat::BGRA8Unorm;
 }
 
-wgpu::Surface createWGPUSurface(const wgpu::Device& device, void* nativeWindow) {
+wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) {
 
 	wgpu::SurfaceDescriptor surfaceDesc{};
 #if SGD_OS_WINDOWS

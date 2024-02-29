@@ -74,7 +74,7 @@ void alert(CString msg) {
 #elif SGD_OS_EMSCRIPTEN
 	jsalert(msg.c_str());
 #elif SGD_OS_LINUX
-	system("zenity --info --title \"Alert!\" --text \"" + msg + "\"");
+	system(("zenity --info --title \"Alert!\" --text \"" + msg + "\"").c_str());
 #endif
 }
 

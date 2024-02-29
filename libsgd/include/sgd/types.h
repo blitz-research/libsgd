@@ -17,10 +17,12 @@
 #define SGD_EXTERN SGD_EXTERN_
 #endif
 
-#if _MSC_VER && !_WIN64 // Checky hack for blitz3d support!
+#if _MSC_VER && !_WIN64 // Cheeky hack for blitz3d support!
 #define SGD_DECL __stdcall
-#else
+#elif _MSC_VER
 #define SGD_DECL __cdecl
+#else
+#define SGD_DECL //__attribute__((__cdecl__)) - ignored?!?
 #endif
 
 typedef int SGD_Bool;

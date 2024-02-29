@@ -109,11 +109,11 @@ private:
 	T* m_ptr{};
 
 	void retain() const {
-		if (m_ptr) m_ptr->retain();
+		if (m_ptr) ((Shared*)(m_ptr))->retain();
 	}
 
 	void release() const {
-		if (m_ptr) m_ptr->release();
+		if (m_ptr) ((Shared*)(m_ptr))->release();
 	}
 };
 

@@ -24,6 +24,6 @@ add_library(dawn ${SOURCES}
         exports.h
         )
 
-target_link_libraries(dawn geom lib-dawn)
+target_link_libraries(dawn geom lib-dawn glfw)
 
 add_subdirectory(tests)

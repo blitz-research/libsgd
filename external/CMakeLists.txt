@@ -44,7 +44,7 @@ if (SGD_OS_EMSCRIPTEN)
 
     target_link_options(glfw INTERFACE -sUSE_GLFW=3)
 
-elseif (SGD_OS_WINDOWS)
+else()
 
     FetchContent_Declare(glfw
             GIT_REPOSITORY https://github.com/blitz-research/glfw.git

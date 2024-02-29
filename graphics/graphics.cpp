@@ -51,7 +51,7 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 	opts.backendType = wgpu::BackendType::D3D12;
 
 	m_wgpuDevice = createWGPUDevice(opts);
-	m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->nativeWindow());
+	m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
 	m_wgpuSwapChain =
 		createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, m_window->size(), preferredWGPUSwapChainFormat(m_wgpuDevice));
 

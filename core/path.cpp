@@ -9,6 +9,9 @@
 #include <Windows.h>
 #undef min
 #undef max
+#elif SGD_OS_LINUX
+#include <linux/limits.h>
+#include <unistd.h>
 #endif
 
 namespace sgd {
