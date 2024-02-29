@@ -3,8 +3,8 @@
 #include <GLFW/glfw3.h>
 
 #if SGD_OS_WINDOWS
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#define GLFW_EXPOSE_NATIVE_WIN32 1
+#include <GLFW/glfw3native.h>
 #undef min
 #undef max
 #elif SGD_OS_LINUX
@@ -92,7 +92,7 @@ wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) 
 	wgpu::SurfaceDescriptor surfaceDesc{};
 #if SGD_OS_WINDOWS
 	wgpu::SurfaceDescriptorFromWindowsHWND nativeDesc{};
-	nativeDesc.hwnd = nativeWindow;
+	nativeDesc.hwnd = glfwGetWin32Window(window);
 	nativeDesc.hinstance = GetModuleHandle(nullptr);
 #elif SGD_OS_LINUX
 	wgpu::SurfaceDescriptorFromXlibWindow nativeDesc{};
