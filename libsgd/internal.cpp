@@ -1,5 +1,7 @@
 #include "internal.h"
 
+#include <thread>
+
 namespace {
 
 using namespace sgd;
@@ -72,6 +74,13 @@ void releaseHandle(HandleType type, SGD_Handle handle) {
 	SGD_ASSERT(rit != rmap.end());
 	map.erase(it);
 	rmap.erase(rit);
+}
+
+SGD_EXTERN void SGD_DECL sgd_Run(void(*start)()) {
+
+	std::thread(start).detach();
+
+	sgd::beginAppEventLoop();
 }
 
 } // namespace sgd

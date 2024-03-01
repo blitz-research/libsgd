@@ -121,11 +121,18 @@ void Scene::render() {
 	}
 
 	updateCameraUniforms();
-
 	updateLightingUniforms();
 
-	GraphicsResource::validateAll(m_gc);
+	runOnMainThread([=] {
+		GraphicsResource::validateAll(m_gc);
+	},true);
 
+	runOnMainThread([=] {
+		renderASync();
+	}, false);
+}
+
+void Scene::renderASync() {
 	m_gc->beginRender(clearColor(), clearDepth());
 
 	for (auto pass : {RenderPass::clear, RenderPass::opaque, RenderPass::blend}) {

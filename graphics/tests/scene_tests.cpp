@@ -79,7 +79,10 @@ int main() {
 	wgpu::RequestAdapterOptions opts{};
 	opts.backendType = wgpu::BackendType::Vulkan;
 
-	requestWGPUDevice(opts, [](const wgpu::Device&) { start(); });
+	requestWGPUDevice(opts, [](const wgpu::Device& device) {
+
+		start();
+	});
 
 	beginAppEventLoop();
 }

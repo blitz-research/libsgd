@@ -59,7 +59,9 @@ const MaterialDescriptor pbrMaterialDescriptor(
 		material->setTexture("metallicTexture", whiteTexture());
 		material->setTexture("roughnessTexture", whiteTexture());
 		material->setTexture("occlusionTexture", whiteTexture());
-		material->setTexture("normalTexture", rgbaTexture(0xff008080));	// 0, 0, -1
+		material->setTexture("normalTexture", rgbaTexture(0xff008080));	// 0, 0, 1
+
+
 	}
 );
 

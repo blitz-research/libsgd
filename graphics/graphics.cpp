@@ -6,8 +6,11 @@
 
 #include <window/exports.h>
 
-namespace sgd {
+#include <condition_variable>
+#include <mutex>
+#include <thread>
 
+namespace sgd {
 namespace {
 
 auto shaderSource{
@@ -43,38 +46,54 @@ BindGroup* createBindGroup0() {
 
 } // namespace
 
+} // namespace sgd
+
+namespace sgd {
+
 // ***** GraphicsContext *****
 
 GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 
-	wgpu::RequestAdapterOptions opts{};
+	CondVar<bool> cv;
+
+	runOnMainThread(
+		[&]()  {
+			wgpu::RequestAdapterOptions opts{};
 #ifdef SGD_OS_WINDOWS
-		opts.backendType = wgpu::BackendType::D3D12;
-#else SGD_OS_LINUX
-		opts.backendType = wgpu::BackendType::Vulkan;
+			opts.backendType = wgpu::BackendType::D3D12;
+#elif SGD_OS_LINUX
+			opts.backendType = wgpu::BackendType::Vulkan;
 #endif
 
-	m_wgpuDevice = createWGPUDevice(opts);
-	m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
-	m_wgpuSwapChain =
-		createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, m_window->size(), preferredWGPUSwapChainFormat(m_wgpuDevice));
+			requestWGPUDevice(opts, [&](const wgpu::Device& device) {
+				m_wgpuDevice = device;
+				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
+				m_wgpuSwapChain = createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, m_window->size(),
+													  preferredWGPUSwapChainFormat(m_wgpuDevice));
 
-	m_colorBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
-	m_depthBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
+				m_colorBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
+				m_depthBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
 
-	m_window->sizeChanged.connect(this, [=](CVec2u size){
-		m_wgpuSwapChain =
-			createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, size, preferredWGPUSwapChainFormat(m_wgpuDevice));
+				m_window->sizeChanged.connect(this, [=](CVec2u size) {
+					m_wgpuSwapChain =
+						createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, size, preferredWGPUSwapChainFormat(m_wgpuDevice));
 
-		m_colorBuffer->resize(size);
-		m_depthBuffer->resize(size);
-	});
+					m_colorBuffer->resize(size);
+					m_depthBuffer->resize(size);
+				});
 
-	m_bindGroup0 = createBindGroup0();
+				m_bindGroup0 = createBindGroup0();
+
+				cv.set(true);
+			});
+		},
+		true);
+
+	cv.wait(true);
 }
 
 void GraphicsContext::beginRender(CVec4f clearColor, float clearDepth) {
-	SGD_ASSERT(!m_wgpuCommandEncoder);
+	SGD_ASSERT(isMainThread() && !m_wgpuCommandEncoder);
 
 	m_clearColor = clearColor;
 	m_clearDepth = clearDepth;
@@ -83,7 +102,7 @@ void GraphicsContext::beginRender(CVec4f clearColor, float clearDepth) {
 }
 
 void GraphicsContext::beginRenderPass(RenderPass rpass) {
-	SGD_ASSERT(m_wgpuCommandEncoder && !m_wgpuRenderPassEncoder);
+	SGD_ASSERT(isMainThread() && m_wgpuCommandEncoder && !m_wgpuRenderPassEncoder);
 
 	m_renderPass = rpass;
 
@@ -126,14 +145,14 @@ void GraphicsContext::beginRenderPass(RenderPass rpass) {
 }
 
 void GraphicsContext::endRenderPass() {
-	SGD_ASSERT(m_wgpuRenderPassEncoder);
+	SGD_ASSERT(isMainThread() && m_wgpuRenderPassEncoder);
 
 	m_wgpuRenderPassEncoder.End();
 	m_wgpuRenderPassEncoder = {};
 }
 
 void GraphicsContext::endRender() {
-	SGD_ASSERT(m_wgpuCommandEncoder && !m_wgpuRenderPassEncoder);
+	SGD_ASSERT(isMainThread() && m_wgpuCommandEncoder && !m_wgpuRenderPassEncoder);
 
 	auto commandBuffer = m_wgpuCommandEncoder.Finish();
 	m_wgpuDevice.GetQueue().Submit(1, &commandBuffer);
@@ -142,13 +161,16 @@ void GraphicsContext::endRender() {
 }
 
 void GraphicsContext::present(Texture* texture) {
-	SGD_ASSERT(!m_wgpuCommandEncoder);
 
-	copyTexture(m_wgpuDevice, texture->wgpuTexture(), m_wgpuSwapChain.GetCurrentTexture());
+	auto wgpuTexture = texture->wgpuTexture();
 
+	requestRender([=] {
+		SGD_ASSERT(!m_wgpuCommandEncoder);
+		copyTexture(m_wgpuDevice, wgpuTexture, m_wgpuSwapChain.GetCurrentTexture());
 #if !SGD_OS_EMSCRIPTEN
-	m_wgpuSwapChain.Present();
+		m_wgpuSwapChain.Present();
 #endif
+	});
 }
 
 // ***** GraphicsResource *****

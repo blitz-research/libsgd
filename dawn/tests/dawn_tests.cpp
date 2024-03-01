@@ -20,13 +20,13 @@
 
 using namespace sgd;
 
+GLFWwindow* window;
+
 wgpu::Device device;
 wgpu::Surface surface;
 wgpu::SwapChain swapChain;
 
 void render() {
-	glfwPollEvents();
-
 	drawHelloTriangle(device, swapChain.GetCurrentTexture());
 
 #if !SGD_OS_EMSCRIPTEN
@@ -41,28 +41,24 @@ int main() {
 
 	if (!glfwInit()) SGD_ABORT();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
 #if SGD_OS_MACOS
 	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif
-	auto window = glfwCreateWindow(width, height, "Dawn test", nullptr, nullptr);
-	SGD_ASSERT(window);
 
-	void* nativeWindow;
-#if SGD_OS_WINDOWS
-	nativeWindow = (void*)glfwGetWin32Window(window);
-#elif SGD_OS_LINUX
-	SGD_ABORT();
-#elif SGD_OS_EMSCRIPTEN
-	nativeWindow = (void*)"#canvas";
-#endif
+	window = glfwCreateWindow(width, height, "Dawn test", nullptr, nullptr);
 
-	requestWGPUDevice({}, [=](const wgpu::Device& result) {
-		device = result;
-		surface = createWGPUSurface(device, nativeWindow);
-		swapChain = createWGPUSwapChain(device, surface, {width, height}, preferredWGPUSwapChainFormat(device));
-		requestRender(render);
+	device = createWGPUDevice({});
+	surface = createWGPUSurface(device, window);
+	swapChain = createWGPUSwapChain(device, surface, {width, height}, preferredWGPUSwapChainFormat(device));
+
+	glfwSetWindowSizeCallback(window, [](GLFWwindow*, int x, int y) {
+		swapChain = createWGPUSwapChain(device, surface, {(uint32_t)x, (uint32_t)y}, preferredWGPUSwapChainFormat(device));
 	});
 
-	beginAppEventLoop();
+	for (;;) {
+		glfwPollEvents();
+		if (glfwWindowShouldClose(window)) std::exit(0);
+
+		render();
+	}
 }

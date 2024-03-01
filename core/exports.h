@@ -2,6 +2,7 @@
 
 #include "appevent.h"
 #include "bitmask.h"
+#include "condvar.h"
 #include "config.h"
 #include "fileio.h"
 #include "log.h"

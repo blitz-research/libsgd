@@ -33,8 +33,6 @@ void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
 	SGD_ABORT();
 }
 
-wgpu::Device requestedDevice;
-
 } // namespace
 
 const wgpu::Instance& getWGPUInstance() {
@@ -58,29 +56,30 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 				nullptr,
 				[](WGPURequestDeviceStatus status, WGPUDevice cDevice, const char* message, void* userdata) {
 					//
-					requestedDevice = wgpu::Device::Acquire(cDevice);
-					requestedDevice.SetUncapturedErrorCallback(&dawnErrorCallback, nullptr);
-					auto callback = (Function<void(const wgpu::Device& device)>*)userdata;
-					(*callback)(requestedDevice);
+					SGD_ASSERT(status == WGPURequestDeviceStatus_Success);
+					auto device = wgpu::Device::Acquire(cDevice);
+					device.SetUncapturedErrorCallback(&dawnErrorCallback, nullptr);
+					auto callback = (Function<void(const wgpu::Device&)>*)userdata;
+					(*callback)(device);
 					delete callback;
 					//
 				},
 				userdata);
 		},
 		userdata);
+
+	getWGPUInstance().ProcessEvents();
 }
 
 wgpu::Device createWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions) {
 
-	if(requestedDevice) return requestedDevice;
+	wgpu::Device result;
 
-	requestWGPUDevice(adapterOptions, [&](const wgpu::Device& result){
+	requestWGPUDevice(adapterOptions, [&](const wgpu::Device& device) { //
+		result = device;
 	});
 
-	getWGPUInstance().ProcessEvents();
-
-	SGD_ASSERT(requestedDevice);
-	return requestedDevice;
+	return result;
 }
 
 wgpu::TextureFormat preferredWGPUSwapChainFormat(const wgpu::Device& device) {
@@ -100,7 +99,7 @@ wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) 
 	nativeDesc.display = glfwGetX11Display();
 #elif SGD_OS_EMSCRIPTEN
 	wgpu::SurfaceDescriptorFromCanvasHTMLSelector nativeDesc{};
-	nativeDesc.selector = (const char*)nativeWindow;
+	nativeDesc.selector = "#canvas";
 #else
 	SGD_ABORT();
 #endif
@@ -133,43 +132,40 @@ wgpu::SwapChain createWGPUSwapChain(const wgpu::Device& device, const wgpu::Surf
 
 #if SGD_OS_EMSCRIPTEN
 
-EM_CALLBACK void sgd_requestRenderSuccess(Function<void()>* func_ptr) {
-	(*func_ptr)();
-	delete func_ptr;
+EM_CALLBACK void sgd_requestAnimationFrameOK(Function<void()>* func) {
+	(*func)();
+	delete func;
 }
 
 // clang-format off
-EM_JS(void, sgd_requestRender, (Function<void()>* func_ptr), {
+EM_JS(void, sgd_requestAnimationFrame, (Function<void()>* func), {
 	requestAnimationFrame(() => {
-		_sgd_requestRenderSuccess(func_ptr);
+		_sgd_requestAnimationFrameOK(func);
 	});
 });
+
 // clang-format on
 
 void requestRender(CFunction<void()> renderFunc) {
-	sgd_requestRender(new Function<void()>(renderFunc));
+
+	CondVar<bool> ready;
+
+	auto func = new Function<void()>([&ready, renderFunc] { //
+		ready.set(true);
+		renderFunc();
+	});
+
+	runOnMainThread([func] { //
+		sgd_requestAnimationFrame(func);
+	}, true);
+
+	ready.wait(true);
 }
 
 #else
 
 void requestRender(CFunction<void()> renderFunc) {
-
-	if(!isMainThread()) {
-		runOnMainThread(renderFunc, true);
-		return;
-	}
-
-	static Deque<Function<void()>> renderQueue;
-
-	renderQueue.push_back(renderFunc);
-
-	if(renderQueue.size()>1) return;
-
-	while(!renderQueue.empty()) {
-		auto func = renderQueue.front();
-		func();
-		renderQueue.pop_front();
-	}
+	runOnMainThread(renderFunc, true);
 }
 
 #endif

@@ -21,10 +21,8 @@ struct Window : Shared {
 	Signal<Vec2f> cursorPosChanged;
 	Signal<> closeClicked;
 
-	using RenderFunc = Function<void(Window*)>;
-
 	Window(CVec2u size, CString title, WindowFlags flags);
-	~Window();
+	~Window() override;
 
 	CVec2u size() const {
 		return m_size;
@@ -47,8 +45,6 @@ struct Window : Shared {
 	GLFWwindow* glfwWindow() const {
 		return m_glfwWindow;
 	}
-
-	void* nativeWindow()const;
 
 private:
 	GLFWwindow* m_glfwWindow{};

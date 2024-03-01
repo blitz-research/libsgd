@@ -43,4 +43,6 @@ SGD_EXTERN void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL *handler)(const char*
 
 SGD_EXTERN void SGD_DECL sgd_Error(SGD_String error);
 
+SGD_EXTERN void SGD_DECL sgd_Run(void(SGD_DECL* start)());
+
 #endif

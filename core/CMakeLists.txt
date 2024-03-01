@@ -5,12 +5,14 @@ cmake_minimum_required(VERSION 3.16)
 project(core)
 
 add_library(core
-        config.cpp
-        config.h
         appevent.cpp
         appevent.h
         bitmask.cpp
         bitmask.h
+        condvar.cpp
+        condvar.h
+        config.cpp
+        config.h
         expected.cpp
         expected.h
         exports.h
@@ -36,7 +38,7 @@ add_library(core
         std.h
         stringutil.cpp
         stringutil.h
-        )
+)
 
 #target_precompile_headers(core PUBLIC exports.h)
 

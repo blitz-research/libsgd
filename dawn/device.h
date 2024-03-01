@@ -18,8 +18,6 @@ constexpr auto defaultBackendType = wgpu::BackendType::Vulkan;
 
 inline Signal<wgpu::Device> wgpuDeviceLost;
 
-const wgpu::Instance& getWGPUInstance();
-
 void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions, CFunction<void(const wgpu::Device& device)> callback);
 
 wgpu::Device createWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions);

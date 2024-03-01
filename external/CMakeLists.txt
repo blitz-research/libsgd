@@ -70,7 +70,7 @@ FetchContent_Declare(tinygltf
         EXCLUDE_FROM_ALL
         )
 
-set(TINYGLTF_HEADER_ONLY ON)
+#set(TINYGLTF_HEADER_ONLY ON)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
 
 FetchContent_MakeAvailable(tinygltf)
@@ -105,8 +105,8 @@ else ()
 
     FetchContent_Declare(dawn
             GIT_REPOSITORY https://github.com/blitz-research/dawn.git
-            GIT_TAG swapchain-fix
-            #            GIT_TAG openxr-dev
+            #GIT_TAG openxr-dev
+            GIT_TAG f9776999488fe1af3916d53f0a897113c0991567
             GIT_SUBMODULES ""
             GIT_SHALLOW TRUE
             GIT_PROGRESS TRUE

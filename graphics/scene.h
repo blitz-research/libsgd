@@ -51,6 +51,8 @@ private:
 
 	void updateCameraUniforms() const;
 	void updateLightingUniforms() const;
+
+	void renderASync();
 };
 
 } // namespace sgd

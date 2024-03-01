@@ -41,73 +41,84 @@ EM_JS(void, getCanvasBufferSize, (uint32_t * width, uint32_t* height), {
 namespace sgd {
 
 Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
+	runOnMainThread(
+		[=] {
+			if (!glfwInit()) SGD_ABORT();
 
-	if (!glfwInit()) SGD_ABORT();
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			glfwWindowHint(GLFW_RESIZABLE, bool(m_flags & WindowFlags::resizable));
 
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, bool(m_flags & WindowFlags::resizable));
+			auto monitor = bool(flags & WindowFlags::fullscreen) ? glfwGetPrimaryMonitor() : nullptr;
 
-	auto monitor = bool(flags & WindowFlags::fullscreen) ? glfwGetPrimaryMonitor() : nullptr;
-
-	m_glfwWindow = glfwCreateWindow(size.x, size.y, title.c_str(), monitor, nullptr);
-	glfwSetWindowUserPointer(m_glfwWindow, this);
-	{
-		glfwSetWindowSizeCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, int w, int h) {
-			auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
-			window->m_size = Vec2u(w, h);
-			window->sizeChanged.emit(window->m_size);
-		});
-		int w, h;
-		glfwGetWindowSize(m_glfwWindow, &w, &h);
-		m_size = Vec2u(w, h);
-	}
-	{
-		glfwSetCursorPosCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, double x, double y) {
-			auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
-			window->m_cursorPos = Vec2f(x, y);
-			window->cursorPosChanged.emit(window->m_cursorPos);
-		});
-		double x, y;
-		glfwGetCursorPos(m_glfwWindow, &x, &y);
-		m_cursorPos = Vec2f(x, y);
-	}
-	{
-		glfwSetWindowCloseCallback(m_glfwWindow, [](GLFWwindow* glfwWindow) {
-			auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
-			window->closeClicked.emit();
-		});
-	}
+			m_glfwWindow = glfwCreateWindow(size.x, size.y, title.c_str(), monitor, nullptr);
+			glfwSetWindowUserPointer(m_glfwWindow, this);
+			{
+				glfwSetWindowSizeCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, int w, int h) {
+					auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+					window->m_size = Vec2u(w, h);
+					window->sizeChanged.emit(window->m_size);
+				});
+				int w, h;
+				glfwGetWindowSize(m_glfwWindow, &w, &h);
+				m_size = Vec2u(w, h);
+			}
+			{
+				glfwSetCursorPosCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, double x, double y) {
+					auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+					window->m_cursorPos = Vec2f(x, y);
+					window->cursorPosChanged.emit(window->m_cursorPos);
+				});
+				double x, y;
+				glfwGetCursorPos(m_glfwWindow, &x, &y);
+				m_cursorPos = Vec2f(x, y);
+			}
+			{
+				glfwSetWindowCloseCallback(m_glfwWindow, [](GLFWwindow* glfwWindow) {
+					auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+					window->closeClicked.emit();
+				});
+			}
+		},
+		true);
+	SGD_ASSERT(m_glfwWindow);
 }
 
 Window::~Window() {
-	// SGD_ASSERT(!m_glfwWindow);
-	close();
+	runOnMainThread(
+		[=] {
+			//SGD_ASSERT(!m_glfwWindow);
+			close();
+		},
+		true);
 }
 
 bool Window::pollEvents() {
+	bool result{};
+
+	runOnMainThread(
+		[=, &result] {
 #if SGD_OS_EMSCRIPTEN
-	Vec2u size;
-	getCanvasBufferSize(&size.x, &size.y);
-	if (size != m_size) sizeChanged.emit((m_size = size));
+			Vec2u size;
+			getCanvasBufferSize(&size.x, &size.y);
+			if (size != m_size) sizeChanged.emit((m_size = size));
 #endif
-	glfwPollEvents();
-	return !glfwWindowShouldClose(m_glfwWindow);
+			glfwPollEvents();
+			result = !glfwWindowShouldClose(m_glfwWindow);
+		},
+		true);
+
+	return result;
 }
 
 void Window::close() {
-	if (!m_glfwWindow) return;
-	glfwDestroyWindow(m_glfwWindow);
-	m_glfwWindow = nullptr;
-}
 
-void* Window::nativeWindow() const {
-#if SGD_OS_WINDOWS
-	return (void*)glfwGetWin32Window(m_glfwWindow);
-#elif SGD_OS_LINUX
-	SGD_ABORT();
-#elif SGD_OS_EMSCRIPTEN
-	return (void*)"#canvas";
-#endif
+	runOnMainThread(
+		[=] {
+			if (!m_glfwWindow) return;
+			glfwDestroyWindow(m_glfwWindow);
+			m_glfwWindow = nullptr;
+		},
+		true);
 }
 
 } // namespace sgd
