@@ -8,7 +8,7 @@ namespace {
 
 Mesh* createMesh(Vector<Vertex> vertices, Vector<Triangle> triangles, Material* material) {
 
-	auto mesh = new Mesh(vertices.data(), vertices.size(), triangles.data(), triangles.size(), MeshFlags::tangentsEnabled);
+	auto mesh = new Mesh(std::move(vertices), std::move(triangles), {}, MeshFlags::tangentsEnabled);
 
 	mesh->addSurface({material, 0, (uint32_t)triangles.size()});
 
@@ -24,9 +24,10 @@ Mesh* createBoxMesh(CBoxf box, Material* material) {
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;
 
-	Vec3f verts[]{{box.min.x / 2, box.max.y / 2, box.min.z / 2},	 {box.max.x / 2, box.max.y / 2, box.min.z / 2}, {box.max.x / 2, box.min.y / 2, box.min.z / 2},
-				  {box.min.x / 2, box.min.y / 2, box.min.z / 2}, {box.min.x / 2, box.max.y / 2, box.max.z / 2}, {box.max.x / 2, box.max.y / 2, box.max.z / 2},
-				  {box.max.x / 2, box.min.y / 2, box.max.z / 2},	 {box.min.x / 2, box.min.y / 2, box.max.z / 2}};
+	Vec3f verts[]{{box.min.x / 2, box.max.y / 2, box.min.z / 2}, {box.max.x / 2, box.max.y / 2, box.min.z / 2},
+				  {box.max.x / 2, box.min.y / 2, box.min.z / 2}, {box.min.x / 2, box.min.y / 2, box.min.z / 2},
+				  {box.min.x / 2, box.max.y / 2, box.max.z / 2}, {box.max.x / 2, box.max.y / 2, box.max.z / 2},
+				  {box.max.x / 2, box.min.y / 2, box.max.z / 2}, {box.min.x / 2, box.min.y / 2, box.max.z / 2}};
 
 	Vec3f norms[]{{0, 0, -1}, {1, 0, 0}, {0, 0, 1}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}};
 
@@ -164,8 +165,7 @@ Mesh* createConeMesh(float length, float radius, uint32_t segs, Material* materi
 	return createMesh(std::move(vertices), std::move(triangles), material);
 }
 
-Mesh* createTorusMesh(float outerRadius, float innerRadius, uint32_t outerSegs, uint32_t innerSegs,
-						Material* material) {
+Mesh* createTorusMesh(float outerRadius, float innerRadius, uint32_t outerSegs, uint32_t innerSegs, Material* material) {
 
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;

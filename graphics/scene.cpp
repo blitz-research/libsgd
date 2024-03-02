@@ -129,7 +129,7 @@ void Scene::render() {
 
 	runOnMainThread([=] {
 		renderASync();
-	}, false);
+	}, isMainThread());
 }
 
 void Scene::renderASync() {

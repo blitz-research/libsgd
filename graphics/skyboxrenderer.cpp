@@ -1,5 +1,7 @@
 #include "skyboxrenderer.h"
 
+#include "shaders/uniforms.h"
+
 namespace sgd {
 
 namespace {
@@ -16,8 +18,10 @@ auto shaderSource =
 BindGroupDescriptor
 	bindGroupDescriptor(3, //
 						{
-							textureBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::Cube),
-							samplerBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment),
+							bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment,
+													   wgpu::BufferBindingType::Uniform), // SkyboxUniforms
+							textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::Cube),
+							samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment),
 						},
 						{}, //
 						shaderSource);
@@ -29,8 +33,16 @@ SkyboxRenderer::SkyboxRenderer() {
 
 	m_bindGroup2 = new BindGroup(&sgd::bindGroupDescriptor);
 
+	SkyboxUniforms uniforms{};
+	m_bindGroup2->setBuffer(0, new Buffer(BufferType::uniform, &uniforms, sizeof(uniforms)));
+
 	skyTexture.changed.connect(this, [=](Texture* texture) { //
-		m_bindGroup2->setTexture(0, texture);
+		m_bindGroup2->setTexture(1, texture);
+	});
+
+	roughness.changed.connect(this, [=](float roughness) {
+		float bias = roughness * 15.99f;
+		m_bindGroup2->getBuffer(0)->update(&bias,offsetof(SkyboxUniforms, mipmapBias), sizeof(bias));
 	});
 }
 

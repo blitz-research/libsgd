@@ -22,16 +22,11 @@ enum struct TextureFlags {
 	clampU = 0x01,
 	clampV = 0x02,
 	clampW = 0x04,
-	//
-	magFilter = 0x100,
-	minFilter = 0x200,
-	mipFilter = 0x400,
-	//
-	cube = 0x800,
-	renderTarget = 0x1000,
-	//
-	clamp = clampU | clampV | clampW,
-	filter = magFilter | minFilter | mipFilter
+	clamp = 0x07,
+	filter = 0x08,
+	mipmap = 0x10,
+	cube = 0x20,
+	renderTarget=0x40,
 };
 
 SGD_SHARED(Texture);

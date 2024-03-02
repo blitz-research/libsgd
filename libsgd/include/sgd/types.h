@@ -2,19 +2,19 @@
 #define SGD_TYPES_H_INCLUDED
 
 #if __cplusplus
-#define SGD_EXTERN_ extern "C"
+#define SGD_EXTERN extern "C"
 #else
-#define SGD_EXTERN_ extern
+#define SGD_EXTERN extern
 #endif
 
 #if SGD_DYNAMIC
 #if SGD_EXPORT
-#define SGD_EXTERN SGD_EXTERN_ __declspec(dllexport)
+#define SGD_API SGD_EXTERN __declspec(dllexport)
 #else
-#define SGD_EXTERN SGD_EXTERN_ __declspec(dllimport)
+#define SGD_API SGD_EXTERN __declspec(dllimport)
 #endif
 #else
-#define SGD_EXTERN SGD_EXTERN_
+#define SGD_API SGD_EXTERN
 #endif
 
 #if _MSC_VER && !_WIN64 // Cheeky hack for blitz3d support!
@@ -37,12 +37,5 @@ typedef SGD_Handle SGD_Camera;
 typedef SGD_Handle SGD_Light;
 typedef SGD_Handle SGD_Model;
 typedef SGD_Handle SGD_Skybox;
-
-// TODO: Move me
-SGD_EXTERN void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL *handler)(const char* error, void* context), void* context);
-
-SGD_EXTERN void SGD_DECL sgd_Error(SGD_String error);
-
-SGD_EXTERN void SGD_DECL sgd_Run(void(SGD_DECL* start)());
 
 #endif

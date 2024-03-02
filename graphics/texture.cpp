@@ -34,17 +34,17 @@ wgpu::Sampler createWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
 
 	static Map<TextureFlags, wgpu::Sampler> cache;
 
-	auto& sampler = cache[flags & (TextureFlags::clamp | TextureFlags::filter)];
+	auto& sampler = cache[flags & (TextureFlags::clamp | TextureFlags::mipmap)];
 	if (sampler) return sampler;
 
 	wgpu::SamplerDescriptor desc{};
 	desc.addressModeU = bool(flags & TextureFlags::clampU) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.addressModeV = bool(flags & TextureFlags::clampV) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.addressModeW = bool(flags & TextureFlags::clampW) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
-	desc.magFilter = bool(flags & TextureFlags::magFilter) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
-	desc.minFilter = bool(flags & TextureFlags::minFilter) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
-	desc.mipmapFilter =
-		bool(flags & TextureFlags::mipFilter) ? wgpu::MipmapFilterMode::Linear : wgpu::MipmapFilterMode::Nearest;
+	desc.magFilter = bool(flags & (TextureFlags::filter | TextureFlags::mipmap)) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
+//	desc.minFilter = bool(flags & (TextureFlags::filter | TextureFlags::mipmap)) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
+	desc.minFilter = wgpu::FilterMode::Linear;
+	desc.mipmapFilter =	bool(flags & TextureFlags::mipmap) ? wgpu::MipmapFilterMode::Linear : wgpu::MipmapFilterMode::Nearest;
 
 	return sampler = gc->wgpuDevice().CreateSampler(&desc);
 }
@@ -109,7 +109,7 @@ void Texture::onValidate(GraphicsContext* gc) const {
 		desc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
 		desc.size = {m_size.x, m_size.y, m_depth};
 		desc.format = getFormat(m_format);
-		if (bool(m_flags & TextureFlags::mipFilter)) {
+		if (bool(m_flags & TextureFlags::mipmap)) {
 			desc.mipLevelCount = (uint32_t)std::floor(log2(std::max(m_size.x, m_size.y))) + 1u;
 			desc.usage |= wgpu::TextureUsage::RenderAttachment;
 		}

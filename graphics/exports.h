@@ -8,6 +8,7 @@
 #include "camera.h"
 #include "entity.h"
 #include "entityutil.h"
+#include "gltfloader.h"
 #include "graphics.h"
 #include "light.h"
 #include "material.h"

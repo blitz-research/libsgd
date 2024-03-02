@@ -16,10 +16,6 @@ int main() {
 		std::exit(0);
 	});
 
-
-	for(;;){
-		window->pollEvents();
-
-		window->render();
+	while(window->pollEvents()) {
 	}
 }

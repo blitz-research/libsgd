@@ -8,15 +8,16 @@ void SGD_DECL start() {
 
 	sgd_CreateScene();
 
-	SGD_Texture skyTexture = sgd_LoadTexture("skybox-4k.png", 2, 0x807);
+	SGD_Texture skyTexture = sgd_LoadTexture("skybox-4k.png", SGD_TEXTURE_FORMAT_SRGBA8, SGD_TEXTURE_FLAGS_CUBE_MIPMAP);
 	sgd_SetSceneEnvTexture(skyTexture);
 
-	SGD_Skybox skybox= sgd_CreateSkybox();
+	SGD_Skybox skybox = sgd_CreateSkybox();
 	sgd_SetSkyboxTexture(skybox, skyTexture);
+	sgd_SetSkyboxRoughness(skybox, .25f);
 
-	SGD_Material material = sgd_LoadMaterial("Marble008_1K-JPG");
-	SGD_Mesh mesh = sgd_CreateSphereMesh(1, 96, 48, material);
-	sgd_TransformMeshTexCoords(mesh, 4, 2, 0, 0);
+	SGD_Mesh mesh = sgd_LoadMesh("barramundi.glb");
+	sgd_FitMesh(mesh, -1,-1,-1,1,1,1,1);
+
 	SGD_Model model = sgd_CreateModel();
 	sgd_MoveEntity(model, 0, 0, 3);
 	sgd_SetModelMesh(model, mesh);

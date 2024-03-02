@@ -58,6 +58,8 @@ struct GLTFLoader {
 	tinygltf::Model gltfModel;
 	Vector<Vertex> loadedVertices;
 	Vector<Vector<Triangle>> loadedTriangles; // keyed by material index
+	bool hasNormalMaps{};
+	bool hasNormals{};
 
 	void loadPrimitive(const tinygltf::Primitive& gltfPrim) {
 		if (gltfPrim.material < 0) return;
@@ -104,6 +106,7 @@ struct GLTFLoader {
 					src += stride;
 					++vp;
 				}
+				hasNormals = true;
 			} else if (attrib.first == "TEXCOORD_0") {
 				SGD_ASSERT(size == 2 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
 				for (size_t i = 0; i < count; ++i) {
@@ -243,8 +246,6 @@ struct GLTFLoader {
 		return true;
 	}
 
-	// ***** Must be called on main thread! *****
-	//
 	Vector<bool> loadedImages;
 	Vector<TexturePtr> loadedTextures;
 
@@ -273,21 +274,21 @@ struct GLTFLoader {
 			auto& gltfSampler = gltfModel.samplers[gltfTex.sampler];
 			if (gltfSampler.wrapS == TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE) texFlags |= TextureFlags::clampU;
 			if (gltfSampler.wrapT == TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE) texFlags |= TextureFlags::clampV;
-			if (gltfSampler.magFilter == TINYGLTF_TEXTURE_FILTER_LINEAR) texFlags |= TextureFlags::magFilter;
+
+			switch (gltfSampler.magFilter) {
+			case TINYGLTF_TEXTURE_FILTER_LINEAR:
+				texFlags |= TextureFlags::filter;
+				break;
+			default:;
+			}
 			switch (gltfSampler.minFilter) {
-			case TINYGLTF_TEXTURE_FILTER_NEAREST:
 			case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
-				break;
 			case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST:
-				texFlags |= TextureFlags::minFilter;
-				break;
 			case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR:
-				texFlags |= TextureFlags::mipFilter;
+			case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR:
+				texFlags |= TextureFlags::mipmap;
 				break;
-			default:
-				texFlags |= TextureFlags::minFilter;
-				texFlags |= TextureFlags::mipFilter;
-				break;
+			default:;
 			}
 		} else {
 			texFlags = TextureFlags::none;
@@ -309,7 +310,7 @@ struct GLTFLoader {
 
 		auto material = new Material(&pbrMaterialDescriptor);
 		material->setBlendMode(gltfMat.alphaMode == "BLEND" ? BlendMode::alpha : BlendMode::opaque);
-		material->setCullMode(gltfMat.doubleSided ? CullMode::none : CullMode::back);
+		material->setCullMode(gltfMat.doubleSided ? CullMode::none : CullMode::front);
 
 		auto& pbr = gltfMat.pbrMetallicRoughness;
 
@@ -329,7 +330,10 @@ struct GLTFLoader {
 		}
 		{
 			auto& texInfo = gltfMat.normalTexture;
-			if (texInfo.index >= 0) material->setTexture("normalTexture", loadTexture(texInfo.index));
+			if (texInfo.index >= 0) {
+				material->setTexture("normalTexture", loadTexture(texInfo.index));
+				hasNormalMaps = true;
+			}
 		}
 		{
 			auto& texInfo = gltfMat.occlusionTexture;
@@ -357,19 +361,22 @@ struct GLTFLoader {
 		Vector<Triangle> triangles;
 		Vector<Surface> surfaces;
 
+		auto firstTri=0u;
+
 		for (int i = 0; i < loadedTriangles.size(); ++i) {
 			auto& tris = loadedTriangles[i];
 			if (tris.empty()) continue;
 			auto material = loadMaterial(gltfModel.materials[i]);
 			triangles.insert(triangles.end(), tris.begin(), tris.end());
-			surfaces.push_back({material, (uint32_t)tris.size()});
+			surfaces.push_back({material, firstTri, (uint32_t)tris.size()});
+			firstTri+=tris.size();
 		}
 
-		auto mesh = new Mesh(loadedVertices.data(), loadedVertices.size(), //
-							 triangles.data(), triangles.size(), //
-							 MeshFlags::tangentsEnabled);
+		auto mesh = new Mesh(loadedVertices, triangles, surfaces, //
+							 hasNormalMaps ? MeshFlags::tangentsEnabled : MeshFlags::none);
 
-		for(auto& surf : surfaces) mesh->addSurface(surf);
+		if(!hasNormals) updateNormals(mesh);
+		if(hasNormalMaps) updateTangents(mesh);
 
 		return mesh;
 	}

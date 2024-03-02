@@ -1,9 +1,5 @@
 #include "internal.h"
 
-#include <sgd/window.h>
-
-#include <window/exports.h>
-
 namespace {
 
 sgd::Vec2u g_windowSize;

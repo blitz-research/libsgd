@@ -8,14 +8,16 @@ set(LIBSGD_SOURCES
         graphics.cpp
         internal.cpp
         internal.h
+        system.cpp
         window.cpp
         types.cpp
 
         include/sgd/graphics.h
         include/sgd/window.h
         include/sgd/sgd.h
+        include/sgd/system.h
         include/sgd/types.h
-        )
+)
 
 add_library(libsgd ${LIBSGD_SOURCES})
 
@@ -85,15 +87,15 @@ function(create_bundled_lib output_lib input_lib)
                 DEPENDS ${static_libs}
                 VERBATIM)
 
-    elseif(SGD_OS_LINUX)
+    elseif (SGD_OS_LINUX)
 
         file(WRITE ${CMAKE_BINARY_DIR}/${output_lib}.ar.in
-                "CREATE ${output_file}\n" )
+                "CREATE ${output_file}\n")
 
-        foreach(target IN LISTS static_libs)
+        foreach (target IN LISTS static_libs)
             file(APPEND ${CMAKE_BINARY_DIR}/${output_lib}.ar.in
                     "ADDLIB $<TARGET_FILE:${target}>\n")
-        endforeach()
+        endforeach ()
 
         file(APPEND ${CMAKE_BINARY_DIR}/${output_lib}.ar.in "SAVE\n")
         file(APPEND ${CMAKE_BINARY_DIR}/${output_lib}.ar.in "END\n")
@@ -104,7 +106,7 @@ function(create_bundled_lib output_lib input_lib)
 
         if (CMAKE_INTERPROCEDURAL_OPTIMIZATION)
             set(ar_tool ${CMAKE_CXX_COMPILER_AR})
-        endif()
+        endif ()
 
         add_custom_command(
                 COMMAND ${CMAKE_AR} -M < ${CMAKE_BINARY_DIR}/${output_lib}.ar
@@ -112,7 +114,7 @@ function(create_bundled_lib output_lib input_lib)
                 DEPENDS ${static_libs}
                 VERBATIM)
 
-    else()
+    else ()
 
         message(FATAL_ERROR "!!! OOPS")
 
@@ -128,15 +130,22 @@ if (NOT SGD_OS_EMSCRIPTEN)
 
 endif ()
 
-add_subdirectory(tests)
-
 
 ##### libsgd_dynamic #####
 
-add_library(libsgd_dynamic SHARED ${LIBSGD_SOURCES})
+if (NOT SGD_OS_EMSCRIPTEN)
 
-target_include_directories(libsgd_dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    add_library(libsgd_dynamic SHARED ${LIBSGD_SOURCES})
 
-target_compile_definitions(libsgd_dynamic PUBLIC SGD_DYNAMIC=1 SGD_EXPORT=1)
+    target_include_directories(libsgd_dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(libsgd_dynamic window graphics)
+    target_compile_definitions(libsgd_dynamic PUBLIC SGD_DYNAMIC=1 SGD_EXPORT=1)
+
+    target_link_libraries(libsgd_dynamic window graphics)
+
+    add_subdirectory(python)
+
+endif ()
+
+
+add_subdirectory(tests)

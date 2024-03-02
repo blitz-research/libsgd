@@ -1,9 +1,5 @@
 #include "internal.h"
 
-#include <sgd/graphics.h>
-
-#include <graphics/exports.h>
-
 // ***** Scene *****
 
 void SGD_DECL sgd_CreateScene() {
@@ -53,9 +49,9 @@ void SGD_DECL sgd_Present() {
 
 // ***** Texture *****
 
-SGD_EXTERN SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags) {
+SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags) {
 	auto texture = sgd::loadTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
-	if (!texture) sgd::error(sgd::String("sgd_LoadTexture failed: ") + texture.error().message());
+	if (!texture) sgd::error("Failed to load texture", texture.error());
 
 	return sgd::createHandle(texture.result());
 }
@@ -64,12 +60,25 @@ SGD_EXTERN SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int
 
 SGD_Material SGD_DECL sgd_LoadMaterial(SGD_String path) {
 	auto material = sgd::loadMaterial(sgd::Path(path));
-	if (!material) sgd::error("Failed to load material");
+	if (!material) sgd::error("Failed to load material", material.error());
 
 	return sgd::createHandle(material.result());
 }
 
 // ***** Mesh *****
+
+SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path) {
+	auto mesh = sgd::loadGLTFMesh(sgd::Path(path));
+	if (!mesh) sgd::error("Failed to load mesh", mesh.error());
+
+	return sgd::createHandle(mesh.result());
+}
+
+SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh hmesh, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, int uniform) {
+	auto mesh = sgd::resolveHandle<sgd::Mesh>(hmesh);
+
+	fit(mesh, {{minX,minY,minZ},{maxX,maxY,maxZ}}, uniform);
+}
 
 SGD_Mesh SGD_DECL sgd_CreateBoxMesh(float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
 									SGD_Material hmaterial) {
@@ -96,7 +105,7 @@ void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh hmesh, float scaleX, float sca
 
 // ***** Skybox *****
 
-SGD_EXTERN SGD_Skybox SGD_DECL sgd_CreateSkybox() {
+SGD_Skybox SGD_DECL sgd_CreateSkybox() {
 	if (!sgd::mainScene) sgd::error("Scene has not been created");
 
 	auto skybox = new sgd::Skybox();
@@ -106,11 +115,18 @@ SGD_EXTERN SGD_Skybox SGD_DECL sgd_CreateSkybox() {
 	return sgd::createHandle(skybox);
 }
 
-SGD_EXTERN void SGD_DECL sgd_SetSkyboxTexture(SGD_Skybox hskybox, SGD_Texture htexture) {
+void SGD_DECL sgd_SetSkyboxTexture(SGD_Skybox hskybox, SGD_Texture htexture) {
 	auto skybox = sgd::resolveHandle<sgd::Skybox>(hskybox);
 	auto texture = sgd::resolveHandle<sgd::Texture>(htexture);
 
 	skybox->skyTexture = texture;
+}
+
+SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness) {
+	auto skybox = sgd::resolveHandle<sgd::Skybox>(hskybox);
+	if(roughness < -1 || roughness > 1) sgd::error("Skybox roughness outside of range -1 to 1");
+
+	skybox->roughness = roughness;
 }
 
 // ***** Model *****

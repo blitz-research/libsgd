@@ -1,7 +1,12 @@
 R"(
 
-@group(2) @binding(0) var skybox_skyboxTexture: texture_cube<f32>;
-@group(2) @binding(1) var skybox_skyboxSampler: sampler;
+struct SkyboxUniforms {
+    mipmapBias:f32
+}
+
+@group(2) @binding(0) var<uniform> skybox_uniforms: SkyboxUniforms;
+@group(2) @binding(1) var skybox_skyboxTexture: texture_cube<f32>;
+@group(2) @binding(2) var skybox_skyboxSampler: sampler;
 
 struct Varying {
     @builtin(position) clipPosition: vec4f,
@@ -28,7 +33,7 @@ struct Varying {
 
     var cubeVec = camera_uniforms.worldMatrix * vec4f(tv.xyz / tv.w, 0);
 
-    return textureSample(skybox_skyboxTexture, skybox_skyboxSampler, cubeVec.xyz);
+    return textureSampleBias(skybox_skyboxTexture, skybox_skyboxSampler, cubeVec.xyz, skybox_uniforms.mipmapBias);
 }
 
 )"

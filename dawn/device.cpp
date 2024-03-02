@@ -164,7 +164,7 @@ void requestRender(CFunction<void()> renderFunc) {
 
 #else
 
-void requestRender(CFunction<void()> renderFunc) {
+void  requestRender(CFunction<void()> renderFunc) {
 	runOnMainThread(renderFunc, true);
 }
 

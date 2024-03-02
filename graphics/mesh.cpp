@@ -2,14 +2,22 @@
 
 namespace sgd {
 
-Mesh::Mesh(const Vertex* vertices, uint32_t vertexCount, const Triangle* triangles, uint32_t triangleCount, MeshFlags flags)
-	: m_vertexBuffer(new Buffer(BufferType::vertex, vertices, vertexCount * sizeof(Vertex))),	   //
-	  m_vertexCount(vertexCount),																   //
+Mesh::Mesh(const Vertex* vertices, uint32_t vertexCount, const Triangle* triangles, uint32_t triangleCount,
+		   CVector<Surface> surfaces, MeshFlags flags)
+	: m_vertexBuffer(new Buffer(BufferType::vertex, vertices, vertexCount * sizeof(Vertex))),		//
+	  m_vertexCount(vertexCount),																	//
 	  m_triangleBuffer(new Buffer(BufferType::index, triangles, triangleCount * sizeof(Triangle))), //
-	  m_triangleCount(triangleCount),m_flags(flags) {
+	  m_triangleCount(triangleCount),																//
+	  m_surfaces(surfaces),																			//
+	  m_flags(flags) {
 
 	addDependency(m_vertexBuffer);
 	addDependency(m_triangleBuffer);
+}
+
+Mesh::Mesh(CVector<Vertex> vertices, CVector<Triangle> triangles, CVector<Surface> surfaces, MeshFlags flags)
+	: //
+	  Mesh(vertices.data(), vertices.size(), triangles.data(), triangles.size(), surfaces, flags) {
 }
 
 void Mesh::resizeVertices(uint32_t size) {
@@ -57,9 +65,9 @@ void Mesh::unlockTriangles() {
 }
 
 void Mesh::clearSurfaces() {
-	if(m_surfaces.empty()) return;
+	if (m_surfaces.empty()) return;
 
-	for(auto& surf : m_surfaces) removeDependency(surf.material);
+	for (auto& surf : m_surfaces) removeDependency(surf.material);
 
 	m_surfaces.clear();
 

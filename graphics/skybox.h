@@ -15,6 +15,8 @@ struct Skybox : Entity {
 
 	Property<TexturePtr> skyTexture;
 
+	Property<float> roughness;
+
 private:
 	SkyboxRendererPtr m_renderer;
 

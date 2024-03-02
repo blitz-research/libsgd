@@ -26,10 +26,12 @@ void Buffer::resize(uint32_t size) {
 	m_size = size;
 	std::free(data);
 
-	m_dirtyBegin = std::min(m_dirtyBegin, (uint32_t)m_size);
+	m_dirtyBegin = std::min(m_dirtyBegin, m_size);
 	m_dirtyEnd = std::min(m_dirtyEnd, m_size);
 
+	// FIXME
 	m_wgpuBuffer = {};
+
 	invalidate(true);
 }
 
@@ -51,12 +53,13 @@ void Buffer::update(const void* data, uint32_t offset, uint32_t size) {
 
 void Buffer::onValidate(GraphicsContext* gc) const {
 
-	if(!m_wgpuBuffer) {
-
+	if (!m_wgpuBuffer) {
 		static const Map<BufferType, wgpu::BufferUsage> usages = {
-			{BufferType::uniform, wgpu::BufferUsage::Uniform},	 {BufferType::storage, wgpu::BufferUsage::Storage},
-			{BufferType::vertex, wgpu::BufferUsage::Vertex},	 {BufferType::index, wgpu::BufferUsage::Index},
-			{BufferType::instance, wgpu::BufferUsage::Vertex},
+			{BufferType::uniform, wgpu::BufferUsage::Uniform}, //
+			{BufferType::storage, wgpu::BufferUsage::Storage}, //
+			{BufferType::vertex, wgpu::BufferUsage::Vertex},   //
+			{BufferType::index, wgpu::BufferUsage::Index},	   //
+			{BufferType::instance, wgpu::BufferUsage::Vertex}, //
 			{BufferType::indirect, wgpu::BufferUsage::Indirect},
 		};
 
@@ -68,12 +71,8 @@ void Buffer::onValidate(GraphicsContext* gc) const {
 		std::memcpy(m_wgpuBuffer.GetMappedRange(0, m_size), m_data, m_size);
 		m_wgpuBuffer.Unmap();
 
-		m_dirtyBegin = m_size;
-		m_dirtyEnd = 0;
-		return;
-	}
+	} else if (m_dirtyEnd > m_dirtyBegin) {
 
-	if (m_dirtyEnd > m_dirtyBegin) {
 		SGD_ASSERT(m_dirtyBegin < m_size && m_dirtyEnd <= m_size);
 		gc->wgpuDevice().GetQueue().WriteBuffer(m_wgpuBuffer, m_dirtyBegin, m_data + m_dirtyBegin, m_dirtyEnd - m_dirtyBegin);
 	}

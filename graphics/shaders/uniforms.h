@@ -65,21 +65,24 @@ struct alignas(16) MatteMaterialUniforms {
 // @group(1) @binding(11) var material_normalTexture: texture_2d<f32>;
 // @group(1) @binding(12) var material_normalSampler: sampler;
 struct alignas(16) PBRMaterialUniforms {
-	Vec4f albedoColor;
-	Vec3f emissiveColor;
-	float metallicFactor;
-	float roughnessFactor;
+	Vec4f albedoColor{1,1,1,1};
+	Vec3f emissiveColor{0,0,0};
+	float metallicFactor{0};
+	float roughnessFactor{1};
 };
 
-// @group(2) @binding(0) var skybox_skyboxTexture: texture_cube<f32>;
-// @group(2) @binding(1) var skybox_skyboxSampler: sampler;
-struct alignas(16) SkyboxUniforms {};
+// @group(2) @binding(0) var<uniform> skybox_uniforms: SkyboxUniforms;
+// @group(2) @binding(1) var skybox_skyboxTexture: texture_cube<f32>;
+// @group(2) @binding(2) var skybox_skyboxSampler: sampler;
+struct alignas(16) SkyboxUniforms {
+	float mipmapBias{0};
+};
 
 // ***** Mesh renderer *****
 
 // @group(2) @binding(0) var<uniform> meshUniforms: MeshUniforms;
 struct alignas(16) MeshUniforms {
-	int32_t tangentsEnabled;
+	int32_t tangentsEnabled{0};
 };
 
 // @location(8) matrix_0: vec4f,

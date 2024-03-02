@@ -3,7 +3,7 @@
 #include <graphics/exports.h>
 #include <window/exports.h>
 
-#include <sgd/types.h>
+#include <sgd/sgd.h>
 
 namespace sgd {
 
@@ -63,6 +63,10 @@ template<class T> T* releaseHandle(SGD_Handle handle) {
 	releaseHandle(handleType<T>(), handle);
 }
 
-void error(CString error);
+void error(CString message);
+
+void error(CString error, CString message);
+
+void error(CString error, CFileioEx& ex);
 
 }

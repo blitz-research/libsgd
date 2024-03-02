@@ -14,7 +14,7 @@ void startApp(CString exepath) {
 	auto root = exepath.substr(0, i);
 	auto url = "http://localhost:8080/" + file;
 
-//	sgd::alert("file=" + file + " root=" + root + " url=" + url);
+	sgd::alert("file=" + file + " root=" + root + " url=" + url);
 
 	std::thread([=] {
 		httplib::Server server;
@@ -52,7 +52,7 @@ int interpreter() {
 
 		String cmd;
 		if (!std::getline(std::cin, cmd)) return 0;
-		// alert(cmd);
+		alert(cmd);
 
 		String args;
 		auto spc = cmd.find(' ');
@@ -60,7 +60,6 @@ int interpreter() {
 			args = cmd.substr(spc + 1);
 			cmd = cmd.substr(0, spc);
 		}
-
 		if (cmd == "-file-exec-and-symbols") {
 			exepath = dequote(args);
 		} else if (cmd == "-environment-cd") {
@@ -77,6 +76,12 @@ int interpreter() {
 
 int main(int argc, const char* argv[]) {
 
+	String str;
+	for (int i = 0; i < argc; ++i) {
+		str += " " + String(argv[i]);
+	}
+	alert(str);
+
 	if (argc == 2 && !std::strcmp(argv[1], "--version")) {
 		puts("GNU gdb (GDB) 11.1");
 		return 0;
@@ -85,12 +90,6 @@ int main(int argc, const char* argv[]) {
 	if (argc == 2 && !std::strcmp(argv[1], "--interpreter=mi2")) { //
 		return interpreter();
 	}
-
-	String str;
-	for (int i = 0; i < argc; ++i) {
-		str += " " + String(argv[i]);
-	}
-	SGD_PANIC("??? " + str);
 
 	return 1;
 }

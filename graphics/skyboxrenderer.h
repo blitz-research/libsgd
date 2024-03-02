@@ -15,6 +15,7 @@ struct SkyboxRenderer : Renderer {
 
 	Property<AffineMat4f> worldMatrix;
 
+	Property<float> roughness;
 
 private:
 	BindGroupPtr m_bindGroup2;
