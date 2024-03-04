@@ -11,7 +11,7 @@
 #include "../include/sgd/sgd.h"
 %}
 
+// This removes sgd_ prefix
 %rename("%(strip:[sgd_])s") "";
 
-void sgd_CreateWindow(int x, int y, const char* title, int flags);
-
+%include "../include/sgd/sgd.h"

@@ -32,6 +32,20 @@ SGD_Mesh loadMesh(BBStr* path) {
 	return mesh;
 }
 
+SGD_Model loadModel(BBStr* path) {
+	auto model = sgd_LoadModel(path->c_str());
+	delete path;
+
+	return model;
+}
+
+SGD_Model loadBonedModel(BBStr* path) {
+	auto model = sgd_LoadBonedModel(path->c_str());
+	delete path;
+
+	return model;
+}
+
 }
 
 bool sgd_create(){
@@ -78,6 +92,9 @@ bool sgd_link( void (*rtSym)( const char *sym, void *pc ) ){
 	rtSym("SetSkyboxRoughness%skybox#roughness", sgd_SetSkyboxRoughness);
 
     // Model
+	rtSym("%LoadModel$path", loadModel);
+	rtSym("%LoadBonedModel$path", loadBonedModel);
+	rtSym("AnimateModel", sgd_AnimateModel);
     rtSym("%CreateModel", sgd_CreateModel);
     rtSym("SetModelMesh%model%mesh", sgd_SetModelMesh);
     rtSym("SetModelColor%model#red#green#blue#alpha", sgd_SetModelColor);
@@ -88,6 +105,8 @@ bool sgd_link( void (*rtSym)( const char *sym, void *pc ) ){
     rtSym("SetLightRange%light#range", sgd_SetLightRange);
     rtSym("SetLightFalloff%light#falloff", sgd_SetLightFalloff);
 
+	// Entity
+	rtSym("%CopyEntity%entity", sgd_CopyEntity);
     rtSym("MoveEntity%entity#x#y#z", sgd_MoveEntity);
     rtSym("TurnEntity%entity#pitch#yawy#roll", sgd_TurnEntity);
 

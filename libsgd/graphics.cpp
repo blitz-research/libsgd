@@ -74,10 +74,11 @@ SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path) {
 	return sgd::createHandle(mesh.result());
 }
 
-SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh hmesh, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, int uniform) {
+SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh hmesh, float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
+								  int uniform) {
 	auto mesh = sgd::resolveHandle<sgd::Mesh>(hmesh);
 
-	fit(mesh, {{minX,minY,minZ},{maxX,maxY,maxZ}}, uniform);
+	fit(mesh, {{minX, minY, minZ}, {maxX, maxY, maxZ}}, uniform);
 }
 
 SGD_Mesh SGD_DECL sgd_CreateBoxMesh(float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
@@ -124,12 +125,39 @@ void SGD_DECL sgd_SetSkyboxTexture(SGD_Skybox hskybox, SGD_Texture htexture) {
 
 SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness) {
 	auto skybox = sgd::resolveHandle<sgd::Skybox>(hskybox);
-	if(roughness < -1 || roughness > 1) sgd::error("Skybox roughness outside of range -1 to 1");
+	if (roughness < -1 || roughness > 1) sgd::error("Skybox roughness outside of range -1 to 1");
 
 	skybox->roughness = roughness;
 }
 
 // ***** Model *****
+
+SGD_Model SGD_DECL sgd_LoadModel(SGD_String path) {
+	if (!sgd::mainScene) sgd::error("Scene has not been created");
+
+	auto mesh = sgd::loadGLTFMesh(sgd::Path(path));
+	if (!mesh) sgd::error("Failed to load mesh", mesh.error());
+
+	auto model = new sgd::Model();
+	model->mesh = mesh.result();
+
+	return sgd::createHandle(model);
+}
+
+SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path) {
+	if (!sgd::mainScene) sgd::error("Scene has not been created");
+
+	auto model = sgd::loadGLTFModel(sgd::Path(path));
+	if (!model) sgd::error("Failed to load model", model.error());
+
+	return sgd::createHandle(model.result());
+}
+
+void SGD_DECL sgd_AnimateModel(SGD_Model hmodel, int animation, float time, int mode) {
+	auto model = sgd::resolveHandle<sgd::Model>(hmodel);
+
+	model->animate(animation, time, sgd::AnimationMode(mode));
+}
 
 SGD_Model SGD_DECL sgd_CreateModel() {
 	if (!sgd::mainScene) sgd::error("Scene has not been created");
@@ -186,6 +214,27 @@ void SGD_DECL sgd_SetLightFalloff(SGD_Light hlight, float falloff) {
 
 // ***** Entity *****
 
+SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	auto copy = entity->copy();
+	sgd::mainScene->add(copy);
+
+	return createHandle(copy);
+}
+
+SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity hentity, float tx, float ty, float tz) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	setPosition(entity, {tx, ty, tz});
+}
+
+SGD_API void SGD_DECL sgd_SetEntityRotation(SGD_Entity hentity, float rx, float ry, float rz) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	setRotation(entity, {rx, ry, rz});
+}
+
 void SGD_DECL sgd_MoveEntity(SGD_Entity hentity, float tx, float ty, float tz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
@@ -196,4 +245,16 @@ void SGD_DECL sgd_TurnEntity(SGD_Entity hentity, float rx, float ry, float rz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
 	turn(entity, {rx, ry, rz});
+}
+
+SGD_API void SGD_DECL sgd_TranslateEntity(SGD_Entity hentity, float tx, float ty, float tz) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	translate(entity, {tx, ty, tz});
+}
+
+SGD_API void SGD_DECL sgd_RotateEntity(SGD_Entity hentity, float rx, float ry, float rz) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	rotate(entity, {rx, ry, rz});
 }
