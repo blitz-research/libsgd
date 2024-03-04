@@ -51,11 +51,15 @@ Material* rgbaMaterial(uint32_t rgba, float metallic, float roughness) {
 	auto& material = cache[rgba];
 	if (material) return material;
 
-	material = new Material("pbr");
+	material = new Material(&pbrMaterialDescriptor);
 	material->setVector4f("albedoColor4f", Vec4f::rgba(rgba));
-	material->setFloat("metallic1f", metallic);
-	material->setFloat("roughness1f", roughness);
+	material->setFloat("metallicFactor1f", metallic);
+	material->setFloat("roughnessFactor1f", roughness);
 	return material;
+}
+
+Material* colorMaterial(CVec4f color, float metallic, float roughness) {
+	return rgbaMaterial(rgba(color), metallic, roughness);
 }
 
 } // namespace sgd

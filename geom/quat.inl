@@ -1,4 +1,4 @@
-//#include "quat.h"
+// #include "quat.h"
 
 namespace sgd {
 
@@ -64,35 +64,34 @@ template <class T> Quat<T> Quat<T>::rotation(CMat3<T> m) {
 	return q;
 }
 
-template <class T> Quat<T>& Quat<T>::operator+=(CQuat<T> q) {
-	v += q.v;
-	w += q.w;
-	return *this;
+template <class T> Quat<T>& Quat<T>::operator*=(CQuat<T> q) {
+	return *this = *this * q;
 }
 
-template <class T> Quat<T>& Quat<T>::operator*=(CQuat<T> q) {
-	float w0 = w * q.w - dot(v, q.v);
-	v = cross(v, q.v) + v * q.w + q.v * w;
-	w = w0;
-	return *this;
+template <class T> Quat<T>& Quat<T>::operator+=(CQuat<T> q) {
+	return *this = *this + q;
 }
 
 template <class T> Quat<T>& Quat<T>::operator*=(T s) {
-	v *= s;
-	w *= s;
-	return *this;
+	return *this = *this * s;
 }
+
+template <class T> Quat<T>& Quat<T>::operator/=(T s) {
+	return *this = *this / s;
+}
+
+// ***** Non-member operstor *****
 
 template <class T> Quat<T> operator-(CQuat<T> q) {
 	return {-q.v, q.w};
 }
 
 template <class T> Quat<T> operator*(CQuat<T> q, CQuat<T> r) {
-	return {cross(r.v, q.v) + r.v * q.w + q.v * r.w, r.w * q.w - dot(r.v, q.v)};	// Note: Flipped lhs/rhs to match matrix muls.
+	return {cross(r.v, q.v) + r.v * q.w + q.v * r.w, r.w * q.w - dot(r.v, q.v)}; // Note: Flipped lhs/rhs to match matrix muls.
 }
 
-template <class T> Vec3<T> operator*(CQuat<T> q, CVec3<T> v) {
-	return (q * Quat<T>(v, 0) * -q).v;
+template <class T> Quat<T> operator+(CQuat<T> q, CQuat<T> r) {
+	return {q.v + r.v, q.w + r.w};
 }
 
 template <class T> Quat<T> operator*(CQuat<T> q, T s) {
@@ -101,6 +100,10 @@ template <class T> Quat<T> operator*(CQuat<T> q, T s) {
 
 template <class T> Quat<T> operator/(CQuat<T> q, T s) {
 	return {q.v / s, q.w / s};
+}
+
+template <class T> Vec3<T> operator*(CQuat<T> q, CVec3<T> v) {
+	return (q * Quat<T>(v, 0) * -q).v;
 }
 
 template <class T> std::ostream& operator<<(std::ostream& str, CQuat<T> q) {
@@ -112,11 +115,31 @@ template <class T> T dot(CQuat<T> q, CQuat<T> r) {
 }
 
 template <class T> T length(CQuat<T> q) {
-	return std::sqrt(dot(q,q));
+	return std::sqrt(dot(q, q));
 }
 
 template <class T> Quat<T> normalize(CQuat<T> q) {
 	return q / length(q);
+}
+
+template <class T> Quat<T> slerp(CQuat<T> q, CQuat<T> r, float alpha) {
+	constexpr T epsilon = 0;
+
+	float beta = 1 - alpha;
+	float d = dot(q, r);
+	auto t = r;
+	if (d < 0) {
+		t.v = -t.v;
+		t.w = -t.w;
+		d = -d;
+	}
+	if (d < 1 - epsilon) {
+		float om = std::acos(d);
+		float si = std::sin(om);
+		alpha = std::sin(alpha * om) / si;
+		beta = std::sin(beta * om) / si;
+	}
+	return q * beta + t * alpha;
 }
 
 } // namespace sgd

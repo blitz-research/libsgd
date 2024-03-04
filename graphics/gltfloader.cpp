@@ -1,5 +1,6 @@
 #include "gltfloader.h"
 
+#include "animation.h"
 #include "meshutil.h"
 #include "pbrmaterial.h"
 #include "textureutil.h"
@@ -44,183 +45,27 @@ AffineMat4f nodeMatrix(const tinygltf::Node& gltfNode) {
 	return matrix;
 }
 
-void transformMesh(Vector<Vertex>::iterator begin, Vector<Vertex>::iterator end, CAffineMat4f matrix) {
-	auto cofactor = sgd::cofactor(matrix.r);
-
-	for (auto it = begin; it != end; ++it) {
-		it->position = matrix * it->position;
-		it->normal = normalize(cofactor * it->normal);
-	}
-}
-
 struct GLTFLoader {
 
 	tinygltf::Model gltfModel;
-	Vector<Vertex> loadedVertices;
-	Vector<Vector<Triangle>> loadedTriangles; // keyed by material index
-	bool hasNormalMaps{};
+	tinygltf::Scene* defaultScene;
+
+	Vector<bool> cachedImages;
+	Vector<TexturePtr> cachedTextures;
+	Vector<MaterialPtr> cachedMaterials;
+	Vector<EntityPtr> modelBones;
+
+	Vector<uint16_t> uint16Indices;
+	Vector<uint8_t> uint8Indices;
+
+	Vector<Vertex> vertices;
+	Map<int, Vector<Triangle>> triangles; // keyed by material index
 	bool hasNormals{};
 
-	void loadPrimitive(const tinygltf::Primitive& gltfPrim) {
-		if (gltfPrim.material < 0) return;
+	Expected<bool, FileioEx> load(CPath path) {
 
-		auto materialId = gltfPrim.material;
+		auto data = loadData(path).result();
 
-		// Vertices
-		size_t v0 = loadedVertices.size();
-		size_t vcount = 0;
-		for (auto& attrib : gltfPrim.attributes) {
-			vcount = std::max(vcount, gltfModel.accessors[attrib.second].count);
-		}
-		loadedVertices.resize(v0 + vcount);
-
-		for (auto& attrib : gltfPrim.attributes) {
-			auto& accessor = gltfModel.accessors[attrib.second];
-
-			size_t count = accessor.count;
-			auto vp = loadedVertices.data() + v0;
-
-			const auto& bufferView = gltfModel.bufferViews[accessor.bufferView];
-			const auto& buffer = gltfModel.buffers[bufferView.buffer];
-			uint8_t* src = (uint8_t*)buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
-
-			int stride = accessor.ByteStride(bufferView);
-			int size = (accessor.type != TINYGLTF_TYPE_SCALAR) ? accessor.type : 1;
-
-			// CLOG << "Loading attrib" << attrib.first;
-
-			if (attrib.first == "POSITION") {
-				SGD_ASSERT(size == 3 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-				for (size_t i = 0; i < count; ++i) {
-					vp->position = *(Vec3f*)src;
-					vp->position.z = -vp->position.z;
-					src += stride;
-					++vp;
-				}
-			} else if (attrib.first == "NORMAL") {
-				SGD_ASSERT(size == 3 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-				for (size_t i = 0; i < count; ++i) {
-					vp->normal = *(Vec3f*)src;
-					vp->normal.z = -vp->normal.z;
-					vp->normal = normalize(vp->normal);
-					src += stride;
-					++vp;
-				}
-				hasNormals = true;
-			} else if (attrib.first == "TEXCOORD_0") {
-				SGD_ASSERT(size == 2 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-				for (size_t i = 0; i < count; ++i) {
-					vp->texCoords = *(Vec2f*)src;
-					src += stride;
-					++vp;
-				}
-			} else {
-				// log() << String("### TODO: Unrecognized Gltf attribute \"") + attrib.first + "\"";
-			}
-		}
-
-		// Triangles
-		const auto& accessor = gltfModel.accessors[gltfPrim.indices];
-
-		const auto& bufferView = gltfModel.bufferViews[accessor.bufferView];
-		const auto& buffer = gltfModel.buffers[bufferView.buffer];
-		uint8_t* data = (uint8_t*)buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
-		auto stride = accessor.ByteStride(bufferView);
-
-		auto& triangles = loadedTriangles[materialId];
-		size_t firstTri = triangles.size();
-		size_t triCount = accessor.count / 3;
-		SGD_ASSERT(triCount * 3 == accessor.count);
-		triangles.resize(firstTri + triCount);
-		auto tri = triangles.data() + firstTri;
-
-		switch (accessor.componentType) {
-		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: {
-			SGD_ASSERT(stride == 4);
-			auto src = (uint32_t*)data;
-			for (size_t i = 0; i < triCount; ++i) {
-				tri->indices[0] = src[0] + v0;
-				tri->indices[1] = src[2] + v0;
-				tri->indices[2] = src[1] + v0;
-				src += 3;
-				++tri;
-			}
-			break;
-		}
-		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
-			SGD_ASSERT(stride == 2);
-			auto src = (uint16_t*)data;
-			for (size_t i = 0; i < triCount; ++i) {
-				tri->indices[0] = src[0] + v0;
-				tri->indices[1] = src[2] + v0;
-				tri->indices[2] = src[1] + v0;
-				src += 3;
-				++tri;
-			}
-			break;
-		}
-		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
-			SGD_ASSERT(stride == 1);
-			auto src = (uint8_t*)data;
-			for (size_t i = 0; i < triCount; ++i) {
-				tri->indices[0] = src[0] + v0;
-				tri->indices[1] = src[2] + v0;
-				tri->indices[2] = src[1] + v0;
-				src += 3;
-				++tri;
-			}
-			break;
-		}
-		default:
-			SGD_ABORT();
-		}
-	}
-
-	void loadMesh(const tinygltf::Mesh& gltfMesh) {
-
-		//		CLOG << "Loading mesh" << gltfMesh.name;
-
-		for (const auto& gltfPrim : gltfMesh.primitives) {
-			if (gltfPrim.mode != TINYGLTF_MODE_TRIANGLES) continue;
-
-			loadPrimitive(gltfPrim);
-		}
-	}
-
-	void loadNode(const tinygltf::Node& gltfNode, CAffineMat4f matrix) { // NOLINT (recursive)
-
-		//		CLOG << "Loading node" << gltfNode.name;
-
-		auto worldMatrix = matrix * nodeMatrix(gltfNode);
-
-		if (gltfNode.mesh >= 0) {
-			SGD_ASSERT(gltfNode.mesh < gltfModel.meshes.size());
-
-			auto v0 = (ptrdiff_t)loadedVertices.size();
-			loadMesh(gltfModel.meshes[gltfNode.mesh]);
-			transformMesh(loadedVertices.begin() + v0, loadedVertices.end(), worldMatrix);
-		}
-
-		for (int i : gltfNode.children) {
-			SGD_ASSERT(i < gltfModel.nodes.size());
-
-			loadNode(gltfModel.nodes[i], worldMatrix);
-		}
-	}
-
-	void loadScene(const tinygltf::Scene& gltfScene) {
-
-		//		CLOG << "Loading scene" << gltfScene.name;
-
-		for (int i : gltfScene.nodes) {
-			SGD_ASSERT(i < gltfModel.nodes.size());
-
-			loadNode(gltfModel.nodes[i], {});
-		}
-	}
-
-	// Can be called on any thread!
-	bool loadData(CData data, CString baseDir) {
 		std::string err;
 		std::string warn;
 		tinygltf::TinyGLTF gltfLoader;
@@ -230,45 +75,48 @@ struct GLTFLoader {
 		if (data.size() >= 4 && !std::memcmp(data.data(), magic, 4)) {
 			res = gltfLoader.LoadBinaryFromMemory(&gltfModel, &err, &warn, data.data(), data.size());
 		} else {
+			auto baseDir = path.resolve().parent_path().u8string();
 			res = gltfLoader.LoadASCIIFromString(&gltfModel, &err, &warn, (char*)data.data(), data.size(), baseDir);
 		}
-		if (!err.empty()) log() << "!!! Tiny gltf error:" << err;
-		if (!warn.empty()) log() << "!!! Tiny gltf warning: " << warn;
-		if (!res) {
-			SGD_PANIC("Failed to load GLTF data");
-			return false;
+		if (!warn.empty()) log() << ">>> Tiny gltf warning: " << warn;
+
+		if (!res && err.empty()) err = "Unknown error.";
+
+		if (!err.empty()) return FileioEx("Tiny gltf error: " + err);
+
+		if (gltfModel.defaultScene == -1) {
+			return FileioEx("Gltf Model has no default scene");
 		}
+		defaultScene = &gltfModel.scenes[gltfModel.defaultScene];
 
-		loadedTriangles.resize(gltfModel.materials.size());
+		cachedImages.resize(gltfModel.images.size());
+		cachedTextures.resize(gltfModel.textures.size());
+		cachedMaterials.resize(gltfModel.materials.size());
 
-		SGD_ASSERT(gltfModel.defaultScene >= 0);
-		loadScene(gltfModel.scenes[gltfModel.defaultScene]);
+		modelBones.resize(gltfModel.nodes.size());
+
 		return true;
 	}
 
-	Vector<bool> loadedImages;
-	Vector<TexturePtr> loadedTextures;
+	Texture* getTexture(int id) {
+		if (cachedTextures[id]) return cachedTextures[id];
 
-	Texture* loadTexture(int index) {
-		SGD_ASSERT(index >= 0 && index < gltfModel.textures.size());
+		auto& gltfTex = gltfModel.textures[id];
 
-		if (loadedTextures[index]) return loadedTextures[index];
-
-		auto& gltfTex = gltfModel.textures[index];
-
-		SGD_ASSERT(gltfTex.source >= 0 && gltfTex.source < gltfModel.images.size());
 		auto& gltfImage = gltfModel.images[gltfTex.source];
+
 		if (gltfImage.bits != 8) SGD_PANIC("gltfImage.bits: " + std::to_string(gltfImage.bits));
 		if (gltfImage.component != 4) SGD_PANIC("gltfImage.component: " + std::to_string(gltfImage.component));
-		auto texFormat = TextureFormat::srgba8;
 
-		if (!loadedImages[gltfTex.source]) {
+		auto texFormat = TextureFormat::srgba8;
+		auto texFlags = TextureFlags::none;
+
+		if (!cachedImages[gltfTex.source]) {
 			premultiplyAlpha(gltfImage.image.data(), TextureFormat::srgba8, Vec2u(gltfImage.width, gltfImage.height),
 							 gltfImage.width * bytesPerTexel(texFormat));
-			loadedImages[gltfTex.source] = true;
+			cachedImages[gltfTex.source] = true;
 		}
 
-		TextureFlags texFlags{};
 		if (gltfTex.sampler >= 0) {
 			SGD_ASSERT(gltfTex.sampler < gltfModel.samplers.size());
 			auto& gltfSampler = gltfModel.samplers[gltfTex.sampler];
@@ -294,21 +142,19 @@ struct GLTFLoader {
 			texFlags = TextureFlags::none;
 		}
 
-		auto texture = new Texture(Vec2u(gltfImage.width, gltfImage.height), 1, texFormat, texFlags);
+		auto texture = cachedTextures[id] = new Texture(Vec2u(gltfImage.width, gltfImage.height), 1, texFormat, texFlags);
 
 		texture->update(gltfImage.image.data(), gltfImage.width * bytesPerTexel(texFormat));
-
-		loadedTextures[index] = texture;
 
 		return texture;
 	}
 
-	Material* loadMaterial(const tinygltf::Material& gltfMat) {
+	Material* getMaterial(int id) {
+		if (cachedMaterials[id]) return cachedMaterials[id];
 
-		// CLOG << "Loading material:" << gltfMat.name << "alphaMode:" << gltfMat.alphaMode
-		//	 << "doubleSided:" << gltfMat.doubleSided;
+		auto& gltfMat = gltfModel.materials[id];
+		auto material = cachedMaterials[id] = new Material(&pbrMaterialDescriptor);
 
-		auto material = new Material(&pbrMaterialDescriptor);
 		material->setBlendMode(gltfMat.alphaMode == "BLEND" ? BlendMode::alpha : BlendMode::opaque);
 		material->setCullMode(gltfMat.doubleSided ? CullMode::none : CullMode::front);
 
@@ -320,31 +166,30 @@ struct GLTFLoader {
 								  Vec4f((float)factor[0], (float)factor[1], (float)factor[2], (float)factor[3]));
 			//			CLOG << "alphaMode:" << gltfMat.alphaMode << "albedoColor:" << uniforms->albedoColor;
 			auto& texInfo = pbr.baseColorTexture;
-			if (texInfo.index >= 0) material->setTexture("albedoTexture", loadTexture(texInfo.index));
+			if (texInfo.index >= 0) material->setTexture("albedoTexture", getTexture(texInfo.index));
 		}
 		{
 			auto factor = gltfMat.emissiveFactor.data();
 			material->setVector3f("emissiveColor3f", Vec3f((float)factor[0], (float)factor[1], (float)factor[2]));
 			auto& texInfo = gltfMat.emissiveTexture;
-			if (texInfo.index >= 0) material->setTexture("emissiveTexture", loadTexture(texInfo.index));
+			if (texInfo.index >= 0) material->setTexture("emissiveTexture", getTexture(texInfo.index));
 		}
 		{
 			auto& texInfo = gltfMat.normalTexture;
 			if (texInfo.index >= 0) {
-				material->setTexture("normalTexture", loadTexture(texInfo.index));
-				hasNormalMaps = true;
+				material->setTexture("normalTexture", getTexture(texInfo.index));
 			}
 		}
 		{
 			auto& texInfo = gltfMat.occlusionTexture;
-			if (texInfo.index >= 0) material->setTexture("occlusionTexture", loadTexture(texInfo.index));
+			if (texInfo.index >= 0) material->setTexture("occlusionTexture", getTexture(texInfo.index));
 		}
 		{
 			material->setFloat("metallicFactor1f", pbr.metallicFactor);
 			material->setFloat("roughnessFactor1f", pbr.roughnessFactor);
 			auto& texInfo = pbr.metallicRoughnessTexture;
 			if (texInfo.index >= 0) {
-				auto texture = loadTexture(texInfo.index);
+				auto texture = getTexture(texInfo.index);
 				material->setTexture("metallicTexture", texture);
 				material->setTexture("roughnessTexture", texture);
 			}
@@ -353,43 +198,332 @@ struct GLTFLoader {
 		return material;
 	}
 
-	Mesh* createMesh() {
+	int componentsForType(int type) const {
+		switch (type) {
+		case TINYGLTF_TYPE_SCALAR:
+			return 1;
+		case TINYGLTF_TYPE_VEC2:
+			return 2;
+		case TINYGLTF_TYPE_VEC3:
+			return 3;
+		case TINYGLTF_TYPE_VEC4:
+			return 4;
+		default:
+			SGD_ABORT();
+		}
+	}
 
-		loadedImages.resize(gltfModel.images.size());
-		loadedTextures.resize(gltfModel.textures.size());
+	int bytesPerComponent(int componentType) const {
+		switch (componentType) {
+		case TINYGLTF_COMPONENT_TYPE_FLOAT:
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
+			return 4;
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT:
+			return 2;
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
+			return 1;
+		default:
+			SGD_ABORT();
+		}
+	}
+
+	uint8_t* bufferData(const tinygltf::Accessor& accessor) const {
+		auto& bufferView = gltfModel.bufferViews[accessor.bufferView];
+		auto& buffer = gltfModel.buffers[bufferView.buffer];
+		return (uint8_t*)buffer.data.data() + bufferView.byteOffset + accessor.byteOffset;
+	}
+
+	int bufferDataPitch(const tinygltf::Accessor& accessor) const {
+		auto& bufferView = gltfModel.bufferViews[accessor.bufferView];
+		return accessor.ByteStride(bufferView);
+	}
+
+	void copyBufferData(const tinygltf::Accessor& accessor, void* dst, size_t dstPitch) const {
+		auto srcp = bufferData(accessor);
+		auto srcPitch = bufferDataPitch(accessor);
+		int size = componentsForType(accessor.type) * bytesPerComponent(accessor.componentType);
+		auto dstp = (uint8_t*)dst;
+
+		for (int i = 0; i < accessor.count; ++i) {
+			std::memcpy(dstp, srcp, size);
+			dstp += dstPitch;
+			srcp += srcPitch;
+		}
+	}
+
+	void beginMesh() {
+		this->vertices.clear();
+		this->triangles.clear();
+		this->hasNormals = false;
+	}
+
+	Mesh* endMesh() {
 
 		Vector<Triangle> triangles;
 		Vector<Surface> surfaces;
 
-		auto firstTri=0u;
+		auto flags = MeshFlags::none;
 
-		for (int i = 0; i < loadedTriangles.size(); ++i) {
-			auto& tris = loadedTriangles[i];
-			if (tris.empty()) continue;
-			auto material = loadMaterial(gltfModel.materials[i]);
-			triangles.insert(triangles.end(), tris.begin(), tris.end());
-			surfaces.push_back({material, firstTri, (uint32_t)tris.size()});
-			firstTri+=tris.size();
+		for (auto it : this->triangles) {
+			auto firstTri = (uint32_t)triangles.size();
+			triangles.insert(triangles.end(), it.second.begin(), it.second.end());
+			surfaces.push_back({getMaterial(it.first), firstTri, (uint32_t)it.second.size()});
+			if (gltfModel.materials[it.first].normalTexture.index != -1) flags |= MeshFlags::tangentsEnabled;
 		}
 
-		auto mesh = new Mesh(loadedVertices, triangles, surfaces, //
-							 hasNormalMaps ? MeshFlags::tangentsEnabled : MeshFlags::none);
+		auto mesh = new Mesh(vertices, triangles, surfaces, flags);
 
-		if(!hasNormals) updateNormals(mesh);
-		if(hasNormalMaps) updateTangents(mesh);
+		if (bool(flags & MeshFlags::tangentsEnabled)) updateTangents(mesh);
+
+		this->vertices.clear();
+		this->triangles.clear();
+		this->hasNormals = false;
 
 		return mesh;
+	}
+
+	void updateMesh(const tinygltf::Primitive& gltfPrim) {
+		if (gltfPrim.mode != TINYGLTF_MODE_TRIANGLES) return;
+		if (gltfPrim.material == -1) return;
+
+		// Add vertex attributes
+		uint32_t firstVertex = vertices.size();
+		uint32_t vertexCount = 0;
+		for (auto& attrib : gltfPrim.attributes) {
+			vertexCount = std::max(vertexCount, (uint32_t)gltfModel.accessors[attrib.second].count);
+		}
+		vertices.resize(firstVertex + vertexCount);
+		auto vp = vertices.data() + firstVertex;
+
+		for (auto& attrib : gltfPrim.attributes) {
+
+			auto& accessor = gltfModel.accessors[attrib.second];
+			int count = accessor.count;
+
+			if (attrib.first == "POSITION") {
+				SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC3 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+				copyBufferData(accessor, &vp->position, sizeof(Vertex));
+				for (int i = 0; i < count; ++i) vp[i].position.z = -vp[i].position.z;
+			} else if (attrib.first == "NORMAL") {
+				SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC3 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+				copyBufferData(accessor, &vp->normal, sizeof(Vertex));
+				for (int i = 0; i < count; ++i) {
+					vp[i].normal.z = -vp[i].normal.z;
+					vp[i].normal = normalize(vp[i].normal);
+				}
+				hasNormals = true;
+			} else if (attrib.first == "TEXCOORD_0") {
+				SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC2 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+				copyBufferData(accessor, &vp->texCoords, sizeof(Vertex));
+			} else {
+				// log() << String("### TODO: Unrecognized Gltf attribute \"") + attrib.first + "\"";
+			}
+		}
+
+		// Add triangles
+		const auto& accessor = gltfModel.accessors[gltfPrim.indices];
+
+		auto& triangles = this->triangles[gltfPrim.material];
+		uint32_t firstTri = triangles.size();
+		uint32_t triCount = accessor.count / 3;
+		SGD_ASSERT(triCount * 3 == accessor.count);
+
+		triangles.resize(firstTri + triCount);
+		auto tp = triangles.data() + firstTri;
+
+		switch (accessor.componentType) {
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT: {
+			copyBufferData(accessor, tp, sizeof(uint32_t));
+			break;
+		}
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: {
+			auto srcp = bufferData(accessor);
+			auto srcPitch = bufferDataPitch(accessor);
+			for (int i = 0; i < accessor.count; ++i) {
+				((uint32_t*)tp)[i] = *((uint16_t*)srcp);
+				srcp += srcPitch;
+			}
+			break;
+		}
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE: {
+			auto srcp = bufferData(accessor);
+			auto srcPitch = bufferDataPitch(accessor);
+			for (int i = 0; i < accessor.count; ++i) {
+				((uint32_t*)tp)[i] = *((uint8_t*)srcp);
+				srcp += srcPitch;
+			}
+			break;
+					}
+		default:
+			SGD_ABORT();
+		}
+		for (int i = 0; i < triCount; ++i) {
+			std::swap(tp[i].indices[1], tp[i].indices[2]);
+			tp[i].indices[0] += firstVertex;
+			tp[i].indices[1] += firstVertex;
+			tp[i].indices[2] += firstVertex;
+		}
+	}
+
+	void updateMesh(const tinygltf::Mesh& gltfMesh) {
+		for (const auto& gltfPrim : gltfMesh.primitives) {
+			updateMesh(gltfPrim);
+		}
+	}
+
+	void updateMesh(const tinygltf::Node& gltfNode, CAffineMat4f matrix) {
+
+		auto worldMatrix = matrix * nodeMatrix(gltfNode);
+
+		if (gltfNode.mesh >= 0) {
+			auto firstVertex = vertices.size();
+			updateMesh(gltfModel.meshes[gltfNode.mesh]);
+
+			// transform added vertices...
+			auto cof = cofactor(worldMatrix.r);
+			for (auto vp = vertices.begin() + firstVertex; vp != vertices.end(); ++vp) {
+				vp->position = worldMatrix * vp->position;
+				vp->normal = normalize(cof * vp->normal);
+			}
+		}
+
+		for (int i : gltfNode.children) {
+			updateMesh(gltfModel.nodes[i], worldMatrix);
+		}
+	}
+
+	Model* createModel(const tinygltf::Node& gltfNode, Model* parent) {
+
+		Model* model = new Model();
+		model->setParent(parent);
+		model->setLocalMatrix(nodeMatrix(gltfNode));
+
+		if (gltfNode.mesh >= 0) {
+			beginMesh();
+			updateMesh(gltfModel.meshes[gltfNode.mesh]);
+			model->mesh = endMesh();
+		}
+
+		for (int i : gltfNode.children) {
+			modelBones[i] = createModel(gltfModel.nodes[i], model);
+		}
+
+		return model;
+	}
+
+	Animation* createAnimation(const tinygltf::Animation& anim) const {
+
+		log() << "### Create animation:" << anim.name << "channels:" << anim.channels.size();
+
+		Map<int, AnimationSeqPtr> seqsMap;
+
+		float duration = 0;
+
+		for (auto& chan : anim.channels) {
+			if (chan.target_path == "weights") continue; // TODO!
+
+			int node = chan.target_node;
+			auto it = seqsMap.find(node);
+			if (it == seqsMap.end()) {
+				it = seqsMap.insert(std::make_pair(node, new AnimationSeq(node))).first;
+			}
+			auto seq = it->second;
+
+			auto& samp = anim.samplers[chan.sampler];
+
+			// input == time
+			auto& time_accessor = gltfModel.accessors[samp.input];
+			SGD_ASSERT(time_accessor.type == TINYGLTF_TYPE_SCALAR &&
+					   time_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+			auto count = time_accessor.count;
+
+			SGD_ASSERT(time_accessor.maxValues.size() == 1);
+			duration = std::max(duration, (float)time_accessor.maxValues[0]);
+
+			// output == pos / rot/ scale
+			auto& value_accessor = gltfModel.accessors[samp.output];
+			SGD_ASSERT(count == value_accessor.count);
+
+			if (chan.target_path == "translation") {
+				log() << "### translation keys:" << count;
+				SGD_ASSERT(value_accessor.type == TINYGLTF_TYPE_VEC3 && //
+						   value_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+				seq->positionKeys.resize(count);
+				copyBufferData(time_accessor, &seq->positionKeys[0].time, sizeof(seq->positionKeys[0]));
+				copyBufferData(value_accessor, &seq->positionKeys[0].value, sizeof(seq->positionKeys[0]));
+				for (auto& key : seq->positionKeys) key.value.z = -key.value.z;
+			} else if (chan.target_path == "rotation") {
+				log() << "### rotation keys:" << count;
+				SGD_ASSERT(value_accessor.type == TINYGLTF_TYPE_VEC4 && //
+						   value_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+				seq->rotationKeys.resize(count);
+				copyBufferData(time_accessor, &seq->rotationKeys[0].time, sizeof(seq->rotationKeys[0]));
+				copyBufferData(value_accessor, &seq->rotationKeys[0].value, sizeof(seq->rotationKeys[0]));
+				for (auto& key : seq->rotationKeys) key.value = Quatf(key.value.v, key.value.w);
+			} else if (chan.target_path == "scale") {
+				log() << "### scale keys:" << count;
+				SGD_ASSERT(value_accessor.type == TINYGLTF_TYPE_VEC3 && //
+						   value_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+				seq->scaleKeys.resize(count);
+				copyBufferData(time_accessor, &seq->scaleKeys[0].time, sizeof(seq->scaleKeys[0]));
+				copyBufferData(value_accessor, &seq->scaleKeys[0].value, sizeof(seq->scaleKeys[0]));
+			} else {
+				SGD_ABORT();
+			}
+		}
+		Vector<CAnimationSeqPtr> seqs;
+		for (auto it : seqsMap) seqs.push_back(it.second);
+		return new Animation(anim.name, seqs, duration);
+	}
+
+	// ***** Public API *****
+
+	Mesh* createMesh() {
+		beginMesh();
+		for (auto i : defaultScene->nodes) {
+			updateMesh(gltfModel.nodes[i], {});
+		}
+		return endMesh();
+	}
+
+	Model* createModel() {
+
+		Vector<AnimationPtr> animations;
+		for (auto& anim : gltfModel.animations) {
+			animations.push_back(createAnimation(anim));
+		}
+
+		for (int i : defaultScene->nodes) {
+			modelBones[i] = createModel(gltfModel.nodes[i], nullptr);
+		}
+
+		auto root = new Model(modelBones, animations);
+
+		for (int i : defaultScene->nodes) {
+			modelBones[i]->setParent(root);
+		}
+		return root;
 	}
 };
 
 } // namespace
 
 Expected<Mesh*, FileioEx> loadGLTFMesh(CPath path) {
+
 	GLTFLoader loader{};
-	auto baseDir = path.resolve().parent_path().u8string();
-	log() << "### baseDir:" << baseDir;
-	loader.loadData(loadData(path).result(), baseDir);
+	auto res = loader.load(path);
+	if (!res) return res.error();
+
 	return loader.createMesh();
+}
+
+Expected<Model*, FileioEx> loadGLTFModel(CPath path) {
+
+	GLTFLoader loader{};
+	auto res = loader.load(path);
+	if (!res) return res.error();
+
+	return loader.createModel();
 }
 
 } // namespace sgd

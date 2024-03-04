@@ -12,11 +12,7 @@ set(LIBSGD_SOURCES
         window.cpp
         types.cpp
 
-        include/sgd/graphics.h
-        include/sgd/window.h
         include/sgd/sgd.h
-        include/sgd/system.h
-        include/sgd/types.h
 )
 
 add_library(libsgd ${LIBSGD_SOURCES})

@@ -13,6 +13,8 @@ struct Skybox : Entity {
 
 	Skybox();
 
+	explicit Skybox(const Skybox* that);
+
 	Property<TexturePtr> skyTexture;
 
 	Property<float> roughness;
@@ -24,6 +26,9 @@ private:
 	void onDestroy() override;
 	void onShow() override;
 	void onHide() override;
+
+	void init();
+	Skybox* onCopy() const override;
 };
 
 }

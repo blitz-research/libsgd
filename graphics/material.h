@@ -68,7 +68,7 @@ protected:
 
 	BlendMode m_blendMode{BlendMode::opaque};
 	DepthFunc m_depthFunc{DepthFunc::lessEqual};
-	CullMode m_cullMode{CullMode::none};
+	CullMode m_cullMode{CullMode::back};
 };
 
 } // namespace sgd

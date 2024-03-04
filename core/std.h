@@ -76,6 +76,16 @@ using CData = const Data&;
 
 [[noreturn]] void unreachable();
 
+// Same as mod but handles negative x value so there's no 'hole' around 0, y should still be positive.
+inline int floorMod(int x, int y) {
+	return x >= 0 ? x % y : x - ((x - y + 1) / y) * y;
+}
+
+// Same as std::fmod but handles negative x value so there's no 'hole' around 0, y should still be positive.
+inline float floorMod(float x, float y) {
+	return x - std::floor(float(x) / float(y)) * y;
+}
+
 template <class C, class V> bool contains(const C& container, const V& value) {
 	return std::find(container.begin(), container.end(), value) != container.end();
 }

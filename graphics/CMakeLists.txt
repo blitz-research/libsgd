@@ -5,18 +5,18 @@ cmake_minimum_required(VERSION 3.16)
 project(graphics)
 
 add_library(graphics
+        animation.cpp
+        animation.h
         bindgroup.cpp
         bindgroup.h
         buffer.cpp
         buffer.h
         camera.cpp
         camera.h
-
         entity.cpp
         entity.h
         entityutil.cpp
         entityutil.h
-
         gltfloader.cpp
         gltfloader.h
         graphics.cpp
@@ -67,14 +67,6 @@ add_library(graphics
         shaders/uniforms.h
 
         exports.h
-        skyboxrenderer.cpp
-        skyboxrenderer.h
-        skybox.cpp
-        skybox.h
-        modelrenderer.cpp
-        modelrenderer.h
-        entityutil.cpp
-        entityutil.h
 )
 
 target_link_libraries(graphics window dawn tinygltf stb)

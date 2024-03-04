@@ -31,7 +31,7 @@ add_library(geom
         vec3.inl
         vec4.h
         vec4.inl
-        )
+)
 
 target_link_libraries(geom core)
 

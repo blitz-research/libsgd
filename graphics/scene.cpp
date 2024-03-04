@@ -20,6 +20,7 @@ Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
 
 void Scene::add(Entity* entity) {
 	SGD_ASSERT(!entity->m_scene);
+	SGD_ASSERT(!entity->parent() || entity->parent()->scene() == this);
 
 	m_entities.push_back(entity);
 	if (entity->is<Camera>()) {
@@ -30,12 +31,18 @@ void Scene::add(Entity* entity) {
 
 	entity->m_scene = this;
 	entity->onCreate();
-	entity->setEnabled(true);
-	entity->setVisible(true);
+	if(entity->enabled()) entity->onEnable();
+	if(entity->visible()) entity->onShow();
+
+	for (auto child : entity->children()) add(child);
 }
 
 void Scene::remove(Entity* entity) {
 	SGD_ASSERT(entity->m_scene == this);
+	SGD_ASSERT(!entity->parent() || entity->parent()->scene() == this);
+
+	for (auto child : entity->children()) remove(child);
+	entity->m_children.clear();
 
 	entity->setVisible(false);
 	entity->setEnabled(false);
@@ -123,13 +130,9 @@ void Scene::render() {
 	updateCameraUniforms();
 	updateLightingUniforms();
 
-	runOnMainThread([=] {
-		GraphicsResource::validateAll(m_gc);
-	},true);
+	runOnMainThread([=] { GraphicsResource::validateAll(m_gc); }, true);
 
-	runOnMainThread([=] {
-		renderASync();
-	}, isMainThread());
+	runOnMainThread([=] { renderASync(); }, isMainThread());
 }
 
 void Scene::renderASync() {

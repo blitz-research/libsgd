@@ -4,15 +4,27 @@
 
 namespace sgd {
 
-Skybox::Skybox() {
-
+void Skybox::init() {
 	skyTexture.changed.connect(this, [=](Texture* texture) { //
 		if (m_renderer) m_renderer->skyTexture = texture;
 	});
-
 	roughness.changed.connect(this, [=](float roughness) { //
 		if (m_renderer) m_renderer->roughness = roughness;
 	});
+}
+
+Skybox::Skybox() {
+	init();
+}
+
+Skybox::Skybox(const Skybox* that) : Entity(that), //
+	skyTexture(that->skyTexture()),
+	roughness(that->roughness()) {
+	init();
+}
+
+Skybox* Skybox::onCopy() const {
+	return new Skybox(this);
 }
 
 void Skybox::onCreate() {

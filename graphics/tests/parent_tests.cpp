@@ -1,3 +1,4 @@
+
 #include <graphics/exports.h>
 
 #include <thread>
@@ -34,40 +35,36 @@ void start() {
 
 	SkyboxPtr skybox = new Skybox();
 	skybox->skyTexture = scene->envTexture;
-	skybox->roughness = .5f;
+	skybox->roughness = .4f;
 	scene->add(skybox);
 
 	LightPtr light = new Light();
-	move(light, {0,0,-10});
+	light->setWorldMatrix(AffineMat4f::TRS({0, 10, 0}));
 	light->color = {1, 1, 1, 1};
 	light->range = 50;
 	scene->add(light);
 
-	CameraPtr camera=new Camera();
-	camera->near=.1;
-	camera->far=1000;
-	move(camera, {0,0,0});
-	scene->add(camera);
+	scene->add(new Camera());
 
-	ModelPtr model = loadGLTFModel(Path("boxanim.glb")).result();
-//	ModelPtr model = loadGLTFModel(Path("gearbox.glb")).result();
+	ModelPtr root = new Model();
+	root->setLocalMatrix(AffineMat4f::TRS({0,0,5}));
+	root->mesh = createSphereMesh(.5,64,32,colorMaterial({1,0,0,1}));
+	scene->add(root);
 
-//	ModelPtr model = new Model();
-//	auto mesh = loadGLTFMesh(Path("normaltangent.glb")).result();
-//	fit(mesh, {-1,1}, true);
-//	model->mesh=mesh;
+	ModelPtr child0 = new Model();
+	child0->setParent(root);
+	child0->setLocalMatrix(AffineMat4f::TRS({-1,-1,0}));
+	child0->mesh = createSphereMesh(.5,64,32,colorMaterial({0,1,0,1},0,0));
+	scene->add(child0);
 
-	translate(model, {0,0,3});
-	scene->add(model);
-
-	float time = 0;
+	ModelPtr child1 = new Model();
+	child1->setParent(root);
+	child1->setLocalMatrix(AffineMat4f::TRS({1,-1,0}));
+	child1->mesh = createSphereMesh(.5,64,32,colorMaterial({0,1,0,1},0,0));
+	scene->add(child1);
 
 	while (window->pollEvents()) {
-
-//		model->animate(0, time += 0.5f/60.0f, AnimationMode::loop);
-
-//		rotate(model, {0, .001, 0});
-
+		turn(root, {0, .001, 0});
 		render();
 	}
 }

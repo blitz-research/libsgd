@@ -113,4 +113,8 @@ template <class T> std::ostream& operator<<(std::ostream& str, CVec4<T>& v) {
 	return str << '(' << v.x << ',' << v.y << ',' << v.z << ',' << v.w << ')';
 }
 
+template<class T> uint32_t rgba(CVec4<T> color) {
+	return (uint8_t(color.w * 255)<<24) | (uint8_t(color.z * 255)<<16) | (uint8_t(color.y * 255)<<8) | uint8_t(color.x * 255);
+}
+
 } // namespace sgd

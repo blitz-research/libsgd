@@ -99,6 +99,13 @@ Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, Textu
 	return texture;
 }
 
+
+void premultiplyAlpha(Texture* texture) {
+
+
+}
+
+
 Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, TextureFlags flags) {
 
 	auto data = loadData(path);

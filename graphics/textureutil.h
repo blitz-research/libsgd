@@ -25,5 +25,6 @@ Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, Textu
 
 void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pitch);
 
+void premultiplyAlpha(Texture* texture);
 
 } // namespace sgd
