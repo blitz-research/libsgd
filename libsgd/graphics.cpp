@@ -68,7 +68,7 @@ SGD_Material SGD_DECL sgd_LoadMaterial(SGD_String path) {
 // ***** Mesh *****
 
 SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path) {
-	auto mesh = sgd::loadGLTFMesh(sgd::Path(path));
+	auto mesh = sgd::loadStaticMesh(sgd::Path(path));
 	if (!mesh) sgd::error("Failed to load mesh", mesh.error());
 
 	return sgd::createHandle(mesh.result());
@@ -135,22 +135,35 @@ SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness
 SGD_Model SGD_DECL sgd_LoadModel(SGD_String path) {
 	if (!sgd::mainScene) sgd::error("Scene has not been created");
 
-	auto mesh = sgd::loadGLTFMesh(sgd::Path(path));
+	auto mesh = sgd::loadStaticMesh(sgd::Path(path));
 	if (!mesh) sgd::error("Failed to load mesh", mesh.error());
 
 	auto model = new sgd::Model();
 	model->mesh = mesh.result();
 
+	sgd::mainScene->add(model);
+
 	return sgd::createHandle(model);
 }
 
-SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path) {
+SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path, SGD_Bool skinned) {
 	if (!sgd::mainScene) sgd::error("Scene has not been created");
 
-	auto model = sgd::loadGLTFModel(sgd::Path(path));
-	if (!model) sgd::error("Failed to load model", model.error());
+	sgd::Model* model;
 
-	return sgd::createHandle(model.result());
+	if (skinned) {
+		auto r = sgd::loadSkinnedModel(sgd::Path(path));
+		if (!r) sgd::error("Failed to load model", r.error());
+		model = r.result();
+	} else {
+		auto r = sgd::loadBonedModel(sgd::Path(path));
+		if (!r) sgd::error("Failed to load model", r.error());
+		model = r.result();
+	}
+
+	sgd::mainScene->add(model);
+
+	return sgd::createHandle(model);
 }
 
 void SGD_DECL sgd_AnimateModel(SGD_Model hmodel, int animation, float time, int mode) {
@@ -180,6 +193,36 @@ void SGD_DECL sgd_SetModelColor(SGD_Model hmodel, float red, float green, float 
 	auto model = sgd::resolveHandle<sgd::Model>(hmodel);
 
 	model->color = sgd::Vec4f(red, green, blue, alpha);
+}
+
+// ***** Camera *****
+
+SGD_Camera SGD_DECL sgd_CreateCamera() {
+	if (!sgd::mainScene) sgd::error("Scene has not been created");
+
+	auto camera = new sgd::Camera();
+
+	sgd::mainScene->add(camera);
+
+	return createHandle(camera);
+}
+
+void SGD_DECL sgd_SetCameraFovY(SGD_Camera hcamera, float fovY) {
+	auto camera = sgd::resolveHandle<sgd::Camera>(hcamera);
+
+	camera->fovY = fovY;
+}
+
+void SGD_DECL sgd_SetCameraNear(SGD_Camera hcamera, float near) {
+	auto camera = sgd::resolveHandle<sgd::Camera>(hcamera);
+
+	camera->near = near;
+}
+
+void SGD_DECL sgd_SetCameraFar(SGD_Camera hcamera, float far) {
+	auto camera = sgd::resolveHandle<sgd::Camera>(hcamera);
+
+	camera->far = far;
 }
 
 // ***** Light *****

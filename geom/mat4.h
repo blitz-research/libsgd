@@ -28,13 +28,9 @@ template <class T> struct Mat4 {
 	static Mat4 frustum(T left, T right, T bottom, T top, T near, T far);
 	static Mat4 perspective(T fovyInDegrees, T aspectRatio, T near, T far);
 
-	Vec4<T>* data();
-	const Vec4<T>* data() const;
-
-	Vec4<T>& operator[](size_t index);
-	CVec4<T> operator[](size_t index) const;
-
 	Mat4& operator*=(CMat4<T> m);
+
+	explicit operator AffineMat4<T>() const;
 };
 
 template <class T> Mat4<T> operator*(CMat4<T> m, CMat4<T> n);

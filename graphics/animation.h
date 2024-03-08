@@ -29,9 +29,9 @@ struct AnimationSeq : public Shared {
 	Vector<QuatfAnimationKey> rotationKeys;
 	Vector<Vec3fAnimationKey> scaleKeys;
 
-	int const boneIndex;
+	int const bone;
 
-	AnimationSeq(int boneIndex):boneIndex(boneIndex){}
+	AnimationSeq(int bone):bone(bone){}
 
 	Vec3f evaluatePosition(float time, CVec3f def) const;
 	Quatf evaluateRotation(float time, CQuatf def) const;

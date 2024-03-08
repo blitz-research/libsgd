@@ -45,26 +45,12 @@ template <class T> Mat4<T> Mat4<T>::perspective(T fovyInDegrees, T aspectRatio, 
 	return frustum(-xmax,xmax,-ymax,ymax,near,far);
 }
 
-template <class T> Vec4<T>* Mat4<T>::data() {
-	return &i;
-}
-
-template <class T> const Vec4<T>* Mat4<T>::data() const {
-	return &i;
-}
-
-template <class T> Vec4<T>& Mat4<T>::operator[](size_t index) {
-	SGD_ASSERT(index < 4);
-	return data()[index];
-}
-
-template <class T> CVec4<T> Mat4<T>::operator[](size_t index) const {
-	SGD_ASSERT(index < 4);
-	return data()[index];
-}
-
 template <class T> Mat4<T>& Mat4<T>::operator*=(CMat4<T> m) {
 	return *this = *this * m;
+}
+
+template <class T> Mat4<T>::operator AffineMat4<T>() const {
+	return AffineMat4<T>(Mat3f(i.xyz(), j.xyz(), k.xyz()), t.xyz());
 }
 
 // ***** Non-member operators *****

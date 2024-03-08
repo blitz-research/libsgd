@@ -16,22 +16,8 @@ template <class T> constexpr Vec3<T>::Vec3(CVec2<T> v, float z) : x(v.x), y(v.y)
 template <class T> constexpr Vec3<T>::Vec3(T x, T y, T z) : x(x), y(y), z(z) {
 }
 
-template <class T> T* Vec3<T>::data() {
-	return &x;
-}
-
-template <class T> const T* Vec3<T>::data() const {
-	return &x;
-}
-
-template <class T> T& Vec3<T>::operator[](size_t index) {
-	SGD_ASSERT(index < 3);
-	return data()[index];
-}
-
-template <class T> const T& Vec3<T>::operator[](size_t index) const {
-	SGD_ASSERT(index < 3);
-	return data()[index];
+template <class T> Vec2<T> Vec3<T>::xy() const {
+	return {x, y};
 }
 
 template <class T> Vec3<T>& Vec3<T>::operator*=(CVec3<T> v) {

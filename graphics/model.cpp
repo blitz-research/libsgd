@@ -1,14 +1,10 @@
 #include "model.h"
 
-#include "scene.h"
-
 #include "modelrenderer.h"
+#include "scene.h"
+#include "skinnedmodelrenderer.h"
 
 namespace sgd {
-
-Model::Model(Vector<EntityPtr> bones, Vector<AnimationPtr> animations)
-	: m_bones(std::move(bones)), m_animations(std::move(animations)) {
-}
 
 Model::Model(const Model* that)
 	: Entity(that),					   //													//
@@ -17,6 +13,7 @@ Model::Model(const Model* that)
 	  m_bones(that->m_bones),		   //
 	  m_animations(that->m_animations) // We need an AnimationSet
 {
+	SGD_ABORT();
 
 	// This is currently a bit crusty, we need to remap bone entities to their copies, assumes they've been copied by Entity
 	// ctor 'in order'. We need a nicer way to do this ultimately.
@@ -40,16 +37,37 @@ Model* Model::onCopy() const {
 	return new Model(this);
 }
 
+Model::Model(Vector<EntityPtr> bones, Vector<AnimationPtr> animations, Vector<Joint> joints) //
+	: m_bones(std::move(bones)),															 //
+	  m_animations(std::move(animations)),													 //
+	  m_joints(std::move(joints)),															 //
+	  m_skinned(!m_joints.empty()),															 //
+	  m_jointMatrices(m_joints.size()) {													 //
+}
+
 void Model::onCreate() {
-	if (!scene()->getRenderer(RendererType::model)) scene()->setRenderer(RendererType::model, new ModelRenderer());
+	if (m_skinned) {
+		if (!scene()->getRenderer(RendererType::skinnedModel))
+			scene()->setRenderer(RendererType::skinnedModel, new SkinnedModelRenderer());
+	} else {
+		if (!scene()->getRenderer(RendererType::model)) scene()->setRenderer(RendererType::model, new ModelRenderer());
+	}
 }
 
 void Model::onShow() {
-	scene()->getRenderer(RendererType::model)->as<ModelRenderer>()->add(this);
+	if (m_skinned) {
+		scene()->getRenderer(RendererType::skinnedModel)->as<SkinnedModelRenderer>()->add(this);
+	} else {
+		scene()->getRenderer(RendererType::model)->as<ModelRenderer>()->add(this);
+	}
 }
 
 void Model::onHide() {
-	scene()->getRenderer(RendererType::model)->as<ModelRenderer>()->remove(this);
+	if (m_skinned) {
+		scene()->getRenderer(RendererType::skinnedModel)->as<SkinnedModelRenderer>()->remove(this);
+	} else {
+		scene()->getRenderer(RendererType::model)->as<ModelRenderer>()->remove(this);
+	}
 }
 
 void Model::animate(uint32_t index, float time, AnimationMode mode) {
@@ -70,7 +88,7 @@ void Model::animate(uint32_t index, float time, AnimationMode mode) {
 	}
 
 	for (auto seq : anim->sequences) {
-		auto bone = m_bones[seq->boneIndex];
+		auto bone = m_bones[seq->bone];
 
 		auto pos = seq->evaluatePosition(time, bone->localMatrix().t);
 		auto rot = seq->evaluateRotation(time, Quatf::rotation(bone->localMatrix().r));
@@ -78,6 +96,10 @@ void Model::animate(uint32_t index, float time, AnimationMode mode) {
 
 		auto matrix = AffineMat4f::translation(pos) * AffineMat4f{Mat3f::rotation(rot), {}} * AffineMat4f::scale(scl);
 		bone->setLocalMatrix(matrix);
+	}
+
+	for (int i = 0; i < m_joints.size(); ++i) {
+		m_jointMatrices[i] = m_bones[m_joints[i].bone]->worldMatrix() * m_joints[i].inverseBindMatrix;
 	}
 }
 

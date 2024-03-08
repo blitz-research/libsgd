@@ -19,22 +19,9 @@ template <class T> Vec4<T> Vec4<T>::rgba(uint32_t rgba) {
 	return {T(rgba & 255) * sc, T((rgba >> 8) & 255) * sc, T((rgba >> 16) & 255) * sc, T(rgba >> 24) * sc};
 }
 
-template<class T> T* Vec4<T>::data() {
-	return &x;
-}
 
-template<class T> const T* Vec4<T>::data() const {
-	return &x;
-}
-
-template<class T> T& Vec4<T>::operator[](size_t index) {
-	SGD_ASSERT(index<4);
-	return data()[index];
-}
-
-template<class T> const T& Vec4<T>::operator[](size_t index) const {
-	SGD_ASSERT(index<4);
-	return data()[index];
+template<class T> Vec4<T>::operator Vec3<T>() const {
+	return {x,y,z};
 }
 
 // ***** Non-members *****
@@ -113,8 +100,9 @@ template <class T> std::ostream& operator<<(std::ostream& str, CVec4<T>& v) {
 	return str << '(' << v.x << ',' << v.y << ',' << v.z << ',' << v.w << ')';
 }
 
-template<class T> uint32_t rgba(CVec4<T> color) {
-	return (uint8_t(color.w * 255)<<24) | (uint8_t(color.z * 255)<<16) | (uint8_t(color.y * 255)<<8) | uint8_t(color.x * 255);
+template <class T> uint32_t rgba(CVec4<T> color) {
+	return (uint8_t(color.w * 255) << 24) | (uint8_t(color.z * 255) << 16) | (uint8_t(color.y * 255) << 8) |
+		   uint8_t(color.x * 255);
 }
 
 } // namespace sgd

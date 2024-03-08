@@ -62,7 +62,6 @@ void Buffer::onValidate(GraphicsContext* gc) const {
 			{BufferType::instance, wgpu::BufferUsage::Vertex}, //
 			{BufferType::indirect, wgpu::BufferUsage::Indirect},
 		};
-
 		wgpu::BufferDescriptor desc{};
 		desc.usage = usages.find(m_type)->second | wgpu::BufferUsage::CopyDst;
 		desc.size = m_size;
@@ -74,6 +73,7 @@ void Buffer::onValidate(GraphicsContext* gc) const {
 	} else if (m_dirtyEnd > m_dirtyBegin) {
 
 		SGD_ASSERT(m_dirtyBegin < m_size && m_dirtyEnd <= m_size);
+//		log() << "### Updating buffer bytes" << m_dirtyEnd - m_dirtyBegin;
 		gc->wgpuDevice().GetQueue().WriteBuffer(m_wgpuBuffer, m_dirtyBegin, m_data + m_dirtyBegin, m_dirtyEnd - m_dirtyBegin);
 	}
 

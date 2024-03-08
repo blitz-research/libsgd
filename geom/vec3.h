@@ -19,14 +19,10 @@ template <class T> struct Vec3 {
 	constexpr Vec3() = default;
 	constexpr explicit Vec3(T s);
 	template <class C> constexpr explicit Vec3(const Vec3<C>& v);
-	constexpr Vec3(CVec2<T> v,float z);
+	constexpr Vec3(CVec2<T> v, float z);
 	constexpr Vec3(T x, T y, T z);
 
-	T* data();
-	const T* data() const;
-
-	T& operator[](size_t index);
-	const T& operator[](size_t index) const;
+	Vec2<T> xy() const;
 
 	Vec3& operator*=(CVec3<T> v);
 	Vec3& operator/=(CVec3<T> v);

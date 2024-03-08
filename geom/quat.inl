@@ -133,6 +133,7 @@ template <class T> Quat<T> slerp(CQuat<T> q, CQuat<T> r, float alpha) {
 		t.w = -t.w;
 		d = -d;
 	}
+
 	if (d < 1 - epsilon) {
 		float om = std::acos(d);
 		float si = std::sin(om);

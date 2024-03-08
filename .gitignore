@@ -6,6 +6,7 @@ assets
 
 # Default CLion output dir
 cmake-build-*
+cmake-install-*
 
 # CLion config
 .idea

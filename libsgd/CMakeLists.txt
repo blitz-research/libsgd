@@ -21,6 +21,9 @@ target_include_directories(libsgd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(libsgd window graphics)
 
+if (SGD_INSTALL_DIR)
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/sgd DESTINATION include)
+endif ()
 
 ##### libsgd_static *****
 
@@ -118,6 +121,10 @@ function(create_bundled_lib output_lib input_lib)
 
     add_custom_target(${output_lib} DEPENDS ${output_file})
 
+    if (SGD_INSTALL_DIR)
+        install(FILES ${output_file} DESTINATION lib/${SGD_INSTALL_DIR})
+    endif ()
+
 endfunction()
 
 if (NOT SGD_OS_EMSCRIPTEN)
@@ -126,12 +133,13 @@ if (NOT SGD_OS_EMSCRIPTEN)
 
 endif ()
 
-
 ##### libsgd_dynamic #####
 
 if (NOT SGD_OS_EMSCRIPTEN)
 
     add_library(libsgd_dynamic SHARED ${LIBSGD_SOURCES})
+
+#    set_target_properties(libsgd_dynamic PROPERTIES OUTPUT_NAME sgd_dynamic)
 
     target_include_directories(libsgd_dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -139,9 +147,12 @@ if (NOT SGD_OS_EMSCRIPTEN)
 
     target_link_libraries(libsgd_dynamic window graphics)
 
+    if (SGD_INSTALL_DIR)
+        install(TARGETS libsgd_dynamic DESTINATION lib/${SGD_INSTALL_DIR})
+    endif ()
+
     add_subdirectory(python)
 
 endif ()
-
 
 add_subdirectory(tests)

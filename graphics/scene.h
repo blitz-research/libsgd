@@ -17,6 +17,8 @@ SGD_SHARED(Scene);
 enum struct RendererType {
 	skybox,
 	model,
+	skinnedModel,
+	//8 MAX!
 };
 
 struct Scene : Shared {

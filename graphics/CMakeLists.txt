@@ -51,6 +51,10 @@ add_library(graphics
         renderqueue.h
         scene.cpp
         scene.h
+        skinnedmeshrenderer.cpp
+        skinnedmeshrenderer.h
+        skinnedmodelrenderer.cpp
+        skinnedmodelrenderer.h
         skybox.cpp
         skybox.h
         skyboxrenderer.cpp
@@ -63,6 +67,7 @@ add_library(graphics
         shaders/meshrenderer.wgsl
         shaders/pbrmaterial.wgsl
         shaders/scene.wgsl
+        shaders/skinnedmeshrenderer.wgsl
         shaders/skyboxrenderer.wgsl
         shaders/uniforms.h
 

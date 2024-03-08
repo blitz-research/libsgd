@@ -3,8 +3,15 @@
 #include "mesh.h"
 #include "renderer.h"
 
+#include "shaders/uniforms.h"
+
 namespace sgd {
 
+// @location(8) matrix_0: vec4f,
+// @location(9) matrix_1: vec4f,
+// @location(10) matrix_2: vec4f,
+// @location(11) matrix_3: vec4f,
+// @location(12) color: vec4f,
 struct MeshInstance {
 	Mat4f matrix;
 	Vec4f color;

@@ -15,15 +15,23 @@ void SGD_DECL start() {
 	sgd_SetSkyboxTexture(skybox, skyTexture);
 	sgd_SetSkyboxRoughness(skybox, .25f);
 
+	SGD_Camera camera = sgd_CreateCamera();
+	sgd_MoveEntity(camera, 0, 1, -5);
+
+#if 0
 	SGD_Mesh mesh = sgd_LoadMesh("barramundi.glb");
 	sgd_FitMesh(mesh, -1,-1,-1,1,1,1,1);
 
 	SGD_Model model = sgd_CreateModel();
-	sgd_MoveEntity(model, 0, 0, 3);
 	sgd_SetModelMesh(model, mesh);
+	sgd_MoveEntity(model, 0, 0, 3);
+#endif
+
+	SGD_Model model = sgd_LoadBonedModel("cesiumman.glb", SGD_TRUE);
+	//	sgd_MoveEntity(model, 0,-1.5,6);
 
 	SGD_Light light = sgd_CreateLight();
-	sgd_MoveEntity(light, 0, 1.5, 0);
+	sgd_MoveEntity(light, 0, 0, -5);
 	sgd_SetLightRange(light, 10);
 
 	puts("Entering render loop");
@@ -32,6 +40,9 @@ void SGD_DECL start() {
 		if (sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) break;
 
 		sgd_TurnEntity(model, 0, .01, 0);
+
+		static float time;
+		sgd_AnimateModel(model, 0, time += .01f, SGD_ANIMATION_MODE_LOOP);
 
 		sgd_RenderScene();
 

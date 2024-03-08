@@ -13,24 +13,6 @@ template <class T> constexpr Vec2<T>::Vec2(T x, T y) : x(x), y(y) {
 template <class T> template <class C> constexpr Vec2<T>::Vec2(CVec2<C>& v) : x(T(v.x)), y(T(v.y)) {
 }
 
-template <class T> T* Vec2<T>::data() {
-	return &x;
-}
-
-template <class T> const T* Vec2<T>::data() const {
-	return &x;
-}
-
-template <class T> T& Vec2<T>::operator[](size_t index) {
-	SGD_ASSERT(index < 2);
-	return data()[index];
-}
-
-template <class T> const T& Vec2<T>::operator[](size_t index) const {
-	SGD_ASSERT(index < 2);
-	return data()[index];
-}
-
 template <class T> Vec2<T>& Vec2<T>::operator*=(CVec2<T> v) {
 	return *this = *this * v;
 }

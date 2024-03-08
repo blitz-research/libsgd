@@ -10,12 +10,13 @@
 #include "emscripten/threading.h"
 #endif
 
-
 // Note: Must use unique_lock for condvars
 
 namespace sgd {
 
 namespace {
+
+struct Die {};
 
 struct AppEvent {
 	AppEventFunc func;
@@ -42,12 +43,16 @@ void waitEvent() {
 	AppEvent event;
 	{
 		std::unique_lock<std::mutex> lock(g_dequeMutex);
+		if(!g_running) return;
+		//
 		g_enqueuedCV.wait(lock, [] { return !g_deque.empty(); });
 		event = g_deque.front();
 	}
 	event.func();
 	{
 		std::lock_guard<std::mutex> lock(g_dequeMutex);
+		if(!g_running) return;
+		//
 		g_deque.pop_front();
 		++g_dispatched;
 	}
@@ -64,6 +69,8 @@ void runOnMainThread(AppEventFunc func, bool sync) {
 	size_t enqueued;
 	{
 		std::lock_guard<std::mutex> lock(g_dequeMutex);
+		if(!g_running) return;
+		//
 		g_deque.emplace_back(std::move(func), sync);
 		enqueued = ++g_enqueued;
 	}
@@ -75,6 +82,8 @@ void runOnMainThread(AppEventFunc func, bool sync) {
 
 	if (sync) {
 		std::unique_lock<std::mutex> lock(g_dequeMutex);
+		if(!g_running) return;
+		//
 		g_dispatchedCV.wait(lock, [=] { return g_dispatched >= enqueued; });
 	}
 }
@@ -89,6 +98,11 @@ void beginAppEventLoop() {
 	unreachable();
 
 #else
+
+	std::atexit([] {
+//		log() << "### atexit!!!!!";
+		g_running = false;
+	});
 
 	while (g_running) {
 		waitEvent();

@@ -10,6 +10,9 @@ template <class T> using CVec4 = const Vec4<T>&;
 using Vec4f = Vec4<float>;
 using CVec4f = CVec4<float>;
 
+using Vec4u = Vec4<uint32_t>;
+using CVec4u = CVec4<uint32_t>;
+
 template <class T> struct Vec4 {
 
 	T x{};
@@ -25,12 +28,6 @@ template <class T> struct Vec4 {
 
 	static Vec4 rgba(uint32_t rgba);
 
-	T* data();
-	const T* data() const;
-
-	T& operator[](size_t index);
-	const T& operator[](size_t index) const;
-
 	Vec4& operator*=(CVec4<T> v);
 	Vec4& operator/=(CVec4<T> v);
 	Vec4& operator+=(CVec4<T> v);
@@ -40,6 +37,8 @@ template <class T> struct Vec4 {
 	Vec4& operator/=(T s);
 	Vec4& operator+=(T s);
 	Vec4& operator-=(T s);
+
+	explicit operator Vec3<T>() const;
 };
 
 template <class T> Vec4<T> operator-(CVec4<T> v);

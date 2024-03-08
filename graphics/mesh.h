@@ -11,6 +11,8 @@ struct Vertex {
 	Vec4f tangent;
 	Vec2f texCoords;
 	Vec4f color{1};
+	uint8_t joints[4]{};
+	float weights[4]{};
 
 	Vertex() = default;
 

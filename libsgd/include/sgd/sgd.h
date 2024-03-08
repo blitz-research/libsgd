@@ -38,6 +38,15 @@ typedef SGD_Handle SGD_Light;
 typedef SGD_Handle SGD_Model;
 typedef SGD_Handle SGD_Skybox;
 
+#define SGD_TRUE 1
+#define SGD_FALSE 0
+
+#define SGD_PI 3.14159265359f;
+#define SGD_TWO_PI 6.28318530718f;
+#define SGD_HALF_PI 1.5707963268f;
+#define SGD_DEGREES_TO_RADIANS = .01745329252f;
+#define SGD_RADIANS_TO_DEGREES = 57.295779513f;
+
 // ***** System *****
 
 // Returned by sgd_PollEvents.
@@ -97,7 +106,7 @@ SGD_API SGD_Material SGD_DECL sgd_LoadMaterial(SGD_String path);
 SGD_API SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path);
 SGD_API SGD_Mesh SGD_DECL sgd_CreateBoxMesh(float minX, float minY, float minZ, float maxX, float maxY, float maxZ, SGD_Material material);
 SGD_API SGD_Mesh SGD_DECL sgd_CreateSphereMesh(float radius, int xSegs, int ySegs, SGD_Material material);
-SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh mesh, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, int uniform);
+SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh mesh, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, SGD_Bool uniform);
 SGD_API void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
 
 // ***** Skybox *****
@@ -108,16 +117,24 @@ SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox skybox, float roughness)
 
 // ***** Model *****
 
+// Used by sgd_AnimateModel
 #define SGD_ANIMATION_MODE_ONESHOT 0
 #define SGD_ANIMATION_MODE_LOOP 1
 #define SGD_ANIMATION_MODE_PINGPONG 2
 
 SGD_API SGD_Model SGD_DECL sgd_LoadModel(SGD_String path);
-SGD_API SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path);
+SGD_API SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path, SGD_Bool skinned);
 SGD_API SGD_Model SGD_DECL sgd_CreateModel();
 SGD_API void SGD_DECL sgd_SetModelMesh(SGD_Model model, SGD_Mesh mesh);
 SGD_API void SGD_DECL sgd_SetModelColor(SGD_Model model, float red, float green, float blue, float alpha);
 SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float time, int mode);
+
+// ***** Camera *****
+
+SGD_API SGD_Camera SGD_DECL sgd_CreateCamera();
+SGD_API void SGD_DECL sgd_SetCameraFovY(SGD_Camera camera, float fovY);
+SGD_API void SGD_DECL sgd_SetCameraNear(SGD_Camera camera, float near);
+SGD_API void SGD_DECL sgd_SetCameraFar(SGD_Camera camera, float far);
 
 // ***** Light *****
 

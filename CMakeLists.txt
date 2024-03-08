@@ -160,6 +160,22 @@ function(copy_assets_to_binary_dir target)
 
 endfunction()
 
+# CMake install setup
+if (SGD_CONFIG_RELEASE AND NOT SGD_OS_EMSCRIPTEN)
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/cmake-install-release)
+    if (SGD_OS_WINDOWS)
+        set(SGD_INSTALL_DIR windows)
+    elseif (SGD_OS_LINUX)
+        set(SGD_INSTALL_DIR linux)
+    endif ()
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SGD_INSTALL_EXT x64)
+    else ()
+        set(SGD_INSTALL_EXT x86)
+    endif ()
+    set(SGD_INSTALL_DIR ${SGD_INSTALL_DIR}-${SGD_INSTALL_EXT})
+endif ()
+
 add_subdirectory(external)
 
 add_subdirectory(core)          #

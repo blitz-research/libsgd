@@ -26,12 +26,6 @@ template <class T> struct Vec2 {
 	template <class C> constexpr explicit Vec2(const Vec2<C>& v);
 	constexpr Vec2(T x, T y);
 
-	T* data();
-	const T* data() const;
-
-	T& operator[](size_t index);
-	const T& operator[](size_t index) const;
-
 	Vec2& operator*=(CVec2<T> v);
 	Vec2& operator/=(CVec2<T> v);
 	Vec2& operator+=(CVec2<T> v);
