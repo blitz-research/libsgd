@@ -15,7 +15,7 @@ wgpu::VertexAttribute vertexBufferAttribs[]{
 	{wgpu::VertexFormat::Float32x4, 24, 2}, // Vec4f tangent
 	{wgpu::VertexFormat::Float32x2, 40, 3}, // Vec2f texCoords0
 	{wgpu::VertexFormat::Float32x4, 48, 4}, // Vec4f color
-	{wgpu::VertexFormat::Uint32, 64, 5},	// uint8_t joints[4]
+	{wgpu::VertexFormat::Uint8x4, 64, 5},	// uint8_t joints[4]
 	{wgpu::VertexFormat::Float32x4, 68, 6}, // float weights[4];
 };
 static_assert(sizeof(Vertex) == 84);

@@ -16,3 +16,7 @@ out
 
 # MSVC config
 .vs
+
+html
+Doxyfile
+doxypress.json

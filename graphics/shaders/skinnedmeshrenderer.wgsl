@@ -22,8 +22,7 @@ struct Vertex {
 	@location(2) tangent: vec4f,
 	@location(3) texCoords: vec2f,
 	@location(4) color: vec4f,
-	@location(5) joints: u32,
-	//vec4u,
+	@location(5) joints: vec4u,
 	@location(6) weights: vec4f,
 };
 
@@ -42,7 +41,7 @@ struct Varying {
 
     let instance = &skinnedMeshInstances[instanceId];
 
-    let joints = unpack4xU8(vertex.joints);
+    let joints = vertex.joints;
 
     let weights = vertex.weights;
 

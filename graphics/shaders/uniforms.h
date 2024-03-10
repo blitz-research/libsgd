@@ -20,28 +20,42 @@ struct alignas(16) CameraUniforms {
 // @group(0) @binding(3) var lighting_envSampler: sampler;
 struct alignas(16) LightingUniforms {
 
-	static constexpr int maxPointLights = 16;
-	static constexpr int maxDirectionalLights = 4;
+	struct alignas(16) DirectionalLight {
+		alignas(16) Vec3f direction{0, 0, -1};	// -forward
+		alignas(16) Vec4f color{1};
+	};
 
 	struct alignas(16) PointLight {
-		Vec4f position{0, 0, 0, 1};
-		Vec4f color{1};
+		alignas(16) Vec3f position{0, 0, 0};
+		alignas(16) Vec4f color{1};
 		float range{100};
 		float falloff{1};
 	};
 
-	struct alignas(16) DirectionalLight {
-		Vec4f direction{0, 0, 1, 0};
-		Vec4f color{1};
+	struct alignas(16) SpotLight {
+		alignas(16) Vec3f position{0, 0, 0};
+		alignas(16) Vec3f direction{0,0,0};
+		alignas(16) Vec4f color{1};
+		float range{100};
+		float falloff{1};
+		float innerConeAngle{0};
+		float outerConeAngle{halfPi};	// 45 degrees
 	};
+
+	static constexpr int maxDirectionalLights = 4;
+	static constexpr int maxPointLights = 8;
+	static constexpr int maxSpotLights = 8;
 
 	Vec4f ambientLightColor{1, 1, 1, .1};
 
-	uint32_t pointLightCount{0};
-	PointLight pointLights[maxPointLights];
-
 	uint32_t directionalLightCount{};
 	DirectionalLight directionalLights[maxDirectionalLights];
+
+	uint32_t pointLightCount{};
+	PointLight pointLights[maxPointLights];
+
+	uint32_t spotLightCount{};
+	SpotLight spotLights[maxSpotLights];
 };
 
 // @group(1) @binding(0) var<uniform> material_uniforms: MaterialUniforms;

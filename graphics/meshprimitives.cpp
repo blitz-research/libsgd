@@ -39,8 +39,8 @@ Mesh* createBoxMesh(CBoxf box, Material* material) {
 		vertices.emplace_back(verts[faces[i + 1]], norm, Vec2f(1, 0));
 		vertices.emplace_back(verts[faces[i + 2]], norm, Vec2f(1, 1));
 		vertices.emplace_back(verts[faces[i + 3]], norm, Vec2f(0, 1));
-		triangles.emplace_back(i, i + 1, i + 2);
-		triangles.emplace_back(i, i + 2, i + 3);
+		triangles.emplace_back(i, i + 2, i + 1);
+		triangles.emplace_back(i, i + 3, i + 2);
 	}
 
 	return createMesh(std::move(vertices), std::move(triangles), material);

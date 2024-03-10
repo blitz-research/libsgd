@@ -3,10 +3,11 @@
 namespace sgd {
 
 Camera::Camera(const Camera* that)
-	: Entity(that),		//
+	: Entity(that),		  //
 	  fovY(that->fovY()), //
 	  near(that->near()), //
-	  far(that->far()) {
+	  far(that->far()),	  //
+	  m_type(that->m_type) {
 }
 
 Entity* Camera::onCopy() const {

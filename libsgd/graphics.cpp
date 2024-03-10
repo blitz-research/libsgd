@@ -197,10 +197,20 @@ void SGD_DECL sgd_SetModelColor(SGD_Model hmodel, float red, float green, float 
 
 // ***** Camera *****
 
-SGD_Camera SGD_DECL sgd_CreateCamera() {
+SGD_Camera SGD_DECL sgd_CreatePerspectiveCamera() {
 	if (!sgd::mainScene) sgd::error("Scene has not been created");
 
-	auto camera = new sgd::Camera();
+	auto camera = new sgd::Camera(sgd::CameraType::perspective);
+
+	sgd::mainScene->add(camera);
+
+	return createHandle(camera);
+}
+
+SGD_Camera SGD_DECL sgd_CreateOrthographicCamera() {
+	if (!sgd::mainScene) sgd::error("Scene has not been created");
+
+	auto camera = new sgd::Camera(sgd::CameraType::orthographic);
 
 	sgd::mainScene->add(camera);
 
@@ -227,10 +237,30 @@ void SGD_DECL sgd_SetCameraFar(SGD_Camera hcamera, float far) {
 
 // ***** Light *****
 
-SGD_Light SGD_DECL sgd_CreateLight() {
+SGD_Light SGD_DECL sgd_CreateDirectionalLight() {
 	if (!sgd::mainScene) sgd::error("Scene has not been created");
 
-	auto light = new sgd::Light();
+	auto light = new sgd::Light(sgd::LightType::directional);
+
+	sgd::mainScene->add(light);
+
+	return sgd::createHandle(light);
+}
+
+SGD_Light SGD_DECL sgd_CreatePointLight() {
+	if (!sgd::mainScene) sgd::error("Scene has not been created");
+
+	auto light = new sgd::Light(sgd::LightType::point);
+
+	sgd::mainScene->add(light);
+
+	return sgd::createHandle(light);
+}
+
+SGD_Light SGD_DECL sgd_CreateSpotLight() {
+	if (!sgd::mainScene) sgd::error("Scene has not been created");
+
+	auto light = new sgd::Light(sgd::LightType::spot);
 
 	sgd::mainScene->add(light);
 
@@ -255,6 +285,18 @@ void SGD_DECL sgd_SetLightFalloff(SGD_Light hlight, float falloff) {
 	light->falloff = falloff;
 }
 
+void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light hlight, float angle) {
+	auto light = sgd::resolveHandle<sgd::Light>(hlight);
+
+	light->innerConeAngle = angle;
+}
+
+void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light hlight, float angle) {
+	auto light = sgd::resolveHandle<sgd::Light>(hlight);
+
+	light->outerConeAngle = angle;
+}
+
 // ***** Entity *****
 
 SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
@@ -275,7 +317,7 @@ SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity hentity, float tx, float 
 SGD_API void SGD_DECL sgd_SetEntityRotation(SGD_Entity hentity, float rx, float ry, float rz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
-	setRotation(entity, {rx, ry, rz});
+	setRotation(entity, {rx * sgd::degreesToRadians, ry * sgd::degreesToRadians, rz * sgd::degreesToRadians});
 }
 
 void SGD_DECL sgd_MoveEntity(SGD_Entity hentity, float tx, float ty, float tz) {
@@ -287,7 +329,7 @@ void SGD_DECL sgd_MoveEntity(SGD_Entity hentity, float tx, float ty, float tz) {
 void SGD_DECL sgd_TurnEntity(SGD_Entity hentity, float rx, float ry, float rz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
-	turn(entity, {rx, ry, rz});
+	turn(entity, {rx * sgd::degreesToRadians, ry * sgd::degreesToRadians, rz * sgd::degreesToRadians});
 }
 
 SGD_API void SGD_DECL sgd_TranslateEntity(SGD_Entity hentity, float tx, float ty, float tz) {
@@ -299,5 +341,5 @@ SGD_API void SGD_DECL sgd_TranslateEntity(SGD_Entity hentity, float tx, float ty
 SGD_API void SGD_DECL sgd_RotateEntity(SGD_Entity hentity, float rx, float ry, float rz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
-	rotate(entity, {rx, ry, rz});
+	rotate(entity, {rx * sgd::degreesToRadians, ry * sgd::degreesToRadians, rz * sgd::degreesToRadians});
 }

@@ -31,8 +31,8 @@ void Scene::add(Entity* entity) {
 
 	entity->m_scene = this;
 	entity->onCreate();
-	if(entity->enabled()) entity->onEnable();
-	if(entity->visible()) entity->onShow();
+	if (entity->enabled()) entity->onEnable();
+	if (entity->visible()) entity->onShow();
 
 	for (auto child : entity->children()) add(child);
 }
@@ -73,7 +73,7 @@ void Scene::updateCameraUniforms() const {
 	auto aspect = (float)m_gc->colorBuffer()->size().x / (float)m_gc->colorBuffer()->size().y;
 
 	if (m_cameras.empty()) {
-		auto curs = m_gc->window()->cursorPos() / Vec2f(m_gc->window()->size());
+		auto curs = m_gc->window()->mouse()->position() / Vec2f(m_gc->window()->size());
 
 		curs = curs * Vec2f(twoPi, pi) - Vec2f(pi, halfPi);
 
@@ -105,18 +105,42 @@ void Scene::updateLightingUniforms() const {
 	LightingUniforms uniforms;
 	uniforms.ambientLightColor = ambientLightColor();
 
-	int i = 0;
 	for (auto light : m_lights) {
 		if (!light->visible()) continue;
 
-		uniforms.pointLights[i].position = Vec4f(light->worldMatrix().t, 1);
-		uniforms.pointLights[i].color = light->color();
-		uniforms.pointLights[i].range = light->range();
-		uniforms.pointLights[i].falloff = light->falloff();
-		if (++i == uniforms.maxPointLights) break;
+		switch (light->type()) {
+		case LightType::directional: {
+			if (uniforms.directionalLightCount == uniforms.maxDirectionalLights) break;
+			auto& ulight = uniforms.directionalLights[uniforms.directionalLightCount++];
+			ulight.direction = -light->worldMatrix().r.k;
+			ulight.color = light->color();
+			break;
+		}
+		case LightType::point: {
+			if (uniforms.pointLightCount == uniforms.maxPointLights) break;
+			auto& ulight = uniforms.pointLights[uniforms.pointLightCount++];
+			ulight.position = light->worldMatrix().t;
+			ulight.color = light->color();
+			ulight.range = light->range();
+			ulight.falloff = light->falloff();
+			break;
+		}
+		case LightType::spot: {
+			if (uniforms.spotLightCount == uniforms.maxSpotLights) break;
+			auto& ulight = uniforms.spotLights[uniforms.spotLightCount++];
+			ulight.position = light->worldMatrix().t;
+			ulight.direction = -light->worldMatrix().r.k;
+			ulight.color = light->color();
+			ulight.range = light->range();
+			ulight.falloff = light->falloff();
+			ulight.innerConeAngle = light->innerConeAngle() * degreesToRadians;
+			ulight.outerConeAngle = light->outerConeAngle() * degreesToRadians;
+			break;
+		}
+		case LightType::undefined:
+			SGD_ABORT();
+		}
 	}
-	uniforms.pointLightCount = i;
-
 	m_gc->bindGroup0()->getBuffer(1)->update(&uniforms, 0, sizeof(uniforms));
 	m_gc->bindGroup0()->setTexture(2, envTexture());
 }

@@ -6,6 +6,13 @@ namespace sgd {
 
 SGD_SHARED(Light);
 
+enum struct LightType {
+	undefined,
+	directional,
+	point,
+	spot,
+};
+
 struct Light : Entity {
 	SGD_OBJECT_TYPE(Light, Entity);
 
@@ -13,11 +20,22 @@ struct Light : Entity {
 
 	explicit Light(const Light* that);
 
-	Property<Vec4f> color{Vec4f(1, 1, 1, 1)};
+	explicit Light(LightType type) : m_type(type) {
+	}
+
+	LightType type() const {
+		return m_type;
+	}
+
+	Property<Vec4f> color{Vec4f(1)};
 	Property<float> range{25};
 	Property<float> falloff{1};
+	Property<float> innerConeAngle{0};
+	Property<float> outerConeAngle{45};
 
 private:
+	LightType m_type{LightType::directional};
+
 	Light* onCopy() const override;
 };
 

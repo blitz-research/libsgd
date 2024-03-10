@@ -1,5 +1,9 @@
 #include "window.h"
 
+#include "gamepad.h"
+#include "keyboard.h"
+#include "mouse.h"
+
 #include <GLFW/glfw3.h>
 
 #if SGD_OS_WINDOWS
@@ -51,7 +55,9 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 			auto monitor = bool(flags & WindowFlags::fullscreen) ? glfwGetPrimaryMonitor() : nullptr;
 
 			m_glfwWindow = glfwCreateWindow(size.x, size.y, title.c_str(), monitor, nullptr);
+
 			glfwSetWindowUserPointer(m_glfwWindow, this);
+
 			{
 				glfwSetWindowSizeCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, int w, int h) {
 					auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
@@ -63,21 +69,16 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 				m_size = Vec2u(w, h);
 			}
 			{
-				glfwSetCursorPosCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, double x, double y) {
-					auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
-					window->m_cursorPos = Vec2f(x, y);
-					window->cursorPosChanged.emit(window->m_cursorPos);
-				});
-				double x, y;
-				glfwGetCursorPos(m_glfwWindow, &x, &y);
-				m_cursorPos = Vec2f(x, y);
-			}
-			{
 				glfwSetWindowCloseCallback(m_glfwWindow, [](GLFWwindow* glfwWindow) {
 					auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
 					window->closeClicked.emit();
 				});
 			}
+			m_keyboard = new Keyboard(m_glfwWindow);
+
+			m_mouse = new Mouse(m_glfwWindow);
+
+			Gamepad::createGamepads();
 		},
 		true);
 	SGD_ASSERT(m_glfwWindow);
@@ -86,7 +87,7 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 Window::~Window() {
 	runOnMainThread(
 		[=] {
-			//SGD_ASSERT(!m_glfwWindow);
+			// SGD_ASSERT(!m_glfwWindow);
 			close();
 		},
 		true);
@@ -103,6 +104,12 @@ bool Window::pollEvents() {
 			if (size != m_size) sizeChanged.emit((m_size = size));
 #endif
 			glfwPollEvents();
+
+			m_keyboard->update();
+			m_mouse->update();
+
+			Gamepad::updateGamepads();
+
 			result = !glfwWindowShouldClose(m_glfwWindow);
 		},
 		true);
@@ -119,6 +126,10 @@ void Window::close() {
 			m_glfwWindow = nullptr;
 		},
 		true);
+}
+
+Window* Window::getWindow(GLFWwindow* glfwWindow) {
+	return static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
 }
 
 } // namespace sgd
