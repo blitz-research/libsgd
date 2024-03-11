@@ -39,8 +39,8 @@ SGD_Model loadModel(BBStr* path) {
 	return model;
 }
 
-SGD_Model loadBonedModel(BBStr* path) {
-	auto model = sgd_LoadBonedModel(path->c_str());
+SGD_Model loadBonedModel(BBStr* path,int skinned) {
+	auto model = sgd_LoadBonedModel(path->c_str(), skinned);
 	delete path;
 
 	return model;
@@ -63,6 +63,19 @@ bool sgd_link( void (*rtSym)( const char *sym, void *pc ) ){
     // Window
     rtSym("CreateWindow%width%height$title%flags", createWindow);
     rtSym("%PollEvents", sgd_PollEvents);
+	rySym("%KeyDown%key",sgd_KeyDown);
+	rySym("%KeyHit%key",sgd_KeyDown);
+	rySym("%GetChar",sgd_GetChar);
+	rtSym("#MouseX", sgd_MouseX);
+	rtSym("#MouseY", sgd_MouseY);
+	rtSym("#MouseScrollX", sgd_MouseX);
+	rtSym("#MouseScrollY", sgd_MouseY);
+	rtSym("%MouseButtonDown%button",sgd_MouseButtonDown);
+	rtSym("%MouseButtonHit%button",sgd_MouseButtonHit);
+	rtSym("%GamepadConnected%gamepad",sgd_GamepadConnected);
+	rtSym("%GamepadButtonDown%gamepad%button",sgd_GamepadButtonDown);
+	rtSym("%GamepadButtonHit%gamepad%button",sgd_GamepadButtonHit);
+	rtSym("#GamepadAxis%gamepad%axis",sgd_GamepadAxis);
 
     // Scene
     rtSym("CreateScene", sgd_CreateScene);
@@ -81,34 +94,61 @@ bool sgd_link( void (*rtSym)( const char *sym, void *pc ) ){
 
     // Mesh
 	rtSym("%LoadMesh$path", loadMesh);
+	rtSym("%CreateBoxMesh#minX#minY#minZ#maxX#maxY#maxZ%material", sgd_CreateBoxMesh);
+	rtSym("%CreateSphereMesh#radius%hSegs%vSegs%material", sgd_CreateSphereMesh);
 	rtSym("FitMesh%mesh#minX#minY#minZ#maxX#maxY#maxZ%uniform", sgd_FitMesh);
     rtSym("TransformMeshTexCoords%mesh#scaleU#scaleV#offsetU#offsetV", sgd_TransformMeshTexCoords);
-    rtSym("%CreateBoxMesh#minX#minY#minZ#maxX#maxY#maxZ%material", sgd_CreateBoxMesh);
-    rtSym("%CreateSphereMesh#radius%hSegs%vSegs%material", sgd_CreateSphereMesh);
 
     // Skybox
+	rtSym("%LoadSkybox$path#roughness", sgd_LoadSkybox);
     rtSym("%CreateSkybox", sgd_CreateSkybox);
     rtSym("SetSkyboxTexture%skybox%texture", sgd_SetSkyboxTexture);
 	rtSym("SetSkyboxRoughness%skybox#roughness", sgd_SetSkyboxRoughness);
 
     // Model
 	rtSym("%LoadModel$path", loadModel);
-	rtSym("%LoadBonedModel$path", loadBonedModel);
+	rtSym("%LoadBonedModel$path%skinned", loadBonedModel);
 	rtSym("AnimateModel", sgd_AnimateModel);
     rtSym("%CreateModel", sgd_CreateModel);
     rtSym("SetModelMesh%model%mesh", sgd_SetModelMesh);
     rtSym("SetModelColor%model#red#green#blue#alpha", sgd_SetModelColor);
+	rtSym("AnimateModel%model%animation#time%mode", sgd_animateModel);
+
+	// Camera
+	rtSym("%CreatePerspectiveCamera", sgd_CreatePerspectiveCamera);
+	rtSym("%CreateOrthographicCamera", sgd_CreateOrthographicCamera);
+	rtSym("SetCameraFOV%camera#fov", sgd_SetCameraFOV);
+	rtSym("SetCameraNear%camera#near", sgd_SetCameraNear);
+	rtSym("SetCameraFar%camera#far", sgd_SetCameraFar);
 
     // Light
-    rtSym("%CreateLight", sgd_CreateLight);
+    rtSym("%CreateDirectionalLight", sgd_CreateDirectionalLight);
+    rtSym("%CreatePointLight", sgd_CreatePointLight);
+    rtSym("%CreateSpotLight", sgd_CreateSpotLight);
     rtSym("SetLightColor%light#red#green#blue#alpha", sgd_SetLightColor);
     rtSym("SetLightRange%light#range", sgd_SetLightRange);
     rtSym("SetLightFalloff%light#falloff", sgd_SetLightFalloff);
+	rtSym("SetLightInnerConeAngle%light#angle", sgd_SetLightInnerConeAngle);
+	rtSym("SetLightOuterConeAngle%light#angle", sgd_SetLightOuterConeAngle);
 
 	// Entity
 	rtSym("%CopyEntity%entity", sgd_CopyEntity);
-    rtSym("MoveEntity%entity#x#y#z", sgd_MoveEntity);
-    rtSym("TurnEntity%entity#pitch#yawy#roll", sgd_TurnEntity);
+	rtSym("SetEntityParent%entity%parent", sgd_SetEntityParent);
+	rtSym("%EntityParent%entity", sgd_EntityParent);
+
+	rtSym("SetEntityPosition%entity#x#y#z", sgd_SetEntityPosition);
+	rtSym("SetEntityRotation%entity#pitch#yaw#roll", sgd_SetEntityRotation);
+	rtSym("MoveEntity%entity#x#y#z", sgd_MoveEntity);
+	rtSym("TurnEntity%entity#pitch#yaw#roll", sgd_TurnEntity);
+	rtSym("TranslateEntity%entity#x#y#z", sgd_TranslateEntity);
+	rtSym("RotateEntity%entity#pitch#yaw#roll", sgd_RotateEntity);
+
+	rtSym("#EntityX%entity", sgd_EntityX);
+	rtSym("#EntityY%entity", sgd_EntityY);
+	rtSym("#EntityZ%entity", sgd_EntityZ);
+	rtSym("#EntityRX%entity", sgd_EntityRX);
+	rtSym("#EntityRY%entity", sgd_EntityRY);
+	rtSym("#EntityRZ%entity", sgd_EntityRZ);
 
     return true;
 }

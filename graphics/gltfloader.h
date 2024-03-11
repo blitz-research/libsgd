@@ -41,13 +41,13 @@ private:
 	void copyBufferData(const tinygltf::Accessor& accessor, void* dst, size_t dstPitch) const;
 	template <class T, class D> void copyBufferData(const tinygltf::Accessor& accessor, void* dst, size_t dstPitch) const;
 
-	void GLTFLoader::beginMesh();
-	Mesh* GLTFLoader::endMesh();
+	void beginMesh();
+	Mesh* endMesh();
 
 	void updateMesh(const tinygltf::Primitive& gltfPrim);
 	void updateMesh(const tinygltf::Mesh& gltfMesh);
 
-	Model* GLTFLoader::loadBones(const tinygltf::Node& gltfNode, Model* parent);
+	Model* loadBones(const tinygltf::Node& gltfNode, Model* parent);
 
 	void loadBones();
 	void loadAnimations();

@@ -23,59 +23,46 @@ bool same(float x, float y) {
 	return std::abs(x - y) <= epsilon;
 }
 
-bool same(CVec3f x, CVec3f y) {
-	for (auto i = 0; i < 3; ++i) {
-		if (same(x[i], y[i])) continue;
-		log() << "### OOPS:";
-		log() << "###" << x;
-		log() << "###" << y;
-		return false;
+bool same(const float* x, const float* y, int n) {
+	for (int i = 0; i < n; ++i) {
+		if (!same(x[i], y[i])) return false;
 	}
 	return true;
+}
+
+bool same(CVec3f x, CVec3f y) {
+	if (same(&x.x, &y.x, 3)) return true;
+	log() << "### OOPS:";
+	log() << "###" << x;
+	log() << "###" << y;
+	return false;
 }
 
 bool same(CVec4f x, CVec4f y) {
-	for (auto i = 0; i < 4; ++i) {
-		if (std::abs(x[i] - y[i]) <= epsilon) continue;
-		log() << "### OOPS:";
-		log() << "###" << x;
-		log() << "###" << y;
-		return false;
-	}
-	return true;
+	if (same(&x.x, &y.x, 4)) return true;
+	log() << "### OOPS:";
+	log() << "###" << x;
+	log() << "###" << y;
+	return false;
 }
 
 bool same(CMat3f x, CMat3f y) {
-	for (auto i = 0; i < 3; ++i) {
-		if (same(x[i], y[i])) continue;
-		log() << "### OOPS:";
-		log() << "###" << x;
-		log() << "###" << y;
-		return false;
-	}
-	return true;
-}
-
-bool same(CMat4f x, CMat4f y) {
-	for (auto i = 0; i < 4; ++i) {
-		if (same(x[i], y[i])) continue;
-		log() << "### OOPS:";
-		log() << "###" << x;
-		log() << "###" << y;
-		return false;
-	}
-	return true;
+	log() << "### OOPS:";
+	log() << "###" << x;
+	log() << "###" << y;
+	return false;
 }
 
 bool same(CAffineMat4f x, CAffineMat4f y) {
-	for (auto i = 0; i < 3; ++i) {
-		if (same(x.r[i], y.r[i])) continue;
-		log() << "### OOPS:";
-		log() << "###" << x;
-		log() << "###" << y;
-		return false;
-	}
-	if (same(x.t, y.t)) return true;
+	if (same(&x.r.i.x, &y.r.i.x, 12)) return true;
+	log() << "### OOPS:";
+	log() << "###" << x;
+	log() << "###" << y;
+	return false;
+}
+
+bool same(CMat4f x, CMat4f y) {
+	if (same(&x.i.x, &y.i.x, 16)) return true;
 	log() << "### OOPS:";
 	log() << "###" << x;
 	log() << "###" << y;
@@ -83,22 +70,13 @@ bool same(CAffineMat4f x, CAffineMat4f y) {
 }
 
 bool same(CQuatf x, CQuatf y) {
-	// Quats have a 'mirror'...
-	auto cmp = [=](CQuatf x, CQuatf y) {
-		const float* px = &x.v.x;
-		const float* py = &y.v.x;
-		for (auto i = 0; i < 4; ++i) {
-			if (std::abs(px[i] - py[i]) > epsilon) return false;
-		}
-		return true;
-	};
-	if (!cmp(x, y) && !cmp(x, Quatf(-y.v, -y.w))) {
-		log() << "### OOPS:";
-		log() << "###" << x;
-		log() << "###" << y;
-		return false;
-	}
-	return true;
+	if(same(&x.v.x, &y.v.x, 4)) return true;
+	Quatf ny(-y.v, -y.w);
+	if(same(&x.v.x, &ny.v.x, 4)) return true;
+	log() << "### OOPS:";
+	log() << "###" << x;
+	log() << "###" << y;
+	return false;
 }
 
 void testRotConversions() {
@@ -187,23 +165,21 @@ void testAffineMat4f() {
 
 void testRectf() {
 	log() << "Testing Rectf";
-	for (int i = 0; i < N; ++i) {
-	}
+	for (int i = 0; i < N; ++i) {}
 }
 
 void testVec2f() {
 	log() << "Testing Vec2f";
 	for (int i = 0; i < N; ++i) {
 
-		Vec2f v0 = Vec2f(rnd(.1f,1),rnd(.1f,1));
+		Vec2f v0 = Vec2f(rnd(.1f, 1), rnd(.1f, 1));
 		same(length(normalize(v0)), 1.0f);
 	}
 }
 
 void testBoxf() {
 	log() << "Testing Boxf";
-	for (int i = 0; i < N; ++i) {
-	}
+	for (int i = 0; i < N; ++i) {}
 }
 
 int main() {

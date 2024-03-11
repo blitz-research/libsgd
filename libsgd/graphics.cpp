@@ -106,6 +106,22 @@ void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh hmesh, float scaleX, float sca
 
 // ***** Skybox *****
 
+SGD_Skybox SGD_DECL sgd_LoadSkybox(SGD_String path, float roughness) {
+	if (!sgd::mainScene) sgd::error("Scene has not been created");
+
+	auto texture = sgd::loadTexture(sgd::Path(path), sgd::TextureFormat::srgba8,
+									sgd::TextureFlags::cube | sgd::TextureFlags::mipmap | sgd::TextureFlags::filter);
+	if (!texture) sgd::error("Failed to load texture", texture.error());
+
+	auto skybox = new sgd::Skybox();
+	skybox->skyTexture = texture.result();
+	skybox->roughness = roughness;
+
+	sgd::mainScene->add(skybox);
+
+	return sgd::createHandle(skybox);
+}
+
 SGD_Skybox SGD_DECL sgd_CreateSkybox() {
 	if (!sgd::mainScene) sgd::error("Scene has not been created");
 
@@ -308,13 +324,28 @@ SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
 	return createHandle(copy);
 }
 
-SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity hentity, float tx, float ty, float tz) {
+void SGD_DECL sgd_SetEntityParent(SGD_Entity hentity, SGD_Entity hparent) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+	auto parent = hparent ? sgd::resolveHandle<sgd::Entity>(hentity) : nullptr;
+
+	entity->setParent(parent);
+}
+
+SGD_Entity SGD_DECL sgd_EntityParent(SGD_Entity hentity) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	auto parent = entity->parent();
+
+	return parent ? sgd::getOrCreateHandle(parent) : 0;
+}
+
+void SGD_DECL sgd_SetEntityPosition(SGD_Entity hentity, float tx, float ty, float tz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
 	setPosition(entity, {tx, ty, tz});
 }
 
-SGD_API void SGD_DECL sgd_SetEntityRotation(SGD_Entity hentity, float rx, float ry, float rz) {
+void SGD_DECL sgd_SetEntityRotation(SGD_Entity hentity, float rx, float ry, float rz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
 	setRotation(entity, {rx * sgd::degreesToRadians, ry * sgd::degreesToRadians, rz * sgd::degreesToRadians});
@@ -332,14 +363,50 @@ void SGD_DECL sgd_TurnEntity(SGD_Entity hentity, float rx, float ry, float rz) {
 	turn(entity, {rx * sgd::degreesToRadians, ry * sgd::degreesToRadians, rz * sgd::degreesToRadians});
 }
 
-SGD_API void SGD_DECL sgd_TranslateEntity(SGD_Entity hentity, float tx, float ty, float tz) {
+void SGD_DECL sgd_TranslateEntity(SGD_Entity hentity, float tx, float ty, float tz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
 	translate(entity, {tx, ty, tz});
 }
 
-SGD_API void SGD_DECL sgd_RotateEntity(SGD_Entity hentity, float rx, float ry, float rz) {
+void SGD_DECL sgd_RotateEntity(SGD_Entity hentity, float rx, float ry, float rz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
 	rotate(entity, {rx * sgd::degreesToRadians, ry * sgd::degreesToRadians, rz * sgd::degreesToRadians});
+}
+
+float SGD_DECL sgd_EntityX(SGD_Entity hentity) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	return entity->worldMatrix().t.x;
+}
+
+float SGD_DECL sgd_EntityY(SGD_Entity hentity) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	return entity->worldMatrix().t.y;
+}
+
+float SGD_DECL sgd_EntityZ(SGD_Entity hentity) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	return entity->worldMatrix().t.z;
+}
+
+float SGD_DECL sgd_EntityRX(SGD_Entity hentity) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	return sgd::pitch(entity->worldMatrix().r);
+}
+
+float SGD_DECL sgd_EntityRY(SGD_Entity hentity) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	return sgd::yaw(entity->worldMatrix().r);
+}
+
+float SGD_DECL sgd_EntityRZ(SGD_Entity hentity) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	return sgd::roll(entity->worldMatrix().r);
 }

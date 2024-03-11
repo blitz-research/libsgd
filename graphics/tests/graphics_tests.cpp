@@ -76,7 +76,7 @@ void start() {
 
 		lighting.pointLightCount = 1;
 		lighting.ambientLightColor = {1, 1, 1, 0};
-		lighting.pointLights[0].position = {2.5, 2.5, -2.5, 1};
+		lighting.pointLights[0].position = {2.5, 2.5, -2.5};
 		lighting.pointLights[0].color = {1, 1, 1, 1};
 		lighting.pointLights[0].falloff = 1;
 		lighting.pointLights[0].range = 25;

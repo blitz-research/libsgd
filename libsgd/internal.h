@@ -41,6 +41,8 @@ SGD_Handle getHandle(HandleType type, Shared* shared);
 
 SGD_Handle createHandle(HandleType type, Shared* shared);
 
+SGD_Handle getOrCreateHandle(HandleType type, Shared* shared);
+
 Shared* resolveHandle(HandleType type, SGD_Handle handle);
 
 void releaseHandle(HandleType type, SGD_Handle handle);
@@ -53,13 +55,17 @@ template<class T> SGD_Handle createHandle(T* shared) {
 	return createHandle(handleType<T>(), shared);
 }
 
+template<class T> SGD_Handle getOrCreateHandle(T* shared) {
+	return createHandle(handleType<T>(), shared);
+}
+
 template<class T> T* resolveHandle(SGD_Handle handle) {
 	auto shared = resolveHandle(handleType<T>(), handle);
 	if(!shared) sgd_Error((sgd::String("Invalid ") + handleTypeName<T>() + " handle").c_str());
 	return shared->template as<T>();
 }
 
-template<class T> T* releaseHandle(SGD_Handle handle) {
+template<class T> void releaseHandle(SGD_Handle handle) {
 	releaseHandle(handleType<T>(), handle);
 }
 

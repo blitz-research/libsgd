@@ -49,8 +49,8 @@ void start() {
 	move(camera, {0,0,0});
 	scene->add(camera);
 
-	ModelPtr model = loadGLTFModel(Path("boxanim.glb")).result();
-//	ModelPtr model = loadGLTFModel(Path("gearbox.glb")).result();
+	ModelPtr model = loadBonedModel(Path("boxanim.glb")).result();
+//	ModelPtr model = loadStaticModel(Path("gearbox.glb")).result();
 
 //	ModelPtr model = new Model();
 //	auto mesh = loadGLTFMesh(Path("normaltangent.glb")).result();

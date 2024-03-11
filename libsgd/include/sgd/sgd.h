@@ -45,11 +45,11 @@ typedef SGD_Handle SGD_Skybox;
 #define SGD_TRUE 1
 #define SGD_FALSE 0
 
-#define SGD_PI 3.14159265359f;
-#define SGD_TWO_PI 6.28318530718f;
-#define SGD_HALF_PI 1.5707963268f;
-#define SGD_DEGREES_TO_RADIANS = .01745329252f;
-#define SGD_RADIANS_TO_DEGREES = 57.295779513f;
+#define SGD_PI 3.14159265359f
+#define SGD_TWO_PI 6.28318530718f
+#define SGD_HALF_PI 1.5707963268f
+#define SGD_DEGREES_TO_RADIANS .01745329252f
+#define SGD_RADIANS_TO_DEGREES 57.295779513f
 
 // ***** System *****
 
@@ -193,31 +193,40 @@ SGD_API void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh mesh, float scaleX, fl
 
 // ***** Skybox *****
 
+//! Load a skybox.
+SGD_API SGD_Skybox SGD_DECL sgd_LoadSkybox(SGD_String path, float roughness);
+
 //! Create a new skybox.
 SGD_API SGD_Skybox SGD_DECL sgd_CreateSkybox();
 
 //! Set skybox texture.
 SGD_API void SGD_DECL sgd_SetSkyboxTexture(SGD_Skybox skybox, SGD_Texture texture);
 
-//! Set skybox roughness in the ranmge 0 to 1.
+//! Set skybox roughness in the range 0 to 1.
 SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox skybox, float roughness);
 
 // ***** Model *****
 
 // Used by sgd_AnimateModel
-#define SGD_ANIMATION_MODE_ONESHOT 0
+#define SGD_ANIMATION_MODE_ONE_SHOT 0
 #define SGD_ANIMATION_MODE_LOOP 1
-#define SGD_ANIMATION_MODE_PINGPONG 2
+#define SGD_ANIMATION_MODE_PING_PONG 2
 
-//! Load a new model.
+//! Load a model.
 SGD_API SGD_Model SGD_DECL sgd_LoadModel(SGD_String path);
 
 //! Load a boned model.
 SGD_API SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path, SGD_Bool skinned);
 
+//! Create a new model.
 SGD_API SGD_Model SGD_DECL sgd_CreateModel();
+
+//! Set model mesh.
 SGD_API void SGD_DECL sgd_SetModelMesh(SGD_Model model, SGD_Mesh mesh);
+
+//! Set model color.
 SGD_API void SGD_DECL sgd_SetModelColor(SGD_Model model, float red, float green, float blue, float alpha);
+
 SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float time, int mode);
 
 // ***** Camera *****
@@ -242,11 +251,21 @@ SGD_API void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light light, float angle);
 // ***** Entity *****
 
 SGD_API SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity entity);
+SGD_API void SGD_DECL sgd_SetEntityParent(SGD_Entity entity, SGD_Entity parent);
+SGD_API SGD_Entity SGD_DECL sgd_EntityParent(SGD_Entity entity);
+
 SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity entity, float tx, float ty, float tz);
 SGD_API void SGD_DECL sgd_SetEntityRotation(SGD_Entity entity, float rx, float ry, float rz);
 SGD_API void SGD_DECL sgd_MoveEntity(SGD_Entity entity, float tx, float ty, float tz);
 SGD_API void SGD_DECL sgd_TurnEntity(SGD_Entity entity, float rx, float ry, float rz);
 SGD_API void SGD_DECL sgd_TranslateEntity(SGD_Entity entity, float tx, float ty, float tz);
-SGD_API void SGD_DECL sgd_RotateEntity(SGD_Entity entity, float tx, float ty, float tz);
+SGD_API void SGD_DECL sgd_RotateEntity(SGD_Entity entity, float rx, float ry, float rz);
+
+SGD_API float SGD_DECL sgd_EntityX(SGD_Entity entity);
+SGD_API float SGD_DECL sgd_EntityY(SGD_Entity entity);
+SGD_API float SGD_DECL sgd_EntityZ(SGD_Entity entity);
+SGD_API float SGD_DECL sgd_EntityRX(SGD_Entity entity);
+SGD_API float SGD_DECL sgd_EntityRY(SGD_Entity entity);
+SGD_API float SGD_DECL sgd_EntityRZ(SGD_Entity entity);
 
 #endif

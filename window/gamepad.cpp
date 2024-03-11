@@ -57,8 +57,10 @@ void Gamepad::onConnected() {
 	if (!glfwJoystickIsGamepad(m_id)) return;
 
 	m_connected = true;
+#ifndef __EMSCRIPTEN__
 	auto p = glfwGetGamepadName(m_id);
 	m_name = p ? String(p) : String();
+#endif
 
 	log() << "### Gamepad" << m_id << m_name << "connected.";
 }
@@ -77,12 +79,14 @@ void Gamepad::onDisconnected() {
 void Gamepad::onPoll() {
 	if (!m_connected) return;
 
+#ifndef __EMSCRIPTEN__
 	GLFWgamepadstate state;
 	glfwGetGamepadState(m_id, &state);
 
 	for (int i = 0; i < numButtons; ++i) setButtonValue(i, state.buttons[i]);
 
 	std::memcpy(m_axes, state.axes, sizeof(m_axes));
+#endif
 }
 
 } // namespace sgd

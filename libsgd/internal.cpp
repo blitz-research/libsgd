@@ -36,10 +36,20 @@ SGD_Handle createHandle(HandleType type, Shared* shared) {
 	return handle;
 }
 
+SGD_Handle getOrCreateHandle(HandleType type, Shared* shared) {
+	auto& rmap = g_reverseMaps[(int)type];
+	auto it = rmap.find(shared);
+	if (it != rmap.end()) return it->second;
+	auto handle = ++g_nextHandle;
+	g_handleMaps[(int)type].insert(std::make_pair(handle, shared));
+	rmap.insert(std::make_pair(shared, handle));
+	return handle;
+}
+
 Shared* resolveHandle(HandleType type, SGD_Handle handle) {
 	auto& map = g_handleMaps[(int)type];
 	auto it = map.find(handle);
-	return it!= map.end() ? it->second : nullptr;
+	return it != map.end() ? it->second : nullptr;
 }
 
 void releaseHandle(HandleType type, SGD_Handle handle) {
@@ -58,7 +68,7 @@ void error(CString message) {
 }
 
 void error(CString error, CString message) {
-	sgd::error(error+": "+message);
+	sgd::error(error + ": " + message);
 }
 
 void error(CString error, CFileioEx& ex) {

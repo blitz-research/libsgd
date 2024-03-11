@@ -8,10 +8,6 @@ int main() {
 
 	window->sizeChanged.connect(nullptr, [](sgd::CVec2u size) { sgd::log() << "### Size changed:" << size; });
 
-	window->cursorPosChanged.connect(nullptr, [](sgd::CVec2f pos) {
-		// sgd::log() << "### CursosPos changed:"<< pos;
-	});
-
 	window->closeClicked.connect(nullptr, [] { //
 		std::exit(0);
 	});

@@ -22,8 +22,8 @@ add_library(python-sgd SHARED libsgd_wrap.c libsgd.py)
 
 add_custom_command(
         COMMAND swig -python -outcurrentdir ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../include/sgd/sgd.h ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
         OUTPUT libsgd_wrap.c libsgd.py
-        MAIN_DEPENDENCY libsgd.i
         VERBATIM)
 
 set_target_properties(python-sgd PROPERTIES OUTPUT_NAME _libsgd)

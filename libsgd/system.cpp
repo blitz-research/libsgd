@@ -1,5 +1,7 @@
 #include "internal.h"
 
+#include <thread>
+
 namespace {
 
 void(SGD_DECL *g_errorHandler)(SGD_String error, void* context);

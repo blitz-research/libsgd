@@ -121,9 +121,11 @@ function(create_bundled_lib output_lib input_lib)
 
     add_custom_target(${output_lib} DEPENDS ${output_file})
 
-    if (SGD_INSTALL_DIR)
-        install(FILES ${output_file} DESTINATION lib/${SGD_INSTALL_DIR})
-    endif ()
+#   No static lib yet - it's half a Gig!
+#
+#    if (SGD_INSTALL_DIR)
+#        install(FILES ${output_file} DESTINATION lib/${SGD_INSTALL_DIR})
+#    endif ()
 
 endfunction()
 
