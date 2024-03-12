@@ -9,7 +9,7 @@
 
 namespace sgd {
 
-extern thread_local String debugThreadName;
+extern String debugThreadName;
 
 struct Log {
 	std::stringstream buf;

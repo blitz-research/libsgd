@@ -7,6 +7,27 @@ if(SGD_OS_EMSCRIPTEN)
     return()
 endif()
 
+# CMake install setup - release x64 only for now
+if (SGD_CONFIG_RELEASE AND CMAKE_SIZEOF_VOID_P EQUAL 8)
+
+    if (SGD_OS_WINDOWS)
+        set(SGD_INSTALL_OS windows)
+    elseif (SGD_OS_LINUX)
+        set(SGD_INSTALL_OS linux)
+    endif ()
+
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SGD_INSTALL_EXT x64)
+    else ()
+        set(SGD_INSTALL_EXT x86)
+    endif ()
+
+    set(SGD_INSTALL_DIR ${SGD_INSTALL_OS}-${SGD_INSTALL_EXT})
+
+    set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/cmake-install-${SGD_INSTALL_DIR}-release)
+
+endif ()
+
 ##### libsgd #####
 
 set(LIBSGD_SOURCES
@@ -136,7 +157,6 @@ endfunction()
 
 create_bundled_lib(libsgd_static libsgd)
 
-
 ##### libsgd_dynamic #####
 
 add_library(libsgd_dynamic SHARED ${LIBSGD_SOURCES})
@@ -147,10 +167,13 @@ target_compile_definitions(libsgd_dynamic PUBLIC SGD_DYNAMIC=1 SGD_EXPORT=1)
 
 target_link_libraries(libsgd_dynamic window graphics)
 
+if(SGD_OS_LINUX)
+    target_link_options(libsgd_dynamic PRIVATE -fPIC)
+endif()
+
 if (SGD_INSTALL_DIR)
     install(TARGETS libsgd_dynamic DESTINATION lib/${SGD_INSTALL_DIR})
 endif ()
-
 
 ##### More libsgds! #####
 

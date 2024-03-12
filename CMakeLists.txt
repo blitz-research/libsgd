@@ -150,42 +150,27 @@ endfunction()
 # Copy assets dir to output binary dir
 function(copy_assets_to_binary_dir target)
 
-    if (NOT SGD_OS_EMSCRIPTEN)
+    get_target_property(SRC_DIR ${target} SOURCE_DIR)
+    set(SRC ${SRC_DIR}/assets)
 
-        set(SRC $<TARGET_PROPERTY:${target},SOURCE_DIR>/assets)
-        set(DST $<TARGET_PROPERTY:${target},BINARY_DIR>/assets)
+    if(NOT EXISTS ${SRC})
+        message(WARNING "Target assets dir ${SRC} does not exist.")
+        return()
+    endif()
 
-        add_custom_command(TARGET ${target} POST_BUILD VERBATIM
-                COMMAND ${CMAKE_COMMAND} -E echo "Copying \"${SRC}\" directory to \"${DST}\""
-                COMMAND ${CMAKE_COMMAND} -E copy_directory ${SRC} ${DST})
+    if(SGD_OS_EMSCRIPTEN)
+        target_link_options(${target} PUBLIC --preload-file "${SRC}@/assets")
+        return()
+    endif()
 
-    else ()
+    get_target_property(DST_DIR ${target} BINARY_DIR)
+    set(DST ${DST_DIR}/assets)
 
-        set(SRC $<TARGET_PROPERTY:${target},SOURCE_DIR>/assets)
-
-        if (SGD_OS_EMSCRIPTEN)
-            target_link_options(${target} PUBLIC --preload-file "${SRC}@/assets")
-        endif ()
-
-    endif ()
+    add_custom_command(TARGET ${target} POST_BUILD VERBATIM
+            COMMAND ${CMAKE_COMMAND} -E echo "Copying assets dir \"${SRC}\" to \"${DST}\"."
+            COMMAND ${CMAKE_COMMAND} -E copy_directory ${SRC} ${DST})
 
 endfunction()
-
-# CMake install setup
-if (SGD_CONFIG_RELEASE AND CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/cmake-install-release)
-    if (SGD_OS_WINDOWS)
-        set(SGD_INSTALL_OS windows)
-    elseif (SGD_OS_LINUX)
-        set(SGD_INSTALL_OS linux)
-    endif ()
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(SGD_INSTALL_EXT x64)
-    else ()
-        set(SGD_INSTALL_EXT x86)
-    endif ()
-    set(SGD_INSTALL_DIR ${SGD_INSTALL_OS}-${SGD_INSTALL_EXT})
-endif ()
 
 add_subdirectory(external)
 

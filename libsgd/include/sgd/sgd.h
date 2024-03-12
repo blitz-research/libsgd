@@ -11,7 +11,7 @@
 #define SGD_EXTERN extern
 #endif
 
-#if SGD_DYNAMIC
+#if SGD_DYNAMIC && _WIN32
 #if SGD_EXPORT
 #define SGD_API SGD_EXTERN __declspec(dllexport)
 #else
@@ -21,7 +21,7 @@
 #define SGD_API SGD_EXTERN
 #endif
 
-#if _MSC_VER && !_WIN64 // Cheeky hack for blitz3d support which needs __stdcall
+#if _MSC_VER && !_WIN64 // Cheeky hack for 32 bit blitz3d support which needs __stdcall
 #define SGD_DECL __stdcall
 #elif _MSC_VER
 #define SGD_DECL __cdecl

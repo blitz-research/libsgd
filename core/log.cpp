@@ -13,7 +13,7 @@
 
 namespace sgd {
 
-thread_local String debugThreadName = (std::ostringstream() << std::this_thread::get_id()).str();
+String debugThreadName = (std::ostringstream() << std::this_thread::get_id()).str();
 
 namespace {
 
@@ -21,7 +21,7 @@ using Clock = std::chrono::system_clock;
 // using Clock = std::chrono::steady_clock;
 // using Clock = std::chrono::high_resolution_clock;
 
-thread_local String suffix;
+String suffix;
 
 std::mutex g_mutex;
 
