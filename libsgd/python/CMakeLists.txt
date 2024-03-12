@@ -16,30 +16,31 @@ if (NOT EXISTS ${PYTHON_SDK_DIR})
     return()
 endif ()
 
-project(python-sgd)
+project(libsgd_python)
 
-add_library(python-sgd SHARED libsgd_wrap.c libsgd.py)
+add_library(libsgd_python SHARED libsgd_wrap.c libsgd.py)
+
+set_target_properties(libsgd_python PROPERTIES OUTPUT_NAME _libsgd)
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set_target_properties(libsgd_python PROPERTIES SUFFIX .pyd)
+endif ()
 
 add_custom_command(
         COMMAND swig -python -outcurrentdir ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../include/sgd/sgd.h ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
+        DEPENDS libsgd ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
         OUTPUT libsgd_wrap.c libsgd.py
         VERBATIM)
 
-set_target_properties(python-sgd PROPERTIES OUTPUT_NAME _libsgd)
+target_include_directories(libsgd_python PRIVATE ${PYTHON_SDK_DIR}/include)
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    set_target_properties(python-sgd PROPERTIES SUFFIX .pyd)
-endif ()
+target_link_directories(libsgd_python PRIVATE ${PYTHON_SDK_DIR}/libs)
 
-target_include_directories(python-sgd PRIVATE ${PYTHON_SDK_DIR}/include)
-
-target_link_directories(python-sgd PRIVATE ${PYTHON_SDK_DIR}/libs)
-
-target_link_libraries(python-sgd PRIVATE libsgd python311.lib)
+target_link_libraries(libsgd_python PRIVATE libsgd python311.lib)
 
 if (SGD_INSTALL_DIR)
-    install(TARGETS python-sgd DESTINATION python/${SGD_INSTALL_DIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libsgd.py ${CMAKE_CURRENT_BINARY_DIR}/_libsgd.pyd DESTINATION python/${SGD_INSTALL_DIR})
+#    install(TARGETS libsgd_python DESTINATION python/${SGD_INSTALL_DIR})
 endif()
 
 #winpty python

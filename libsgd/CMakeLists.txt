@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 
 project(libsgd)
 
+# Laters gators!
+if(SGD_OS_EMSCRIPTEN)
+    return()
+endif()
+
 ##### libsgd #####
 
 set(LIBSGD_SOURCES
@@ -25,7 +30,7 @@ if (SGD_INSTALL_DIR)
     install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/sgd DESTINATION include)
 endif ()
 
-##### libsgd_static *****
+##### sgd_static *****
 
 function(create_bundled_lib output_lib input_lib)
 
@@ -119,9 +124,9 @@ function(create_bundled_lib output_lib input_lib)
 
     endif ()
 
-    add_custom_target(${output_lib} DEPENDS ${output_file})
+    add_custom_target(${output_lib} ALL DEPENDS ${output_file})
 
-#   No static lib yet - it's half a Gig!
+#   No static lib yet - 64 bit release is half a Gig!
 #
 #    if (SGD_INSTALL_DIR)
 #        install(FILES ${output_file} DESTINATION lib/${SGD_INSTALL_DIR})
@@ -129,32 +134,28 @@ function(create_bundled_lib output_lib input_lib)
 
 endfunction()
 
-if (NOT SGD_OS_EMSCRIPTEN)
+create_bundled_lib(libsgd_static libsgd)
 
-    create_bundled_lib(libsgd_static libsgd)
-
-endif ()
 
 ##### libsgd_dynamic #####
 
-if (NOT SGD_OS_EMSCRIPTEN)
+add_library(libsgd_dynamic SHARED ${LIBSGD_SOURCES})
 
-    add_library(libsgd_dynamic SHARED ${LIBSGD_SOURCES})
+target_include_directories(libsgd_dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-#    set_target_properties(libsgd_dynamic PROPERTIES OUTPUT_NAME sgd_dynamic)
+target_compile_definitions(libsgd_dynamic PUBLIC SGD_DYNAMIC=1 SGD_EXPORT=1)
 
-    target_include_directories(libsgd_dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(libsgd_dynamic window graphics)
 
-    target_compile_definitions(libsgd_dynamic PUBLIC SGD_DYNAMIC=1 SGD_EXPORT=1)
-
-    target_link_libraries(libsgd_dynamic window graphics)
-
-    if (SGD_INSTALL_DIR)
-        install(TARGETS libsgd_dynamic DESTINATION lib/${SGD_INSTALL_DIR})
-    endif ()
-
-    add_subdirectory(python)
-
+if (SGD_INSTALL_DIR)
+    install(TARGETS libsgd_dynamic DESTINATION lib/${SGD_INSTALL_DIR})
 endif ()
+
+
+##### More libsgds! #####
+
+add_subdirectory(python)
+
+add_subdirectory(nodejs)
 
 add_subdirectory(tests)

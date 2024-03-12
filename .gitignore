@@ -17,6 +17,13 @@ out
 # MSVC config
 .vs
 
+# Docs coming soon!
 html
 Doxyfile
 doxypress.json
+
+# Nodejs crud
+libsgd/nodejs/build
+libsgd/nodejs/libsgd.node
+libsgd/nodejs/libsgd_wrap.cxx
+

@@ -233,7 +233,7 @@ SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float tim
 
 SGD_API SGD_Camera SGD_DECL sgd_CreatePerspectiveCamera();
 SGD_API SGD_Camera SGD_DECL sgd_CreateOrthographicCamera();
-SGD_API void SGD_DECL sgd_SetCameraFovY(SGD_Camera camera, float fovY);
+SGD_API void SGD_DECL sgd_SetCameraFOV(SGD_Camera camera, float fovY);
 SGD_API void SGD_DECL sgd_SetCameraNear(SGD_Camera camera, float near);
 SGD_API void SGD_DECL sgd_SetCameraFar(SGD_Camera camera, float far);
 

@@ -233,10 +233,10 @@ SGD_Camera SGD_DECL sgd_CreateOrthographicCamera() {
 	return createHandle(camera);
 }
 
-void SGD_DECL sgd_SetCameraFovY(SGD_Camera hcamera, float fovY) {
+void SGD_DECL sgd_SetCameraFOV(SGD_Camera hcamera, float fov) {
 	auto camera = sgd::resolveHandle<sgd::Camera>(hcamera);
 
-	camera->fovY = fovY;
+	camera->fov = fov;
 }
 
 void SGD_DECL sgd_SetCameraNear(SGD_Camera hcamera, float near) {

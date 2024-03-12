@@ -4,7 +4,7 @@ namespace sgd {
 
 Camera::Camera(const Camera* that)
 	: Entity(that),		  //
-	  fovY(that->fovY()), //
+	  fov(that->fov()), //
 	  near(that->near()), //
 	  far(that->far()),	  //
 	  m_type(that->m_type) {

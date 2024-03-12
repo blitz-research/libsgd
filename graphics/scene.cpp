@@ -92,7 +92,7 @@ void Scene::updateCameraUniforms() const {
 		uniforms.worldMatrix = Mat4f(camera->worldMatrix());
 		uniforms.viewMatrix = Mat4f(inverse(camera->worldMatrix()));
 
-		uniforms.projectionMatrix = Mat4f::perspective(camera->fovY(), aspect, camera->near(), camera->far());
+		uniforms.projectionMatrix = Mat4f::perspective(camera->fov(), aspect, camera->near(), camera->far());
 	}
 	uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
 	uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;

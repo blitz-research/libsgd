@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 
+# So you can set options using 'set' before add_subdirectory, maybe? Doing this only seems to upset tinygltf.
+# cmake_policy(SET CMP0077 NEW) FAILS?
+set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
+
+# Use cmake's FindPythonInterp/FindPythonLibs
+set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
+
 project("LibSGD")
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
@@ -49,6 +56,10 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 else ()
     message(FATAL_ERROR "!!! Unsupported compiler: ${CMAKE_SYSTEM_NAME}")
 endif ()
+
+# Add cmake 'find' scripts
+#
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 # Using C++ 17
 #
@@ -161,19 +172,19 @@ function(copy_assets_to_binary_dir target)
 endfunction()
 
 # CMake install setup
-if (SGD_CONFIG_RELEASE AND NOT SGD_OS_EMSCRIPTEN)
+if (SGD_CONFIG_RELEASE AND CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/cmake-install-release)
     if (SGD_OS_WINDOWS)
-        set(SGD_INSTALL_DIR windows)
+        set(SGD_INSTALL_OS windows)
     elseif (SGD_OS_LINUX)
-        set(SGD_INSTALL_DIR linux)
+        set(SGD_INSTALL_OS linux)
     endif ()
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(SGD_INSTALL_EXT x64)
     else ()
         set(SGD_INSTALL_EXT x86)
     endif ()
-    set(SGD_INSTALL_DIR ${SGD_INSTALL_DIR}-${SGD_INSTALL_EXT})
+    set(SGD_INSTALL_DIR ${SGD_INSTALL_OS}-${SGD_INSTALL_EXT})
 endif ()
 
 add_subdirectory(external)

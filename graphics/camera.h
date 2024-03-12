@@ -18,7 +18,7 @@ struct Camera : Entity {
 	explicit Camera(CameraType type) : m_type(type) {
 	}
 
-	Property<float> fovY{45};
+	Property<float> fov {45};
 	Property<float> near{.1};
 	Property<float> far{100};
 
