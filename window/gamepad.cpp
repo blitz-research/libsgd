@@ -1,6 +1,6 @@
 #include "gamepad.h"
 
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/html5.h>
