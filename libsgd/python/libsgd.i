@@ -8,10 +8,10 @@
 
 %{
 #define SWIG_FILE_WITH_INIT
-#include "../include/sgd/sgd.h"
+#include <sgd/sgd.h>
 %}
 
 // This removes sgd_ prefix
 %rename("%(strip:[sgd_])s") "";
 
-%include "../include/sgd/sgd.h"
+%include <sgd/sgd.h>
