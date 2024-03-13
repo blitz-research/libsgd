@@ -1,17 +1,24 @@
 cmake_minimum_required(VERSION 3.16)
 
+project(libsgd_python)
+
 # No 32 bit python support yet
 if(CMAKE_SIZEOF_VOID_P EQUAL 4)
     return()
 endif()
 
-find_package(Python COMPONENTS Development)
-if(NOT Python_Development_FOUND)
-    message(WARNING "Python development package not found, python target disabled")
+# Check we have SWIG
+if(SWIG_PATH STREQUAL SWIG_PATH-NOTFOUND)
+    message(WARNING "Can't find swig program, skipping python target.")
     return()
 endif()
 
-project(libsgd_python)
+# Check we have Python development
+find_package(Python COMPONENTS Development)
+if(NOT Python_Development_FOUND)
+    message(WARNING "Python development package not found, skipping python target")
+    return()
+endif()
 
 add_library(libsgd_python SHARED libsgd_wrap.c libsgd.py libsgd.i)
 
@@ -26,7 +33,7 @@ target_include_directories(libsgd_python PRIVATE ${Python_INCLUDE_DIRS})
 target_link_libraries(libsgd_python PRIVATE libsgd ${Python_LIBRARIES})
 
 add_custom_command(
-        COMMAND swig -python -outcurrentdir -I${CMAKE_CURRENT_SOURCE_DIR}/../include ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
+        COMMAND swig -python -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
         DEPENDS libsgd ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
         OUTPUT libsgd_wrap.c libsgd.py
         VERBATIM)

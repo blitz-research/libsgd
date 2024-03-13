@@ -1,0 +1,11 @@
+{
+    "targets": 
+    [
+        {
+            "target_name": "libsgd",
+            "sources": ["libsgd_wrap.cxx"],
+            "libraries": ["${LIBSGD_STATIC_LIB}", "dxguid.lib"],
+            "include_dirs": ["${CMAKE_SOURCE_DIR}/libsgd/include", "./node_modules/node-addon-api"]
+        }
+    ]
+}
