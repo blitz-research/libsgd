@@ -20,9 +20,9 @@ if(NOT Python_Development_FOUND)
     return()
 endif()
 
-add_library(libsgd_python SHARED libsgd_wrap.c libsgd.py libsgd.i)
+add_library(libsgd_python SHARED sgd_wrap.c sgd.py sgd.i)
 
-set_target_properties(libsgd_python PROPERTIES OUTPUT_NAME _libsgd)
+set_target_properties(libsgd_python PROPERTIES OUTPUT_NAME _sgd)
 set_target_properties(libsgd_python PROPERTIES PREFIX "")
 
 if (SGD_OS_WINDOWS)
@@ -34,15 +34,15 @@ target_include_directories(libsgd_python PRIVATE ${Python_INCLUDE_DIRS})
 target_link_libraries(libsgd_python PRIVATE libsgd ${Python_LIBRARIES})
 
 add_custom_command(
-        COMMAND swig -python -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
-        DEPENDS libsgd ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
-        OUTPUT libsgd_wrap.c libsgd.py
+        COMMAND swig -python -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
+        DEPENDS libsgd ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
+        OUTPUT sgd_wrap.c sgd.py
         VERBATIM)
 
 if (SGD_INSTALL_DIR)
     install(FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/libsgd.py
-            ${CMAKE_CURRENT_BINARY_DIR}/_libsgd.pyd
+            ${CMAKE_CURRENT_BINARY_DIR}/sgd.py
+            ${CMAKE_CURRENT_BINARY_DIR}/_sgd.pyd
             ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.py
             DESTINATION python/${SGD_INSTALL_DIR})
 endif()

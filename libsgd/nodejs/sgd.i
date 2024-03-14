@@ -1,4 +1,4 @@
-%module libsgd
+%module sgd
 
 %begin %{
 #ifdef _MSC_VER

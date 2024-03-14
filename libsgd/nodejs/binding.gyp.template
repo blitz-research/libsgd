@@ -2,7 +2,7 @@
     "targets": 
     [
         {
-            "target_name": "libsgd",
+            "target_name": "sgd",
             "sources": ["libsgd_wrap.cxx"],
             "libraries": [${SGD_NODE_GYP_LIBS}],
             "include_dirs": ["${CMAKE_SOURCE_DIR}/libsgd/include", "./node_modules/node-addon-api"]

@@ -15,7 +15,7 @@ if (SWIG_PATH STREQUAL SWIG_PATH-NOTFOUND)
 endif ()
 
 if (SGD_OS_WINDOWS)
-    set(CMD "cmd /C")
+    set(CMD cmd /C)
 else ()
     set(CMD "")
 endif ()
@@ -40,7 +40,7 @@ endif ()
 if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/binding.gyp)
 
     if (SGD_OS_WINDOWS)
-        set(SGD_NODE_GYP_LIBS "\"${CMAKE_BINARY_DIR}/libsgd/libsgd_static.lib\", \"dxguid.lib\"")
+        set(SGD_NODE_GYP_LIBS "\"${CMAKE_BINARY_DIR}/libsgd/sgd_static.lib\", \"dxguid.lib\"")
     else ()
         set(SGD_NODE_GYP_LIBS "\"${CMAKE_BINARY_DIR}/libsgd/libsgd_static.a\"")
     endif ()
@@ -57,15 +57,15 @@ if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/build)
 
 endif ()
 
-set(output_file ${CMAKE_CURRENT_BINARY_DIR}/build/Release/libsgd.node)
+set(output_file ${CMAKE_CURRENT_BINARY_DIR}/build/Release/sgd.node)
 
 add_custom_target(libsgd_nodejs ALL DEPENDS ${output_file})
 
 add_custom_command(
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMAND swig -c++ -javascript -napi -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
+        COMMAND swig -c++ -javascript -napi -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
         COMMAND npx node-gyp build
-        DEPENDS libsgd_static ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
+        DEPENDS libsgd_static ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
         OUTPUT ${output_file}
         VERBATIM)
 

@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.16)
 project(libsgd)
 
 # Laters gators!
-if(SGD_OS_EMSCRIPTEN)
+if (SGD_OS_EMSCRIPTEN)
     return()
-endif()
+endif ()
 
 ##### libsgd #####
 
@@ -75,9 +75,13 @@ function(create_bundled_lib output_lib input_lib)
 
     list(REMOVE_DUPLICATES static_libs)
 
-    message("### Dependencies: ${static_libs}")
+#    message("### Dependencies: ${static_libs}")
 
-    set(output_file ${CMAKE_CURRENT_BINARY_DIR}/${output_lib}${CMAKE_STATIC_LIBRARY_SUFFIX})
+    if (SGD_OS_WINDOWS)
+        set(output_file ${CMAKE_CURRENT_BINARY_DIR}/sgd_static.lib)
+    else ()
+        set(output_file ${CMAKE_CURRENT_BINARY_DIR}/libsgd_static.a)
+    endif ()
 
     if (SGD_OS_WINDOWS)
 
@@ -126,11 +130,11 @@ function(create_bundled_lib output_lib input_lib)
 
     add_custom_target(${output_lib} ALL DEPENDS ${output_file})
 
-#   No static lib yet - 64 bit release is half a Gig!
-#
-#    if (SGD_INSTALL_DIR)
-#        install(FILES ${output_file} DESTINATION lib/${SGD_INSTALL_DIR})
-#    endif ()
+    #   No static lib yet - 64 bit release is half a Gig!
+    #
+    #    if (SGD_INSTALL_DIR)
+    #        install(FILES ${output_file} DESTINATION lib/${SGD_INSTALL_DIR})
+    #    endif ()
 
 endfunction()
 
@@ -148,9 +152,9 @@ target_compile_definitions(libsgd_dynamic PUBLIC SGD_DYNAMIC=1 SGD_EXPORT=1)
 
 target_link_libraries(libsgd_dynamic window graphics)
 
-if(SGD_OS_LINUX)
+if (SGD_OS_LINUX)
     target_link_options(libsgd_dynamic PRIVATE -fPIC)
-endif()
+endif ()
 
 if (SGD_INSTALL_DIR)
     install(TARGETS libsgd_dynamic DESTINATION lib/${SGD_INSTALL_DIR})
