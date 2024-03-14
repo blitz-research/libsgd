@@ -9,7 +9,9 @@ GraphicsContextPtr gc;
 ScenePtr scene;
 
 void render() {
+
 	scene->render();
+
 	gc->present(gc->colorBuffer());
 }
 
@@ -19,11 +21,11 @@ void start() {
 
 	window->closeClicked.connect(nullptr, [] { std::exit(0); });
 
-	//	window->sizeChanged.connect(nullptr, [](CVec2u) {
-	//		if (scene) scene->render();
-	//	});
+	window->sizeChanged.connect(nullptr, [](CVec2u) {
+		if (scene) scene->render();
+	});
 
-	gc = new GraphicsContext(window);
+	gc = new GraphicsContext(window, wgpu::BackendType::Vulkan);
 
 	scene = new Scene(gc);
 	scene->clearColor = {1, 1, 0, 1};
@@ -57,16 +59,16 @@ void start() {
 //	fit(mesh, {-1,1}, true);
 //	model->mesh=mesh;
 
-	translate(model, {0,0,3});
+	translate(model, {0,-1,3});
 	scene->add(model);
 
 	float time = 0;
 
 	while (window->pollEvents()) {
 
-//		model->animate(0, time += 0.5f/60.0f, AnimationMode::loop);
+		model->animate(0, time += 0.5f/60.0f, AnimationMode::loop);
 
-//		rotate(model, {0, .001, 0});
+		rotate(model, {0, .001, 0});
 
 		render();
 	}

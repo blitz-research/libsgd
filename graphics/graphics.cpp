@@ -11,11 +11,42 @@
 #include <thread>
 
 namespace sgd {
+
 namespace {
 
 auto shaderSource{
 #include "shaders/scene.wgsl"
 };
+
+void logAdapterProps(const wgpu::Adapter& adapter) {
+
+	wgpu::AdapterProperties props{};
+	adapter.GetProperties(&props);
+
+	log() << "### wgpu Adapter Properties:";
+	log() << "### Vender name:" << (props.vendorName ? props.vendorName : "???");
+	log() << "### Architecture:" << (props.architecture ? props.architecture : "???");
+	log() << "### Name:" << (props.name ? props.name : "???");
+	log() << "### Driver description:" << (props.driverDescription ? props.driverDescription : "???");
+
+	Map<wgpu::AdapterType, String> adapterTypes{
+		{wgpu::AdapterType::DiscreteGPU, "DiscreteGPU"},
+		{wgpu::AdapterType::IntegratedGPU, "IntegratedGPU"},
+		{wgpu::AdapterType::CPU, "CPU"},
+		{wgpu::AdapterType::Unknown, "Unknown"},
+	};
+	log() << "### Adapter type:" << adapterTypes[props.adapterType];
+
+	Map<wgpu::BackendType, String> backendTypes{
+		{wgpu::BackendType::Undefined, "Undefined"}, {wgpu::BackendType::D3D12, "D3D12"},
+		{wgpu::BackendType::D3D11, "D3D11"},		 {wgpu::BackendType::Vulkan, "Vulkan"},
+		{wgpu::BackendType::Null, "Null"},			 {wgpu::BackendType::Metal, "Metal"},
+		{wgpu::BackendType::OpenGL, "OpenGL"},		 {wgpu::BackendType::OpenGLES, "OpenGLES"},
+		{wgpu::BackendType::WebGPU, "WebGPU"},
+	};
+	log() << "### Backend type:" << backendTypes[props.backendType];
+	log() << "### Compatibility mode:" << props.compatibilityMode;
+}
 
 BindGroupDescriptor bindGroup0Desc( //
 	0,								//
@@ -52,24 +83,29 @@ namespace sgd {
 
 // ***** GraphicsContext *****
 
-GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
+GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBackendType) : m_window(window) {
 
 	CondVar<bool> cv;
 
 	runOnMainThread(
-		[&]()  {
+		[&]() {
 			wgpu::RequestAdapterOptions opts{};
+			opts.backendType = wgpuBackendType;
+			if (opts.backendType == wgpu::BackendType::Undefined) {
 #ifdef SGD_OS_WINDOWS
-			opts.backendType = wgpu::BackendType::D3D12;
+				opts.backendType = wgpu::BackendType::D3D12;
 #elif SGD_OS_LINUX
-			opts.backendType = wgpu::BackendType::Vulkan;
+				opts.backendType = wgpu::BackendType::Vulkan;
 #endif
+			}
 
 			requestWGPUDevice(opts, [&](const wgpu::Device& device) {
 				m_wgpuDevice = device;
 				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
 				m_wgpuSwapChain = createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, m_window->size(),
 													  preferredWGPUSwapChainFormat(m_wgpuDevice));
+
+				logAdapterProps(m_wgpuDevice.GetAdapter());
 
 				m_colorBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
 				m_depthBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);

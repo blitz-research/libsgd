@@ -20,6 +20,8 @@ if(NOT Python_Development_FOUND)
     return()
 endif()
 
+message("### adding libsgd_python target")
+
 add_library(libsgd_python SHARED sgd_wrap.c sgd.py sgd.i)
 
 set_target_properties(libsgd_python PROPERTIES OUTPUT_NAME _sgd)

@@ -2,10 +2,30 @@
 
 // ***** Scene *****
 
+namespace {
+
+wgpu::BackendType g_backendType{wgpu::BackendType::Undefined};
+
+}
+
+SGD_API void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend) {
+	if (sgd::mainScene) sgd::error("Backend type must be selected before scene is created");
+
+	sgd::Map<sgd::String, wgpu::BackendType> types{
+		{"D3D12", wgpu::BackendType::D3D12},   {"D3D11", wgpu::BackendType::D3D11},		  {"Vulkan", wgpu::BackendType::Vulkan},
+		{"OpenGL", wgpu::BackendType::OpenGL}, {"OpenGLES", wgpu::BackendType::OpenGLES}, {"Metal", wgpu::BackendType::Metal},
+		{"WebGPU", wgpu::BackendType::WebGPU},
+	};
+	auto it = types.find(backend);
+	if (it == types.end()) sgd::error(sgd::String("Unrecognized backend: '") + backend + "'");
+
+	g_backendType = it->second;
+}
+
 void SGD_DECL sgd_CreateScene() {
 	if (sgd::mainScene) sgd::error("Scene has already been created");
 
-	sgd::mainGC = new sgd::GraphicsContext(sgd::mainWindow);
+	sgd::mainGC = new sgd::GraphicsContext(sgd::mainWindow, g_backendType);
 
 	sgd::mainScene = new sgd::Scene(sgd::mainGC);
 }

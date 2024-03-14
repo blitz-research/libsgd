@@ -17,7 +17,7 @@ SGD_SHARED(GraphicsResource);
 struct GraphicsContext : Shared {
 	SGD_OBJECT_TYPE(GraphicsContext, Shared);
 
-	GraphicsContext(Window* window);
+	GraphicsContext(Window* window, const wgpu::BackendType wgpuBackendType = wgpu::BackendType::Undefined);
 
 	Window* window() const {
 		return m_window;

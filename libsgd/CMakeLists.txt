@@ -124,6 +124,8 @@ function(create_bundled_lib output_lib output_libname input_lib)
 
     endif ()
 
+    message("### adding ${output_lib} target")
+
     add_custom_target(${output_lib} ALL DEPENDS ${output_file})
 
     #   No static lib yet - 64 bit release is 500M!

@@ -58,55 +58,50 @@ void rrender() {
 
 void start() {
 
-	{
-		window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::resizable);
+	window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::resizable);
 
-		gc = new GraphicsContext(window);
+	gc = new GraphicsContext(window);
 
-		window->sizeChanged.connect(nullptr, [](CVec2u){
-			render();
-		});
-	}
+	window->sizeChanged.connect(nullptr, [](CVec2u){
+		render();
+	});
 
-	{
-		TexturePtr envTexture =
-			loadTexture(Path("sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::filter).result();
+	TexturePtr envTexture =
+		loadTexture(Path("sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::filter).result();
 
-		gc->bindGroup0()->setTexture(2, envTexture);
+	gc->bindGroup0()->setTexture(2, envTexture);
 
-		lighting.pointLightCount = 1;
-		lighting.ambientLightColor = {1, 1, 1, 0};
-		lighting.pointLights[0].position = {2.5, 2.5, -2.5};
-		lighting.pointLights[0].color = {1, 1, 1, 1};
-		lighting.pointLights[0].falloff = 1;
-		lighting.pointLights[0].range = 25;
-	}
+	lighting.pointLightCount = 1;
+	lighting.ambientLightColor = {1, 1, 1, 0};
+	lighting.pointLights[0].position = {2.5, 2.5, -2.5};
+	lighting.pointLights[0].color = {1, 1, 1, 1};
+	lighting.pointLights[0].falloff = 1;
+	lighting.pointLights[0].range = 25;
 
-	{
-		MaterialPtr material = loadMaterial(Path("Bricks076C_1K-JPG")).result();
-		//MaterialPtr material = loadMaterial(Path("Marble008_1K-JPG")).result();
-		// MaterialPtr material = loadMaterial(Path("Facade001_1K-JPG"));
-		//MaterialPtr material = loadMaterial(Path("Facade018A_1K-JPG"));
-		//MaterialPtr material = loadMaterial(Path("PavingStones131_1K-JPG"));
+	MaterialPtr material = loadMaterial(Path("Bricks076C_1K-JPG")).result();
+	//MaterialPtr material = loadMaterial(Path("Marble008_1K-JPG")).result();
+	// MaterialPtr material = loadMaterial(Path("Facade001_1K-JPG"));
+	//MaterialPtr material = loadMaterial(Path("Facade018A_1K-JPG"));
+	//MaterialPtr material = loadMaterial(Path("PavingStones131_1K-JPG"));
 
-		MeshPtr mesh = createSphereMesh(1, 64, 32, material);
-		//MeshPtr mesh = createBoxMesh(Boxf(-1, 1), material);
+	MeshPtr mesh = createSphereMesh(1, 64, 32, material);
+	//MeshPtr mesh = createBoxMesh(Boxf(-1, 1), material);
 
-		transformTexCoords(mesh, {4,2}, {0,0});
+	transformTexCoords(mesh, {4,2}, {0,0});
 
-		meshRenderer = new MeshRenderer(mesh);
-		auto insts = meshRenderer->lockInstances(1);
-		insts[0].matrix = {};
-		insts[0].color = {1, 1, 1, 1};
-		meshRenderer->unlockInstances();
-	}
+	meshRenderer = new MeshRenderer(mesh);
+	auto insts = meshRenderer->lockInstances(1);
+	insts[0].matrix = {};
+	insts[0].color = {1, 1, 1, 1};
+	meshRenderer->unlockInstances();
 
 	requestRender(rrender);
 }
 
 int main() {
 
-	requestWGPUDevice({}, [](const wgpu::Device&) { start(); });
+	start();
 
-	beginAppEventLoop();
+//	std::thread(&start).detach();
+//	beginAppEventLoop();
 }

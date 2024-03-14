@@ -10,6 +10,8 @@
 void SGD_DECL init() {
 	sgd_CreateWindow(1280, 720, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE);
 
+	sgd_SetWebGPUBackend("D3D11");
+
 	sgd_CreateScene();
 
 	SGD_Texture skyTexture = sgd_LoadTexture("sunnysky-cube.png", SGD_TEXTURE_FORMAT_SRGBA8, SGD_TEXTURE_FLAGS_CUBE_MIPMAP);
@@ -23,5 +25,7 @@ void SGD_DECL init() {
 }
 
 int main() {
-	sgd_Run(init);
+	init();
+//	sgd_Run(init);
+
 }

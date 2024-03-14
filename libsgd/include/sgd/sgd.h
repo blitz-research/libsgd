@@ -125,6 +125,9 @@ SGD_API float SGD_DECL sgd_GamepadAxis(int gamepad, int axis);
 
 // ***** Scene *****
 
+//! Set WebGPU backend: D3D12, D3D11, Vulkan
+SGD_API void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend);
+
 //! Create a new scene.
 SGD_API void SGD_DECL sgd_CreateScene();
 
