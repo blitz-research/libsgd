@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(libsgd_nodejs )
 
+# No 32 bit nodejs
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     return()
 endif()
@@ -46,8 +47,7 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/build)
 
     execute_process(
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-            COMMAND cmd /C npx node-gyp configure
-    )
+            COMMAND cmd /C npx node-gyp configure)
 
 endif()
 
@@ -57,7 +57,7 @@ add_custom_target(libsgd_nodejs ALL DEPENDS ${output_file})
 
 add_custom_command(
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMAND swig -c++ -javascript -napi -outcurrentdir  -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
+        COMMAND swig -c++ -javascript -napi -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
         COMMAND npx node-gyp build
         DEPENDS libsgd ${CMAKE_CURRENT_SOURCE_DIR}/libsgd.i
         OUTPUT ${output_file}
