@@ -23,10 +23,11 @@ endif()
 add_library(libsgd_python SHARED libsgd_wrap.c libsgd.py libsgd.i)
 
 set_target_properties(libsgd_python PROPERTIES OUTPUT_NAME _libsgd)
+set_target_properties(libsgd_python PROPERTIES PREFIX "")
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+if (SGD_OS_WINDOWS)
     set_target_properties(libsgd_python PROPERTIES SUFFIX .pyd)
-endif ()
+endif()
 
 target_include_directories(libsgd_python PRIVATE ${Python_INCLUDE_DIRS})
 

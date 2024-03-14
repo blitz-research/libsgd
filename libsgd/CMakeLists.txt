@@ -77,7 +77,7 @@ function(create_bundled_lib output_lib input_lib)
 
     message("### Dependencies: ${static_libs}")
 
-    set(output_file ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${output_lib}${CMAKE_STATIC_LIBRARY_SUFFIX})
+    set(output_file ${CMAKE_CURRENT_BINARY_DIR}/${output_lib}${CMAKE_STATIC_LIBRARY_SUFFIX})
 
     if (SGD_OS_WINDOWS)
 
@@ -139,6 +139,8 @@ create_bundled_lib(libsgd_static libsgd)
 ##### libsgd_dynamic #####
 
 add_library(libsgd_dynamic SHARED ${LIBSGD_SOURCES})
+
+set_target_properties(libsgd_dynamic PROPERTIES OUTPUT_NAME sgd_dynamic)
 
 target_include_directories(libsgd_dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
