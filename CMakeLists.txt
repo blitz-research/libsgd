@@ -138,23 +138,15 @@ else ()
 
 endif ()
 
-# SGD_INSTALLDIR setup - release x64 only for now
+# SGD_INSTALLDIR setup for x64 release
 #
 if (SGD_CONFIG_RELEASE AND CMAKE_SIZEOF_VOID_P EQUAL 8)
 
     if (SGD_OS_WINDOWS)
-        set(SGD_INSTALL_OS windows)
+        set(SGD_INSTALL_DIR windows-x64-release)
     elseif (SGD_OS_LINUX)
-        set(SGD_INSTALL_OS linux)
+        set(SGD_INSTALL_DIR linux-x64-release)
     endif ()
-
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(SGD_INSTALL_EXT x64)
-    else ()
-        set(SGD_INSTALL_EXT x86)
-    endif ()
-
-    set(SGD_INSTALL_DIR ${SGD_INSTALL_OS}-${SGD_INSTALL_EXT})
 
     set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/cmake-install-${SGD_INSTALL_DIR})
 
