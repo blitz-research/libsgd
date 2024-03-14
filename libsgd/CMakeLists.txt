@@ -32,7 +32,7 @@ endif ()
 
 ##### sgd_static *****
 
-function(create_bundled_lib output_lib input_lib)
+function(create_bundled_lib output_lib output_libname input_lib)
 
     function(collect_dependencies target)
 
@@ -77,11 +77,7 @@ function(create_bundled_lib output_lib input_lib)
 
 #    message("### Dependencies: ${static_libs}")
 
-    if (SGD_OS_WINDOWS)
-        set(output_file ${CMAKE_CURRENT_BINARY_DIR}/sgd_static.lib)
-    else ()
-        set(output_file ${CMAKE_CURRENT_BINARY_DIR}/libsgd_static.a)
-    endif ()
+    set(output_file ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${output_libname}${CMAKE_STATIC_LIBRARY_SUFFIX})
 
     if (SGD_OS_WINDOWS)
 
@@ -130,7 +126,7 @@ function(create_bundled_lib output_lib input_lib)
 
     add_custom_target(${output_lib} ALL DEPENDS ${output_file})
 
-    #   No static lib yet - 64 bit release is half a Gig!
+    #   No static lib yet - 64 bit release is 500M!
     #
     #    if (SGD_INSTALL_DIR)
     #        install(FILES ${output_file} DESTINATION lib/${SGD_INSTALL_DIR})
@@ -138,7 +134,7 @@ function(create_bundled_lib output_lib input_lib)
 
 endfunction()
 
-create_bundled_lib(libsgd_static libsgd)
+create_bundled_lib(libsgd_static sgd_static libsgd)
 
 ##### libsgd_dynamic #####
 
@@ -158,6 +154,7 @@ endif ()
 
 if (SGD_INSTALL_DIR)
     install(TARGETS libsgd_dynamic DESTINATION lib/${SGD_INSTALL_DIR})
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.c DESTINATION lib/${SGD_INSTALL_DIR})
 endif ()
 
 ##### More libsgds! #####
