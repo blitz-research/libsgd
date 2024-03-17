@@ -108,31 +108,40 @@ function(create_bundled_lib output_lib output_libname input_lib)
                 OUTPUT ${CMAKE_BINARY_DIR}/${output_lib}.ar
                 INPUT ${CMAKE_BINARY_DIR}/${output_lib}.ar.in)
 
-        if (CMAKE_INTERPROCEDURAL_OPTIMIZATION)
-            set(ar_tool ${CMAKE_CXX_COMPILER_AR})
-        endif ()
-
         add_custom_command(
                 COMMAND ${CMAKE_AR} -M < ${CMAKE_BINARY_DIR}/${output_lib}.ar
                 OUTPUT ${output_file}
                 DEPENDS ${static_libs}
                 VERBATIM)
 
+    elseif(SGD_OS_MACOS)
+
+        # Based on:
+        #
+        # https://stackoverflow.com/questions/8170450/combine-static-libraries-on-apple/8170851#8170851
+
+        foreach (target IN LISTS static_libs)
+            list(APPEND lib_files $<TARGET_FILE:${target}>)
+        endforeach ()
+
+        add_custom_command(
+            COMMAND libtool -static -o ${output_file} ${lib_files}
+            OUTPUT ${output_file}
+            DEPENDS ${static_libs}
+            VERBATIM)
+
     else ()
 
-        message(FATAL_ERROR "!!! OOPS")
+        message(FATAL_ERROR "***** TODO *****")
 
     endif ()
 
-    message("### adding ${output_lib} target")
-
     add_custom_target(${output_lib} ALL DEPENDS ${output_file})
 
-    #   No static lib yet - 64 bit release is 500M!
-    #
-    #    if (SGD_INSTALL_DIR)
-    #        install(FILES ${output_file} DESTINATION lib/${SGD_INSTALL_DIR})
-    #    endif ()
+    # No install for static lib yet - 64 bit release is 500M!
+    # if (SGD_INSTALL_DIR)
+    #   install(FILES ${output_file} DESTINATION lib/${SGD_INSTALL_DIR})
+    # endif ()
 
 endfunction()
 

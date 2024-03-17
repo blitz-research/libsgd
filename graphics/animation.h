@@ -5,7 +5,7 @@
 namespace sgd {
 
 enum struct AnimationMode {
-	oneshot,
+	oneshot = 1,
 	loop,
 	pingpong
 };

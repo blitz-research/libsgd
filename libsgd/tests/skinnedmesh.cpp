@@ -9,19 +9,20 @@ void start() {
 	SGD_Model model = sgd_LoadBonedModel("cesiumman.glb", SGD_TRUE);
 
 	for (;;) {
+
 		if (sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) break;
 
 		// Gamepad...
-		if(sgd_GamepadButtonDown(0, SGD_GAMEPAD_BUTTON_LEFT_BUMPER)) {
+		if (sgd_GamepadButtonDown(0, SGD_GAMEPAD_BUTTON_LEFT_BUMPER)) {
 			sgd_TurnEntity(model, 0, .6, 0);
-		}else if(sgd_GamepadButtonDown(0, SGD_GAMEPAD_BUTTON_RIGHT_BUMPER)){
+		} else if (sgd_GamepadButtonDown(0, SGD_GAMEPAD_BUTTON_RIGHT_BUMPER)) {
 			sgd_TurnEntity(model, 0, -.6, 0);
 		}
 
 		// Keyboard...
-		if(sgd_KeyDown(SGD_KEY_LEFT)){
+		if (sgd_KeyDown(SGD_KEY_LEFT)) {
 			sgd_TurnEntity(model, 0, .6, 0);
-		}else if(sgd_KeyDown(SGD_KEY_RIGHT)){
+		} else if (sgd_KeyDown(SGD_KEY_RIGHT)) {
 			sgd_TurnEntity(model, 0, -.6, 0);
 		}
 

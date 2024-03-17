@@ -17,10 +17,8 @@ out
 # MSVC config
 .vs
 
-# Docs coming soon!
-html
-Doxyfile
-doxypress.json
+# Generated docs
+help
 
 # Nodejs crud
 libsgd/nodejs/build

@@ -96,6 +96,8 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 				opts.backendType = wgpu::BackendType::D3D12;
 #elif SGD_OS_LINUX
 				opts.backendType = wgpu::BackendType::Vulkan;
+#elif SGD_OS_METAL
+				opts.backendType = wgpu::BackendType::Metal;
 #endif
 			}
 

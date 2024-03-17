@@ -12,6 +12,9 @@
 #elif SGD_OS_LINUX
 #include <linux/limits.h>
 #include <unistd.h>
+#elif SGD_OS_MACOS
+#include <sys/types.h>
+#include <unistd.h>
 #endif
 
 namespace sgd {
@@ -38,7 +41,7 @@ std::filesystem::path appPath() {
 	}
 	return path = buf;
 
-#elif SGD_OS_LINUX
+#elif defined(SGD_OS_LINUX) || defined(SGD_OS_MACOS)
 
 	char lnk[PATH_MAX + 1];
 	char buf[PATH_MAX + 1];

@@ -31,8 +31,10 @@ static String timeStamp(const Clock::time_point& tp) {
 	auto durS = std::chrono::duration_cast<std::chrono::seconds>(dur).count();
 	auto durMs = std::chrono::duration_cast<std::chrono::milliseconds>(dur).count();
 
+	std::time_t tS = durS;
+
 	std::ostringstream str;
-	str << std::put_time(std::localtime(&durS), "%Y-%m-%d %H:%M:%S.");
+	str << std::put_time(std::localtime(&tS), "%Y-%m-%d %H:%M:%S.");
 	str << std::setw(3) << std::setfill('0') << int(durMs - durS * 1000);
 
 	return str.str();

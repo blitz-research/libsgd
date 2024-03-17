@@ -8,9 +8,10 @@
 //#include "spotlight.cpp"
 
 void SGD_DECL init() {
+
 	sgd_CreateWindow(1280, 720, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE);
 
-	sgd_SetWebGPUBackend("D3D11");
+//	sgd_SetWebGPUBackend("Vulkan");
 
 	sgd_CreateScene();
 

@@ -48,11 +48,11 @@ int64_t nanos() {
 }
 
 int64_t micros() {
-	return nanos() / 1000000;
+	return nanos() / 1000;
 }
 
 int64_t millis() {
-	return nanos() / 1000;
+	return nanos() / 1000000;
 }
 String toLower(String str) {
 	for (int i = 0; i < str.size(); ++i) str[i] = tolower(str[i]);

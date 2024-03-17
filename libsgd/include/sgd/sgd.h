@@ -5,6 +5,8 @@
 
 //! @file
 
+//! @cond
+
 #if __cplusplus
 #define SGD_EXTERN extern "C"
 #else
@@ -29,6 +31,17 @@
 #define SGD_DECL //__attribute__((__cdecl__)) - ignored?!?
 #endif
 
+#define SGD_TRUE 1
+#define SGD_FALSE 0
+
+#define SGD_PI 3.14159265359f
+#define SGD_TWO_PI 6.28318530718f
+#define SGD_HALF_PI 1.5707963268f
+#define SGD_DEGREES_TO_RADIANS .01745329252f
+#define SGD_RADIANS_TO_DEGREES 57.295779513f
+
+//! @endcond
+
 typedef int SGD_Bool;
 typedef int SGD_Handle;
 typedef const char* SGD_String;
@@ -42,20 +55,12 @@ typedef SGD_Handle SGD_Light;
 typedef SGD_Handle SGD_Model;
 typedef SGD_Handle SGD_Skybox;
 
-#define SGD_TRUE 1
-#define SGD_FALSE 0
-
-#define SGD_PI 3.14159265359f
-#define SGD_TWO_PI 6.28318530718f
-#define SGD_HALF_PI 1.5707963268f
-#define SGD_DEGREES_TO_RADIANS .01745329252f
-#define SGD_RADIANS_TO_DEGREES 57.295779513f
-
 // ***** System *****
 
-// Returned by sgd_PollEvents.
+//! @cond Event type constants returned by sgd_PollEvents.
 #define SGD_EVENT_MASK_CLOSE_CLICKED 1
 #define SGD_EVENT_MASK_SIZE_CHANGED 2
+//! @endcond
 
 //! Set error handler callback.
 SGD_API void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(const char* error, void* context), void* context);
@@ -63,19 +68,34 @@ SGD_API void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(const char* er
 //! Run on new thread.
 SGD_API void SGD_DECL sgd_Run(void(SGD_DECL* start)());
 
-//! Generate runtime errror.
+//! Generate runtime error.
 SGD_API void SGD_DECL sgd_Error(SGD_String error);
 
 //! Poll system for events.
+//!
+//! @The returned value can contain one or more of the following bitmasks:
+//!
+//! Event mask                   | Integer value | Description
+//!------------------------------|---------------|------------
+//! SGD_EVENT_MASK_CLOSE_CLICKED | 1             | Window close button was clicked.
+//! SGD_EVENT_MASK_SIZE_CHANGED  | 2             | Window was resized.
 SGD_API int SGD_DECL sgd_PollEvents();
 
 // ***** Window *****
 
-// Used by sgd_CreateWindow.
+//! @cond Window flags for use with CreateWindow.
 #define SGD_WINDOW_FLAGS_FULLSCREEN 1
-#define SGD_WINDOW_FLAGS_RESIZABLE 2
+#define SGD_WINDOW_FLAGS_RESIZABLE  2
+//! @endcond
 
 //! Create a new window.
+//!
+//! @flags should be one or more of the following bit mask values:
+//!
+//! Window flag                 | Integer value | Description
+//! ----------------------------|---------------|------------
+//! SGD_WINDOW_FLAGS_FULLSCREEN | 1             | Create a fullscreen window.
+//! SGD_WINDOW_FLAGS_RESIZABLE  | 2             | Create a resizable window.
 SGD_API void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flags);
 
 //! Get window width.
@@ -151,12 +171,15 @@ SGD_API void SGD_DECL sgd_Present();
 
 // ***** Texture *****
 
+//! @cond Texture format constants
 #define SGD_TEXTURE_FORMAT_RGBA8 1
 #define SGD_TEXTURE_FORMAT_SRGBA8 2
 #define SGD_TEXTURE_FORMAT_RGBA16F 3
 #define SGD_TEXTURE_FORMAT_DEPTH32F 4
+//! @endcond
 
-//! Texture flag constants
+//! @cond Texture flag constants
+#define SGD_TEXTURE_FLAGS_NONE 0x0
 #define SGD_TEXTURE_FLAGS_CLAMP_U 0x01
 #define SGD_TEXTURE_FLAGS_CLAMP_V 0x02
 #define SGD_TEXTURE_FLAGS_CLAMP_W 0x04
@@ -166,8 +189,36 @@ SGD_API void SGD_DECL sgd_Present();
 #define SGD_TEXTURE_FLAGS_CUBE 0x20
 #define SGD_TEXTURE_FLAGS_CUBE_MIPMAP 0x30
 #define SGD_TEXTURE_FLAGS_RENDER_TARGET 0x40
+//! @endcond
 
 //! Load a new texture.
+//!
+//! @param `path` is the file path of the texture image to load.
+//!
+//! @param `format` should be one of the following:
+//!
+//! Texture format             | Integer value | Bytes per texel | Description
+//! ---------------------------|---------------|-----------------|------------
+//! SGD_TEXTURE_FORMAT_RGBA8   | 1             | 4               | Unsigned byte per component linear red/green/blue/alpha
+//! SGD_TEXTURE_FORMAT_SRGBA8  | 2             | 4               | Unsigned byte per component standard red/green/blue/alpha
+//! SGD_TEXTURE_FORMAT_RGBA16F | 3             | 8               | 16 bit float per component linear red/green/blue/alpha
+//! SGD_TEXTURE_FORMAT_DEPTH32F | 4            | 4               | 32 bit float per component depth
+//!
+//! Note that you should generally use the 'standard' formats when dealing with WYSIWG images,
+//! 'linear' when dealing with algorithmically generated data.
+//!
+//! @param `flags` should be one or more of the following bitmasks:
+//!
+//! Texture flags             | Integer value | Description
+//! --------------------------|---------------|------------
+//! SGD_TEXTURE_FLAGS_NONE    | 0             | No texture flags.
+//! SGD_TEXTURE_FLAGS_CLAMP_U | 1             | Clamp texture U coordinate.
+//! SGD_TEXTURE_FLAGS_CLAMP_V | 2             | Clamp texture V coordinate.
+//! SGD_TEXTURE_FLAGS_CLAMP_W | 4             | Clamp texture W coordinate.
+//! SGD_TEXTURE_FLAGS_FILTER  | 8             | Filter magnified texels.
+//! SGD_TEXTURE_FLAGS_MIPMAP  | 16            | Mipmap minified texels.
+//! SGD_TEXTURE_FLAGS_CUBE    | 32            | Create a cube texture.
+//! SGD_TEXTURE_RENDER_TARGET | 64            | Create a texture that can be rendered to.
 SGD_API SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags);
 
 // ***** Material *****
@@ -210,10 +261,11 @@ SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox skybox, float roughness)
 
 // ***** Model *****
 
-// Used by sgd_AnimateModel
-#define SGD_ANIMATION_MODE_ONE_SHOT 0
-#define SGD_ANIMATION_MODE_LOOP 1
-#define SGD_ANIMATION_MODE_PING_PONG 2
+//! @cond Animation ode constants used by sgd_AnimateModel
+#define SGD_ANIMATION_MODE_ONE_SHOT 1
+#define SGD_ANIMATION_MODE_LOOP 2
+#define SGD_ANIMATION_MODE_PING_PONG 3
+//! @endcond
 
 //! Load a model.
 SGD_API SGD_Model SGD_DECL sgd_LoadModel(SGD_String path);
@@ -230,45 +282,105 @@ SGD_API void SGD_DECL sgd_SetModelMesh(SGD_Model model, SGD_Mesh mesh);
 //! Set model color.
 SGD_API void SGD_DECL sgd_SetModelColor(SGD_Model model, float red, float green, float blue, float alpha);
 
-SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float time, int mode);
+//! Animate a model.
+//!
+//! @mode should be one of the following:
+//!
+//! Animation mode              | Integer value | meaning
+//! ----------------------------|---------------|--------
+//! SGD_ANIMATION_MODE_ONE_SHOT | 1             | Animation plays forward once then ends.
+//! SGD_ANIMATION_MODE_LOOP     | 2             | Animation plays forward repeatedly.
+//! SGD_ANIMATION_PING_PING     | 3             | Animation plays forward then backwards repeatedly.
+ SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float time, int mode);
 
 // ***** Camera *****
 
+//! Create a perspective camera
 SGD_API SGD_Camera SGD_DECL sgd_CreatePerspectiveCamera();
+
+//! Create an orthographic camera
 SGD_API SGD_Camera SGD_DECL sgd_CreateOrthographicCamera();
+
+//! Set camera vertical field of view in degrees.
 SGD_API void SGD_DECL sgd_SetCameraFOV(SGD_Camera camera, float fovY);
+
+//! Set camera near clipping plane.
 SGD_API void SGD_DECL sgd_SetCameraNear(SGD_Camera camera, float near);
+
+//! Set camera far clipping plane.
 SGD_API void SGD_DECL sgd_SetCameraFar(SGD_Camera camera, float far);
 
 // ***** Light *****
 
+//! Create a directional light.
 SGD_API SGD_Light SGD_DECL sgd_CreateDirectionalLight();
+
+//! Create a point light.
 SGD_API SGD_Light SGD_DECL sgd_CreatePointLight();
+
+//! Create a spot light.
 SGD_API SGD_Light SGD_DECL sgd_CreateSpotLight();
+
+//! Set a light's color.
 SGD_API void SGD_DECL sgd_SetLightColor(SGD_Light light, float red, float green, float blue, float alpha);
+
+//! Set a point/spot light's range.
 SGD_API void SGD_DECL sgd_SetLightRange(SGD_Light light, float range);
+
+//! Set a point/pot light's falloff.
 SGD_API void SGD_DECL sgd_SetLightFalloff(SGD_Light light, float falloff);
+
+//! Set a spot light's inner cone angle in degrees.
 SGD_API void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light light, float angle);
+
+//! Set a spot light's outer cone angle in degrees.
 SGD_API void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light light, float angle);
 
 // ***** Entity *****
 
+//! Copy an entity and its children recursively.
 SGD_API SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity entity);
+
+//! Set an entity's parent.
 SGD_API void SGD_DECL sgd_SetEntityParent(SGD_Entity entity, SGD_Entity parent);
+
+//! Get an entity's parent.
 SGD_API SGD_Entity SGD_DECL sgd_EntityParent(SGD_Entity entity);
 
+//! Set an  entity's position in world space.
 SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity entity, float tx, float ty, float tz);
+
+//! Set an  entity's rotation in world space.
 SGD_API void SGD_DECL sgd_SetEntityRotation(SGD_Entity entity, float rx, float ry, float rz);
-SGD_API void SGD_DECL sgd_MoveEntity(SGD_Entity entity, float tx, float ty, float tz);
-SGD_API void SGD_DECL sgd_TurnEntity(SGD_Entity entity, float rx, float ry, float rz);
+
+//! Translate an entity in world space.
 SGD_API void SGD_DECL sgd_TranslateEntity(SGD_Entity entity, float tx, float ty, float tz);
+
+//! Rotate an entity in world space.
 SGD_API void SGD_DECL sgd_RotateEntity(SGD_Entity entity, float rx, float ry, float rz);
 
+//! Move an entity relative to it's current orientation.
+SGD_API void SGD_DECL sgd_MoveEntity(SGD_Entity entity, float tx, float ty, float tz);
+
+//! Turn an entity relative to it's current orientation.
+SGD_API void SGD_DECL sgd_TurnEntity(SGD_Entity entity, float rx, float ry, float rz);
+
+//! Get the X component of an entity's position in world space.
 SGD_API float SGD_DECL sgd_EntityX(SGD_Entity entity);
+
+//! Get the Y component of an entity's position in world space.
 SGD_API float SGD_DECL sgd_EntityY(SGD_Entity entity);
+
+//! Get the Z component of an entity's position in world space.
 SGD_API float SGD_DECL sgd_EntityZ(SGD_Entity entity);
+
+//! Get the X rotation component (ie: 'pitch') of an entity's orientation in world space.
 SGD_API float SGD_DECL sgd_EntityRX(SGD_Entity entity);
+
+//! Get the Y rotation component (ie: 'yaw') of an entity's orientation in world space.
 SGD_API float SGD_DECL sgd_EntityRY(SGD_Entity entity);
+
+//! Get the Z rotation component (ie: 'roll') of an entity's orientation in world space.
 SGD_API float SGD_DECL sgd_EntityRZ(SGD_Entity entity);
 
 #endif

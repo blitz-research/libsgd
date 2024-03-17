@@ -25,7 +25,7 @@ void start() {
 		if (scene) scene->render();
 	});
 
-	gc = new GraphicsContext(window, wgpu::BackendType::Vulkan);
+	gc = new GraphicsContext(window, wgpu::BackendType::D3D12);
 
 	scene = new Scene(gc);
 	scene->clearColor = {1, 1, 0, 1};
@@ -40,37 +40,44 @@ void start() {
 	scene->add(skybox);
 
 	LightPtr light = new Light();
-	move(light, {0,0,-10});
+	move(light, {0, 0, -10});
 	light->color = {1, 1, 1, 1};
 	light->range = 50;
 	scene->add(light);
 
-	CameraPtr camera=new Camera();
-	camera->near=.1;
-	camera->far=1000;
-	move(camera, {0,0,0});
+	CameraPtr camera = new Camera();
+	camera->near = .1;
+	camera->far = 1000;
+	move(camera, {0, 0, 0});
 	scene->add(camera);
 
 	ModelPtr model = loadBonedModel(Path("boxanim.glb")).result();
-//	ModelPtr model = loadStaticModel(Path("gearbox.glb")).result();
+	//	ModelPtr model = loadStaticModel(Path("gearbox.glb")).result();
 
-//	ModelPtr model = new Model();
-//	auto mesh = loadGLTFMesh(Path("normaltangent.glb")).result();
-//	fit(mesh, {-1,1}, true);
-//	model->mesh=mesh;
+	//	ModelPtr model = new Model();
+	//	auto mesh = loadGLTFMesh(Path("normaltangent.glb")).result();
+	//	fit(mesh, {-1,1}, true);
+	//	model->mesh=mesh;
 
-	translate(model, {0,-1,3});
+	translate(model, {0, -1, 3});
 	scene->add(model);
 
 	float time = 0;
 
 	while (window->pollEvents()) {
 
-		model->animate(0, time += 0.5f/60.0f, AnimationMode::loop);
+		auto ms = micros();
+
+		model->animate(0, time += 0.5f / 60.0f, AnimationMode::loop);
 
 		rotate(model, {0, .001, 0});
 
 		render();
+
+		auto elapsed = sgd::micros() - ms;
+		ms += elapsed;
+
+		sgd::log() << ">>> FPS:" << 1000000.0 / elapsed;
 	}
 }
 
