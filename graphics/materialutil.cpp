@@ -14,32 +14,34 @@ Expected<Material*, FileioEx> loadMaterial(CPath path) {
 
 	auto prefix = path / path.stem();
 
+	auto texFlags = TextureFlags::mipmap|TextureFlags::filter;
+
 	if ((prefix + "_Color.jpg").exists()) {
 		material->setTexture("albedoTexture",
-							 loadTexture(prefix + "_Color.jpg", TextureFormat::srgba8, TextureFlags::filter).result());
+							 loadTexture(prefix + "_Color.jpg", TextureFormat::srgba8, texFlags).result());
 	}
 
 	if ((prefix + "_Metalness.jpg").exists()) {
 		material->setTexture("metallicTexture",
-							 loadTexture(prefix + "_Metalness.jpg", TextureFormat::rgba8, TextureFlags::filter).result());
+							 loadTexture(prefix + "_Metalness.jpg", TextureFormat::rgba8, texFlags).result());
 		material->setFloat("metallicFactor1f", 1);
 	}
 
 	if ((prefix + "_Roughness.jpg").exists()) {
 		material->setTexture("roughnessTexture",
-							 loadTexture(prefix + "_Roughness.jpg", TextureFormat::rgba8, TextureFlags::filter).result());
+							 loadTexture(prefix + "_Roughness.jpg", TextureFormat::rgba8, texFlags).result());
 		material->setFloat("roughnessFactor1f", 1);
 	}
 
 	if ((prefix + "_AmbientOcclusion.jpg").exists()) {
 		material->setTexture(
 			"occlusionTexture",
-			loadTexture(prefix + "_AmbientOcclusion.jpg", TextureFormat::rgba8, TextureFlags::filter).result());
+			loadTexture(prefix + "_AmbientOcclusion.jpg", TextureFormat::rgba8, texFlags).result());
 	}
 
 	if ((prefix + "_NormalGL.jpg").exists()) {
 		material->setTexture("normalTexture",
-							 loadTexture(prefix + "_NormalGL.jpg", TextureFormat::rgba8, TextureFlags::filter).result());
+							 loadTexture(prefix + "_NormalGL.jpg", TextureFormat::rgba8, texFlags).result());
 	}
 
 	return material;

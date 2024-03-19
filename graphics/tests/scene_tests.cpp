@@ -28,56 +28,66 @@ void start() {
 	gc = new GraphicsContext(window, wgpu::BackendType::D3D12);
 
 	scene = new Scene(gc);
-	scene->clearColor = {1, 1, 0, 1};
+	// scene->clearColor = {1, 1, 0, 1};
 	scene->ambientLightColor = {1, 1, 1, 0};
 
-	scene->envTexture =
-		loadTexture(Path("sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::mipmap).result();
+	auto skyTexture = loadTexture(Path("sunnysky-cube.png"), TextureFormat::srgba8,
+								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
+						  .result();
+
+	scene->envTexture = skyTexture;
 
 	SkyboxPtr skybox = new Skybox();
-	skybox->skyTexture = scene->envTexture;
-	skybox->roughness = .5f;
+	skybox->skyTexture = skyTexture;
+//	skybox->roughness = .25f;
 	scene->add(skybox);
 
-	LightPtr light = new Light();
-	move(light, {0, 0, -10});
-	light->color = {1, 1, 1, 1};
-	light->range = 50;
+	LightPtr light = new Light(LightType::directional);
+	turn(light, {-halfPi / 2, 0, 0});
+	//	move(light,{0,2,0});
 	scene->add(light);
 
+#if 0
 	CameraPtr camera = new Camera();
 	camera->near = .1;
 	camera->far = 1000;
-	move(camera, {0, 0, 0});
+	move(camera, {0, 1, -3});
 	scene->add(camera);
+#endif
 
-	ModelPtr model = loadBonedModel(Path("boxanim.glb")).result();
-	//	ModelPtr model = loadStaticModel(Path("gearbox.glb")).result();
+	//	MaterialPtr material = loadMaterial(Path("PavingStones119_1K-JPG")).result();
+	MaterialPtr material = loadMaterial(Path("Facade001_1K-JPG")).result();
+	MeshPtr groundMesh = createBoxMesh(Boxf{{-10, -3, -10}, {10, -2, 10}}, material);
+	transformTexCoords(groundMesh, {5, 5}, {0, 0});
+	ModelPtr ground = new Model();
+	ground->mesh = groundMesh;
+	scene->add(ground);
 
-	//	ModelPtr model = new Model();
-	//	auto mesh = loadGLTFMesh(Path("normaltangent.glb")).result();
-	//	fit(mesh, {-1,1}, true);
-	//	model->mesh=mesh;
-
-	translate(model, {0, -1, 3});
+	auto mesh = loadStaticMesh(Path("helmet.glb")).result();
+	fit(mesh, Boxf{{-1, -1, -1}, {1, 1, 1}}, true);
+	ModelPtr model = new Model();
+	model->mesh = mesh;
+	move(model, {0, 0, 3});
+//	turn(model, {0, halfPi, 0});
 	scene->add(model);
 
 	float time = 0;
 
 	while (window->pollEvents()) {
 
-		auto ms = micros();
+		if (window->keyboard()->key((uint32_t)KeyCode::LEFT).down()) {
+			turn(model, {0, -.1, 0});
+		} else if (window->keyboard()->key((uint32_t)KeyCode::RIGHT).down()) {
+			turn(model, {0, .1, 0});
+		}
 
-		model->animate(0, time += 0.5f / 60.0f, AnimationMode::loop);
-
-		rotate(model, {0, .001, 0});
+		if (window->keyboard()->key((uint32_t)KeyCode::UP).down()) {
+			turn(model, {-.1, 0, 0});
+		} else if (window->keyboard()->key((uint32_t)KeyCode::DOWN).down()) {
+			turn(model, {.1, 0, 0});
+		}
 
 		render();
-
-		auto elapsed = sgd::micros() - ms;
-		ms += elapsed;
-
-		sgd::log() << ">>> FPS:" << 1000000.0 / elapsed;
 	}
 }
 

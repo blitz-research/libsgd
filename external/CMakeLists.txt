@@ -133,7 +133,7 @@ else ()
 
     FetchContent_MakeAvailable(dawn)
 
-    target_link_libraries(lib-dawn INTERFACE dawn_native webgpu_dawn webgpu_cpp)
+    target_link_libraries(lib-dawn INTERFACE webgpu_dawn webgpu_cpp)
 
     target_include_directories(lib-dawn INTERFACE ${DAWN_INCLUDE_DIR})
 

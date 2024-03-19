@@ -4,11 +4,7 @@
 
 namespace sgd {
 
-enum struct AnimationMode {
-	oneshot = 1,
-	loop,
-	pingpong
-};
+enum struct AnimationMode { oneshot = 1, loop, pingpong };
 
 template <class T> struct AnimationKey {
 	float time;
@@ -31,7 +27,8 @@ struct AnimationSeq : public Shared {
 
 	int const bone;
 
-	AnimationSeq(int bone):bone(bone){}
+	explicit AnimationSeq(int bone) : bone(bone) {
+	}
 
 	Vec3f evaluatePosition(float time, CVec3f def) const;
 	Quatf evaluateRotation(float time, CQuatf def) const;

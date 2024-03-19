@@ -95,7 +95,7 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 	}
 	if (!warn.empty()) log() << ">>> Tiny gltf warning: " << warn;
 	if (!err.empty()) return FileioEx("Tiny gltf error: " + err);
-	if(!res) return FileioEx("Tiny gltf unknown error");
+	if (!res) return FileioEx("Tiny gltf unknown error");
 
 	cachedImages.resize(gltfModel.images.size());
 	cachedTextures.resize(gltfModel.textures.size());
@@ -104,7 +104,7 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 	return true;
 }
 
-Texture* GLTFLoader::loadTexture(int id) {
+Texture* GLTFLoader::loadTexture(int id, bool srgb) {
 	if (cachedTextures[id]) return cachedTextures[id];
 
 	auto& gltfTex = gltfModel.textures[id];
@@ -114,11 +114,11 @@ Texture* GLTFLoader::loadTexture(int id) {
 	if (gltfImage.bits != 8) SGD_PANIC("gltfImage.bits: " + std::to_string(gltfImage.bits));
 	if (gltfImage.component != 4) SGD_PANIC("gltfImage.component: " + std::to_string(gltfImage.component));
 
-	auto texFormat = TextureFormat::srgba8;
+	auto texFormat = srgb ? TextureFormat::srgba8 : TextureFormat::rgba8;
 	auto texFlags = TextureFlags::none;
 
 	if (!cachedImages[gltfTex.source]) {
-		premultiplyAlpha(gltfImage.image.data(), TextureFormat::srgba8, Vec2u(gltfImage.width, gltfImage.height),
+		premultiplyAlpha(gltfImage.image.data(), texFormat, Vec2u(gltfImage.width, gltfImage.height),
 						 gltfImage.width * bytesPerTexel(texFormat));
 		cachedImages[gltfTex.source] = true;
 	}
@@ -171,29 +171,41 @@ Material* GLTFLoader::loadMaterial(int id) {
 		material->setVector4f("albedoColor4f", Vec4f((float)factor[0], (float)factor[1], (float)factor[2], (float)factor[3]));
 		//			CLOG << "alphaMode:" << gltfMat.alphaMode << "albedoColor:" << uniforms->albedoColor;
 		auto& texInfo = pbr.baseColorTexture;
-		if (texInfo.index >= 0) material->setTexture("albedoTexture", loadTexture(texInfo.index));
+		if (texInfo.index >= 0) {
+			SGD_ASSERT(texInfo.texCoord == 0);
+			material->setTexture("albedoTexture", loadTexture(texInfo.index, true));
+		}
 	}
 	{
 		auto factor = gltfMat.emissiveFactor.data();
 		material->setVector3f("emissiveColor3f", Vec3f((float)factor[0], (float)factor[1], (float)factor[2]));
 		auto& texInfo = gltfMat.emissiveTexture;
-		if (texInfo.index >= 0) material->setTexture("emissiveTexture", loadTexture(texInfo.index));
+		if (texInfo.index >= 0) {
+			SGD_ASSERT(texInfo.texCoord == 0);
+			material->setTexture("emissiveTexture", loadTexture(texInfo.index, true));
+		}
 	}
 	{
 		auto& texInfo = gltfMat.normalTexture;
 		if (texInfo.index >= 0) {
+			SGD_ASSERT(texInfo.texCoord == 0);
+			SGD_ASSERT(texInfo.scale == 1.0f);
 			material->setTexture("normalTexture", loadTexture(texInfo.index));
 		}
 	}
 	{
 		auto& texInfo = gltfMat.occlusionTexture;
-		if (texInfo.index >= 0) material->setTexture("occlusionTexture", loadTexture(texInfo.index));
+		if (texInfo.index >= 0) {
+			SGD_ASSERT(texInfo.texCoord == 0);
+			material->setTexture("occlusionTexture", loadTexture(texInfo.index));
+		}
 	}
 	{
 		material->setFloat("metallicFactor1f", pbr.metallicFactor);
 		material->setFloat("roughnessFactor1f", pbr.roughnessFactor);
 		auto& texInfo = pbr.metallicRoughnessTexture;
 		if (texInfo.index >= 0) {
+			SGD_ASSERT(texInfo.texCoord == 0);
 			auto texture = loadTexture(texInfo.index);
 			material->setTexture("metallicTexture", texture);
 			material->setTexture("roughnessTexture", texture);
@@ -230,6 +242,7 @@ void GLTFLoader::beginMesh() {
 	meshVertices.clear();
 	meshTriangles.clear();
 	meshHasNormals = false;
+	meshHasTangents = false;
 }
 
 Mesh* GLTFLoader::endMesh() {
@@ -248,7 +261,7 @@ Mesh* GLTFLoader::endMesh() {
 
 	auto mesh = new Mesh(meshVertices, triangles, surfaces, flags);
 
-	if (bool(flags & MeshFlags::tangentsEnabled)) updateTangents(mesh);
+	if (bool(flags & MeshFlags::tangentsEnabled) && !meshHasTangents) updateTangents(mesh);
 
 	beginMesh();
 
@@ -279,11 +292,13 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 		} else if (attrib.first == "NORMAL") {
 			SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC3 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
 			copyBufferData(accessor, &vp->normal, sizeof(Vertex));
-			for (int i = 0; i < count; ++i) {
-				vp[i].normal.z = -vp[i].normal.z;
-				vp[i].normal = normalize(vp[i].normal);
-			}
+			for (int i = 0; i < count; ++i) vp[i].normal.z = -vp[i].normal.z;
 			meshHasNormals = true;
+		} else if (attrib.first == "TANGENT") {
+			SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC4 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
+			copyBufferData(accessor, &vp->tangent, sizeof(Vertex));
+			for (int i = 0; i < count; ++i) vp[i].tangent.z = -vp[i].tangent.z;
+			meshHasTangents = true;
 		} else if (attrib.first == "TEXCOORD_0") {
 			SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC2 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
 			copyBufferData(accessor, &vp->texCoords, sizeof(Vertex));

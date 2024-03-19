@@ -85,6 +85,43 @@ SGD_Material SGD_DECL sgd_LoadMaterial(SGD_String path) {
 	return sgd::createHandle(material.result());
 }
 
+SGD_Material SGD_DECL sgd_CreateMaterial() {
+	auto material = new sgd::Material(&sgd::pbrMaterialDescriptor);
+
+	return sgd::createHandle(material);
+}
+
+void SGD_DECL sgd_SetMaterialVector4f(SGD_Material hmaterial, SGD_String property, float x, float y, float z, float a) {
+	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
+
+	if (!material->setVector4f(property, {x, y, z, a})) sgd::error("Material property not found");
+}
+
+void SGD_DECL sgd_SetMaterialVector3f(SGD_Material hmaterial, SGD_String property, float x, float y, float z) {
+	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
+
+	if(!material->setVector3f(property, {x, y, z})) sgd::error("Material property not found");
+}
+
+void SGD_DECL sgd_SetMaterialVector2f(SGD_Material hmaterial, SGD_String property, float x, float y) {
+	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
+
+	if(!material->setVector2f(property, {x, y})) sgd::error("Material property not found");
+}
+
+void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String property, float n) {
+	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
+
+	if(!material->setFloat(property, n)) sgd::error("Material property not found");
+}
+
+void SGD_DECL sgd_SetMaterialTexture(SGD_Material hmaterial, SGD_String property, SGD_Texture htexture) {
+	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
+	auto texture = sgd::resolveHandle<sgd::Texture>(htexture);
+
+	if(!material->setTexture(property, texture)) sgd::error("Material property not found");
+}
+
 // ***** Mesh *****
 
 SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path) {
@@ -205,7 +242,7 @@ SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path, SGD_Bool skinned) {
 void SGD_DECL sgd_AnimateModel(SGD_Model hmodel, int animation, float time, int mode) {
 	auto model = sgd::resolveHandle<sgd::Model>(hmodel);
 
-	model->animate(animation, time, sgd::AnimationMode(mode));
+	model->animate(animation, time, (sgd::AnimationMode)mode);
 }
 
 SGD_Model SGD_DECL sgd_CreateModel() {
@@ -346,7 +383,7 @@ SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
 
 void SGD_DECL sgd_SetEntityParent(SGD_Entity hentity, SGD_Entity hparent) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
-	auto parent = hparent ? sgd::resolveHandle<sgd::Entity>(hentity) : nullptr;
+	auto parent = hparent ? sgd::resolveHandle<sgd::Entity>(hparent) : nullptr;
 
 	entity->setParent(parent);
 }

@@ -57,44 +57,45 @@ void Material::setCullMode(CullMode cullMode) {
 	invalidate(true);
 }
 
-void Material::setTexture(CString name, Texture* texture) {
+bool Material::setTexture(CString name, Texture* texture) {
 	auto it = m_desc->textureIndices.find(name);
-	SGD_ASSERT(it != m_desc->textureIndices.end());
+	if(it==m_desc->textureIndices.end()) return false;
 
 	m_bindGroup->setTexture(it->second, texture);
+	return true;
 }
 
-void Material::setVector4f(CString name, CVec4f value) {
-	SGD_ASSERT(endsWith(name, "4f"));
+bool Material::setVector4f(CString name, CVec4f value) {
 	auto it = m_desc->uniformOffsets.find(name);
-
-	SGD_ASSERT(it != m_desc->uniformOffsets.end());
+	if(it==m_desc->uniformOffsets.end()) return false;
 
 	m_uniformBuffer->update(&value, it->second, sizeof(value));
+	return true;
 }
 
-void Material::setVector3f(CString name, CVec3f value) {
+bool Material::setVector3f(CString name, CVec3f value) {
 	SGD_ASSERT(endsWith(name, "3f"));
 	auto it = m_desc->uniformOffsets.find(name);
-	SGD_ASSERT(it != m_desc->uniformOffsets.end());
+	if(it == m_desc->uniformOffsets.end()) return false;
 
 	m_uniformBuffer->update(&value, it->second, sizeof(value));
+	return true;
 }
 
-void Material::setVector2f(CString name, CVec2f value) {
-	SGD_ASSERT(endsWith(name, "2f"));
+bool Material::setVector2f(CString name, CVec2f value) {
 	auto it = m_desc->uniformOffsets.find(name);
-	SGD_ASSERT(it != m_desc->uniformOffsets.end());
+	if(it == m_desc->uniformOffsets.end()) return false;
 
 	m_uniformBuffer->update(&value, it->second, sizeof(value));
+	return true;
 }
 
-void Material::setFloat(CString name, float value) {
-	SGD_ASSERT(endsWith(name, "1f"));
+bool Material::setFloat(CString name, float value) {
 	auto it = m_desc->uniformOffsets.find(name);
-	SGD_ASSERT(it != m_desc->uniformOffsets.end());
+	if(it == m_desc->uniformOffsets.end()) return false;
 
 	m_uniformBuffer->update(&value, it->second, sizeof(value));
+	return true;
 }
 
 } // namespace sgd

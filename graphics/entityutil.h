@@ -4,8 +4,8 @@
 
 namespace sgd {
 
-inline void setPosition(Entity* entity, CVec3f trans) {
-	entity->setWorldMatrix({entity->worldMatrix().r, trans});
+inline void setPosition(Entity* entity, CVec3f pos) {
+	entity->setWorldMatrix({entity->worldMatrix().r, pos});
 }
 
 inline void setRotation(Entity* entity, CVec3f rot) {

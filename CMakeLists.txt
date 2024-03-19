@@ -139,8 +139,7 @@ if (SGD_CONFIG_DEBUG)
 		#       https://chrome.google.com/webstore/detail/cc%20%20-devtools-support-dwa/pdcpmagijalfljmkmjngeonclgbbannb
 		add_compile_options(-O1 -g2)
 		add_link_options(-O1 -g2)
-
-		add_link_options(--minify=0)    # Don't minifiy javascript
+		add_link_options(--minify=0)    # Don't minify javascript
 	endif ()
 
 else ()
@@ -148,7 +147,7 @@ else ()
 	if (SGD_OS_EMSCRIPTEN)
 		add_compile_options(-O1)
 		add_link_options(-O1)
-	elseif (SGD_OS_LINUX)
+	elseif (SGD_OS_LINUX OR SGD_OS_MACOS)
 		add_compile_options(-O3)
 	endif ()
 

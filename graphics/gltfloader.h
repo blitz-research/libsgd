@@ -20,6 +20,7 @@ private:
 	Vector<Vertex> meshVertices;
 	Map<int, Vector<Triangle>> meshTriangles; // keyed by material index
 	bool meshHasNormals{};
+	bool meshHasTangents{};
 
 	// loadBones
 	Vector<EntityPtr> bones;
@@ -33,7 +34,7 @@ private:
 	static int bytesPerComponent(int componentType);
 	static int byteSize(const tinygltf::Accessor& accessor);
 
-	Texture* loadTexture(int id);
+	Texture* loadTexture(int id, bool srgb = false);
 	Material* loadMaterial(int id);
 
 	uint8_t* bufferData(const tinygltf::Accessor& accessor) const;

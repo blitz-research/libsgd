@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 //#include "directionallights.cpp"
-#include "skinnedmesh.cpp"
-//#include "spotlight.cpp"
+//#include "skinnedmesh.cpp"
+#include "spotlight.cpp"
 
 void SGD_DECL init() {
 

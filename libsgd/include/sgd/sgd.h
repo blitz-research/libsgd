@@ -226,6 +226,26 @@ SGD_API SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int fl
 //! Load a new material.
 SGD_API SGD_Material SGD_DECL sgd_LoadMaterial(SGD_String path);
 
+//! Create a new material.
+SGD_API SGD_Material SGD_DECL sgd_CreateMaterial();
+
+//! Set material vector4 property
+SGD_API void SGD_DECL sgd_SetMaterialVector4f(SGD_Material material, SGD_String property, float x, float y, float z,float a);
+
+//! Set material vector3 property
+SGD_API void SGD_DECL sgd_SetMaterialVector3f(SGD_Material material, SGD_String property, float x, float y, float z);
+
+//! Set material vector2 property
+SGD_API void SGD_DECL sgd_SetMaterialVector2f(SGD_Material material, SGD_String property, float x, float y);
+
+//! Set material float property
+SGD_API void SGD_DECL sgd_SetMaterialFloat(SGD_Material material, SGD_String property, float n);
+
+//! Set material texture property
+SGD_API void SGD_DECL sgd_SetMaterialTexture(SGD_Material material, SGD_String property, SGD_Texture texture);
+
+//! Set a material
+
 // ***** Mesh *****
 
 //! Load a new mesh.

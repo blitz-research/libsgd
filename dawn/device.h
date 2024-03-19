@@ -2,8 +2,6 @@
 
 #include <geom/exports.h>
 
-//#include <dawn/webgpu_cpp.h>
-
 #include <webgpu/webgpu_cpp.h>
 
 struct GLFWwindow;
@@ -12,8 +10,12 @@ namespace sgd {
 
 #if SGD_OS_WINDOWS
 constexpr auto defaultBackendType = wgpu::BackendType::D3D12;
-#else
+#elif SGD_OS_LINUX
 constexpr auto defaultBackendType = wgpu::BackendType::Vulkan;
+#elif SGD_OS_MACOS
+constexpr auto defaultBackendType = wgpu::BackendType::Metal;
+#elif SGD_OS_EMSCRIPTEN
+constexpr auto defaultBackendType = wgpu::BackendType::WebGPU;
 #endif
 
 inline Signal<wgpu::Device> wgpuDeviceLost;

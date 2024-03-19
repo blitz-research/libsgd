@@ -11,10 +11,9 @@
 namespace sgd {
 
 Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
-	// No-op white envTexture
 	auto texture = new Texture({1, 1}, 6, TextureFormat::rgba8, TextureFlags::cube);
-	uint32_t data[] = {~0u, ~0u, ~0u, ~0u, ~0u, ~0u};
-	texture->update(data, 4);
+	uint32_t data[6]{0xff000000,0xff000000,0xff000000,0xff000000,0xff000000,0xff000000};
+	texture->update(data, sizeof(uint32_t));
 	envTexture = texture;
 }
 

@@ -28,13 +28,13 @@ void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flag
 int SGD_DECL sgd_WindowWidth() {
 	if(!sgd::mainWindow) sgd_Error("Window has not been created");
 
-	return g_windowSize.x;
+	return(int)g_windowSize.x;
 }
 
 int SGD_DECL sgd_WindowHeight() {
 	if(!sgd::mainWindow) sgd_Error("Window has not been created");
 
-	return g_windowSize.y;
+	return (int)g_windowSize.y;
 }
 
 int SGD_DECL sgd_PollEvents() {

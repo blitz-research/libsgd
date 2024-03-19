@@ -49,9 +49,12 @@ struct Varying {
 	out.color = instance.color * vertex.color;
 
 	if mesh_uniforms.tangentsEnabled != 0 {
-        out.tanMatrix2 = normalize(normalMatrix * vertex.normal);
-        out.tanMatrix0 = normalize(normalMatrix * vertex.tangent.xyz);
-        out.tanMatrix1 = cross(out.tanMatrix0, out.tanMatrix2) * vertex.tangent.a;
+//        out.tanMatrix2 = normalize(normalMatrix * vertex.normal);
+//        out.tanMatrix0 = normalize(normalMatrix * vertex.tangent.xyz);
+//        out.tanMatrix1 = cross(out.tanMatrix0, out.tanMatrix2) * vertex.tangent.w;
+        out.tanMatrix2 = normalMatrix * vertex.normal;
+        out.tanMatrix0 = normalMatrix * vertex.tangent.xyz;
+        out.tanMatrix1 = cross(out.tanMatrix0, out.tanMatrix2) * vertex.tangent.w;
     } else {
     	out.normal = normalize(normalMatrix * vertex.normal);
     }
@@ -66,7 +69,8 @@ struct Varying {
     var normal:vec3f;
 
     if mesh_uniforms.tangentsEnabled != 0 {
-        let tanMatrix = mat3x3f(in.tanMatrix0, in.tanMatrix1, in.tanMatrix2);
+//        let tanMatrix = mat3x3f(in.tanMatrix0, in.tanMatrix1, in.tanMatrix2);
+        let tanMatrix = mat3x3f(normalize(in.tanMatrix0), normalize(in.tanMatrix1), in.tanMatrix2);
         normal = normalize(tanMatrix * material.normal);
     }else{
         normal = normalize(in.normal);

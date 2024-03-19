@@ -14,14 +14,14 @@
 #undef Success
 #undef Always
 #undef None
-#elif SGD_OS_MACOS
-#define GLFW_EXPOSE_NATIVE_COCOA 1
-#include <GLFW/glfw3native.h>
-// Defined in device.mm
-NSLayer* createMetalLayer(GLFWwindow* window);
 #endif
 
 namespace sgd {
+
+#if SGD_OS_MACOS
+// Defined in device.mm
+void* createMetalLayer(GLFWwindow* window);
+#endif
 
 namespace {
 
@@ -113,8 +113,8 @@ wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) 
 	wgpu::SurfaceDescriptor surfaceDesc{};
 	surfaceDesc.nextInChain = &nativeDesc;
 
-	wgpu::Surface surface = wgpuInstanceCreateSurface(getWGPUInstance().Get(), (WGPUSurfaceDescriptor*)&surfaceDesc);
-	//	wgpu::Surface surface = getWGPUInstance().CreateSurface(&surfaceDesc);
+	//wgpu::Surface surface = wgpuInstanceCreateSurface(getWGPUInstance().Get(), (WGPUSurfaceDescriptor*)&surfaceDesc);
+	wgpu::Surface surface = getWGPUInstance().CreateSurface(&surfaceDesc);
 
 	return surface;
 }
@@ -129,8 +129,8 @@ wgpu::SwapChain createWGPUSwapChain(const wgpu::Device& device, const wgpu::Surf
 #if SGD_OS_EMSCRIPTEN
 	desc.presentMode = wgpu::PresentMode::Fifo;
 #else
-//	desc.presentMode = wgpu::PresentMode::Mailbox;	// vsync = off?
-	desc.presentMode = wgpu::PresentMode::Fifo;		// vsync = on?
+//	desc.presentMode = wgpu::PresentMode::Mailbox;	// vsync = off
+	desc.presentMode = wgpu::PresentMode::Fifo;		// vsync = on
 #endif
 
 	auto swapChain = device.CreateSwapChain(surface, &desc);

@@ -11,7 +11,7 @@ namespace sgd {
 //
 // https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn/glfw/utils_metal.mm
 
-NSLayer* createMetalLayer(GLFWwindow* window) {
+void* createMetalLayer(GLFWwindow* window) {
 	@autoreleasepool {
 
 		NSWindow* nsWindow = glfwGetCocoaWindow(window);

@@ -47,15 +47,15 @@ struct Material : GraphicsResource {
 		return m_cullMode;
 	}
 
-	void setVector4f(CString name, CVec4f value);
+	bool setVector4f(CString name, CVec4f value);
 
-	void setVector3f(CString name, CVec3f value);
+	bool setVector3f(CString name, CVec3f value);
 
-	void setVector2f(CString name, CVec2f value);
+	bool setVector2f(CString name, CVec2f value);
 
-	void setFloat(CString name, float value);
+	bool setFloat(CString name, float value);
 
-	void setTexture(CString name, Texture* value);
+	bool setTexture(CString name, Texture* value);
 
 	BindGroup* bindGroup() const {
 		return m_bindGroup;

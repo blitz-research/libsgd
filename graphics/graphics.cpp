@@ -70,6 +70,8 @@ BindGroup* createBindGroup0() {
 	bindGroup->setBuffer(1, new Buffer(BufferType::uniform, &lightingUniforms, sizeof(lightingUniforms)));
 
 	auto envTexture = new Texture({1, 1}, 6, TextureFormat::rgba8, TextureFlags::cube);
+	uint32_t data[6]{0xff000000,0xff000000,0xff000000,0xff000000,0xff000000,0xff000000};
+	envTexture->update(data, sizeof(uint32_t));
 	bindGroup->setTexture(2, envTexture);
 
 	return bindGroup;
