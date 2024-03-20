@@ -12,19 +12,15 @@
 
 ``python/windows-x64``: Windows 64 bit python module. Both the _libsgd.py and _libsgd.pyd files must be in the current directory when you run a python app that wants to use libsgd.
 
-``blitz3d/runtime.dll``: Runtime lib for Blitz3d. This should be copied to your Blitz3D's 'bin' directory. Note that it entirely replaces the existing 2d/3d command set, so you should back up your current version first.
+``help/html``: Doxygen generated help files.
 
-``examples``: a bunch of simple examples.
+``blitz3d``: Blitz3d replacement runtime.dll and sample code.
 
 #### Notes
 
-Most folders contain very short 'helloworld' demos to get you started.
+Most folders contain very short 'helloworld' demos to get you started. See source code for simple build/run instructions.
 
-This release only contains the 'dll' versions of LibSGD. This is because the 64 bit release version of the static lib currently comes it at around 500M(!) and I'm not sure why as yet (The 32 bit version is 'only' 157M) so to keep the release tidier I'm leaving it out at this stage.
-
-Ditto, this releases contains 64 bit releases only, except for Blitz3D. If you need a static or 32 bit lib for Windows/Linux, please contact me.
-
-I am not yet sure how to 'package' node.js and python modules correctly so using them is currently a bit untidy.
+This release only contains the 'dll' version of the sgd library, as the static version currently weighs in at over several hundred megabytes. We're working on improving this, but in the meantime if you need the static lib for some reason (eg: both the node.js and blitz3d targets link with it, even though they only produce 8M libs) please get in touch at the Blitz World forum: skirmish-dev.net/forum
 
 ##### Credits
 

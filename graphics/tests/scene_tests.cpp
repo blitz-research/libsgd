@@ -56,9 +56,9 @@ void start() {
 #endif
 
 	//	MaterialPtr material = loadMaterial(Path("PavingStones119_1K-JPG")).result();
-	MaterialPtr material = loadMaterial(Path("Facade001_1K-JPG")).result();
+	MaterialPtr material = loadMaterial(Path("Tiles019_1K-JPG")).result();
 	MeshPtr groundMesh = createBoxMesh(Boxf{{-10, -3, -10}, {10, -2, 10}}, material);
-	transformTexCoords(groundMesh, {5, 5}, {0, 0});
+	transformTexCoords(groundMesh, {3, 3}, {0, 0});
 	ModelPtr ground = new Model();
 	ground->mesh = groundMesh;
 	scene->add(ground);
