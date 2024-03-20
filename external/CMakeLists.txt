@@ -17,7 +17,7 @@ FetchContent_Declare(stb
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
         EXCLUDE_FROM_ALL
-        )
+)
 
 FetchContent_MakeAvailable(stb)
 
@@ -32,7 +32,7 @@ FetchContent_Declare(json11
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
         EXCLUDE_FROM_ALL
-        )
+)
 
 FetchContent_MakeAvailable(json11)
 
@@ -44,7 +44,7 @@ if (SGD_OS_EMSCRIPTEN)
 
     target_link_options(glfw INTERFACE -sUSE_GLFW=3)
 
-else()
+else ()
 
     FetchContent_Declare(glfw
             GIT_REPOSITORY https://github.com/blitz-research/glfw.git
@@ -53,7 +53,7 @@ else()
             GIT_SHALLOW TRUE
             GIT_PROGRESS TRUE
             EXCLUDE_FROM_ALL
-            )
+    )
 
     FetchContent_MakeAvailable(glfw)
 
@@ -68,7 +68,7 @@ FetchContent_Declare(tinygltf
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
         EXCLUDE_FROM_ALL
-        )
+)
 
 #set(TINYGLTF_HEADER_ONLY ON)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
@@ -95,27 +95,28 @@ endif ()
 
 ##### target: libcurl #####
 
-if(NOT SGD_OS_EMSCRIPTEN)
+if (NOT SGD_OS_EMSCRIPTEN)
 
     FetchContent_Declare(libcurl
-        GIT_REPOSITORY https://github.com/blitz-research/curl.git
-        GIT_TAG ea7322ed14e26eb9ea715f4637b28fdecbefe2a1
-        GIT_SUBMODULES ""
-        GIT_SHALLOW TRUE
-        GIT_PROGRESS TRUE
-        EXCLUDE_FROM_ALL
+            GIT_REPOSITORY https://github.com/blitz-research/curl.git
+            GIT_TAG ea7322ed14e26eb9ea715f4637b28fdecbefe2a1
+            GIT_SUBMODULES ""
+            GIT_SHALLOW TRUE
+            GIT_PROGRESS TRUE
+            EXCLUDE_FROM_ALL
     )
 
     set(BUILD_CURL_EXE OFF)
     set(CURL_DISABLE_LDAP ON)
-    set(CURL_ENABLE_SSL ON)
-    set(CURL_USE_SCHANNEL ON)
-    set(CURL_USE_LIBSSH OFF)
-    set(CURL_USE_LIBSSH2 OFF)
+    if (SGD_OS_WINDOWS)
+        set(CURL_USE_SCHANNEL ON)
+    else ()
+        set(CURL_USE_LIBSSH ON)
+    endif ()
 
     FetchContent_MakeAvailable(libcurl)
 
-endif()
+endif ()
 
 ##### target: lib-dawn #####
 
@@ -135,7 +136,7 @@ else ()
             GIT_SHALLOW TRUE
             GIT_PROGRESS TRUE
             EXCLUDE_FROM_ALL
-            )
+    )
 
     set(DAWN_FETCH_DEPENDENCIES ON)
     set(DAWN_BUILD_SAMPLES OFF)

@@ -4,8 +4,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(libsgd_tests)
 
-add_executable(libsgd_tests libsgd_tests.c)
-
 function(add name)
 	add_executable(${name} ${name}.c)
 	target_link_libraries(${name} libsgd)
