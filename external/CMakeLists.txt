@@ -107,12 +107,14 @@ if (NOT SGD_OS_EMSCRIPTEN)
     )
 
     set(BUILD_CURL_EXE OFF)
-    set(CURL_DISABLE_LDAP ON)
-    if (SGD_OS_WINDOWS)
+    set(CURL_DISABLE_TESTS ON)
+
+    if(SGD_OS_WINDOWS)
         set(CURL_USE_SCHANNEL ON)
-    else ()
-        set(CURL_USE_LIBSSH ON)
-    endif ()
+    else()
+        set(CURL_USE_OPENSSL ON)
+        set(CURL_DISABLE_ALTSVC ON) # Missing header?
+    endif()
 
     FetchContent_MakeAvailable(libcurl)
 
@@ -147,9 +149,9 @@ else ()
         set(DAWN_ENABLE_D3D11 ON)
         set(DAWN_ENABLE_VULKAN ON)
     else ()
-        set(ENABLE_OPENGLES ON)
-        set(ENABLE_DESKTOP_GL ON)
-        set(ENABLE_VULKAN ON)
+        set(DAWN_ENABLE_OPENGLES ON)
+        set(DAWN_ENABLE_DESKTOP_GL ON)
+        set(DAWN_ENABLE_VULKAN ON)
     endif ()
 
     set(TINT_BUILD_CMD_TOOLS OFF)

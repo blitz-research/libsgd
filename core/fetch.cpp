@@ -34,7 +34,7 @@ String fetch(String url, curl_write_callback writeFunc, void* writeData) {
 	if (startsWith(url, "sgd://")) {
 		static const String SGD_URL = "https://skirmish-dev.net/libsgd/";
 		url = SGD_URL + url.substr(6);
-		log() << "### Remapped url:"<<url;
+		log() << "### Remapped url:" << url;
 	}
 
 	auto curl = openCurl();
@@ -48,9 +48,9 @@ String fetch(String url, curl_write_callback writeFunc, void* writeData) {
 
 	auto result = curl_easy_perform(curl);
 
-	int httpStatus = 1234;
+	long httpStatus = -1;
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
-	if(result!=CURLcode::CURLE_OK) {
+	if (result != CURLcode::CURLE_OK) {
 		// if (httpStatus < 200 || httpStatus >= 300) log() << "### CURL HttpStatus:" << httpStatus;
 		log() << "### CURL HttpStatus:" << httpStatus;
 		log() << "### CURL code:" << curl_easy_strerror(result);

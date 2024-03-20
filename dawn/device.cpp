@@ -113,8 +113,11 @@ wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) 
 	wgpu::SurfaceDescriptor surfaceDesc{};
 	surfaceDesc.nextInChain = &nativeDesc;
 
-	//wgpu::Surface surface = wgpuInstanceCreateSurface(getWGPUInstance().Get(), (WGPUSurfaceDescriptor*)&surfaceDesc);
-	wgpu::Surface surface = getWGPUInstance().CreateSurface(&surfaceDesc);
+	wgpu::Surface surface = wgpuInstanceCreateSurface(getWGPUInstance().Get(), (WGPUSurfaceDescriptor*)&surfaceDesc);
+
+	//Don't use! Causes weird missing symbols errors on Linux!
+	//
+//	wgpu::Surface surface = getWGPUInstance().CreateSurface(&surfaceDesc);
 
 	return surface;
 }

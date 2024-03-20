@@ -75,7 +75,7 @@ function(create_bundled_lib output_lib output_libname input_lib)
 
     list(REMOVE_DUPLICATES static_libs)
 
-#    message("### Dependencies: ${static_libs}")
+    message("### Dependencies: ${static_libs}")
 
     set(output_file ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${output_libname}${CMAKE_STATIC_LIBRARY_SUFFIX})
 
