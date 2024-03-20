@@ -1,4 +1,4 @@
-const sgd = require("./libsgd");
+const sgd = require("./sgd");
 
 sgd.CreateWindow(640, 480, "Hello World!", 0);
 sgd.CreateScene();
