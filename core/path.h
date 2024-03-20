@@ -14,7 +14,10 @@ using CPath = const Path&;
 struct Path {
 	explicit Path(String str);
 
-	std::filesystem::path resolve() const;
+	bool isUrl() const;
+
+	bool isValidFilePath() const;
+	std::filesystem::path filePath() const;
 
 	bool exists() const;
 	bool isFile() const;
@@ -48,5 +51,7 @@ Path operator/(CPath x, CPath y);
 Path operator/(CPath x, CString y);
 Path operator/(CString x, CPath y);
 Path operator+(CPath x, CString y);
+
+String appDir();
 
 }

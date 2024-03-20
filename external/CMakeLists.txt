@@ -93,6 +93,30 @@ if (SGD_OS_WINDOWS)
 endif ()
 ]]
 
+##### target: libcurl #####
+
+if(NOT SGD_OS_EMSCRIPTEN)
+
+    FetchContent_Declare(libcurl
+        GIT_REPOSITORY https://github.com/blitz-research/curl.git
+        GIT_TAG ea7322ed14e26eb9ea715f4637b28fdecbefe2a1
+        GIT_SUBMODULES ""
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        EXCLUDE_FROM_ALL
+    )
+
+    set(BUILD_CURL_EXE OFF)
+    set(CURL_DISABLE_LDAP ON)
+    set(CURL_ENABLE_SSL ON)
+    set(CURL_USE_SCHANNEL ON)
+    set(CURL_USE_LIBSSH OFF)
+    set(CURL_USE_LIBSSH2 OFF)
+
+    FetchContent_MakeAvailable(libcurl)
+
+endif()
+
 ##### target: lib-dawn #####
 
 add_library(lib-dawn INTERFACE)

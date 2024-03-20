@@ -1,6 +1,8 @@
 #include "fileio.h"
 
 #include "log.h"
+#include "stringutil.h"
+#include "fetch.h"
 
 #include <fstream>
 #include <sstream>
@@ -14,7 +16,16 @@
 namespace sgd {
 
 Expected<String, FileioEx> loadString(CPath path) {
-	auto fpath = path.resolve();
+
+	if(path.isUrl()) {
+		auto r = fetchString(path.str());
+		if(!r) return FileioEx(r.error().message());
+		return r.result();
+	}
+
+	if(!path.isValidFilePath()) return FileioEx("Invalid file path");
+
+	auto fpath = path.filePath();
 
 	std::error_code ec;
 	auto size = std::filesystem::file_size(fpath, ec);
@@ -32,7 +43,10 @@ Expected<String, FileioEx> loadString(CPath path) {
 }
 
 Expected<bool, FileioEx> saveString(CString str, CPath path) {
-	auto fpath = path.resolve();
+
+	if(!path.isValidFilePath()) return FileioEx("Invalid file path");
+
+	auto fpath = path.filePath();
 
 	std::ofstream fs(fpath, std::ios::binary | std::ios::trunc);
 	if (!fs.is_open()) return FileioEx{"IO error opening file"};
@@ -43,7 +57,16 @@ Expected<bool, FileioEx> saveString(CString str, CPath path) {
 }
 
 Expected<Data, FileioEx> loadData(CPath path) {
-	auto fpath = path.resolve();
+
+	if(path.isUrl()) {
+		auto r = fetchData(path.str());
+		if(!r) return FileioEx(r.error().message());
+		return r.result();
+	}
+
+	if(!path.isValidFilePath()) return FileioEx("Invalid file path");
+
+	auto fpath = path.filePath();
 
 	std::error_code ec;
 	auto size = std::filesystem::file_size(fpath, ec);
@@ -61,7 +84,10 @@ Expected<Data, FileioEx> loadData(CPath path) {
 }
 
 Expected<bool, FileioEx> saveData(CData data, CPath path) {
-	auto fpath = path.resolve();
+
+	if(!path.isValidFilePath()) return FileioEx("Invalid file path");
+
+	auto fpath = path.filePath();
 
 	std::ofstream fs(fpath, std::ios::binary | std::ios::trunc);
 	if (!fs.is_open()) return FileioEx{"IO error opening file"};
@@ -70,12 +96,5 @@ Expected<bool, FileioEx> saveData(CData data, CPath path) {
 
 	return true;
 }
-
-#if SGD_OS_WINDOWS
-void openURL(CString url) {
-	CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
-	ShellExecute(HWND_DESKTOP, nullptr, url.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
-}
-#endif
 
 } // namespace sgd

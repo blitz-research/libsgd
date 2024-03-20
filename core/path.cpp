@@ -1,6 +1,7 @@
 #include "path.h"
 
 #include "log.h"
+#include "stringutil.h"
 
 #include <fstream>
 #include <sstream>
@@ -29,7 +30,7 @@ String join(CString x, CString y) {
 
 std::filesystem::path appPath() {
 	static std::filesystem::path path;
-	if(!path.empty()) return path;
+	if (!path.empty()) return path;
 
 #if SGD_OS_WINDOWS
 
@@ -66,33 +67,31 @@ std::filesystem::path appPath() {
 Path::Path(String path) : m_str(std::move(path)) {
 }
 
-std::filesystem::path Path::resolve() const {
+bool Path::isUrl() const {
 
-	// Check . dir...
-	auto path = std::filesystem::current_path() / m_str;
-	if(std::filesystem::exists(path)) return path;
+	return startsWith(m_str, "http://") || startsWith(m_str, "https://") || startsWith(m_str, "sgd://");
+}
 
-	// Check ./assets dir...
-	path = std::filesystem::current_path() / "assets" / m_str;
-	if(std::filesystem::exists(path)) return path;
+bool Path::isValidFilePath() const {
 
-	// Check exe/assets dir...
-	path = appPath().parent_path() / m_str;
-	if(std::filesystem::exists(path)) return path;
+	return !isUrl();
+}
 
-	return {};
+std::filesystem::path Path::filePath() const {
+
+	return std::filesystem::absolute(m_str).u8string();
 }
 
 bool Path::exists() const {
-	return std::filesystem::exists(resolve());
+	return std::filesystem::exists(filePath());
 }
 
 bool Path::isFile() const {
-	return std::filesystem::is_regular_file(resolve());
+	return std::filesystem::is_regular_file(filePath());
 }
 
 bool Path::isDir() const {
-	return std::filesystem::is_directory(resolve());
+	return std::filesystem::is_directory(filePath());
 }
 
 String Path::name() const {
@@ -126,6 +125,10 @@ Path operator/(CString x, CPath y) {
 
 Path operator+(CPath x, CString y) {
 	return Path(x.str() + y);
+}
+
+String appDir() {
+	return appPath().u8string();
 }
 
 } // namespace sgd

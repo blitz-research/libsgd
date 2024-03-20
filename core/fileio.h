@@ -14,7 +14,7 @@ struct FileioEx {
 	explicit FileioEx(String message) : m_message(std::move(message)) {
 	}
 
-	String message() const {
+	CString message() const {
 		return m_message;
 	}
 
