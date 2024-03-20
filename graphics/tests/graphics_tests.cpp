@@ -48,14 +48,6 @@ void render() {
 	gc->present(gc->colorBuffer());
 }
 
-void rrender() {
-	if (!window->pollEvents()) std::exit(0);
-
-	requestRender(rrender);
-
-	render();
-}
-
 void start() {
 
 	window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::resizable);
@@ -67,7 +59,7 @@ void start() {
 	});
 
 	TexturePtr envTexture =
-		loadTexture(Path("sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::filter).result();
+		loadTexture(Path("sgd://assets/sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::filter).result();
 
 	gc->bindGroup0()->setTexture(2, envTexture);
 
@@ -78,14 +70,9 @@ void start() {
 	lighting.pointLights[0].falloff = 1;
 	lighting.pointLights[0].range = 25;
 
-	MaterialPtr material = loadMaterial(Path("Bricks076C_1K-JPG")).result();
-	//MaterialPtr material = loadMaterial(Path("Marble008_1K-JPG")).result();
-	// MaterialPtr material = loadMaterial(Path("Facade001_1K-JPG"));
-	//MaterialPtr material = loadMaterial(Path("Facade018A_1K-JPG"));
-	//MaterialPtr material = loadMaterial(Path("PavingStones131_1K-JPG"));
+	MaterialPtr material = loadMaterial(Path("sgd://assets/PavingStones131_1K-JPG")).result();
 
 	MeshPtr mesh = createSphereMesh(1, 64, 32, material);
-	//MeshPtr mesh = createBoxMesh(Boxf(-1, 1), material);
 
 	transformTexCoords(mesh, {4,2}, {0,0});
 
@@ -95,7 +82,9 @@ void start() {
 	insts[0].color = {1, 1, 1, 1};
 	meshRenderer->unlockInstances();
 
-	requestRender(rrender);
+	while(window->pollEvents()) {
+		requestRender(render);
+	}
 }
 
 int main() {

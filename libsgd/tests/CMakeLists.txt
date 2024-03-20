@@ -6,5 +6,11 @@ project(libsgd_tests)
 
 add_executable(libsgd_tests libsgd_tests.c)
 
-target_link_libraries(libsgd_tests libsgd)
-copy_assets_to_binary_dir(libsgd_tests)
+function(add name)
+	add_executable(${name} ${name}.c)
+	target_link_libraries(${name} libsgd)
+endfunction()
+
+add(libsgd_tests_skinnedmesh)
+add(libsgd_tests_directionallight)
+add(libsgd_tests_spotlight)

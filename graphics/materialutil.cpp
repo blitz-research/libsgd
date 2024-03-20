@@ -8,40 +8,39 @@ namespace sgd {
 
 Expected<Material*, FileioEx> loadMaterial(CPath path) {
 
-	if(!path.isDir()) return FileioEx("Material directory does not exist");
+	if (!path.isUrl() && !path.isDir()) return FileioEx("Material directory does not exist");
 
 	auto material = new Material(&pbrMaterialDescriptor);
 
 	auto prefix = path / path.stem();
 
-	auto texFlags = TextureFlags::mipmap|TextureFlags::filter;
+	auto texFlags = TextureFlags::mipmap | TextureFlags::filter;
 
-	if ((prefix + "_Color.jpg").exists()) {
-		material->setTexture("albedoTexture",
-							 loadTexture(prefix + "_Color.jpg", TextureFormat::srgba8, texFlags).result());
+	auto tryLoad = [=](CString suffix, TextureFormat format) -> Texture* {
+		auto texture = loadTexture(prefix + suffix, format, texFlags);
+		return texture ? texture.result() : nullptr;
+	};
+
+	if (auto texture = tryLoad("_Color.jpg", TextureFormat::srgba8)) {
+		material->setTexture("albedoTexture", texture);
 	}
 
-	if ((prefix + "_Metalness.jpg").exists()) {
-		material->setTexture("metallicTexture",
-							 loadTexture(prefix + "_Metalness.jpg", TextureFormat::rgba8, texFlags).result());
+	if (auto texture = tryLoad("_Metalness.jpg", TextureFormat::rgba8)) {
+		material->setTexture("metallicTexture", texture);
 		material->setFloat("metallicFactor1f", 1);
 	}
 
-	if ((prefix + "_Roughness.jpg").exists()) {
-		material->setTexture("roughnessTexture",
-							 loadTexture(prefix + "_Roughness.jpg", TextureFormat::rgba8, texFlags).result());
+	if (auto texture = tryLoad("_Roughness.jpg", TextureFormat::rgba8)) {
+		material->setTexture("roughnessTexture", texture);
 		material->setFloat("roughnessFactor1f", 1);
 	}
 
-	if ((prefix + "_AmbientOcclusion.jpg").exists()) {
-		material->setTexture(
-			"occlusionTexture",
-			loadTexture(prefix + "_AmbientOcclusion.jpg", TextureFormat::rgba8, texFlags).result());
+	if (auto texture = tryLoad("_AmbientOcclusion.jpg", TextureFormat::rgba8)) {
+		material->setTexture("occlusionTexture", texture);
 	}
 
-	if ((prefix + "_NormalGL.jpg").exists()) {
-		material->setTexture("normalTexture",
-							 loadTexture(prefix + "_NormalGL.jpg", TextureFormat::rgba8, texFlags).result());
+	if (auto texture = tryLoad("_NormalGL.jpg", TextureFormat::rgba8)) {
+		material->setTexture("normalTexture", texture);
 	}
 
 	return material;

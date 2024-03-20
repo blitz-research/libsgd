@@ -9,7 +9,7 @@ inline void setPosition(Entity* entity, CVec3f pos) {
 }
 
 inline void setRotation(Entity* entity, CVec3f rot) {
-	entity->setWorldMatrix({Mat3f::rotation(rot), entity->worldMatrix().t});
+	entity->setWorldMatrix({Mat3f::rotation(rot * degreesToRadians), entity->worldMatrix().t});
 }
 
 inline void move(Entity* entity, CVec3f trans) {
@@ -17,7 +17,7 @@ inline void move(Entity* entity, CVec3f trans) {
 }
 
 inline void turn(Entity* entity, CVec3f rot) {
-	entity->setWorldMatrix(entity->worldMatrix() * AffineMat4f::rotation(rot));
+	entity->setWorldMatrix(entity->worldMatrix() * AffineMat4f::rotation(rot * degreesToRadians));
 }
 
 inline void translate(Entity* entity, CVec3f trans) {
@@ -26,7 +26,7 @@ inline void translate(Entity* entity, CVec3f trans) {
 }
 
 inline void rotate(Entity* entity, CVec3f rot) {
-	auto m = AffineMat4f::rotation(rot) * entity->worldMatrix();
+	auto m = AffineMat4f::rotation(rot * degreesToRadians) * entity->worldMatrix();
 	entity->setWorldMatrix({m.r, entity->worldMatrix().t});
 }
 

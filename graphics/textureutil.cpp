@@ -99,9 +99,7 @@ Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, Textu
 	return texture;
 }
 
-
 void premultiplyAlpha(Texture* texture) {
-
 
 }
 

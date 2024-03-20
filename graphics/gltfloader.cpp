@@ -90,7 +90,7 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 	if (data.size() >= 4 && !std::memcmp(data.data(), magic, 4)) {
 		res = gltfLoader.LoadBinaryFromMemory(&gltfModel, &err, &warn, data.data(), data.size());
 	} else {
-		auto baseDir = path.resolve().parent_path().u8string();
+		auto baseDir = path.filePath().parent_path().u8string();
 		res = gltfLoader.LoadASCIIFromString(&gltfModel, &err, &warn, (char*)data.data(), data.size(), baseDir);
 	}
 	if (!warn.empty()) log() << ">>> Tiny gltf warning: " << warn;

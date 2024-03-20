@@ -28,10 +28,9 @@ void start() {
 	gc = new GraphicsContext(window, wgpu::BackendType::D3D12);
 
 	scene = new Scene(gc);
-	// scene->clearColor = {1, 1, 0, 1};
 	scene->ambientLightColor = {1, 1, 1, 0};
 
-	auto skyTexture = loadTexture(Path("sunnysky-cube.png"), TextureFormat::srgba8,
+	auto skyTexture = loadTexture(Path("sgd://assets/sunnysky-cube.png"), TextureFormat::srgba8,
 								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
 						  .result();
 
@@ -39,12 +38,10 @@ void start() {
 
 	SkyboxPtr skybox = new Skybox();
 	skybox->skyTexture = skyTexture;
-//	skybox->roughness = .25f;
 	scene->add(skybox);
 
 	LightPtr light = new Light(LightType::directional);
 	turn(light, {-halfPi / 2, 0, 0});
-	//	move(light,{0,2,0});
 	scene->add(light);
 
 #if 0
@@ -55,20 +52,18 @@ void start() {
 	scene->add(camera);
 #endif
 
-	//	MaterialPtr material = loadMaterial(Path("PavingStones119_1K-JPG")).result();
-	MaterialPtr material = loadMaterial(Path("Tiles019_1K-JPG")).result();
+	MaterialPtr material = loadMaterial(Path("sgd://assets/Tiles019_1K-JPG")).result();
 	MeshPtr groundMesh = createBoxMesh(Boxf{{-10, -3, -10}, {10, -2, 10}}, material);
 	transformTexCoords(groundMesh, {3, 3}, {0, 0});
 	ModelPtr ground = new Model();
 	ground->mesh = groundMesh;
 	scene->add(ground);
 
-	auto mesh = loadStaticMesh(Path("helmet.glb")).result();
+	auto mesh = loadStaticMesh(Path("sgd://assets/helmet.glb")).result();
 	fit(mesh, Boxf{{-1, -1, -1}, {1, 1, 1}}, true);
 	ModelPtr model = new Model();
 	model->mesh = mesh;
 	move(model, {0, 0, 3});
-//	turn(model, {0, halfPi, 0});
 	scene->add(model);
 
 	float time = 0;

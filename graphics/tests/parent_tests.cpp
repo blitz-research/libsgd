@@ -16,13 +16,9 @@ void render() {
 
 void start() {
 
-	window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::resizable);
+	window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::none);
 
 	window->closeClicked.connect(nullptr, [] { std::exit(0); });
-
-	//	window->sizeChanged.connect(nullptr, [](CVec2u) {
-	//		if (scene) scene->render();
-	//	});
 
 	gc = new GraphicsContext(window);
 
@@ -31,7 +27,7 @@ void start() {
 	scene->ambientLightColor = {1, 1, 1, 0};
 
 	scene->envTexture =
-		loadTexture(Path("sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::mipmap).result();
+		loadTexture(Path("sgd://assets/sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::mipmap).result();
 
 	SkyboxPtr skybox = new Skybox();
 	skybox->skyTexture = scene->envTexture;
@@ -60,7 +56,7 @@ void start() {
 	ModelPtr child1 = new Model();
 	child1->setParent(root);
 	child1->setLocalMatrix(AffineMat4f::TRS({1,-1,0}));
-	child1->mesh = createSphereMesh(.5,64,32,colorMaterial({0,1,0,1},0,0));
+	child1->mesh = createSphereMesh(.5,64,32,colorMaterial({0,0,1,1},0,0));
 	scene->add(child1);
 
 	while (window->pollEvents()) {

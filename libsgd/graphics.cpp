@@ -100,26 +100,26 @@ void SGD_DECL sgd_SetMaterialVector4f(SGD_Material hmaterial, SGD_String propert
 void SGD_DECL sgd_SetMaterialVector3f(SGD_Material hmaterial, SGD_String property, float x, float y, float z) {
 	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
 
-	if(!material->setVector3f(property, {x, y, z})) sgd::error("Material property not found");
+	if (!material->setVector3f(property, {x, y, z})) sgd::error("Material property not found");
 }
 
 void SGD_DECL sgd_SetMaterialVector2f(SGD_Material hmaterial, SGD_String property, float x, float y) {
 	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
 
-	if(!material->setVector2f(property, {x, y})) sgd::error("Material property not found");
+	if (!material->setVector2f(property, {x, y})) sgd::error("Material property not found");
 }
 
 void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String property, float n) {
 	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
 
-	if(!material->setFloat(property, n)) sgd::error("Material property not found");
+	if (!material->setFloat(property, n)) sgd::error("Material property not found");
 }
 
 void SGD_DECL sgd_SetMaterialTexture(SGD_Material hmaterial, SGD_String property, SGD_Texture htexture) {
 	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
 	auto texture = sgd::resolveHandle<sgd::Texture>(htexture);
 
-	if(!material->setTexture(property, texture)) sgd::error("Material property not found");
+	if (!material->setTexture(property, texture)) sgd::error("Material property not found");
 }
 
 // ***** Mesh *****
@@ -405,7 +405,7 @@ void SGD_DECL sgd_SetEntityPosition(SGD_Entity hentity, float tx, float ty, floa
 void SGD_DECL sgd_SetEntityRotation(SGD_Entity hentity, float rx, float ry, float rz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
-	setRotation(entity, {rx * sgd::degreesToRadians, ry * sgd::degreesToRadians, rz * sgd::degreesToRadians});
+	setRotation(entity, {rx, ry, rz});
 }
 
 void SGD_DECL sgd_MoveEntity(SGD_Entity hentity, float tx, float ty, float tz) {
@@ -417,7 +417,7 @@ void SGD_DECL sgd_MoveEntity(SGD_Entity hentity, float tx, float ty, float tz) {
 void SGD_DECL sgd_TurnEntity(SGD_Entity hentity, float rx, float ry, float rz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
-	turn(entity, {rx * sgd::degreesToRadians, ry * sgd::degreesToRadians, rz * sgd::degreesToRadians});
+	turn(entity, {rx, ry, rz});
 }
 
 void SGD_DECL sgd_TranslateEntity(SGD_Entity hentity, float tx, float ty, float tz) {
@@ -429,7 +429,7 @@ void SGD_DECL sgd_TranslateEntity(SGD_Entity hentity, float tx, float ty, float 
 void SGD_DECL sgd_RotateEntity(SGD_Entity hentity, float rx, float ry, float rz) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
-	rotate(entity, {rx * sgd::degreesToRadians, ry * sgd::degreesToRadians, rz * sgd::degreesToRadians});
+	rotate(entity, {rx, ry, rz});
 }
 
 float SGD_DECL sgd_EntityX(SGD_Entity hentity) {
@@ -453,17 +453,17 @@ float SGD_DECL sgd_EntityZ(SGD_Entity hentity) {
 float SGD_DECL sgd_EntityRX(SGD_Entity hentity) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
-	return sgd::pitch(entity->worldMatrix().r);
+	return sgd::pitch(entity->worldMatrix().r) * sgd::radiansToDegrees;
 }
 
 float SGD_DECL sgd_EntityRY(SGD_Entity hentity) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
-	return sgd::yaw(entity->worldMatrix().r);
+	return sgd::yaw(entity->worldMatrix().r) * sgd::radiansToDegrees;
 }
 
 float SGD_DECL sgd_EntityRZ(SGD_Entity hentity) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 
-	return sgd::roll(entity->worldMatrix().r);
+	return sgd::roll(entity->worldMatrix().r) * sgd::radiansToDegrees;
 }
