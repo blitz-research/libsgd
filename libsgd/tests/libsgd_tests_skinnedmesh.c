@@ -7,7 +7,7 @@ void entry() {
 
 	SGD_Light light = sgd_CreateDirectionalLight();
 
-	SGD_Model model = sgd_LoadBonedModel("sgd://assets/cesiumman.glb", SGD_TRUE);
+	SGD_Model model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", SGD_TRUE);
 
 	for (;;) {
 

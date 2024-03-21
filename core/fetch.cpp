@@ -32,7 +32,7 @@ CURL* openCurl() {
 String fetch(String url, curl_write_callback writeFunc, void* writeData) {
 
 	if (startsWith(url, "sgd://")) {
-		static const String SGD_URL = "https://skirmish-dev.net/libsgd/";
+		static const String SGD_URL = "https://skirmish-dev.net/assets/";
 		url = SGD_URL + url.substr(6);
 		log() << "### Remapped url:" << url;
 	}

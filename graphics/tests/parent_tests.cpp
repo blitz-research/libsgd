@@ -27,7 +27,7 @@ void start() {
 	scene->ambientLightColor = {1, 1, 1, 0};
 
 	scene->envTexture =
-		loadTexture(Path("sgd://assets/sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::mipmap).result();
+		loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::mipmap).result();
 
 	SkyboxPtr skybox = new Skybox();
 	skybox->skyTexture = scene->envTexture;

@@ -59,7 +59,7 @@ void start() {
 	});
 
 	TexturePtr envTexture =
-		loadTexture(Path("sgd://assets/sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::filter).result();
+		loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::filter).result();
 
 	gc->bindGroup0()->setTexture(2, envTexture);
 
@@ -70,7 +70,7 @@ void start() {
 	lighting.pointLights[0].falloff = 1;
 	lighting.pointLights[0].range = 25;
 
-	MaterialPtr material = loadMaterial(Path("sgd://assets/PavingStones131_1K-JPG")).result();
+	MaterialPtr material = loadMaterial(Path("sgd://materials/PavingStones131_1K-JPG")).result();
 
 	MeshPtr mesh = createSphereMesh(1, 64, 32, material);
 

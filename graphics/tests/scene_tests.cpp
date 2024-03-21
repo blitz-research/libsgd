@@ -30,7 +30,7 @@ void start() {
 	scene = new Scene(gc);
 	scene->ambientLightColor = {1, 1, 1, 0};
 
-	auto skyTexture = loadTexture(Path("sgd://assets/sunnysky-cube.png"), TextureFormat::srgba8,
+	auto skyTexture = loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8,
 								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
 						  .result();
 
@@ -52,14 +52,14 @@ void start() {
 	scene->add(camera);
 #endif
 
-	MaterialPtr material = loadMaterial(Path("sgd://assets/Tiles019_1K-JPG")).result();
+	MaterialPtr material = loadMaterial(Path("sgd://materials/Tiles019_1K-JPG")).result();
 	MeshPtr groundMesh = createBoxMesh(Boxf{{-10, -3, -10}, {10, -2, 10}}, material);
 	transformTexCoords(groundMesh, {3, 3}, {0, 0});
 	ModelPtr ground = new Model();
 	ground->mesh = groundMesh;
 	scene->add(ground);
 
-	auto mesh = loadStaticMesh(Path("sgd://assets/helmet.glb")).result();
+	auto mesh = loadStaticMesh(Path("sgd://models/helmet.glb")).result();
 	fit(mesh, Boxf{{-1, -1, -1}, {1, 1, 1}}, true);
 	ModelPtr model = new Model();
 	model->mesh = mesh;

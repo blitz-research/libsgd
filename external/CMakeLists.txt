@@ -11,12 +11,12 @@ set(FETCHCONTENT_QUIET OFF)
 add_library(stb INTERFACE)
 
 FetchContent_Declare(stb
-        GIT_REPOSITORY https://github.com/blitz-research/stb.git
-        GIT_TAG master
-        GIT_SUBMODULES ""
-        GIT_SHALLOW TRUE
-        GIT_PROGRESS TRUE
-        EXCLUDE_FROM_ALL
+	GIT_REPOSITORY https://github.com/blitz-research/stb.git
+	GIT_TAG master
+	GIT_SUBMODULES ""
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
+	EXCLUDE_FROM_ALL
 )
 
 FetchContent_MakeAvailable(stb)
@@ -26,12 +26,12 @@ target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
 ##### json11 #####
 
 FetchContent_Declare(json11
-        GIT_REPOSITORY https://github.com/blitz-research/json11.git
-        GIT_TAG master
-        GIT_SUBMODULES ""
-        GIT_SHALLOW TRUE
-        GIT_PROGRESS TRUE
-        EXCLUDE_FROM_ALL
+	GIT_REPOSITORY https://github.com/blitz-research/json11.git
+	GIT_TAG master
+	GIT_SUBMODULES ""
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
+	EXCLUDE_FROM_ALL
 )
 
 FetchContent_MakeAvailable(json11)
@@ -40,34 +40,34 @@ FetchContent_MakeAvailable(json11)
 
 if (SGD_OS_EMSCRIPTEN)
 
-    add_library(glfw INTERFACE)
+	add_library(glfw INTERFACE)
 
-    target_link_options(glfw INTERFACE -sUSE_GLFW=3)
+	target_link_options(glfw INTERFACE -sUSE_GLFW=3)
 
 else ()
 
-    FetchContent_Declare(glfw
-            GIT_REPOSITORY https://github.com/blitz-research/glfw.git
-            GIT_TAG master
-            GIT_SUBMODULES ""
-            GIT_SHALLOW TRUE
-            GIT_PROGRESS TRUE
-            EXCLUDE_FROM_ALL
-    )
+	FetchContent_Declare(glfw
+		GIT_REPOSITORY https://github.com/blitz-research/glfw.git
+		GIT_TAG master
+		GIT_SUBMODULES ""
+		GIT_SHALLOW TRUE
+		GIT_PROGRESS TRUE
+		EXCLUDE_FROM_ALL
+	)
 
-    FetchContent_MakeAvailable(glfw)
+	FetchContent_MakeAvailable(glfw)
 
 endif ()
 
 ##### tinygltf #####
 
 FetchContent_Declare(tinygltf
-        GIT_REPOSITORY https://github.com/blitz-research/tinygltf.git
-        GIT_TAG master
-        GIT_SUBMODULES ""
-        GIT_SHALLOW TRUE
-        GIT_PROGRESS TRUE
-        EXCLUDE_FROM_ALL
+	GIT_REPOSITORY https://github.com/blitz-research/tinygltf.git
+	GIT_TAG master
+	GIT_SUBMODULES ""
+	GIT_SHALLOW TRUE
+	GIT_PROGRESS TRUE
+	EXCLUDE_FROM_ALL
 )
 
 #set(TINYGLTF_HEADER_ONLY ON)
@@ -97,26 +97,27 @@ endif ()
 
 if (NOT SGD_OS_EMSCRIPTEN)
 
-    FetchContent_Declare(libcurl
-            GIT_REPOSITORY https://github.com/blitz-research/curl.git
-            GIT_TAG ea7322ed14e26eb9ea715f4637b28fdecbefe2a1
-            GIT_SUBMODULES ""
-            GIT_SHALLOW TRUE
-            GIT_PROGRESS TRUE
-            EXCLUDE_FROM_ALL
-    )
+	FetchContent_Declare(libcurl
+		GIT_REPOSITORY https://github.com/blitz-research/curl.git
+		GIT_TAG ea7322ed14e26eb9ea715f4637b28fdecbefe2a1
+		GIT_SUBMODULES ""
+		GIT_SHALLOW TRUE
+		GIT_PROGRESS TRUE
+		EXCLUDE_FROM_ALL
+	)
 
-    set(BUILD_CURL_EXE OFF)
-    set(CURL_DISABLE_TESTS ON)
+	set(BUILD_CURL_EXE OFF)
+	set(BUILD_SHARED_LIBS OFF)
+	set(CURL_DISABLE_TESTS ON)
 
-    if(SGD_OS_WINDOWS)
-        set(CURL_USE_SCHANNEL ON)
-    else()
-        set(CURL_USE_OPENSSL ON)
-        set(CURL_DISABLE_ALTSVC ON) # Missing header?
-    endif()
+	if (SGD_OS_WINDOWS)
+		set(CURL_USE_SCHANNEL ON)
+	else ()
+		set(CURL_USE_OPENSSL ON)
+		set(CURL_DISABLE_ALTSVC ON) # Missing header?
+	endif ()
 
-    FetchContent_MakeAvailable(libcurl)
+	FetchContent_MakeAvailable(libcurl)
 
 endif ()
 
@@ -126,42 +127,32 @@ add_library(lib-dawn INTERFACE)
 
 if (SGD_OS_EMSCRIPTEN)
 
-    target_link_options(lib-dawn INTERFACE -sUSE_WEBGPU=1)
+	target_link_options(lib-dawn INTERFACE -sUSE_WEBGPU=1)
 
 else ()
 
-    FetchContent_Declare(dawn
-            GIT_REPOSITORY https://github.com/blitz-research/dawn.git
-            #GIT_TAG openxr-dev
-            GIT_TAG f9776999488fe1af3916d53f0a897113c0991567
-            GIT_SUBMODULES ""
-            GIT_SHALLOW TRUE
-            GIT_PROGRESS TRUE
-            EXCLUDE_FROM_ALL
-    )
+	FetchContent_Declare(dawn
+		GIT_REPOSITORY https://github.com/blitz-research/dawn.git
+		#GIT_TAG openxr-dev
+		GIT_TAG f9776999488fe1af3916d53f0a897113c0991567
+		GIT_SUBMODULES ""
+		GIT_SHALLOW TRUE
+		GIT_PROGRESS TRUE
+		EXCLUDE_FROM_ALL
+	)
 
-    set(DAWN_FETCH_DEPENDENCIES ON)
-    set(DAWN_BUILD_SAMPLES OFF)
-    set(DAWN_USE_GLFW OFF)
+	set(DAWN_FETCH_DEPENDENCIES ON)
+	set(DAWN_BUILD_SAMPLES OFF)
+	set(DAWN_USE_GLFW OFF)
 
-    if (SGD_OS_WINDOWS)
-        set(DAWN_ENABLE_D3D12 ON)
-        set(DAWN_ENABLE_D3D11 ON)
-        set(DAWN_ENABLE_VULKAN ON)
-    else ()
-        set(DAWN_ENABLE_OPENGLES ON)
-        set(DAWN_ENABLE_DESKTOP_GL ON)
-        set(DAWN_ENABLE_VULKAN ON)
-    endif ()
+	set(TINT_BUILD_CMD_TOOLS OFF)
+	set(TINT_BUILD_DOCS OFF)
+	set(TINT_BUILD_TESTS OFF)
 
-    set(TINT_BUILD_CMD_TOOLS OFF)
-    set(TINT_BUILD_DOCS OFF)
-    set(TINT_BUILD_TESTS OFF)
+	FetchContent_MakeAvailable(dawn)
 
-    FetchContent_MakeAvailable(dawn)
+	target_link_libraries(lib-dawn INTERFACE webgpu_dawn webgpu_cpp)
 
-    target_link_libraries(lib-dawn INTERFACE webgpu_dawn webgpu_cpp)
-
-    target_include_directories(lib-dawn INTERFACE ${DAWN_INCLUDE_DIR})
+	target_include_directories(lib-dawn INTERFACE ${DAWN_INCLUDE_DIR})
 
 endif ()
