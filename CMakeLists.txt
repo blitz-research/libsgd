@@ -155,7 +155,7 @@ elseif (SGD_OS_EMSCRIPTEN)
 
 endif ()
 
-# SGD_INSTALLDIR setup for x64 release
+# SGD_INSTALL_DIR setup for x64 release
 #
 if (SGD_CONFIG_RELEASE AND CMAKE_SIZEOF_VOID_P EQUAL 8)
 
