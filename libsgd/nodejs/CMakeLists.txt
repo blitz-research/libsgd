@@ -40,7 +40,7 @@ endif ()
 if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/binding.gyp)
 
     if (SGD_OS_WINDOWS)
-        set(SGD_NODE_GYP_LIBS "\"${CMAKE_BINARY_DIR}/libsgd/sgd_static.lib\", \"dxguid.lib\"")
+        set(SGD_NODE_GYP_LIBS "\"${CMAKE_BINARY_DIR}/libsgd/sgd_static.lib\", \"crypt32.lib\", \"Wldap32.lib\", \"dxguid.lib\", \"Ws2_32.lib\"")
     else ()
         set(SGD_NODE_GYP_LIBS "\"${CMAKE_BINARY_DIR}/libsgd/libsgd_static.a\"")
     endif ()
