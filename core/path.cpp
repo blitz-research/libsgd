@@ -132,7 +132,8 @@ Path homeDir() {
 	SGD_ASSERT(home);
 	return Path(replace(home,"\\","/"));
 #else
-	auto home = SGD_ASSERT(home);
+	auto home = getenv("HOME");
+	SGD_ASSERT(home);
 	return Path(home);
 #endif
 }

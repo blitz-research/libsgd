@@ -92,7 +92,7 @@ void cacheFile(CString url, const void* data, size_t size) {
 
 	SGD_ASSERT(g_cacheFiles.find(key) == g_cacheFiles.end());
 
-	auto file = std::to_string(++g_nextFileId);
+	auto file = std::to_string(++g_nextFileId) + Path(url).ext();
 	auto path = g_cacheDir / file;
 
 	auto r = saveData(data, size, path);
