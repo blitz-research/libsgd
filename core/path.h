@@ -12,7 +12,9 @@ struct Path;
 using CPath = const Path&;
 
 struct Path {
+	Path() = default;
 	explicit Path(String str);
+	explicit Path(std::filesystem::path& fpath);
 
 	bool isUrl() const;
 
@@ -31,9 +33,28 @@ struct Path {
 		return m_str;
 	}
 
+	explicit operator bool() const { return !m_str.empty();}
+
 private:
 	String m_str;
 };
+
+bool operator==(CPath x, CPath y);
+bool operator!=(CPath x, CPath y);
+bool operator<(CPath x, CPath y);
+
+Path operator/(CPath x, CPath y);
+Path operator/(CPath x, CString y);
+Path operator/(CString x, CPath y);
+Path operator+(CPath x, CString y);
+
+Path appPath();
+
+Path homeDir();
+
+inline std::ostream& operator << (std::ostream& os, CPath path) {
+	return os << path.str();
+}
 
 inline bool operator==(CPath x, CPath y) {
 	return x.str() == y.str();
@@ -46,12 +67,4 @@ inline bool operator!=(CPath x, CPath y) {
 inline bool operator<(CPath x, CPath y) {
 	return x.str() < y.str();
 }
-
-Path operator/(CPath x, CPath y);
-Path operator/(CPath x, CString y);
-Path operator/(CString x, CPath y);
-Path operator+(CPath x, CString y);
-
-String appDir();
-
 }

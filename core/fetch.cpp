@@ -1,14 +1,107 @@
 #include "fetch.h"
 
+#include "fileio.h"
 #include "log.h"
+#include "path.h"
 #include "stringutil.h"
 
 #include <curl/curl.h>
 #include <thread>
 
+#include <json11.hpp>
+
+using namespace json11;
+
 namespace sgd {
 
 namespace {
+
+constexpr auto sgdPrefix = "sgd://";
+
+auto g_cacheDir = homeDir() / ".sgd";
+
+auto g_cacheFilesPath = g_cacheDir / "cache.json";
+
+std::map<String, String> g_cacheFiles;
+
+size_t g_nextFileId;
+
+bool g_cacheOk = false;
+
+bool initCache() {
+	static bool done;
+	if (done) return g_cacheOk;
+	done = true;
+
+	if (!g_cacheDir.isDir()) {
+		std::filesystem::create_directory(g_cacheDir.filePath());
+		SGD_ASSERT(g_cacheDir.isDir());
+	}
+
+	if (!g_cacheFilesPath.isFile()) {
+		saveString("{}", g_cacheFilesPath);
+		SGD_ASSERT(g_cacheFilesPath.isFile());
+	}
+
+	auto src = loadString(g_cacheFilesPath);
+	SGD_ASSERT(src);
+
+	String err;
+	auto json = Json::parse(src.result(), err, JsonParse::COMMENTS);
+	SGD_ASSERT(json.is_object());
+
+	for (auto& kv : json.object_items()) {
+		g_cacheFiles.insert(std::make_pair(kv.first, kv.second.string_value()));
+		++g_nextFileId;
+	}
+
+	return g_cacheOk = true;
+}
+
+void saveCacheState() {
+	if (!g_cacheOk) return;
+
+	Json::object obj;
+	for (auto& kv : g_cacheFiles) {
+		obj.insert(std::make_pair(kv.first, kv.second));
+	}
+	String src;
+	Json(std::move(obj)).dump(src);
+
+	auto r = saveString(src, g_cacheFilesPath);
+	SGD_ASSERT(r);
+}
+
+Path cacheFile(CString url) {
+	if (!startsWith(url, sgdPrefix) || !initCache()) return {};
+
+	auto key = url.substr(6);
+
+	auto it = g_cacheFiles.find(key);
+	if (it == g_cacheFiles.end()) return {};
+
+	log() << "### Cache hit for:" << url;
+
+	return g_cacheDir / Path(it->second);
+}
+
+void cacheFile(CString url, const void* data, size_t size) {
+	if (!g_cacheOk || !startsWith(url, sgdPrefix)) return;
+
+	auto key = url.substr(6);
+
+	SGD_ASSERT(g_cacheFiles.find(key) == g_cacheFiles.end());
+
+	auto file = std::to_string(++g_nextFileId);
+	auto path = g_cacheDir / file;
+
+	auto r = saveData(data, size, path);
+	SGD_ASSERT(r);
+
+	g_cacheFiles.insert(std::make_pair(key, file));
+
+	saveCacheState();
+}
 
 CURL* g_curl;
 
@@ -31,7 +124,7 @@ CURL* openCurl() {
 
 String fetch(String url, curl_write_callback writeFunc, void* writeData) {
 
-	if (startsWith(url, "sgd://")) {
+	if (startsWith(url, sgdPrefix)) {
 		static const String SGD_URL = "https://skirmish-dev.net/assets/";
 		url = SGD_URL + url.substr(6);
 		log() << "### Remapped url:" << url;
@@ -81,16 +174,30 @@ size_t writeDataFunc(char* buffer, size_t size, size_t nmemb, void* datap) {
 } // namespace
 
 Expected<String, FetchEx> fetchString(CString url) {
+	if (auto cpath = cacheFile(url)) {
+		return loadString(cpath).result();
+	}
+
 	String result;
 	auto err = fetch(url, writeStringFunc, &result);
 	if (!err.empty()) return FetchEx(err);
+
+	cacheFile(url, result.data(), result.size());
+
 	return result;
 }
 
 Expected<Data, FetchEx> fetchData(CString url) {
+	if (auto cpath = cacheFile(url)) {
+		return loadData(cpath).result();
+	}
+
 	Data result;
 	auto err = fetch(url, writeDataFunc, &result);
 	if (!err.empty()) return FetchEx(err);
+
+	cacheFile(url, result.data(), result.size());
+
 	return result;
 }
 

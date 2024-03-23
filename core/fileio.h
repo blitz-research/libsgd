@@ -34,4 +34,7 @@ Expected<Data, FileioEx> loadData(CPath path);
 //! Save byte data to file.
 Expected<bool, FileioEx> saveData(CData data, CPath path);
 
+//! Save byte data to file.
+Expected<bool, FileioEx> saveData(const void* data, size_t size, CPath path);
+
 } // namespace sgd

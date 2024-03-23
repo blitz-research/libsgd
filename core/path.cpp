@@ -28,57 +28,23 @@ String join(CString x, CString y) {
 	return (i0 != String::npos ? x.substr(0, i0 + 1) : x) + "/" + (i1 != String::npos ? y.substr(i1) : y);
 }
 
-std::filesystem::path appPath() {
-	static std::filesystem::path path;
-	if (!path.empty()) return path;
-
-#if SGD_OS_WINDOWS
-
-	wchar_t buf[MAX_PATH + 1];
-	GetModuleFileNameW(GetModuleHandleW(0), buf, MAX_PATH);
-	buf[MAX_PATH] = 0;
-	for (int i = 0; buf[i]; ++i) {
-		if (buf[i] == '\\') buf[i] = '/';
-	}
-	return path = buf;
-
-#elif defined(SGD_OS_LINUX) || defined(SGD_OS_MACOS)
-
-	char lnk[PATH_MAX + 1];
-	char buf[PATH_MAX + 1];
-	pid_t pid = getpid();
-	sprintf(lnk, "/proc/%i/exe", pid);
-	int i = readlink(lnk, buf, PATH_MAX);
-	if (i > PATH_MAX) SGD_ABORT();
-	buf[i] = 0;
-	return path = buf;
-
-#elif SGD_OS_EMSCRIPTEN
-
-	return path = "/";
-
-#else
-	SGD_ABORT();
-#endif
-}
-
 } // namespace
 
 Path::Path(String path) : m_str(std::move(path)) {
 }
 
-bool Path::isUrl() const {
+Path::Path(std::filesystem::path& fpath) : m_str(fpath.u8string()) {
+}
 
-	return startsWith(m_str, "http://") || startsWith(m_str, "https://") || startsWith(m_str, "sgd://");
+bool Path::isUrl() const {
+	return m_str.find("://")!=String::npos;
 }
 
 bool Path::isValidFilePath() const {
-
 	return !isUrl();
 }
 
 std::filesystem::path Path::filePath() const {
-
 	return std::filesystem::absolute(m_str).u8string();
 }
 
@@ -127,8 +93,48 @@ Path operator+(CPath x, CString y) {
 	return Path(x.str() + y);
 }
 
-String appDir() {
-	return appPath().u8string();
+Path appPath() {
+	static Path path;
+	if (path) return path;
+
+#if SGD_OS_WINDOWS
+
+	char buf[MAX_PATH + 1];
+	GetModuleFileName(GetModuleHandle(nullptr), buf, MAX_PATH);
+	buf[MAX_PATH] = 0;
+
+	return path = Path(replace(buf,"\\","/"));
+
+#elif defined(SGD_OS_LINUX) || defined(SGD_OS_MACOS)
+
+	char lnk[PATH_MAX + 1];
+	char buf[PATH_MAX + 1];
+	pid_t pid = getpid();
+	sprintf(lnk, "/proc/%i/exe", pid);
+	int i = readlink(lnk, buf, PATH_MAX);
+	if (i > PATH_MAX) SGD_ABORT();
+	buf[i] = 0;
+
+	return path = Path(buf);
+
+#elif SGD_OS_EMSCRIPTEN
+
+	return path = Path("/");
+
+#else
+	SGD_ABORT();
+#endif
+}
+
+Path homeDir() {
+#if SGD_OS_WINDOWS
+	auto home = getenv("USERPROFILE");
+	SGD_ASSERT(home);
+	return Path(replace(home,"\\","/"));
+#else
+	auto home = SGD_ASSERT(home);
+	return Path(home);
+#endif
 }
 
 } // namespace sgd

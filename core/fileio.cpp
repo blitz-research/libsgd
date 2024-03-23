@@ -97,4 +97,18 @@ Expected<bool, FileioEx> saveData(CData data, CPath path) {
 	return true;
 }
 
+Expected<bool, FileioEx> saveData(const void *data, size_t size, CPath path) {
+
+	if(!path.isValidFilePath()) return FileioEx("Invalid file path");
+
+	auto fpath = path.filePath();
+
+	std::ofstream fs(fpath, std::ios::binary | std::ios::trunc);
+	if (!fs.is_open()) return FileioEx{"IO error opening file"};
+
+	if (!fs.write((const char*)data, size)) return FileioEx{"IO error writing file"};
+
+	return true;
+}
+
 } // namespace sgd
