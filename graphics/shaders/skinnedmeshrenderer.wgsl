@@ -1,6 +1,6 @@
 R"(
 
-// ***** BonedMeshRenderer *****
+// ***** SkinnedMeshRenderer *****
 
 struct MeshUniforms {
     tangentsEnabled: i32,

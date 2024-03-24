@@ -30,7 +30,7 @@ void ModelRenderer::remove(CModel* model) {
 	model->mesh.changed.disconnect(this);
 }
 
-void ModelRenderer::onUpdate() const {
+void ModelRenderer::onUpdate(CVec3f eye) {
 	for(auto [mesh, list] : m_instanceLists) {
 		if(!mesh) continue;
 		auto inst = list->meshRenderer->lockInstances(list->models.size());
@@ -40,7 +40,7 @@ void ModelRenderer::onUpdate() const {
 			++inst;
 		}
 		list->meshRenderer->unlockInstances();
-		list->meshRenderer->onUpdate();
+		list->meshRenderer->onUpdate(eye);
 	}
 }
 

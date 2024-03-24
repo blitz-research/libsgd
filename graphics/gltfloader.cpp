@@ -161,8 +161,8 @@ Material* GLTFLoader::loadMaterial(int id) {
 	auto& gltfMat = gltfModel.materials[id];
 	auto material = cachedMaterials[id] = new Material(&pbrMaterialDescriptor);
 
-	material->setBlendMode(gltfMat.alphaMode == "BLEND" ? BlendMode::alpha : BlendMode::opaque);
-	material->setCullMode(gltfMat.doubleSided ? CullMode::none : CullMode::front);
+	material->blendMode = gltfMat.alphaMode == "BLEND" ? BlendMode::alpha : BlendMode::opaque;
+	material->cullMode = gltfMat.doubleSided ? CullMode::none : CullMode::back;
 
 	auto& pbr = gltfMat.pbrMetallicRoughness;
 
@@ -354,12 +354,15 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 	default:
 		SGD_ABORT();
 	}
+
+#if 0	// CullMode was wrong?
 	for (int i = 0; i < triCount; ++i) {
 		std::swap(tp[i].indices[1], tp[i].indices[2]);
 		tp[i].indices[0] += firstVertex;
 		tp[i].indices[1] += firstVertex;
 		tp[i].indices[2] += firstVertex;
 	}
+#endif
 }
 
 void GLTFLoader::updateMesh(const tinygltf::Mesh& gltfMesh) {

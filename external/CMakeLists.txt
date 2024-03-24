@@ -133,8 +133,8 @@ else ()
 
 	FetchContent_Declare(dawn
 		GIT_REPOSITORY https://github.com/blitz-research/dawn.git
+		GIT_TAG d1955726b120bac568ec65b1f4c2ab441b63acbe
 		#GIT_TAG openxr-dev
-		GIT_TAG f9776999488fe1af3916d53f0a897113c0991567
 		GIT_SUBMODULES ""
 		GIT_SHALLOW TRUE
 		GIT_PROGRESS TRUE

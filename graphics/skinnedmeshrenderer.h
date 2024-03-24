@@ -5,13 +5,7 @@
 
 namespace sgd {
 
-// @group(2) @binding(1) var<storage> bonedMeshInstances: array<SkinnedMeshInstance>;
-struct alignas(16) SkinnedMeshInstance {
-	static constexpr int maxJoints=256;
-	Mat4f worldMatrix;
-	Vec4f color;
-	Mat4f jointMatrices[maxJoints];
-};
+struct SkinnedMeshInstance;
 
 SGD_SHARED(SkinnedMeshRenderer);
 
@@ -33,13 +27,12 @@ private:
 
 	mutable wgpu::Buffer m_vertexBuffer;
 	mutable wgpu::Buffer m_indexBuffer;
-	mutable wgpu::BindGroup m_bindGroup2;
 
 	struct RenderOp {
 		wgpu::RenderPipeline pipeline;
 		wgpu::BindGroup bindGroup1;
-		uint32_t firstIndex;
-		uint32_t indexCount;
+		uint32_t firstIndex{};
+		uint32_t indexCount{};
 	};
 
 	mutable Vector<RenderOp> m_renderOps[renderPassCount];

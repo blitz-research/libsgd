@@ -26,6 +26,7 @@ template <class T> struct Rect {
 	constexpr Rect() = default;
 	constexpr explicit Rect(CVec2<T> v);
 	template <class C> constexpr explicit Rect(CRect<C> r);
+	constexpr Rect(float min, float max);
 	constexpr Rect(CVec2<T> min, CVec2<T> max);
 	constexpr Rect(T x0, T y0, T x1, T y1);
 

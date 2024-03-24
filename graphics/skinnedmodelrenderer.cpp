@@ -2,6 +2,8 @@
 
 #include "model.h"
 
+#include "shaders/uniforms.h"
+
 namespace sgd {
 
 SkinnedModelRenderer::SkinnedModelRenderer() {
@@ -31,7 +33,7 @@ void SkinnedModelRenderer::remove(CModel* model) {
 	model->mesh.changed.disconnect(this);
 }
 
-void SkinnedModelRenderer::onUpdate() const {
+void SkinnedModelRenderer::onUpdate(CVec3f eye) {
 	for (auto [mesh, list] : m_instanceLists) {
 		if (!mesh) continue;
 		auto inst = list->meshRenderer->lockInstances(list->models.size());
@@ -45,7 +47,7 @@ void SkinnedModelRenderer::onUpdate() const {
 			++inst;
 		}
 		list->meshRenderer->unlockInstances();
-		list->meshRenderer->onUpdate();
+		list->meshRenderer->onUpdate(eye);
 	}
 }
 

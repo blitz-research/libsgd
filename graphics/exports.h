@@ -23,5 +23,6 @@
 #include "renderqueue.h"
 #include "scene.h"
 #include "skybox.h"
+#include "sprite.h"
 #include "texture.h"
 #include "textureutil.h"

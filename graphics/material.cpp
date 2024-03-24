@@ -20,46 +20,35 @@ MaterialDescriptor::MaterialDescriptor(CString typeName,							   //
 	  uniformOffsets(uniformOffsets),			//
 	  textureIndices(textureIndices),			//
 	  initFunc(initFunc) {
-//	log() << "### Material typeName:" << typeName;
-	if(!g_materialDescs) g_materialDescs= new Map<String, MaterialDescriptor*>();
+	//	log() << "### Material typeName:" << typeName;
+	if (!g_materialDescs) g_materialDescs = new Map<String, MaterialDescriptor*>();
 	(*g_materialDescs)[typeName] = this;
 }
 
 Material::Material(const MaterialDescriptor* desc)
 	: m_desc(desc), //
-	  m_bindGroup(new BindGroup(m_desc->bindGroupDescriptor)),
-	  m_uniformBuffer(new Buffer(BufferType::uniform, nullptr, m_desc->uniformsSize)) {
+	  m_uniformBuffer(new Buffer(BufferType::uniform, nullptr, m_desc->uniformsSize)),
+	  m_bindGroup(new BindGroup(m_desc->bindGroupDescriptor)) {
+
+	blendMode.changed.connect(this, [=](BlendMode) { invalidate(true); });
+	depthFunc.changed.connect(this, [=](DepthFunc) { invalidate(true); });
+	cullMode.changed.connect(this, [=](CullMode) { invalidate(true); });
+
+	m_bindGroup->setBuffer(0, m_uniformBuffer);
 
 	addDependency(m_bindGroup);
 
-	m_bindGroup->setBuffer(0, m_uniformBuffer);
 	m_desc->initFunc(this);
 }
 
+#if 0
 Material::Material(CString typeName) : Material((*g_materialDescs)[typeName]) {
 }
-
-void Material::setBlendMode(BlendMode blendMode) {
-	if (blendMode == m_blendMode) return;
-	m_blendMode = blendMode;
-	invalidate(true);
-}
-
-void Material::setDepthFunc(DepthFunc depthFunc) {
-	if (depthFunc == m_depthFunc) return;
-	m_depthFunc = depthFunc;
-	invalidate(true);
-}
-
-void Material::setCullMode(CullMode cullMode) {
-	if (cullMode == m_cullMode) return;
-	m_cullMode = cullMode;
-	invalidate(true);
-}
+#endif
 
 bool Material::setTexture(CString name, Texture* texture) {
 	auto it = m_desc->textureIndices.find(name);
-	if(it==m_desc->textureIndices.end()) return false;
+	if (it == m_desc->textureIndices.end()) return false;
 
 	m_bindGroup->setTexture(it->second, texture);
 	return true;
@@ -67,7 +56,7 @@ bool Material::setTexture(CString name, Texture* texture) {
 
 bool Material::setVector4f(CString name, CVec4f value) {
 	auto it = m_desc->uniformOffsets.find(name);
-	if(it==m_desc->uniformOffsets.end()) return false;
+	if (it == m_desc->uniformOffsets.end()) return false;
 
 	m_uniformBuffer->update(&value, it->second, sizeof(value));
 	return true;
@@ -76,7 +65,7 @@ bool Material::setVector4f(CString name, CVec4f value) {
 bool Material::setVector3f(CString name, CVec3f value) {
 	SGD_ASSERT(endsWith(name, "3f"));
 	auto it = m_desc->uniformOffsets.find(name);
-	if(it == m_desc->uniformOffsets.end()) return false;
+	if (it == m_desc->uniformOffsets.end()) return false;
 
 	m_uniformBuffer->update(&value, it->second, sizeof(value));
 	return true;
@@ -84,7 +73,7 @@ bool Material::setVector3f(CString name, CVec3f value) {
 
 bool Material::setVector2f(CString name, CVec2f value) {
 	auto it = m_desc->uniformOffsets.find(name);
-	if(it == m_desc->uniformOffsets.end()) return false;
+	if (it == m_desc->uniformOffsets.end()) return false;
 
 	m_uniformBuffer->update(&value, it->second, sizeof(value));
 	return true;
@@ -92,7 +81,7 @@ bool Material::setVector2f(CString name, CVec2f value) {
 
 bool Material::setFloat(CString name, float value) {
 	auto it = m_desc->uniformOffsets.find(name);
-	if(it == m_desc->uniformOffsets.end()) return false;
+	if (it == m_desc->uniformOffsets.end()) return false;
 
 	m_uniformBuffer->update(&value, it->second, sizeof(value));
 	return true;

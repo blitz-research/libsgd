@@ -1,29 +1,38 @@
 #include "renderpipeline.h"
 
+#include "material.h"
+
 namespace sgd {
 
-wgpu::RenderPipeline getRenderPipeline(GraphicsContext* gc, BindGroup* bindGroup1, BindGroup* bindGroup2, BlendMode blendMode,
-									   DepthFunc depthFunc, CullMode cullMode, DrawMode drawMode) {
+wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
+											   BindGroup* material, //
+											   BlendMode blendMode, //
+											   DepthFunc depthFunc, //
+											   CullMode cullMode,	//
+											   BindGroup* renderer, //
+											   DrawMode drawMode) {
 
 	static Map<uint64_t, wgpu::RenderPipeline> cache;
 
-	auto bindGroup0 = gc->bindGroup0();
+	auto scene = gc->bindGroup0();
+
+	if (!material) material = emptyBindGroup(1);
 
 	// TODO: Include colorBuffer/depthBuffer format in hash
-	uint64_t hash = ((uint64_t)bindGroup0->descriptor()->hash << 56) | //
-					((uint64_t)bindGroup1->descriptor()->hash << 48) | //
-					((uint64_t)bindGroup2->descriptor()->hash << 40) | //
-					((uint64_t)blendMode << 32) |					   //
-					((uint64_t)depthFunc << 24) |					   //
-					((uint64_t)cullMode << 16) |					   //
+	uint64_t hash = ((uint64_t)scene->descriptor()->hash << 56) |	 //
+					((uint64_t)material->descriptor()->hash << 48) | //
+					((uint64_t)renderer->descriptor()->hash << 40) | //
+					((uint64_t)blendMode << 32) |					 //
+					((uint64_t)depthFunc << 24) |					 //
+					((uint64_t)cullMode << 16) |					 //
 					((uint64_t)drawMode << 8);
 
 	auto& pipeline = cache[hash];
 	if (pipeline) return pipeline;
 
-	bindGroup0->validate(gc);
-	bindGroup1->validate(gc);
-	bindGroup2->validate(gc);
+	scene->validate(gc);
+	material->validate(gc);
+	renderer->validate(gc);
 
 	wgpu::RenderPipelineDescriptor pipelineDescriptor;
 
@@ -55,9 +64,9 @@ wgpu::RenderPipeline getRenderPipeline(GraphicsContext* gc, BindGroup* bindGroup
 
 	// Shader module
 	// Note: This generates a shader per pipeline state (ie: one for opaque, one for alpha etc), might be overkill.
-	String source = bindGroup0->descriptor()->wgpuShaderSource + //
-					bindGroup1->descriptor()->wgpuShaderSource + //
-					bindGroup2->descriptor()->wgpuShaderSource;
+	String source = scene->descriptor()->wgpuShaderSource +	   //
+					material->descriptor()->wgpuShaderSource + //
+					renderer->descriptor()->wgpuShaderSource;
 
 	auto module = createShaderModule(gc->wgpuDevice(), source);
 
@@ -73,8 +82,8 @@ wgpu::RenderPipeline getRenderPipeline(GraphicsContext* gc, BindGroup* bindGroup
 	auto& vertexState = pipelineDescriptor.vertex;
 	vertexState.module = module;
 	vertexState.entryPoint = "vertexMain";
-	vertexState.bufferCount = bindGroup2->descriptor()->wgpuVertexBufferLayouts.size();
-	vertexState.buffers = bindGroup2->descriptor()->wgpuVertexBufferLayouts.data();
+	vertexState.bufferCount = renderer->descriptor()->wgpuVertexBufferLayouts.size();
+	vertexState.buffers = renderer->descriptor()->wgpuVertexBufferLayouts.data();
 
 	// Depth stencil state
 	wgpu::DepthStencilState depthStencilState;
@@ -93,9 +102,9 @@ wgpu::RenderPipeline getRenderPipeline(GraphicsContext* gc, BindGroup* bindGroup
 	pipelineDescriptor.depthStencil = &depthStencilState;
 
 	// Pipeline layout
-	wgpu::BindGroupLayout bindGroupLayouts[]{bindGroup0->descriptor()->wgpuBindGroupLayout(gc), //
-											 bindGroup1->descriptor()->wgpuBindGroupLayout(gc), //
-											 bindGroup2->descriptor()->wgpuBindGroupLayout(gc)};
+	wgpu::BindGroupLayout bindGroupLayouts[]{scene->descriptor()->wgpuBindGroupLayout(gc),	  //
+											 material->descriptor()->wgpuBindGroupLayout(gc), //
+											 renderer->descriptor()->wgpuBindGroupLayout(gc)};
 
 	wgpu::PipelineLayoutDescriptor pipelineLayoutDesc{};
 	pipelineLayoutDesc.bindGroupLayoutCount = std::size(bindGroupLayouts);
@@ -108,6 +117,15 @@ wgpu::RenderPipeline getRenderPipeline(GraphicsContext* gc, BindGroup* bindGroup
 	pipelineDescriptor.primitive.cullMode = (wgpu::CullMode)cullMode;
 
 	return pipeline = gc->wgpuDevice().CreateRenderPipeline(&pipelineDescriptor);
+}
+
+wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
+											   Material* material,	//
+											   BindGroup* renderer, //
+											   DrawMode drawMode) {
+
+	return getOrCreateRenderPipeline(gc, material->bindGroup(), material->blendMode(), material->depthFunc(),
+									 material->cullMode(), renderer, drawMode);
 }
 
 } // namespace sgd

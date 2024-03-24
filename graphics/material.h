@@ -29,23 +29,11 @@ struct Material : GraphicsResource {
 
 	Material(CString typeName);
 
-	void setBlendMode(BlendMode blendMode);
+	Property<BlendMode> blendMode{BlendMode::opaque};
 
-	BlendMode blendMode() const {
-		return m_blendMode;
-	}
+	Property<DepthFunc> depthFunc{DepthFunc::lessEqual};
 
-	void setDepthFunc(DepthFunc depthFunc);
-
-	DepthFunc depthFunc() const {
-		return m_depthFunc;
-	}
-
-	void setCullMode(CullMode cullMode);
-
-	CullMode cullMode() const {
-		return m_cullMode;
-	}
+	Property<CullMode> cullMode{CullMode::back};
 
 	bool setVector4f(CString name, CVec4f value);
 
@@ -63,12 +51,8 @@ struct Material : GraphicsResource {
 
 protected:
 	const MaterialDescriptor* m_desc;
-	BindGroupPtr m_bindGroup;
 	BufferPtr m_uniformBuffer;
-
-	BlendMode m_blendMode{BlendMode::opaque};
-	DepthFunc m_depthFunc{DepthFunc::lessEqual};
-	CullMode m_cullMode{CullMode::back};
+	BindGroupPtr m_bindGroup;
 };
 
 } // namespace sgd

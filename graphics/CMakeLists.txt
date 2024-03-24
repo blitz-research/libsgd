@@ -59,6 +59,10 @@ add_library(graphics
         skybox.h
         skyboxrenderer.cpp
         skyboxrenderer.h
+		sprite.cpp
+		sprite.h
+		spriterenderer.cpp
+		spriterenderer.h
         texture.cpp
         texture.h
         textureutil.cpp
@@ -69,6 +73,7 @@ add_library(graphics
         shaders/scene.wgsl
         shaders/skinnedmeshrenderer.wgsl
         shaders/skyboxrenderer.wgsl
+		shaders/spriterenderer.wgsl
         shaders/uniforms.h
 
         exports.h

@@ -86,14 +86,12 @@ void SkinnedMeshRenderer::onValidate(GraphicsContext* gc) const {
 
 	m_vertexBuffer = m_mesh->vertexBuffer()->wgpuBuffer();
 	m_indexBuffer = m_mesh->indexBuffer()->wgpuBuffer();
-	m_bindGroup2 = m_bindGroup->wgpuBindGroup();
 
 	for (int i = 0; i < m_mesh->surfaces().size(); ++i) {
 		auto& surf = m_mesh->surfaces()[i];
 		int rpass = (int)renderPass(surf.material->blendMode());
 
-		auto pipeline = getRenderPipeline(gc, surf.material->bindGroup(), m_bindGroup, surf.material->blendMode(),
-										  surf.material->depthFunc(), surf.material->cullMode(), DrawMode::triangleList);
+		auto pipeline = getOrCreateRenderPipeline(gc, surf.material, m_bindGroup, DrawMode::triangleList);
 
 		m_renderOps[rpass].push_back({pipeline, surf.material->bindGroup()->wgpuBindGroup(), surf.firstTriangle * 3, surf.triangleCount * 3});
 
@@ -108,7 +106,7 @@ void SkinnedMeshRenderer::onRender(GraphicsContext* gc) const {
 
 	encoder.SetVertexBuffer(0, m_vertexBuffer);
 	encoder.SetIndexBuffer(m_indexBuffer, wgpu::IndexFormat::Uint32);
-	encoder.SetBindGroup(2, m_bindGroup2);
+	encoder.SetBindGroup(2, m_bindGroup->wgpuBindGroup());
 
 	for (auto& op : m_renderOps[(int)gc->renderPass()]) {
 		encoder.SetBindGroup(1, op.bindGroup1);

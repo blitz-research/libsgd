@@ -21,7 +21,7 @@ struct alignas(16) CameraUniforms {
 struct alignas(16) LightingUniforms {
 
 	struct alignas(16) DirectionalLight {
-		alignas(16) Vec3f direction{0, 0, -1};	// -forward
+		alignas(16) Vec3f direction{0, 0, -1}; // -forward
 		alignas(16) Vec4f color{1};
 	};
 
@@ -34,12 +34,12 @@ struct alignas(16) LightingUniforms {
 
 	struct alignas(16) SpotLight {
 		alignas(16) Vec3f position{0, 0, 0};
-		alignas(16) Vec3f direction{0,0,0};
+		alignas(16) Vec3f direction{0, 0, 0};
 		alignas(16) Vec4f color{1};
 		float range{100};
 		float falloff{1};
 		float innerConeAngle{0};
-		float outerConeAngle{halfPi};	// 45 degrees
+		float outerConeAngle{halfPi}; // 45 degrees
 	};
 
 	static constexpr int maxDirectionalLights = 4;
@@ -79,8 +79,8 @@ struct alignas(16) MatteMaterialUniforms {
 // @group(1) @binding(11) var material_normalTexture: texture_2d<f32>;
 // @group(1) @binding(12) var material_normalSampler: sampler;
 struct alignas(16) PBRMaterialUniforms {
-	Vec4f albedoColor{1,1,1,1};
-	Vec3f emissiveColor{0,0,0};
+	Vec4f albedoColor{1, 1, 1, 1};
+	Vec3f emissiveColor{0, 0, 0};
 	float metallicFactor{0};
 	float roughnessFactor{1};
 };
@@ -97,6 +97,25 @@ struct alignas(16) SkyboxUniforms {
 // @group(2) @binding(0) var<uniform> meshUniforms: MeshUniforms;
 struct alignas(16) MeshUniforms {
 	int32_t tangentsEnabled{0};
+};
+
+// ***** SkinnedMeshRenderer *****
+
+//@group(2) @binding(1) var<storage> skinnedMeshInstances: array<SkinnedMeshInstance>;
+struct alignas(16) SkinnedMeshInstance {
+	static constexpr int maxJoints = 256;
+	Mat4f worldMatrix;
+	Vec4f color;
+	Mat4f jointMatrices[maxJoints];
+};
+
+// ***** Sprite Renderer *****
+
+// @group(2) @binding(0) var<storage> spriteInstances: array<SpriteInstance>;
+struct SpriteInstance {
+	Mat4f matrix;
+	Vec4f color;
+	Rectf rect;
 };
 
 } // namespace sgd

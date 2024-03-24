@@ -12,7 +12,7 @@ namespace sgd {
 
 Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
 	auto texture = new Texture({1, 1}, 6, TextureFormat::rgba8, TextureFlags::cube);
-	uint32_t data[6]{0xff000000,0xff000000,0xff000000,0xff000000,0xff000000,0xff000000};
+	uint32_t data[6]{0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000};
 	texture->update(data, sizeof(uint32_t));
 	envTexture = texture;
 }
@@ -65,9 +65,7 @@ Renderer* Scene::getRenderer(RendererType type) {
 	;
 }
 
-void Scene::updateCameraUniforms() const {
-
-	CameraUniforms uniforms;
+void Scene::updateCameraUniforms(CameraUniforms& uniforms) const {
 
 	auto aspect = (float)m_gc->colorBuffer()->size().x / (float)m_gc->colorBuffer()->size().y;
 
@@ -95,13 +93,10 @@ void Scene::updateCameraUniforms() const {
 	}
 	uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
 	uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
-
-	m_gc->bindGroup0()->getBuffer(0)->update(&uniforms, 0, sizeof(uniforms));
 }
 
-void Scene::updateLightingUniforms() const {
+void Scene::updateLightingUniforms(LightingUniforms& uniforms) const {
 
-	LightingUniforms uniforms;
 	uniforms.ambientLightColor = ambientLightColor();
 
 	for (auto light : m_lights) {
@@ -140,22 +135,34 @@ void Scene::updateLightingUniforms() const {
 			SGD_ABORT();
 		}
 	}
-	m_gc->bindGroup0()->getBuffer(1)->update(&uniforms, 0, sizeof(uniforms));
-	m_gc->bindGroup0()->setTexture(2, envTexture());
 }
 
 void Scene::render() {
 
+	CameraUniforms cameraUniforms;
+	updateCameraUniforms(cameraUniforms);
+	m_gc->bindGroup0()->getBuffer(0)->update(&cameraUniforms, 0, sizeof(cameraUniforms));
+
+	LightingUniforms lightingUniforms;
+	updateLightingUniforms(lightingUniforms);
+	m_gc->bindGroup0()->getBuffer(1)->update(&lightingUniforms, 0, sizeof(lightingUniforms));
+	m_gc->bindGroup0()->setTexture(2, envTexture());
+
 	for (auto r : m_renderers) {
-		if (r && r->enabled()) r->onUpdate();
+		if (r && r->enabled()) r->onUpdate(Vec3f(cameraUniforms.worldMatrix.t));
 	}
 
-	updateCameraUniforms();
-	updateLightingUniforms();
+	runOnMainThread(
+		[=] { //
+			GraphicsResource::validateAll(m_gc);
+		},
+		true);
 
-	runOnMainThread([=] { GraphicsResource::validateAll(m_gc); }, true);
-
-	runOnMainThread([=] { renderASync(); }, isMainThread());
+	runOnMainThread(
+		[=] { //
+			renderASync();
+		},
+		isMainThread());
 }
 
 void Scene::renderASync() {

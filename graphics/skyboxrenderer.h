@@ -18,7 +18,7 @@ struct SkyboxRenderer : Renderer {
 	Property<float> roughness;
 
 private:
-	BindGroupPtr m_bindGroup2;
+	BindGroupPtr m_bindGroup;
 
 	mutable wgpu::RenderPipeline m_pipeline;
 

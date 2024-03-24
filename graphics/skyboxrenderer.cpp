@@ -31,31 +31,31 @@ BindGroupDescriptor
 SkyboxRenderer::SkyboxRenderer() {
 	m_renderPassMask = 1 << (int)RenderPass::clear;
 
-	m_bindGroup2 = new BindGroup(&sgd::bindGroupDescriptor);
+	m_bindGroup = new BindGroup(&sgd::bindGroupDescriptor);
 
 	SkyboxUniforms uniforms{};
-	m_bindGroup2->setBuffer(0, new Buffer(BufferType::uniform, &uniforms, sizeof(uniforms)));
+	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, &uniforms, sizeof(uniforms)));
 
 	skyTexture.changed.connect(this, [=](Texture* texture) { //
-		m_bindGroup2->setTexture(1, texture);
+		m_bindGroup->setTexture(1, texture);
 	});
 
 	roughness.changed.connect(this, [=](float roughness) {
 		float bias = roughness * 15.99f;
-		m_bindGroup2->getBuffer(0)->update(&bias,offsetof(SkyboxUniforms, mipmapBias), sizeof(bias));
+		m_bindGroup->getBuffer(0)->update(&bias,offsetof(SkyboxUniforms, mipmapBias), sizeof(bias));
 	});
 }
 
 void SkyboxRenderer::onValidate(GraphicsContext* gc) const {
 
-	m_pipeline = getRenderPipeline(gc, emptyBindGroup(1), m_bindGroup2, BlendMode::opaque, DepthFunc::undefined, CullMode::none,
+	m_pipeline = getOrCreateRenderPipeline(gc, nullptr, BlendMode::opaque, DepthFunc::undefined, CullMode::none, m_bindGroup,
 								   DrawMode::triangleStrip);
 }
 
 void SkyboxRenderer::onRender(GraphicsContext* gc) const {
 	auto& encoder = gc->wgpuRenderPassEncoder();
 	encoder.SetBindGroup(1, emptyBindGroup(1)->wgpuBindGroup());
-	encoder.SetBindGroup(2, m_bindGroup2->wgpuBindGroup());
+	encoder.SetBindGroup(2, m_bindGroup->wgpuBindGroup());
 	encoder.SetPipeline(m_pipeline);
 	encoder.Draw(4, 1);
 }

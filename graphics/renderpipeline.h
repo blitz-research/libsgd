@@ -6,6 +6,8 @@
 
 namespace sgd {
 
+SGD_SHARED(Material);
+
 enum struct BlendMode {
 	opaque,
 	alpha,
@@ -22,8 +24,17 @@ enum struct CullMode { undefined, none, front, back };
 // wgpu::PrimitiveTopology
 enum struct DrawMode { undefined, pointList, lineList, lineStrip, triangleList, triangleStrip };
 
-wgpu::RenderPipeline getRenderPipeline(GraphicsContext* gc,							 //
-									   BindGroup* bindGroup1, BindGroup* bindGroup2, //
-									   BlendMode blendMode, DepthFunc depthFunc, CullMode cullMode, DrawMode drawMode);
+wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
+											   BindGroup* material, //
+											   BlendMode blendMode, //
+											   DepthFunc depthFunc, //
+											   CullMode cullMode,	//
+											   BindGroup* renderer, //
+											   DrawMode drawMode);
+
+wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
+											   Material* material,	//
+											   BindGroup* renderer, //
+											   DrawMode drawMode);
 
 } // namespace sgd

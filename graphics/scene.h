@@ -14,12 +14,17 @@ SGD_SHARED(GraphicsContext);
 
 SGD_SHARED(Scene);
 
+
 enum struct RendererType {
 	skybox,
 	model,
 	skinnedModel,
+	sprite,
 	//8 MAX!
 };
+
+struct CameraUniforms;
+struct LightingUniforms;
 
 struct Scene : Shared {
 	SGD_OBJECT_TYPE(Scene, Shared);
@@ -51,8 +56,8 @@ private:
 
 	Vector<RendererPtr> m_renderers{8};
 
-	void updateCameraUniforms() const;
-	void updateLightingUniforms() const;
+	void updateCameraUniforms(CameraUniforms& uniforms) const;
+	void updateLightingUniforms(LightingUniforms& uniforms) const;
 
 	void renderASync();
 };

@@ -45,6 +45,7 @@ bool Path::isValidFilePath() const {
 }
 
 std::filesystem::path Path::filePath() const {
+	if(startsWith(m_str, "~/")) return (homeDir() / Path(m_str.substr(2))).filePath();
 	return std::filesystem::absolute(m_str).u8string();
 }
 

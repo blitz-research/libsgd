@@ -8,6 +8,9 @@ template <class T> constexpr Rect<T>::Rect(CVec2<T> v) : min(v), max(v) {
 template <class T> template <class C> constexpr Rect<T>::Rect(CRect<C> r) : min(r.min), max(r.max) {
 }
 
+template <class T> constexpr Rect<T>::Rect(float min, float max) : min(min), max(max) {
+}
+
 template <class T> constexpr Rect<T>::Rect(CVec2<T> min, CVec2<T> max) : min(min), max(max) {
 }
 

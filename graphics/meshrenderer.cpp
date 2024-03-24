@@ -91,8 +91,7 @@ void MeshRenderer::onValidate(GraphicsContext* gc) const {
 		auto& surf = m_mesh->surfaces()[i];
 		int rpass = (int)renderPass(surf.material->blendMode());
 
-		auto pipeline = getRenderPipeline(gc, surf.material->bindGroup(), m_bindGroup, surf.material->blendMode(),
-										  surf.material->depthFunc(), surf.material->cullMode(), DrawMode::triangleList);
+		auto pipeline = getOrCreateRenderPipeline(gc, surf.material, m_bindGroup, DrawMode::triangleList);
 
 		m_renderOps[rpass].push_back({pipeline, surf.material->bindGroup(), surf.firstTriangle * 3, surf.triangleCount * 3});
 

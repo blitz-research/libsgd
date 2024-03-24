@@ -22,7 +22,7 @@ private:
 	};
 	Map<CMesh*, InstanceList*> m_instanceLists;
 
-	void onUpdate() const override;
+	void onUpdate(CVec3f eye) override;
 
 	void onRender(GraphicsContext* gc) const override;
 };
