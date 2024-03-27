@@ -16,7 +16,9 @@ template <class T> struct CondVar {
 
 	void wait(CFunction<bool(const T&)> condition) const;
 
-	void wait(const T& value) const;
+	void waiteq(const T& value) const;
+
+	void waitne(const T& value) const;
 
 private:
 	T m_value{};
@@ -40,10 +42,17 @@ template <class T> void CondVar<T>::wait(CFunction<bool(const T&)> cond) const {
 	}
 }
 
-template <class T> void CondVar<T>::wait(const T& value) const {
+template <class T> void CondVar<T>::waiteq(const T& value) const {
 	{
 		std::unique_lock<std::mutex> lock(m_mutex);
 		m_cv.wait(lock, [=] { return m_value == value; });
+	}
+}
+
+template <class T> void CondVar<T>::waitne(const T& value) const {
+	{
+		std::unique_lock<std::mutex> lock(m_mutex);
+		m_cv.wait(lock, [=] { return m_value != value; });
 	}
 }
 

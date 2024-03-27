@@ -4,10 +4,13 @@
 
 namespace sgd {
 
-Expected<Material*, FileioEx> loadMaterial(CPath path);
+Material* createPBRMaterial();
+Expected<Material*, FileioEx> loadPBRMaterial(CPath path);
 
-Material* rgbaMaterial(uint32_t rgba, float metallic=0, float roughness=1);
+Material* createMatteMaterial();
+Expected<Material*, FileioEx> loadMatteMaterial(CPath path);
 
-Material* colorMaterial(CVec4f color, float metallic=0, float roughness=1);
+Material* createSpriteMaterial();
+Expected<Material*, FileioEx> loadSpriteMaterial(CPath path);
 
 }

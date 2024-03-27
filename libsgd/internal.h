@@ -35,6 +35,7 @@ SGD_TYPE_INFO(Entity, HandleType::entity);
 SGD_TYPE_INFO(Camera, HandleType::entity);
 SGD_TYPE_INFO(Light, HandleType::entity);
 SGD_TYPE_INFO(Model, HandleType::entity);
+SGD_TYPE_INFO(Sprite, HandleType::entity);
 SGD_TYPE_INFO(Skybox, HandleType::entity);
 
 SGD_Handle getHandle(HandleType type, Shared* shared);

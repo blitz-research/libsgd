@@ -5,7 +5,7 @@ void entry() {
 	SGD_Camera camera = sgd_CreatePerspectiveCamera();
 	sgd_MoveEntity(camera, 0, 0, -3);
 
-	SGD_Material material = sgd_LoadMaterial("sgd://materials/Bricks076C_1K-JPG");
+	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/Bricks076C_1K-JPG");
 	SGD_Mesh mesh = sgd_CreateSphereMesh(1, 64, 32, material);
 	sgd_TransformMeshTexCoords(mesh, 2, 2, 0, 0);
 	SGD_Model model = sgd_CreateModel();

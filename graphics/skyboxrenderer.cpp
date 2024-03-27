@@ -6,50 +6,44 @@ namespace sgd {
 
 namespace {
 
-static const BindGroupDescriptor emptyDescs[]{				   //
-											  {0, {}, {}, {}}, //
-											  {1, {}, {}, {}}, //
-											  {2, {}, {}, {}}};
-
-auto shaderSource =
+auto shaderSource{
 #include "shaders/skyboxrenderer.wgsl"
-	;
+};
 
-BindGroupDescriptor
-	bindGroupDescriptor(3, //
-						{
-							bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment,
-													   wgpu::BufferBindingType::Uniform), // SkyboxUniforms
-							textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::Cube),
-							samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment),
-						},
-						{}, //
-						shaderSource);
+BindGroupDescriptor bindGroupDescriptor( //
+	3,
+	{
+		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform), // SkyboxUniforms
+		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::Cube),
+		samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment),
+	},
+	{}, shaderSource);
 
 } // namespace
 
 SkyboxRenderer::SkyboxRenderer() {
-	m_renderPassMask = 1 << (int)RenderPass::clear;
 
 	m_bindGroup = new BindGroup(&sgd::bindGroupDescriptor);
 
 	SkyboxUniforms uniforms{};
-	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, &uniforms, sizeof(uniforms)));
+	m_uniformBuffer = new Buffer(BufferType::uniform, &uniforms, sizeof(uniforms));
+	m_bindGroup->setBuffer(0, m_uniformBuffer);
 
 	skyTexture.changed.connect(this, [=](Texture* texture) { //
 		m_bindGroup->setTexture(1, texture);
 	});
 
-	roughness.changed.connect(this, [=](float roughness) {
-		float bias = roughness * 15.99f;
-		m_bindGroup->getBuffer(0)->update(&bias,offsetof(SkyboxUniforms, mipmapBias), sizeof(bias));
+	roughness.changed.connect(this, [=](float r) {
+		float bias = r * 15.99f;
+		m_uniformBuffer->update(&bias, offsetof(SkyboxUniforms, mipmapBias), sizeof(bias));
 	});
+
+	m_renderPassMask = 1 << (int)RenderPass::clear;
 }
 
 void SkyboxRenderer::onValidate(GraphicsContext* gc) const {
-
 	m_pipeline = getOrCreateRenderPipeline(gc, nullptr, BlendMode::opaque, DepthFunc::undefined, CullMode::none, m_bindGroup,
-								   DrawMode::triangleStrip);
+										   DrawMode::triangleStrip);
 }
 
 void SkyboxRenderer::onRender(GraphicsContext* gc) const {

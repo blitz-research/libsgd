@@ -37,7 +37,7 @@ Path::Path(std::filesystem::path& fpath) : m_str(fpath.u8string()) {
 }
 
 bool Path::isUrl() const {
-	return m_str.find("://")!=String::npos;
+	return m_str.find("://") != String::npos;
 }
 
 bool Path::isValidFilePath() const {
@@ -45,7 +45,25 @@ bool Path::isValidFilePath() const {
 }
 
 std::filesystem::path Path::filePath() const {
-	if(startsWith(m_str, "~/")) return (homeDir() / Path(m_str.substr(2))).filePath();
+	if (startsWith(m_str, "${")) {
+		auto i = m_str.find('}');
+		if (i == String::npos) return {};
+		auto id = m_str.substr(2, i - 2);
+		Path prefix;
+		if (id == "HOME") {
+#if SGD_OS_WINDOWS
+			auto home = getenv("USERPROFILE");
+			if(!home) home=getenv("HOMEPATH");
+#elif SGD_OS_WINDOWS || SGD_OS_MACOS
+			auto home = getenv("HOME");
+#else
+			SGD_PANIC("OOPS");
+#endif
+			if(!home) return {};
+			return std::filesystem::path(home) / m_str.substr(i + 1);
+		}
+		return {};
+	}
 	return std::filesystem::absolute(m_str).u8string();
 }
 
@@ -104,7 +122,7 @@ Path appPath() {
 	GetModuleFileName(GetModuleHandle(nullptr), buf, MAX_PATH);
 	buf[MAX_PATH] = 0;
 
-	return path = Path(replace(buf,"\\","/"));
+	return path = Path(replace(buf, "\\", "/"));
 
 #elif defined(SGD_OS_LINUX) || defined(SGD_OS_MACOS)
 
@@ -131,7 +149,7 @@ Path homeDir() {
 #if SGD_OS_WINDOWS
 	auto home = getenv("USERPROFILE");
 	SGD_ASSERT(home);
-	return Path(replace(home,"\\","/"));
+	return Path(replace(home, "\\", "/"));
 #else
 	auto home = getenv("HOME");
 	SGD_ASSERT(home);

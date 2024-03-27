@@ -84,24 +84,25 @@ template <class T> struct SharedPtr {
 	}
 
 	T* operator->() const {
+#if SGD_DEBUG_SHARED_REFS
+		((Shared*)m_ptr)->validateRefs();
+#endif
 		return m_ptr;
 	}
 
 	T& operator*() const {
+#if SGD_DEBUG_SHARED_REFS
+		((Shared*)m_ptr)->validateRefs();
+#endif
 		return *m_ptr;
 	}
 
 	operator T*() const& {
+#if SGD_DEBUG_SHARED_REFS
+		if(m_ptr) ((Shared*)m_ptr)->validateRefs();
+#endif
 		return m_ptr;
 	}
-
-	// IMPORTANT! Can't convert temporary shared ptr to raw ptr!
-	// Might work if we null out m_ptr std::move-style, but let's not go there...
-// 	operator T*() && = delete;
-
-//	T* get() const {
-//		return m_ptr;
-//	}
 
 private:
 	template <class> friend class SharedPtr;
@@ -109,11 +110,11 @@ private:
 	T* m_ptr{};
 
 	void retain() const {
-		if (m_ptr) ((Shared*)(m_ptr))->retain();
+		if (m_ptr) ((Shared*)m_ptr)->retain();
 	}
 
 	void release() const {
-		if (m_ptr) ((Shared*)(m_ptr))->release();
+		if (m_ptr) ((Shared*)m_ptr)->release();
 	}
 };
 

@@ -27,11 +27,11 @@ private:
 	BindGroupPtr m_bindGroup;
 
 	Vector<Sprite*> m_instances;
-	uint32_t m_instanceCount;
+	uint32_t m_instanceCount{};
 	BufferPtr m_instanceBuffer;
-	uint32_t m_instanceCapacity{0};
+	uint32_t m_instanceCapacity{};
 
-	mutable Vector<RenderOp> m_renderOps;
+	mutable Vector<RenderOp> m_renderOps[2];
 
 	void onUpdate(CVec3f eye) override;
 

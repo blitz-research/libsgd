@@ -18,7 +18,7 @@ namespace {
 
 constexpr auto sgdPrefix = "sgd://";
 
-auto g_cacheDir = homeDir() / ".sgd";
+auto g_cacheDir = Path("${HOME}/.sgd");
 
 auto g_cacheFilesPath = g_cacheDir / "cache.json";
 

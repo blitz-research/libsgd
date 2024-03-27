@@ -2,8 +2,9 @@
 #include "camera.h"
 #include "entity.h"
 #include "light.h"
-
 #include "renderer.h"
+#include "scenebindings.h"
+
 #include "shaders/uniforms.h"
 
 #include <window/exports.h>
@@ -70,6 +71,7 @@ void Scene::updateCameraUniforms(CameraUniforms& uniforms) const {
 	auto aspect = (float)m_gc->colorBuffer()->size().x / (float)m_gc->colorBuffer()->size().y;
 
 	if (m_cameras.empty()) {
+
 		auto curs = m_gc->window()->mouse()->position() / Vec2f(m_gc->window()->size());
 
 		curs = curs * Vec2f(twoPi, pi) - Vec2f(pi, halfPi);
@@ -83,7 +85,9 @@ void Scene::updateCameraUniforms(CameraUniforms& uniforms) const {
 
 		uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
 		uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
+
 	} else {
+
 		auto camera = m_cameras.front();
 
 		uniforms.worldMatrix = Mat4f(camera->worldMatrix());
@@ -99,19 +103,23 @@ void Scene::updateLightingUniforms(LightingUniforms& uniforms) const {
 
 	uniforms.ambientLightColor = ambientLightColor();
 
-	for (auto light : m_lights) {
+	uniforms.directionalLightCount=0;
+	uniforms.pointLightCount=0;
+	uniforms.spotLightCount=0;
+
+	for (Light* light : m_lights) {
 		if (!light->visible()) continue;
 
 		switch (light->type()) {
 		case LightType::directional: {
-			if (uniforms.directionalLightCount == uniforms.maxDirectionalLights) break;
+			if (uniforms.directionalLightCount == LightingUniforms::maxDirectionalLights) break;
 			auto& ulight = uniforms.directionalLights[uniforms.directionalLightCount++];
 			ulight.direction = -light->worldMatrix().r.k;
 			ulight.color = light->color();
 			break;
 		}
 		case LightType::point: {
-			if (uniforms.pointLightCount == uniforms.maxPointLights) break;
+			if (uniforms.pointLightCount == LightingUniforms::maxPointLights) break;
 			auto& ulight = uniforms.pointLights[uniforms.pointLightCount++];
 			ulight.position = light->worldMatrix().t;
 			ulight.color = light->color();
@@ -120,7 +128,7 @@ void Scene::updateLightingUniforms(LightingUniforms& uniforms) const {
 			break;
 		}
 		case LightType::spot: {
-			if (uniforms.spotLightCount == uniforms.maxSpotLights) break;
+			if (uniforms.spotLightCount == LightingUniforms::maxSpotLights) break;
 			auto& ulight = uniforms.spotLights[uniforms.spotLightCount++];
 			ulight.position = light->worldMatrix().t;
 			ulight.direction = -light->worldMatrix().r.k;
@@ -139,21 +147,26 @@ void Scene::updateLightingUniforms(LightingUniforms& uniforms) const {
 
 void Scene::render() {
 
-	CameraUniforms cameraUniforms;
-	updateCameraUniforms(cameraUniforms);
-	m_gc->bindGroup0()->getBuffer(0)->update(&cameraUniforms, 0, sizeof(cameraUniforms));
+	auto cameraUniforms = (CameraUniforms*)m_gc->sceneBindings()->cameraUniforms()->lock(0, sizeof(CameraUniforms));
+	updateCameraUniforms(*cameraUniforms);
+	auto eye = Vec3f(cameraUniforms->worldMatrix.t);
+	m_gc->sceneBindings()->cameraUniforms()->unlock();
 
-	LightingUniforms lightingUniforms;
-	updateLightingUniforms(lightingUniforms);
-	m_gc->bindGroup0()->getBuffer(1)->update(&lightingUniforms, 0, sizeof(lightingUniforms));
-	m_gc->bindGroup0()->setTexture(2, envTexture());
+	auto lightingUniforms = (LightingUniforms*)m_gc->sceneBindings()->lightingUniforms()->lock(0, sizeof(LightingUniforms));
+	updateLightingUniforms(*lightingUniforms);
+	m_gc->sceneBindings()->lightingUniforms()->unlock();
+
+	m_gc->sceneBindings()->bindGroup()->setTexture(2, envTexture());
 
 	for (auto r : m_renderers) {
-		if (r && r->enabled()) r->onUpdate(Vec3f(cameraUniforms.worldMatrix.t));
+		if (r && r->enabled()) r->onUpdate(eye);
 	}
 
 	runOnMainThread(
-		[=] { //
+		[=] { // We should really dependencies on these...
+			m_gc->colorBuffer()->validate(m_gc);
+			m_gc->depthBuffer()->validate(m_gc);
+			m_gc->sceneBindings()->validate(m_gc);
 			GraphicsResource::validateAll(m_gc);
 		},
 		true);

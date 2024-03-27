@@ -5,47 +5,30 @@
 
 namespace sgd {
 
-void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pitch) {
+const Texture* rgbaTexture(uint32_t rgba) {
 
-	auto bpp = bytesPerTexel(format);
+	static Map<uint32_t, TexturePtr> cache;
 
-	switch (format) {
-	case TextureFormat::rgba8:
-		for (auto y = 0; y < size.y; ++y) {
-			auto p = (uint8_t*)data + y * pitch;
-			for (auto x = 0; x < size.x; p += 4, ++x) {
-				auto a = u8tof(p[3]);
-				p[0] = ftou8(std::pow(std::pow(u8tof(p[0]), 2.2f) * a, 1.0f / 2.2f));
-				p[1] = ftou8(std::pow(std::pow(u8tof(p[1]), 2.2f) * a, 1.0f / 2.2f));
-				p[2] = ftou8(std::pow(std::pow(u8tof(p[2]), 2.2f) * a, 1.0f / 2.2f));
-			}
-		}
-		break;
-	case TextureFormat::srgba8:
-		for (auto y = 0; y < size.y; ++y) {
-			auto p = (uint8_t*)data + y * pitch;
-			for (auto x = 0; x < size.x; p += 4, ++x) {
-				p[0] = p[0] * p[3] / 255;
-				p[1] = p[1] * p[3] / 255;
-				p[2] = p[2] * p[3] / 255;
-			}
-		}
-		break;
-	default:
-		break;
-	}
+	auto& texture = cache[rgba];
+	if (texture) return texture;
+
+	texture = new Texture({1, 1}, 1, TextureFormat::rgba8, TextureFlags::none);
+
+	texture->update(&rgba, bytesPerTexel(TextureFormat::rgba8));
+
+	return texture;
 }
 
 Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags) {
 
 	if (format != TextureFormat::rgba8 && format != TextureFormat::srgba8) SGD_ABORT();
 
-	int bpp = bytesPerTexel(format);
+	auto bpp = bytesPerTexel(format);
 
 	Vec2u size;
 	uint32_t n;
 
-	auto img = stbi_load_from_memory(data.data(), data.size(), (int*)&size.x, (int*)&size.y, (int*)&n, bpp);
+	auto img = stbi_load_from_memory(data.data(), data.size(), (int*)&size.x, (int*)&size.y, (int*)&n, (int)bpp);
 	if (!img) return FileioEx("STB error decoding image data");
 
 	uint32_t depth = 1;
@@ -99,11 +82,6 @@ Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, Textu
 	return texture;
 }
 
-void premultiplyAlpha(Texture* texture) {
-
-}
-
-
 Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, TextureFlags flags) {
 
 	auto data = loadData(path);
@@ -112,18 +90,35 @@ Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, Textu
 	return loadTexture(data.result(), format, flags);
 }
 
-Texture* rgbaTexture(uint32_t rgba) {
+void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pitch) {
 
-	static Map<uint32_t, TexturePtr> cache;
+	auto bpp = bytesPerTexel(format);
 
-	auto& texture = cache[rgba];
-	if (texture) return texture;
-
-	texture = new Texture({1, 1}, 1, TextureFormat::rgba8, TextureFlags::none);
-
-	texture->update(&rgba, bytesPerTexel(TextureFormat::rgba8));
-
-	return texture;
+	switch (format) {
+	case TextureFormat::rgba8:
+		for (auto y = 0; y < size.y; ++y) {
+			auto p = (uint8_t*)data + y * pitch;
+			for (auto x = 0; x < size.x; p += 4, ++x) {
+				auto a = u8tof(p[3]);
+				p[0] = ftou8(std::pow(std::pow(u8tof(p[0]), 2.2f) * a, 1.0f / 2.2f));
+				p[1] = ftou8(std::pow(std::pow(u8tof(p[1]), 2.2f) * a, 1.0f / 2.2f));
+				p[2] = ftou8(std::pow(std::pow(u8tof(p[2]), 2.2f) * a, 1.0f / 2.2f));
+			}
+		}
+		break;
+	case TextureFormat::srgba8:
+		for (auto y = 0; y < size.y; ++y) {
+			auto p = (uint8_t*)data + y * pitch;
+			for (auto x = 0; x < size.x; p += 4, ++x) {
+				p[0] = p[0] * p[3] / 255;
+				p[1] = p[1] * p[3] / 255;
+				p[2] = p[2] * p[3] / 255;
+			}
+		}
+		break;
+	default:
+		break;
+	}
 }
 
 } // namespace sgd

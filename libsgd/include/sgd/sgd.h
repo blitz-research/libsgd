@@ -53,6 +53,7 @@ typedef SGD_Handle SGD_Entity;
 typedef SGD_Handle SGD_Camera;
 typedef SGD_Handle SGD_Light;
 typedef SGD_Handle SGD_Model;
+typedef SGD_Handle SGD_Sprite;
 typedef SGD_Handle SGD_Skybox;
 
 // ***** System *****
@@ -62,14 +63,20 @@ typedef SGD_Handle SGD_Skybox;
 #define SGD_EVENT_MASK_SIZE_CHANGED 2
 //! @endcond
 
+//! Start up libsgd.
+SGD_API void SGD_DECL sgd_Startup();
+
+//! Shut down libsgd.
+SGD_API void SGD_DECL sgd_Shutdown();
+
 //! Set error handler callback.
 SGD_API void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(const char* error, void* context), void* context);
 
-//! Run on new thread.
-SGD_API void SGD_DECL sgd_Run(void(SGD_DECL* start)());
-
 //! Generate runtime error.
 SGD_API void SGD_DECL sgd_Error(SGD_String error);
+
+//! Generate a modal alert dialog.
+SGD_API void SGD_DECL sgd_Alert(SGD_String message);
 
 //! Poll system for events.
 //!
@@ -85,7 +92,7 @@ SGD_API int SGD_DECL sgd_PollEvents();
 
 //! @cond Window flags for use with CreateWindow.
 #define SGD_WINDOW_FLAGS_FULLSCREEN 1
-#define SGD_WINDOW_FLAGS_RESIZABLE  2
+#define SGD_WINDOW_FLAGS_RESIZABLE 2
 //! @endcond
 
 //! Create a new window.
@@ -97,6 +104,9 @@ SGD_API int SGD_DECL sgd_PollEvents();
 //! SGD_WINDOW_FLAGS_FULLSCREEN | 1             | Create a fullscreen window.
 //! SGD_WINDOW_FLAGS_RESIZABLE  | 2             | Create a resizable window.
 SGD_API void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flags);
+
+//! Destroy window.
+SGD_API void SGD_DECL sgd_DestroyWindow();
 
 //! Get window width.
 SGD_API int SGD_DECL sgd_WindowWidth();
@@ -223,14 +233,91 @@ SGD_API SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int fl
 
 // ***** Material *****
 
-//! Load a new material.
-SGD_API SGD_Material SGD_DECL sgd_LoadMaterial(SGD_String path);
+//! @cond blend mode constants
+#define SGD_BLEND_MODE_OPAQUE   1
+#define SGD_BLEND_MODE_ALPHA    2
+#define SGD_BLEND_MODE_ADDITIVE 3
+#define SGD_BLEND_MODE_MULTIPLY 4
+//! @endcond
 
-//! Create a new material.
-SGD_API SGD_Material SGD_DECL sgd_CreateMaterial();
+//! @cond depth func constants
+#define SGD_DEPTH_FUNC_NEVER         1
+#define SGD_DEPTH_FUNC_LESS          2
+#define SGD_DEPTH_FUNC_EQUAL         3
+#define SGD_DEPTH_FUNC_LESS_EQUAL    4
+#define SGD_DEPTH_FUNC_GREATER       5
+#define SGD_DEPTH_FUNC_NOT_EQUAL     6
+#define SGD_DEPTH_FUNC_GREATER_EQUAL 7
+#define SGD_DEPTH_FUNC_ALWAYS        8
+//! @endcond
+
+//! @cond cull mode constants
+#define SGD_CULL_MODE_NONE  1
+#define SGD_CULL_MODE_FRONT 2
+#define SGD_CULL_MODE_BACK  3
+//! @endcond
+
+//!
+
+//! Create a new PBR material.
+SGD_API SGD_Material SGD_DECL sgd_CreatePBRMaterial();
+
+//! Load a new PBR material.
+SGD_API SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path);
+
+//! Create a new matte matterial.
+SGD_API SGD_Material SGD_DECL sgd_CreateMatteMaterial();
+
+//! Load a new matte material.
+SGD_API SGD_Material SGD_DECL sgd_LoadMatteMaterial(SGD_String path);
+
+//! Create a new sprite matterial.
+SGD_API SGD_Material SGD_DECL sgd_CreateSpriteMaterial();
+
+//! Load a new sprite material.
+SGD_API SGD_Material SGD_DECL sgd_LoadSpriteMaterial(SGD_String path);
+
+//! Set material blend mode.
+//!
+//! `blendMode` should be one of the following:
+//!
+//! Blend mode              | Integer value | Description
+//! ------------------------|---------------|------------
+//! SGD_BLEND_MODE_OPAQUE   | 1             | Opaque
+//! SGD_BLEND_MODE_ALPHA    | 2             | Alpha blended
+//! SGD_BLEND_MODE_ADDITIVE | 3             | Additive blended
+//! SGD_BLEND_MODE_MULTIPLY | 4             | Multiply blended
+SGD_API void SGD_DECL sgd_SetMaterialBlendMode(SGD_Material material, int blendMode);
+
+//! Set material depth comparison function.
+//!
+//! `depthFunc` should be one of the following:
+//!
+//! Blend mode                   | Integer value
+//! -----------------------------|--------------
+//! SGD_DEPTH_FUNC_NEVER         | 1
+//! SGD_DEPTH_FUNC_LESS          | 2
+//! SGD_DEPTH_FUNC_EQUAL         | 3
+//! SGD_DEPTH_FUNC_LESS_EQUAL    | 4
+//! SGD_DEPTH_FUNC_GREATER       | 5
+//! SGD_DEPTH_FUNC_NOT_EQUAL     | 6
+//! SGD_DEPTH_FUNC_GREATER_EQUAL | 7
+//! SGD_DEPTH_FUNC_ALWAYS        | 8
+SGD_API void SGD_DECL sgd_SetMaterialDepthFunc(SGD_Material material, int depthFunc);
+
+//! Set material primitive culling mode.
+//!
+//! `cullMode` should be one of the following:
+//!
+//! Cull mode           | Integer value | Description
+//! --------------------| --------------|------------
+//! SGD_CULL_MODE_NONE  | 1             | Don't cull any primitives.
+//! SGD_CULL_MODE_FRONT | 2             | Cull front facing primitives.
+//! SGD_CULL_MODE_BACK  | 3             | Cull back facing primitives.
+SGD_API void SGD_DECL sgd_SetMaterialCullMode(SGD_Material material, int cullMode);
 
 //! Set material vector4 property
-SGD_API void SGD_DECL sgd_SetMaterialVector4f(SGD_Material material, SGD_String property, float x, float y, float z,float a);
+SGD_API void SGD_DECL sgd_SetMaterialVector4f(SGD_Material material, SGD_String property, float x, float y, float z, float a);
 
 //! Set material vector3 property
 SGD_API void SGD_DECL sgd_SetMaterialVector3f(SGD_Material material, SGD_String property, float x, float y, float z);
@@ -311,14 +398,28 @@ SGD_API void SGD_DECL sgd_SetModelColor(SGD_Model model, float red, float green,
 //! SGD_ANIMATION_MODE_ONE_SHOT | 1             | Animation plays forward once then ends.
 //! SGD_ANIMATION_MODE_LOOP     | 2             | Animation plays forward repeatedly.
 //! SGD_ANIMATION_PING_PING     | 3             | Animation plays forward then backwards repeatedly.
- SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float time, int mode);
+SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float time, int mode);
+
+// ***** Sprite *****
+
+//! Create a new sprite.
+SGD_API SGD_Sprite SGD_DECL sgd_CreateSprite();
+
+//! Set sprite material.
+SGD_API void SGD_DECL sgd_SetSpriteMaterial(SGD_Sprite sprite, SGD_Material material);
+
+//! Set sprite color.
+SGD_API void SGD_DECL sgd_SetSpriteColor(SGD_Sprite sprite, float red, float green, float blue, float alpha);
+
+//! Set sprite rect, defaults to -.5, -.5, .5, .5.
+SGD_API void SGD_DECL sgd_SetSpriteRect(SGD_Sprite sprite, float minX, float minY, float maxX, float maxY);
 
 // ***** Camera *****
 
-//! Create a perspective camera
+//! Create a perspective camera.
 SGD_API SGD_Camera SGD_DECL sgd_CreatePerspectiveCamera();
 
-//! Create an orthographic camera
+//! Create an orthographic camera.
 SGD_API SGD_Camera SGD_DECL sgd_CreateOrthographicCamera();
 
 //! Set camera vertical field of view in degrees.

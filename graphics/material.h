@@ -7,27 +7,32 @@ namespace sgd {
 SGD_SHARED(Material);
 
 struct MaterialDescriptor {
+	struct UniformDesc {
+		size_t offset;
+		size_t type;	// n floats for now
+		void* defValue;
+	};
+	struct TextureDesc {
+		uint32_t binding;
+		const Texture* defValue;
+	};
 	String typeName;
 	const BindGroupDescriptor* bindGroupDescriptor;
 	uint32_t uniformsSize;
-	Map<String, size_t> uniformOffsets;
-	Map<String, uint32_t> textureIndices;
-	Function<void(Material*)> initFunc;
+	Map<String, UniformDesc> uniformDescs;
+	Map<String, TextureDesc> textureDescs;
 
-	MaterialDescriptor(CString typeName,							   //
+	MaterialDescriptor(String typeName,							   //
 					   const BindGroupDescriptor* bindGroupDescriptor, //
 					   uint32_t uniformsSize,						   //
-					   CMap<String, size_t> uniformOffsets,			   //
-					   CMap<String, uint32_t> textureIndices,		   //
-					   Function<void(Material*)> initFunc);
+					   Map<String, UniformDesc> uniformDescs,			   //
+					   Map<String, TextureDesc> textureDescs);
 };
 
 struct Material : GraphicsResource {
 	SGD_OBJECT_TYPE(Material, GraphicsResource);
 
-	Material(const MaterialDescriptor* desc);
-
-	Material(CString typeName);
+	explicit Material(const MaterialDescriptor* desc);
 
 	Property<BlendMode> blendMode{BlendMode::opaque};
 
@@ -43,7 +48,11 @@ struct Material : GraphicsResource {
 
 	bool setFloat(CString name, float value);
 
-	bool setTexture(CString name, Texture* value);
+	bool setTexture(CString name, CTexture* value);
+
+	bool hasNormalTexture() const {
+		return m_hasNormalTexture;
+	}
 
 	BindGroup* bindGroup() const {
 		return m_bindGroup;
@@ -51,8 +60,9 @@ struct Material : GraphicsResource {
 
 protected:
 	const MaterialDescriptor* m_desc;
-	BufferPtr m_uniformBuffer;
 	BindGroupPtr m_bindGroup;
+	BufferPtr m_uniformBuffer;
+	bool m_hasNormalTexture{};
 };
 
 } // namespace sgd

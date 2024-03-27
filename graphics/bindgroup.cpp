@@ -43,7 +43,7 @@ wgpu::BindGroupLayout BindGroupDescriptor::wgpuBindGroupLayout(GraphicsContext* 
 BindGroup::BindGroup(const BindGroupDescriptor* desc) : m_desc(desc), m_resources(m_desc->wgpuBindGroupLayoutEntries.size()) {
 }
 
-void BindGroup::setResource(uint32_t index, GraphicsResource* resource) {
+void BindGroup::setResource(uint32_t index, CGraphicsResource* resource) {
 	if (m_resources[index] == resource) return;
 
 	updateDependency(m_resources[index], resource);
@@ -52,21 +52,21 @@ void BindGroup::setResource(uint32_t index, GraphicsResource* resource) {
 	invalidate(true);
 }
 
-void BindGroup::setBuffer(uint32_t index, Buffer* buffer) {
+void BindGroup::setBuffer(uint32_t index, const Buffer* buffer) {
 	SGD_ASSERT(index < m_desc->wgpuBindGroupLayoutEntries.size());
 	SGD_ASSERT(m_desc->wgpuBindGroupLayoutEntries[index].buffer.type != wgpu::BufferBindingType::Undefined);
 
 	setResource(index, buffer);
 }
 
-Buffer* BindGroup::getBuffer(uint32_t index) const {
+const Buffer* BindGroup::getBuffer(uint32_t index) const {
 	SGD_ASSERT(index < m_desc->wgpuBindGroupLayoutEntries.size());
 	SGD_ASSERT(m_desc->wgpuBindGroupLayoutEntries[index].buffer.type != wgpu::BufferBindingType::Undefined);
 
-	return m_resources[index] ? m_resources[index]->as<Buffer>() : nullptr;
+	return m_resources[index] ? m_resources[index]->as<const Buffer>() : nullptr;
 }
 
-void BindGroup::setTexture(uint32_t index, Texture* texture) {
+void BindGroup::setTexture(uint32_t index, const Texture* texture) {
 	SGD_ASSERT(index < m_desc->wgpuBindGroupLayoutEntries.size());
 	SGD_ASSERT(m_desc->wgpuBindGroupLayoutEntries[index].texture.sampleType != wgpu::TextureSampleType::Undefined);
 
@@ -77,11 +77,11 @@ void BindGroup::setTexture(uint32_t index, Texture* texture) {
 	}
 }
 
-Texture* BindGroup::getTexture(uint32_t index) const {
+const Texture* BindGroup::getTexture(uint32_t index) const {
 	SGD_ASSERT(index < m_desc->wgpuBindGroupLayoutEntries.size());
 	SGD_ASSERT(m_desc->wgpuBindGroupLayoutEntries[index].texture.sampleType != wgpu::TextureSampleType::Undefined);
 
-	return m_resources[index] ? m_resources[index]->as<Texture>() : nullptr;
+	return m_resources[index] ? m_resources[index]->as<const Texture>() : nullptr;
 }
 
 void BindGroup::onValidate(GraphicsContext* gc) const {
@@ -93,11 +93,11 @@ void BindGroup::onValidate(GraphicsContext* gc) const {
 	for (int i = 0; i < entries.size(); ++i) {
 		entries[i].binding = i;
 		if (bglEntries[i].buffer.type != wgpu::BufferBindingType::Undefined) {
-			entries[i].buffer = m_resources[i]->as<Buffer>()->wgpuBuffer();
+			entries[i].buffer = m_resources[i]->as<const Buffer>()->wgpuBuffer();
 		} else if (bglEntries[i].texture.sampleType != wgpu::TextureSampleType::Undefined) {
-			entries[i].textureView = m_resources[i]->as<Texture>()->wgpuTextureView();
+			entries[i].textureView = m_resources[i]->as<const Texture>()->wgpuTextureView();
 		} else if (bglEntries[i].sampler.type != wgpu::SamplerBindingType::Undefined) {
-			entries[i].sampler = m_resources[i]->as<Texture>()->wgpuSampler();
+			entries[i].sampler = m_resources[i]->as<const Texture>()->wgpuSampler();
 		} else {
 			SGD_ABORT();
 		}

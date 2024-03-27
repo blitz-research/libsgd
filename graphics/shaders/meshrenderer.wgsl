@@ -5,7 +5,6 @@ R"(
 struct MeshUniforms {
     tangentsEnabled: i32,
 }
-
 @group(2) @binding(0) var<uniform> mesh_uniforms: MeshUniforms;
 
 struct Vertex {

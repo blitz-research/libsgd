@@ -14,7 +14,6 @@ SGD_SHARED(GraphicsContext);
 
 SGD_SHARED(Scene);
 
-
 enum struct RendererType {
 	skybox,
 	model,

@@ -1,16 +1,17 @@
 #include "meshprimitives.h"
 
 #include "meshutil.h"
+#include "materialutil.h"
 
 namespace sgd {
 
 namespace {
 
-Mesh* createMesh(Vector<Vertex> vertices, Vector<Triangle> triangles, Material* material) {
+Mesh* createMesh(CVector<Vertex> vertices, CVector<Triangle> triangles, Material* material) {
 
-	auto mesh = new Mesh(std::move(vertices), std::move(triangles), {}, MeshFlags::tangentsEnabled);
+	if(!material) material = createMatteMaterial();
 
-	mesh->addSurface({material, 0, (uint32_t)triangles.size()});
+	auto mesh = new Mesh(vertices, triangles, {{material, 0, (uint32_t)triangles.size()}}, material->hasNormalTexture() ? MeshFlags::tangentsEnabled : MeshFlags::none);
 
 	updateTangents(mesh);
 
@@ -43,7 +44,7 @@ Mesh* createBoxMesh(CBoxf box, Material* material) {
 		triangles.emplace_back(i, i + 3, i + 2);
 	}
 
-	return createMesh(std::move(vertices), std::move(triangles), material);
+	return createMesh(vertices, triangles, material);
 }
 
 Mesh* createSphereMesh(float radius, uint32_t xSegs, uint32_t ySegs, Material* material) {
@@ -83,7 +84,7 @@ Mesh* createSphereMesh(float radius, uint32_t xSegs, uint32_t ySegs, Material* m
 		triangles.emplace_back(v0, v0 + 1, v0 + xSegs + 1);
 	}
 
-	return createMesh(std::move(vertices), std::move(triangles), material);
+	return createMesh(vertices, triangles, material);
 }
 
 Mesh* createCylinderMesh(float length, float radius, uint32_t segs, Material* material) {
@@ -126,7 +127,7 @@ Mesh* createCylinderMesh(float length, float radius, uint32_t segs, Material* ma
 		triangles.emplace_back(v0 + i * 2 + 1, v0 + (i + 1) * 2 + 1, v0 + 1);
 	}
 
-	return createMesh(std::move(vertices), std::move(triangles), material);
+	return createMesh(vertices, triangles, material);
 }
 
 Mesh* createConeMesh(float length, float radius, uint32_t segs, Material* material) {
@@ -162,7 +163,7 @@ Mesh* createConeMesh(float length, float radius, uint32_t segs, Material* materi
 	}
 	for (auto i = 1u; i < segs - 1; ++i) triangles.emplace_back(v0, v0 + i, v0 + i + 1);
 
-	return createMesh(std::move(vertices), std::move(triangles), material);
+	return createMesh(vertices, triangles, material);
 }
 
 Mesh* createTorusMesh(float outerRadius, float innerRadius, uint32_t outerSegs, uint32_t innerSegs, Material* material) {
@@ -197,7 +198,7 @@ Mesh* createTorusMesh(float outerRadius, float innerRadius, uint32_t outerSegs, 
 		}
 	}
 
-	return createMesh(std::move(vertices), std::move(triangles), material);
+	return createMesh(vertices, triangles, material);
 }
 
 } // namespace sgd

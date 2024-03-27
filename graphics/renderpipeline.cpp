@@ -1,6 +1,7 @@
 #include "renderpipeline.h"
 
 #include "material.h"
+#include "scenebindings.h"
 
 namespace sgd {
 
@@ -14,7 +15,7 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
 
 	static Map<uint64_t, wgpu::RenderPipeline> cache;
 
-	auto scene = gc->bindGroup0();
+	auto scene = gc->sceneBindings()->bindGroup();
 
 	if (!material) material = emptyBindGroup(1);
 

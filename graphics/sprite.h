@@ -16,7 +16,7 @@ struct Sprite : Entity {
 
 	Property<MaterialPtr> material;
 	Property<Vec4f> color{Vec4f(1)};
-	Property<Rectf> rect{Rectf(-1, 1)};
+	Property<Rectf> rect{Rectf(-.5f, .5f)};
 
 private:
 	void onCreate() override;

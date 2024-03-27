@@ -4,7 +4,8 @@
 
 namespace sgd {
 
-// @group(0) @binding(0) var<uniform> camera_uniforms: CameraUniforms;
+// ***** Scene *****
+
 struct alignas(16) CameraUniforms {
 	Mat4f projectionMatrix;
 	Mat4f inverseProjectionMatrix;
@@ -15,9 +16,6 @@ struct alignas(16) CameraUniforms {
 	float clipFar{100};
 };
 
-// @group(0) @binding(1) var<uniform> lighting_uniforms: LightingUniforms;
-// @group(0) @binding(2) var lighting_envTexture: texture_cube<f32>;
-// @group(0) @binding(3) var lighting_envSampler: sampler;
 struct alignas(16) LightingUniforms {
 
 	struct alignas(16) DirectionalLight {
@@ -46,7 +44,7 @@ struct alignas(16) LightingUniforms {
 	static constexpr int maxPointLights = 8;
 	static constexpr int maxSpotLights = 8;
 
-	Vec4f ambientLightColor{1, 1, 1, .1};
+	Vec4f ambientLightColor{1, 1, 1, 0};
 
 	uint32_t directionalLightCount{};
 	DirectionalLight directionalLights[maxDirectionalLights];
@@ -57,15 +55,31 @@ struct alignas(16) LightingUniforms {
 	uint32_t spotLightCount{};
 	SpotLight spotLights[maxSpotLights];
 };
+// @group(0) @binding(0) var<uniform> camera_uniforms: CameraUniforms;
+// @group(0) @binding(1) var<uniform> lighting_uniforms: LightingUniforms;
+// @group(0) @binding(2) var lighting_envTexture: texture_cube<f32>;
+// @group(0) @binding(3) var lighting_envSampler: sampler;
 
+// ***** MatteMaterial *****
+
+struct alignas(16) MatteMaterialUniforms {
+	Vec4f albedoColor{1};
+	float metallicFactor{0};
+	float roughnessFactor{1};
+};
 // @group(1) @binding(0) var<uniform> material_uniforms: MaterialUniforms;
 // @group(1) @binding(1) var material_albedoTexture: texture_2d<f32>;
 // @group(1) @binding(2) var material_albedoSampler: sampler;
-struct alignas(16) MatteMaterialUniforms {
-	Vec4f albedoColor;
-};
 
-// @group(1) @binding(0) var<uniform> material_uniforms: MaterialUniforms;
+// ***** PBRMaterial *****
+
+struct alignas(16) PBRMaterialUniforms {
+	Vec4f albedoColor{1};
+	Vec3f emissiveColor{0};
+	float metallicFactor{0};
+	float roughnessFactor{1};
+};
+// @group(1) @binding(0) var<uniform> material_uniforms: PBRMaterialUniforms;
 // @group(1) @binding(1) var material_albedoTexture: texture_2d<f32>;
 // @group(1) @binding(2) var material_albedoSampler: sampler;
 // @group(1) @binding(3) var material_emissiveTexture: texture_2d<f32>;
@@ -78,44 +92,49 @@ struct alignas(16) MatteMaterialUniforms {
 // @group(1) @binding(10) var material_occlusionSampler: sampler;
 // @group(1) @binding(11) var material_normalTexture: texture_2d<f32>;
 // @group(1) @binding(12) var material_normalSampler: sampler;
-struct alignas(16) PBRMaterialUniforms {
-	Vec4f albedoColor{1, 1, 1, 1};
-	Vec3f emissiveColor{0, 0, 0};
-	float metallicFactor{0};
-	float roughnessFactor{1};
-};
 
-// @group(2) @binding(0) var<uniform> skybox_uniforms: SkyboxUniforms;
-// @group(2) @binding(1) var skybox_skyboxTexture: texture_cube<f32>;
-// @group(2) @binding(2) var skybox_skyboxSampler: sampler;
+// ***** SkyboxRenderer *****
+
 struct alignas(16) SkyboxUniforms {
 	float mipmapBias{0};
 };
+// @group(2) @binding(0) var<uniform> skybox_uniforms: SkyboxUniforms;
+// @group(2) @binding(1) var skybox_skyboxTexture: texture_cube<f32>;
+// @group(2) @binding(2) var skybox_skyboxSampler: sampler;
 
-// ***** Mesh renderer *****
+// ***** MeshRenderer *****
 
-// @group(2) @binding(0) var<uniform> meshUniforms: MeshUniforms;
 struct alignas(16) MeshUniforms {
 	int32_t tangentsEnabled{0};
 };
+// @group(2) @binding(0) var<uniform> meshUniforms: MeshUniforms;
 
 // ***** SkinnedMeshRenderer *****
 
-//@group(2) @binding(1) var<storage> skinnedMeshInstances: array<SkinnedMeshInstance>;
 struct alignas(16) SkinnedMeshInstance {
 	static constexpr int maxJoints = 256;
 	Mat4f worldMatrix;
 	Vec4f color;
 	Mat4f jointMatrices[maxJoints];
 };
+//@group(2) @binding(1) var<storage> meshInstances: array<SkinnedMeshInstance>;
 
-// ***** Sprite Renderer *****
+// ***** SpriteMaterial *****
 
-// @group(2) @binding(0) var<storage> spriteInstances: array<SpriteInstance>;
+// @group(1) @binding(0) var<uniform> material_uniforms: SpriteMaterialUniforms;
+// @group(1) @binding(1) var material_albedoTexture: texture_2d<f32>;
+// @group(1) @binding(2) var material_albedoSampler: sampler;
+struct alignas(16) SpriteMaterialUniforms {
+	Vec4f albedoColor{1};
+};
+
+// ***** SpriteRenderer *****
+
 struct SpriteInstance {
 	Mat4f matrix;
 	Vec4f color;
 	Rectf rect;
 };
+// @group(2) @binding(0) var<storage> spriteInstances: array<SpriteInstance>;
 
 } // namespace sgd

@@ -21,9 +21,9 @@ void render() {
 	camera.projectionMatrix = Mat4f::perspective(45, (float)window->size().x / (float)window->size().y, .1, 100);
 	camera.inverseProjectionMatrix = inverse(camera.projectionMatrix);
 	camera.viewProjectionMatrix = camera.projectionMatrix * camera.viewMatrix;
-	gc->bindGroup0()->getBuffer(0)->update(&camera, 0, sizeof(camera));
+	gc->sceneBindings()->cameraUniforms()->update(&camera, 0, sizeof(camera));
 
-	gc->bindGroup0()->getBuffer(1)->update(&lighting, 0, sizeof(lighting));
+	gc->sceneBindings()->lightingUniforms()->update(&lighting, 0, sizeof(lighting));
 
 	{
 		static float meshRot;
@@ -61,7 +61,7 @@ void start() {
 	TexturePtr envTexture =
 		loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::filter).result();
 
-	gc->bindGroup0()->setTexture(2, envTexture);
+	gc->sceneBindings()->bindGroup()->setTexture(2, envTexture);
 
 	lighting.pointLightCount = 1;
 	lighting.ambientLightColor = {1, 1, 1, 0};
@@ -70,7 +70,7 @@ void start() {
 	lighting.pointLights[0].falloff = 1;
 	lighting.pointLights[0].range = 25;
 
-	MaterialPtr material = loadMaterial(Path("sgd://materials/PavingStones131_1K-JPG")).result();
+	MaterialPtr material = loadPBRMaterial(Path("sgd://materials/PavingStones131_1K-JPG")).result();
 
 	MeshPtr mesh = createSphereMesh(1, 64, 32, material);
 

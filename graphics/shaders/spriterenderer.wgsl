@@ -26,7 +26,6 @@ struct VertexOut {
         (instance.rect.z - instance.rect.x) * vcoords.x + instance.rect.x,
         (instance.rect.w - instance.rect.y) * vcoords.y + instance.rect.y, 0);
 
-//    vertex = ((camera_uniforms.worldMatrix * instance.matrix) * vec4f(vertex, 0)).xyz;
     vertex = (camera_uniforms.worldMatrix * vec4f(vertex, 0)).xyz;
 
     var out: VertexOut;

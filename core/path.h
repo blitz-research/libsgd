@@ -50,8 +50,6 @@ Path operator+(CPath x, CString y);
 
 Path appPath();
 
-Path homeDir();
-
 inline std::ostream& operator << (std::ostream& os, CPath path) {
 	return os << path.str();
 }

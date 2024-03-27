@@ -38,6 +38,36 @@ void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
 	SGD_ABORT();
 }
 
+void logAdapterProps(const wgpu::Adapter& adapter) {
+
+	wgpu::AdapterProperties props{};
+	adapter.GetProperties(&props);
+
+	log() << "### wgpu Adapter Properties:";
+	log() << "### Vender name:" << (props.vendorName ? props.vendorName : "???");
+	log() << "### Architecture:" << (props.architecture ? props.architecture : "???");
+	log() << "### Name:" << (props.name ? props.name : "???");
+	log() << "### Driver description:" << (props.driverDescription ? props.driverDescription : "???");
+
+	Map<wgpu::AdapterType, String> adapterTypes{
+		{wgpu::AdapterType::DiscreteGPU, "DiscreteGPU"},
+		{wgpu::AdapterType::IntegratedGPU, "IntegratedGPU"},
+		{wgpu::AdapterType::CPU, "CPU"},
+		{wgpu::AdapterType::Unknown, "Unknown"},
+	};
+	log() << "### Adapter type:" << adapterTypes[props.adapterType];
+
+	Map<wgpu::BackendType, String> backendTypes{
+		{wgpu::BackendType::Undefined, "Undefined"}, {wgpu::BackendType::D3D12, "D3D12"},
+		{wgpu::BackendType::D3D11, "D3D11"},		 {wgpu::BackendType::Vulkan, "Vulkan"},
+		{wgpu::BackendType::Null, "Null"},			 {wgpu::BackendType::Metal, "Metal"},
+		{wgpu::BackendType::OpenGL, "OpenGL"},		 {wgpu::BackendType::OpenGLES, "OpenGLES"},
+		{wgpu::BackendType::WebGPU, "WebGPU"},
+	};
+	log() << "### Backend type:" << backendTypes[props.backendType];
+	log() << "### Compatibility mode:" << props.compatibilityMode;
+}
+
 } // namespace
 
 const wgpu::Instance& getWGPUInstance() {
@@ -56,13 +86,16 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 			//
 			SGD_ASSERT(status == WGPURequestAdapterStatus_Success);
 			auto adapter = wgpu::Adapter::Acquire(cAdapter);
-			//
+
+			logAdapterProps(adapter);
+
 			adapter.RequestDevice(
 				nullptr,
 				[](WGPURequestDeviceStatus status, WGPUDevice cDevice, const char* message, void* userdata) {
 					//
 					SGD_ASSERT(status == WGPURequestDeviceStatus_Success);
 					auto device = wgpu::Device::Acquire(cDevice);
+
 					device.SetUncapturedErrorCallback(&dawnErrorCallback, nullptr);
 					auto callback = (Function<void(const wgpu::Device&)>*)userdata;
 					(*callback)(device);
@@ -72,74 +105,97 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 				userdata);
 		},
 		userdata);
-
 	getWGPUInstance().ProcessEvents();
 }
 
 wgpu::Device createWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions) {
 
 	wgpu::Device result;
+	CondVar<bool> ready;
 
-	requestWGPUDevice(adapterOptions, [&](const wgpu::Device& device) { //
-		result = device;
-	});
+	runOnMainThread([&]{
+		requestWGPUDevice(adapterOptions, [&](const wgpu::Device& device) { //
+			result=device;
+			ready.set(true);
+		});
+	}, true);
 
+	ready.waiteq(true);
+	SGD_ASSERT(result);
 	return result;
 }
 
 wgpu::TextureFormat preferredWGPUSwapChainFormat(const wgpu::Device& device) {
+
 	return wgpu::TextureFormat::BGRA8Unorm;
 }
 
 wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) {
 
+	wgpu::Surface result;
+	CondVar<bool> ready;
+
+	runOnMainThread([&]{
+
 #if SGD_OS_WINDOWS
-	wgpu::SurfaceDescriptorFromWindowsHWND nativeDesc{};
-	nativeDesc.hwnd = glfwGetWin32Window(window);
-	nativeDesc.hinstance = GetModuleHandle(nullptr);
+		wgpu::SurfaceDescriptorFromWindowsHWND nativeDesc{};
+		nativeDesc.hwnd = glfwGetWin32Window(window);
+		nativeDesc.hinstance = GetModuleHandle(nullptr);
 #elif SGD_OS_LINUX
-	wgpu::SurfaceDescriptorFromXlibWindow nativeDesc{};
-	nativeDesc.window = glfwGetX11Window(window);
-	nativeDesc.display = glfwGetX11Display();
+		wgpu::SurfaceDescriptorFromXlibWindow nativeDesc{};
+		nativeDesc.window = glfwGetX11Window(window);
+		nativeDesc.display = glfwGetX11Display();
 #elif SGD_OS_MACOS
-	wgpu::SurfaceDescriptorFromMetalLayer nativeDesc{};
-	nativeDesc.layer = createMetalLayer(window);
+		wgpu::SurfaceDescriptorFromMetalLayer nativeDesc{};
+		nativeDesc.layer = createMetalLayer(window);
 #elif SGD_OS_EMSCRIPTEN
-	wgpu::SurfaceDescriptorFromCanvasHTMLSelector nativeDesc{};
-	nativeDesc.selector = "#canvas";
+		wgpu::SurfaceDescriptorFromCanvasHTMLSelector nativeDesc{};
+		nativeDesc.selector = "#canvas";
 #else
-	SGD_ABORT();
+		SGD_ABORT();
 #endif
-	wgpu::SurfaceDescriptor surfaceDesc{};
-	surfaceDesc.nextInChain = &nativeDesc;
+		wgpu::SurfaceDescriptor surfaceDesc{};
+		surfaceDesc.nextInChain = &nativeDesc;
 
-	wgpu::Surface surface = wgpuInstanceCreateSurface(getWGPUInstance().Get(), (WGPUSurfaceDescriptor*)&surfaceDesc);
+		wgpu::Surface surface = wgpuInstanceCreateSurface(getWGPUInstance().Get(), (WGPUSurfaceDescriptor*)&surfaceDesc);
+		// Can't use hits, causes weird missing symbols errors on Linux!
+		//wgpu::Surface surface = getWGPUInstance().CreateSurface(&surfaceDesc);
 
-	//Don't use! Causes weird missing symbols errors on Linux!
-	//
-//	wgpu::Surface surface = getWGPUInstance().CreateSurface(&surfaceDesc);
+		result=surface;
+		ready.set(true);
 
-	return surface;
+	},true);
+
+	ready.waiteq(true);
+	SGD_ASSERT(result);
+	return result;
 }
 
 wgpu::SwapChain createWGPUSwapChain(const wgpu::Device& device, const wgpu::Surface& surface, CVec2u size,
 									wgpu::TextureFormat format) {
-	wgpu::SwapChainDescriptor desc;
-	desc.usage = wgpu::TextureUsage::RenderAttachment;
-	desc.format = format;
-	desc.width = size.x;
-	desc.height = size.y;
+	wgpu::SwapChain result;
+	CondVar<bool> ready;
+
+	runOnMainThread([&]{
+		wgpu::SwapChainDescriptor desc;
+		desc.usage = wgpu::TextureUsage::RenderAttachment;
+		desc.format = format;
+		desc.width = size.x;
+		desc.height = size.y;
 #if SGD_OS_EMSCRIPTEN
-	desc.presentMode = wgpu::PresentMode::Fifo;
+		desc.presentMode = wgpu::PresentMode::Fifo;
 #else
-//	desc.presentMode = wgpu::PresentMode::Mailbox;	// vsync = off
-	desc.presentMode = wgpu::PresentMode::Fifo;		// vsync = on
+		//	desc.presentMode = wgpu::PresentMode::Mailbox;	// vsync = off
+		desc.presentMode = wgpu::PresentMode::Fifo; // vsync = on
 #endif
+		result = device.CreateSwapChain(surface, &desc);
+		ready.set(true);
 
-	auto swapChain = device.CreateSwapChain(surface, &desc);
-	SGD_ASSERT(swapChain);
+	},true);
 
-	return swapChain;
+	ready.waiteq(true);
+	SGD_ASSERT(result);
+	return result;
 }
 
 #if SGD_OS_EMSCRIPTEN
@@ -171,7 +227,7 @@ void requestRender(CFunction<void()> renderFunc) {
 		sgd_requestAnimationFrame(func);
 	}, true);
 
-	ready.wait(true);
+	ready.waiteq(true);
 }
 
 #else

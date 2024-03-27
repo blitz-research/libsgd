@@ -1,13 +1,18 @@
 #include "materialutil.h"
 
+#include "mattematerial.h"
 #include "pbrmaterial.h"
+#include "spritematerial.h"
 
 #include "textureutil.h"
 
 namespace sgd {
 
-Expected<Material*, FileioEx> loadMaterial(CPath path) {
+Material* createPBRMaterial() {
+	return new Material(&pbrMaterialDescriptor);
+}
 
+Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
 	if (!path.isUrl() && !path.isDir()) return FileioEx("Material directory does not exist");
 
 	auto material = new Material(&pbrMaterialDescriptor);
@@ -46,21 +51,32 @@ Expected<Material*, FileioEx> loadMaterial(CPath path) {
 	return material;
 }
 
-Material* rgbaMaterial(uint32_t rgba, float metallic, float roughness) {
-	static Map<uint32_t, MaterialPtr> cache;
+Material* createMatteMaterial() {
+	return new Material(&matteMaterialDescriptor);
+}
 
-	auto& material = cache[rgba];
-	if (material) return material;
+Expected<Material*, FileioEx> loadMatteMaterial(CPath path) {
+	auto texture = loadTexture(path, TextureFormat::srgba8, TextureFlags::mipmap | TextureFlags::filter);
+	if (!texture) return texture.error();
 
-	material = new Material(&pbrMaterialDescriptor);
-	material->setVector4f("albedoColor4f", Vec4f::rgba(rgba));
-	material->setFloat("metallicFactor1f", metallic);
-	material->setFloat("roughnessFactor1f", roughness);
+	auto material = createMatteMaterial();
+	material->setTexture("albedoTexture", texture.result());
+
 	return material;
 }
 
-Material* colorMaterial(CVec4f color, float metallic, float roughness) {
-	return rgbaMaterial(rgba(color), metallic, roughness);
+Material* createSpriteMaterial() {
+	return new Material(&spriteMaterialDescriptor);
+}
+
+Expected<Material*, FileioEx> loadSpriteMaterial(CPath path) {
+	auto texture = loadTexture(path, TextureFormat::srgba8, TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clampU | TextureFlags::clampV);
+	if (!texture) return texture.error();
+
+	auto material = createSpriteMaterial();
+	material->setTexture("albedoTexture", texture.result());
+
+	return material;
 }
 
 } // namespace sgd

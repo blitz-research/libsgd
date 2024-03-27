@@ -69,6 +69,7 @@ private:
 
 	Keyboard* m_keyboard;
 	Mouse* m_mouse;
+	Gamepad* m_gamepads[maxGamepads];
 };
 
 } // namespace sgd

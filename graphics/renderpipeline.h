@@ -9,6 +9,7 @@ namespace sgd {
 SGD_SHARED(Material);
 
 enum struct BlendMode {
+	undefined,
 	opaque,
 	alpha,
 	additive,

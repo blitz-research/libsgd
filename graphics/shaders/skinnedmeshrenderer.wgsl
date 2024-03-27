@@ -12,7 +12,6 @@ struct SkinnedMeshInstance {
     color: vec4f,
     jointMatrices: array<mat4x4f, maxJoints>,
 };
-
 @group(2) @binding(0) var<uniform> mesh_uniforms: MeshUniforms;
 @group(2) @binding(1) var<storage> skinnedMeshInstances: array<SkinnedMeshInstance>;
 

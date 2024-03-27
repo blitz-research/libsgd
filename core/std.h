@@ -54,7 +54,7 @@ using String = std::string;
 using CString = const String&;
 
 template <class F> using Function = std::function<F>;
-template <class F> using CFunction = Function<F>;
+template <class F> using CFunction = const Function<F>&;
 
 template <class T> using Vector = std::vector<T>;
 template <class T> using CVector = const Vector<T>&;

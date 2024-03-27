@@ -19,6 +19,7 @@ struct SkyboxRenderer : Renderer {
 
 private:
 	BindGroupPtr m_bindGroup;
+	BufferPtr m_uniformBuffer;
 
 	mutable wgpu::RenderPipeline m_pipeline;
 

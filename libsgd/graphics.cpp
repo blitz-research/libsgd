@@ -78,17 +78,61 @@ SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags) {
 
 // ***** Material *****
 
-SGD_Material SGD_DECL sgd_LoadMaterial(SGD_String path) {
-	auto material = sgd::loadMaterial(sgd::Path(path));
+SGD_Material SGD_DECL sgd_CreatePBRMaterial() {
+	auto material = new sgd::Material(&sgd::pbrMaterialDescriptor);
+
+	return sgd::createHandle(material);
+}
+
+SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path) {
+	auto material = sgd::loadPBRMaterial(sgd::Path(path));
 	if (!material) sgd::error("Failed to load material", material.error());
 
 	return sgd::createHandle(material.result());
 }
 
-SGD_Material SGD_DECL sgd_CreateMaterial() {
-	auto material = new sgd::Material(&sgd::pbrMaterialDescriptor);
+SGD_Material SGD_DECL sgd_CreateMatteMaterial() {
+	auto material = new sgd::Material(&sgd::matteMaterialDescriptor);
 
 	return sgd::createHandle(material);
+}
+
+SGD_Material SGD_DECL sgd_LoadMatteMaterial(SGD_String path) {
+	auto material = sgd::loadMatteMaterial(sgd::Path(path));
+	if (!material) sgd::error("Failed to load material", material.error());
+
+	return sgd::createHandle(material.result());
+}
+
+SGD_Material SGD_DECL sgd_CreateSpriteMaterial() {
+	auto material = new sgd::Material(&sgd::spriteMaterialDescriptor);
+
+	return createHandle(material);
+}
+
+SGD_Material SGD_DECL sgd_LoadSpriteMaterial(SGD_String path) {
+	auto material = sgd::loadSpriteMaterial(sgd::Path(path));
+	if (!material) sgd::error("Failed to load material", material.error());
+
+	return sgd::createHandle(material.result());
+}
+
+void SGD_DECL sgd_SetMaterialBlendMode(SGD_Material hmaterial, int blendMode) {
+	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
+
+	material->blendMode = (sgd::BlendMode)blendMode;
+}
+
+void SGD_DECL sgd_SetMaterialDepthFunc(SGD_Material hmaterial, int depthFunc) {
+	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
+
+	material->depthFunc = (sgd::DepthFunc)depthFunc;
+}
+
+void SGD_DECL sgd_SetMaterialCullMode(SGD_Material hmaterial, int cullMode) {
+	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
+
+	material->cullMode = (sgd::CullMode)cullMode;
 }
 
 void SGD_DECL sgd_SetMaterialVector4f(SGD_Material hmaterial, SGD_String property, float x, float y, float z, float a) {
@@ -266,6 +310,37 @@ void SGD_DECL sgd_SetModelColor(SGD_Model hmodel, float red, float green, float 
 	auto model = sgd::resolveHandle<sgd::Model>(hmodel);
 
 	model->color = sgd::Vec4f(red, green, blue, alpha);
+}
+
+// ***** Sprite *****
+
+SGD_Sprite SGD_DECL sgd_CreateSprite() {
+	if (!sgd::mainScene) sgd::error("Scene has not been created");
+
+	auto sprite = new sgd::Sprite();
+
+	sgd::mainScene->add(sprite);
+
+	return sgd::createHandle<sgd::Sprite>(sprite);
+}
+
+void SGD_DECL sgd_SetSpriteMaterial(SGD_Sprite hsprite, SGD_Material hmaterial) {
+	auto sprite = sgd::resolveHandle<sgd::Sprite>(hsprite);
+	auto material = sgd::resolveHandle<sgd::Material>(hmaterial);
+
+	sprite->material = material;
+}
+
+void SGD_DECL sgd_SetSpriteColor(SGD_Sprite hsprite, float red, float green, float blue, float alpha) {
+	auto sprite = sgd::resolveHandle<sgd::Sprite>(hsprite);
+
+	sprite->color = sgd::Vec4f(red, green, blue, alpha);
+}
+
+void SGD_DECL sgd_SetSpriteRect(SGD_Sprite hsprite, float minX, float minY, float maxX, float maxY) {
+	auto sprite = sgd::resolveHandle<sgd::Sprite>(hsprite);
+
+	sprite->rect = sgd::Rectf(minX, minY, maxX, maxY);
 }
 
 // ***** Camera *****

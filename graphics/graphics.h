@@ -10,6 +10,7 @@ constexpr int renderPassCount = 3;
 SGD_SHARED(Window);
 SGD_SHARED(Texture);
 SGD_SHARED(BindGroup);
+SGD_SHARED(SceneBindings);
 
 SGD_SHARED(GraphicsContext);
 SGD_SHARED(GraphicsResource);
@@ -31,6 +32,10 @@ struct GraphicsContext : Shared {
 		return m_depthBuffer;
 	}
 
+	SceneBindings* sceneBindings() const {
+		return m_sceneBindings;
+	}
+
 	void beginRender(CVec4f clearColor, float clearDepth);
 
 	void beginRenderPass(RenderPass renderPass);
@@ -44,10 +49,6 @@ struct GraphicsContext : Shared {
 	void endRender();
 
 	void present(Texture* colorBuffer);
-
-	BindGroup* bindGroup0() const {
-		return m_bindGroup0;
-	}
 
 	// ***** Internal *****
 
@@ -66,15 +67,15 @@ struct GraphicsContext : Shared {
 private:
 	WindowPtr m_window;
 
+	SceneBindingsPtr m_sceneBindings;
+
 	TexturePtr m_colorBuffer;
 	TexturePtr m_depthBuffer;
 
-	Vec4f m_clearColor;
-	float m_clearDepth;
+	Vec4f m_clearColor{1};
+	float m_clearDepth{0};
 
-	BindGroupPtr m_bindGroup0;
-
-	RenderPass m_renderPass;
+	RenderPass m_renderPass{};
 
 	wgpu::Device m_wgpuDevice;
 	wgpu::Surface m_wgpuSurface;
@@ -96,7 +97,7 @@ struct GraphicsResource : Shared {
 protected:
 	GraphicsResource();
 
-	~GraphicsResource();
+	~GraphicsResource() override;
 
 	void addDependency(CGraphicsResource* dep, bool emit = true);
 

@@ -41,10 +41,12 @@ wgpu::Sampler createWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
 	desc.addressModeU = bool(flags & TextureFlags::clampU) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.addressModeV = bool(flags & TextureFlags::clampV) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.addressModeW = bool(flags & TextureFlags::clampW) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
-	desc.magFilter = bool(flags & (TextureFlags::filter | TextureFlags::mipmap)) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
-//	desc.minFilter = bool(flags & (TextureFlags::filter | TextureFlags::mipmap)) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
+	desc.magFilter =
+		bool(flags & (TextureFlags::filter | TextureFlags::mipmap)) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
+	//	desc.minFilter = bool(flags & (TextureFlags::filter | TextureFlags::mipmap)) ? wgpu::FilterMode::Linear :
+	//wgpu::FilterMode::Nearest;
 	desc.minFilter = wgpu::FilterMode::Linear;
-	desc.mipmapFilter =	bool(flags & TextureFlags::mipmap) ? wgpu::MipmapFilterMode::Linear : wgpu::MipmapFilterMode::Nearest;
+	desc.mipmapFilter = bool(flags & TextureFlags::mipmap) ? wgpu::MipmapFilterMode::Linear : wgpu::MipmapFilterMode::Nearest;
 
 	return sampler = gc->wgpuDevice().CreateSampler(&desc);
 }
@@ -55,9 +57,13 @@ Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags
 	: m_size(size), m_depth(depth), m_format(format), m_flags(flags) {
 
 	m_data = (uint8_t*)std::malloc(SIZE(m_size));
+
+//	log() << "### Created texture:" << this << size << depth;
 }
 
 Texture::~Texture() {
+
+//	log() << "### Deleting texture:" << this << m_size << m_depth;
 
 	std::free(m_data);
 }

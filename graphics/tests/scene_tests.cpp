@@ -52,7 +52,7 @@ void start() {
 	scene->add(camera);
 #endif
 
-	MaterialPtr material = loadMaterial(Path("sgd://materials/Tiles019_1K-JPG")).result();
+	MaterialPtr material = loadPBRMaterial(Path("sgd://materials/Tiles019_1K-JPG")).result();
 	MeshPtr groundMesh = createBoxMesh(Boxf{{-10, -3, -10}, {10, -2, 10}}, material);
 	transformTexCoords(groundMesh, {3, 3}, {0, 0});
 	ModelPtr ground = new Model();

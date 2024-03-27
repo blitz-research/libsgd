@@ -9,14 +9,18 @@ inline uint32_t bytesPerTexel(TextureFormat format) {
 	return bpp[(int)format];
 }
 
-Texture* rgbaTexture(uint32_t rgba);
+const Texture* rgbaTexture(uint32_t rgba);
 
-inline Texture* blackTexture() {
+inline const Texture* blackTexture() {
 	return rgbaTexture(0xff000000);
 }
 
-inline Texture* whiteTexture() {
+inline const Texture* whiteTexture() {
 	return rgbaTexture(0xffffffff);
+}
+
+inline const Texture* flatNormalTexture() {
+	return rgbaTexture(0xffff8080);
 }
 
 Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags);
@@ -24,7 +28,5 @@ Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, Textu
 Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, TextureFlags flags);
 
 void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pitch);
-
-void premultiplyAlpha(Texture* texture);
 
 } // namespace sgd

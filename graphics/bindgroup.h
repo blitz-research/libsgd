@@ -26,17 +26,17 @@ struct BindGroupDescriptor {
 struct BindGroup : GraphicsResource {
 	SGD_OBJECT_TYPE(BindGroup, GraphicsResource);
 
-	BindGroup(const BindGroupDescriptor* desc);
+	explicit BindGroup(const BindGroupDescriptor* desc);
 
 	const BindGroupDescriptor* descriptor() const {
 		return m_desc;
 	}
 
-	void setBuffer(uint32_t index, Buffer* buffer);
-	Buffer* getBuffer(uint32_t index) const;
+	void setBuffer(uint32_t index, CBuffer* buffer);
+	const Buffer* getBuffer(uint32_t index) const;
 
-	void setTexture(uint32_t index, Texture* texture);
-	Texture* getTexture(uint32_t index) const;
+	void setTexture(uint32_t index, CTexture* texture);
+	const Texture* getTexture(uint32_t index) const;
 
 	wgpu::BindGroup wgpuBindGroup() const {
 		return m_bindGroup;
@@ -44,11 +44,11 @@ struct BindGroup : GraphicsResource {
 
 private:
 	const BindGroupDescriptor* m_desc;
-	Vector<GraphicsResourcePtr> m_resources;
+	Vector<CGraphicsResourcePtr> m_resources;
 
 	mutable wgpu::BindGroup m_bindGroup;
 
-	void setResource(uint32_t index, GraphicsResource* resource);
+	void setResource(uint32_t index, CGraphicsResource* resource);
 
 	void onValidate(GraphicsContext* gc) const override;
 };

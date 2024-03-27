@@ -1,5 +1,6 @@
 #include "graphics.h"
 #include "renderpipeline.h"
+#include "scenebindings.h"
 #include "texture.h"
 
 #include "shaders/uniforms.h"
@@ -12,85 +13,14 @@
 
 namespace sgd {
 
-namespace {
-
-auto shaderSource{
-#include "shaders/scene.wgsl"
-};
-
-void logAdapterProps(const wgpu::Adapter& adapter) {
-
-	wgpu::AdapterProperties props{};
-	adapter.GetProperties(&props);
-
-	log() << "### wgpu Adapter Properties:";
-	log() << "### Vender name:" << (props.vendorName ? props.vendorName : "???");
-	log() << "### Architecture:" << (props.architecture ? props.architecture : "???");
-	log() << "### Name:" << (props.name ? props.name : "???");
-	log() << "### Driver description:" << (props.driverDescription ? props.driverDescription : "???");
-
-	Map<wgpu::AdapterType, String> adapterTypes{
-		{wgpu::AdapterType::DiscreteGPU, "DiscreteGPU"},
-		{wgpu::AdapterType::IntegratedGPU, "IntegratedGPU"},
-		{wgpu::AdapterType::CPU, "CPU"},
-		{wgpu::AdapterType::Unknown, "Unknown"},
-	};
-	log() << "### Adapter type:" << adapterTypes[props.adapterType];
-
-	Map<wgpu::BackendType, String> backendTypes{
-		{wgpu::BackendType::Undefined, "Undefined"}, {wgpu::BackendType::D3D12, "D3D12"},
-		{wgpu::BackendType::D3D11, "D3D11"},		 {wgpu::BackendType::Vulkan, "Vulkan"},
-		{wgpu::BackendType::Null, "Null"},			 {wgpu::BackendType::Metal, "Metal"},
-		{wgpu::BackendType::OpenGL, "OpenGL"},		 {wgpu::BackendType::OpenGLES, "OpenGLES"},
-		{wgpu::BackendType::WebGPU, "WebGPU"},
-	};
-	log() << "### Backend type:" << backendTypes[props.backendType];
-	log() << "### Compatibility mode:" << props.compatibilityMode;
-}
-
-BindGroupDescriptor bindGroup0Desc( //
-	0,								//
-	{bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
-								wgpu::BufferBindingType::Uniform), // binding(0) camera uniforms
-	 bufferBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment,
-								wgpu::BufferBindingType::Uniform), // binding(1) lighting uniforms
-	 textureBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment,
-								 wgpu::TextureViewDimension::Cube), // binding(2) lighting envTexture
-	 samplerBindGroupLayoutEntry(3, wgpu::ShaderStage::Fragment)},	// binding(3) lighting envSampler
-	{},																//
-	shaderSource);
-
-BindGroup* createBindGroup0() {
-	auto bindGroup = new BindGroup(&bindGroup0Desc);
-
-	CameraUniforms cameraUniforms;
-	bindGroup->setBuffer(0, new Buffer(BufferType::uniform, &cameraUniforms, sizeof(cameraUniforms)));
-
-	LightingUniforms lightingUniforms;
-	bindGroup->setBuffer(1, new Buffer(BufferType::uniform, &lightingUniforms, sizeof(lightingUniforms)));
-
-	auto envTexture = new Texture({1, 1}, 6, TextureFormat::rgba8, TextureFlags::cube);
-	uint32_t data[6]{0xff000000,0xff000000,0xff000000,0xff000000,0xff000000,0xff000000};
-	envTexture->update(data, sizeof(uint32_t));
-	bindGroup->setTexture(2, envTexture);
-
-	return bindGroup;
-}
-
-} // namespace
-
-} // namespace sgd
-
-namespace sgd {
-
 // ***** GraphicsContext *****
 
 GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBackendType) : m_window(window) {
 
-	CondVar<bool> cv;
+	CondVar<bool> ready;
 
 	runOnMainThread(
-		[&]() {
+		[&] {
 			wgpu::RequestAdapterOptions opts{};
 			opts.backendType = wgpuBackendType;
 			if (opts.backendType == wgpu::BackendType::Undefined) {
@@ -98,21 +28,20 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 				opts.backendType = wgpu::BackendType::D3D12;
 #elif SGD_OS_LINUX
 				opts.backendType = wgpu::BackendType::Vulkan;
-#elif SGD_OS_METAL
+#elif SGD_OS_MACOS
 				opts.backendType = wgpu::BackendType::Metal;
 #endif
 			}
-
 			requestWGPUDevice(opts, [&](const wgpu::Device& device) {
 				m_wgpuDevice = device;
 				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
 				m_wgpuSwapChain = createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, m_window->size(),
 													  preferredWGPUSwapChainFormat(m_wgpuDevice));
 
-				logAdapterProps(m_wgpuDevice.GetAdapter());
-
 				m_colorBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
 				m_depthBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
+
+				m_sceneBindings = new SceneBindings();
 
 				m_window->sizeChanged.connect(this, [=](CVec2u size) {
 					m_wgpuSwapChain =
@@ -122,14 +51,12 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 					m_depthBuffer->resize(size);
 				});
 
-				m_bindGroup0 = createBindGroup0();
-
-				cv.set(true);
+				ready.set(true);
 			});
 		},
 		true);
 
-	cv.wait(true);
+	ready.waiteq(true);
 }
 
 void GraphicsContext::beginRender(CVec4f clearColor, float clearDepth) {
@@ -181,7 +108,7 @@ void GraphicsContext::beginRenderPass(RenderPass rpass) {
 	// Default?
 	m_wgpuRenderPassEncoder.SetViewport(0, 0, (float)m_colorBuffer->size().x, (float)m_colorBuffer->size().y, 0, 1);
 
-	m_wgpuRenderPassEncoder.SetBindGroup(0, m_bindGroup0->wgpuBindGroup());
+	m_wgpuRenderPassEncoder.SetBindGroup(0, m_sceneBindings->bindGroup()->wgpuBindGroup());
 }
 
 void GraphicsContext::endRenderPass() {
@@ -221,25 +148,33 @@ GraphicsResource::GraphicsResource() {
 
 GraphicsResource::~GraphicsResource() {
 	auto it = sgd::find(g_invalidQueue, this);
-	if (it != g_invalidQueue.end()) g_invalidQueue.erase(it);
+	if(m_invalid) {
+		SGD_ASSERT(it!=g_invalidQueue.end());
+		g_invalidQueue.erase(it);
+	}else{
+		SGD_ASSERT(it==g_invalidQueue.end());
+	}
 }
 
-void GraphicsResource::validate(GraphicsContext* gc) const {
+void GraphicsResource::validate(GraphicsContext* gc) const { // NOLINT (recursive)
 	if (!m_invalid) return;
-	for (auto r : m_dependencies) r->validate(gc);
+	for (CGraphicsResource* r : m_dependencies) r->validate(gc);
 	onValidate(gc);
 	m_invalid = false;
 	m_emitted = false;
 }
 
 void GraphicsResource::validateAll(GraphicsContext* gc) {
-	for (auto& r : g_invalidQueue) r->validate(gc);
-	g_invalidQueue.clear();
+	while (!g_invalidQueue.empty()) {
+		auto r = g_invalidQueue.back();
+		g_invalidQueue.pop_back();
+		r->validate(gc);
+	}
 }
 
 void GraphicsResource::addDependency(CGraphicsResource* dep, bool emit) {
 	if (!dep) return;
-	m_dependencies.push_back(dep);
+	m_dependencies.emplace_back(dep);
 	dep->invalidated.connect(this, [=] { //
 		invalidate(emit);
 	});
