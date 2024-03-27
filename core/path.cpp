@@ -59,10 +59,8 @@ std::filesystem::path Path::filePath() const {
 #if SGD_OS_WINDOWS
 			auto home = getenv("USERPROFILE");
 			if (!home) home = getenv("HOMEPATH");
-#elif SGD_OS_WINDOWS || SGD_OS_MACOS
-			auto home = getenv("HOME");
 #else
-			SGD_PANIC("OOPS");
+			auto home = getenv("HOME");
 #endif
 			if (!home) return {};
 			prefix = home;

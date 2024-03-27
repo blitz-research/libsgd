@@ -6,7 +6,6 @@
 #include "stringutil.h"
 
 #include <curl/curl.h>
-#include <thread>
 
 #include <json11.hpp>
 
@@ -32,6 +31,8 @@ bool initCache() {
 	static bool done;
 	if (done) return g_cacheOk;
 	done = true;
+
+	log() << "### Initializing fetch cache" << g_cacheDir.filePath().u8string();
 
 	if (!g_cacheDir.isDir()) {
 		std::filesystem::create_directory(g_cacheDir.filePath());
@@ -122,17 +123,19 @@ CURL* openCurl() {
 	return g_curl;
 }
 
-String fetch(String url, curl_write_callback writeFunc, void* writeData) {
+String fetch(CString url, curl_write_callback writeFunc, void* writeData) {
+
+	String turl = url;
 
 	if (startsWith(url, sgdPrefix)) {
 		static const String SGD_URL = "https://skirmish-dev.net/assets/";
-		url = SGD_URL + url.substr(6);
-		log() << "### Remapped url:" << url;
+		turl = SGD_URL + url.substr(6);
+		log() << "### Remapped url:" << url << "to" << turl;
 	}
 
 	auto curl = openCurl();
 
-	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+	curl_easy_setopt(curl, CURLOPT_URL, turl.c_str());
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFunc);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, writeData);
 
@@ -148,9 +151,8 @@ String fetch(String url, curl_write_callback writeFunc, void* writeData) {
 		log() << "### CURL HttpStatus:" << httpStatus;
 		log() << "### CURL code:" << curl_easy_strerror(result);
 		log() << "### CURL errors:" << error;
+		return curl_easy_strerror(result);
 	}
-
-	if (result) String(curl_easy_strerror(result));
 
 	return {};
 }
