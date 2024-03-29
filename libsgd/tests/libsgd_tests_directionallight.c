@@ -36,7 +36,7 @@ void entry() {
 	for (;;) {
 		if (sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) break;
 
-		sgd_TurnEntity(model, 0, .01, 0);
+		sgd_TurnEntity(model, 0, .1f, 0);
 
 		sgd_RenderScene();
 
