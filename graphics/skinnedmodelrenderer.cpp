@@ -7,7 +7,7 @@
 namespace sgd {
 
 SkinnedModelRenderer::SkinnedModelRenderer() {
-	m_instanceLists[nullptr] = new InstanceList{nullptr};
+	m_instanceLists.insert(std::make_pair(nullptr, new InstanceList{}));
 }
 
 void SkinnedModelRenderer::add(CModel* model) {
@@ -17,8 +17,8 @@ void SkinnedModelRenderer::add(CModel* model) {
 		auto renderer = new SkinnedMeshRenderer(mesh);
 		it = m_instanceLists.insert(std::make_pair(mesh, new InstanceList{renderer})).first;
 	}
-	auto list = it->second;
-	list->models.push_back(model);
+	auto list = it->second.get();
+	list->models.emplace_back(model);
 	model->mesh.changed.connect(this, [=](CMesh*) {
 		sgd::remove(list->models, model);
 		add(model);
@@ -34,10 +34,12 @@ void SkinnedModelRenderer::remove(CModel* model) {
 }
 
 void SkinnedModelRenderer::onUpdate(CVec3f eye) {
-	for (auto [mesh, list] : m_instanceLists) {
-		if (!mesh) continue;
+	for(auto& kv : m_instanceLists) {
+		CMesh* mesh = kv.first;
+		if(!mesh) continue;
+		auto list = kv.second.get();
 		auto inst = list->meshRenderer->lockInstances(list->models.size());
-		for (auto model : list->models) {
+		for (CModel* model : list->models) {
 			inst->worldMatrix = Mat4f(model->worldMatrix());
 			inst->color = model->color();
 			int i = 0;
@@ -52,8 +54,8 @@ void SkinnedModelRenderer::onUpdate(CVec3f eye) {
 }
 
 void SkinnedModelRenderer::onRender(GraphicsContext* gc) const {
-	for (auto [mesh, list] : m_instanceLists) {
-		if (mesh) list->meshRenderer->render(gc);
+	for(auto& kv : m_instanceLists) {
+		if (kv.first) kv.second->meshRenderer->render(gc);
 	}
 }
 

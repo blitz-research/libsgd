@@ -447,6 +447,30 @@ void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light hlight, float angle) {
 
 // ***** Entity *****
 
+void SGD_DECL sgd_ClearScene() {
+	if (!sgd::mainScene) sgd::error("Scene has not been created");
+
+	sgd::mainScene->clear();
+
+	sgd::destroyAllHandles();
+}
+
+void SGD_DECL sgd_DestroyEntity(SGD_Entity hentity) {
+	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
+
+	sgd::mainScene->remove(entity);
+
+	sgd::Function<void(sgd::Entity*)> destroyHandle;
+
+	destroyHandle = [=](sgd::Entity* entity){
+		for(sgd::Entity* child : entity->children()) {
+			destroyHandle(child);
+		}
+		sgd::destroyHandle(entity);
+	};
+	destroyHandle(entity);
+}
+
 SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
 	auto entity = sgd::resolveHandle<sgd::Entity>(hentity);
 

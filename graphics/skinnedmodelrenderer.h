@@ -20,7 +20,7 @@ private:
 		SkinnedMeshRendererPtr meshRenderer;
 		Vector<CModelPtr> models;
 	};
-	Map<CMesh*, InstanceList*> m_instanceLists;
+	Map<CMesh*, std::unique_ptr<InstanceList>> m_instanceLists;
 
 	void onUpdate(CVec3f eye) override;
 

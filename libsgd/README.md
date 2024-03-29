@@ -1,4 +1,4 @@
-### LibSGD release V24.03
+### LibSGD release V0.03
 
 #### Contents:
 

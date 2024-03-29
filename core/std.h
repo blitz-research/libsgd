@@ -10,6 +10,7 @@
 #include <deque>
 #include <functional>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <string>
@@ -53,6 +54,9 @@ using CAny = const Any&;
 using String = std::string;
 using CString = const String&;
 
+template <class T> using UniquePtr = std::unique_ptr<T>;
+template <class T> using CUniquePtr = const UniquePtr<T>&;
+
 template <class F> using Function = std::function<F>;
 template <class F> using CFunction = const Function<F>&;
 
@@ -70,6 +74,9 @@ template <class T, class C = std::less<T>> using CSet = const Set<T, C>&;
 
 template <class K, class V, class C = std::less<K>> using Map = std::map<K, V, C>;
 template <class K, class V, class C = std::less<K>> using CMap = const Map<K, V, C>&;
+
+template <class K, class V> using Pair = std::pair<K, V>;
+template <class K, class V> using CPair = const Pair<K, V>&;
 
 using Data = Vector<uint8_t>;
 using CData = const Data&;
@@ -94,6 +101,13 @@ template <class C, class V> bool remove(C& container, const V& value) {
 	auto it = std::find(container.begin(), container.end(), value);
 	if (it == container.end()) return false;
 	container.erase(it);
+	return true;
+}
+
+template <class C, class V> bool rremove(C& container, const V& value) {
+	auto it = std::find(container.rbegin(), container.rend(), value);
+	if (it == container.rend()) return false;
+	container.erase(--it.base()); // Woah...
 	return true;
 }
 

@@ -36,6 +36,8 @@ struct Scene : Shared {
 
 	Scene(GraphicsContext* gc);
 
+	void clear();
+
 	void add(Entity* entity);
 	void remove(Entity* entity);
 
@@ -53,7 +55,7 @@ private:
 	Vector<CameraPtr> m_cameras;
 	Vector<LightPtr> m_lights;
 
-	Vector<RendererPtr> m_renderers{8};
+	Array<RendererPtr,8> m_renderers;
 
 	void updateCameraUniforms(CameraUniforms& uniforms) const;
 	void updateLightingUniforms(LightingUniforms& uniforms) const;

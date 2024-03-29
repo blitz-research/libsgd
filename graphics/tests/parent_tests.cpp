@@ -69,7 +69,8 @@ void start() {
 	child1->mesh = createSphereMesh(.5, 64, 32, blueMaterial);
 	scene->add(child1);
 
-	while (window->pollEvents()) {
+	for(;;) {
+		pollEvents();
 		turn(root, {0, .001, 0});
 		render();
 	}

@@ -20,7 +20,7 @@ private:
 		MeshRendererPtr meshRenderer;
 		Vector<CModelPtr> models;
 	};
-	Map<CMesh*, InstanceList*> m_instanceLists;
+	Map<CMesh*, UniquePtr<InstanceList>> m_instanceLists;
 
 	void onUpdate(CVec3f eye) override;
 

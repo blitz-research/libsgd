@@ -88,6 +88,8 @@ SGD_API void SGD_DECL sgd_Alert(SGD_String message);
 //! SGD_EVENT_MASK_SIZE_CHANGED  | 2             | Window was resized.
 SGD_API int SGD_DECL sgd_PollEvents();
 
+SGD_API void SGD_DECL sgd_Debug();
+
 // ***** Window *****
 
 //! @cond Window flags for use with CreateWindow.
@@ -458,6 +460,12 @@ SGD_API void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light light, float angle);
 SGD_API void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light light, float angle);
 
 // ***** Entity *****
+
+//! Clears the entire scene and reclaims any non-retained resources.
+SGD_API void SGD_DECL sgd_ClearScene();
+
+//! Destroy and antity and its children, recursively.
+SGD_API void SGD_DECL sgd_DestroyEntity(SGD_Entity entity);
 
 //! Copy an entity and its children recursively.
 SGD_API SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity entity);

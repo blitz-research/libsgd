@@ -32,7 +32,7 @@ bool initCache() {
 	if (done) return g_cacheOk;
 	done = true;
 
-	log() << "### Initializing fetch cache" << g_cacheDir.filePath().u8string();
+	log() << "###  Initializing fetch cache" << g_cacheDir.filePath().u8string();
 
 	if (!g_cacheDir.isDir()) {
 		std::filesystem::create_directory(g_cacheDir.filePath());

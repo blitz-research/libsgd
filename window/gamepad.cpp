@@ -1,5 +1,7 @@
 #include "gamepad.h"
 
+#include "window.h"
+
 #include <GLFW/glfw3.h>
 
 #ifdef __EMSCRIPTEN__
@@ -16,18 +18,19 @@ Gamepad* g_gamepads[Gamepad::maxGamepads];
 
 // ***** Gamepad *****
 
+Gamepad::Gamepad(uint32_t id) : UIDevice(numButtons), m_id(id) {
+	endPollEvents.connect(this, [=] { poll(); });\
+}
+
 Gamepad* Gamepad::getGamepad(uint32_t id) {
 	SGD_ASSERT(id < maxGamepads);
 
-	return g_gamepads[id];
-}
+	if (g_gamepads[id]) return g_gamepads[id];
 
-void Gamepad::createGamepads() {
-	SGD_ASSERT(!g_gamepads[0]);
+	for (int i = 0; i < maxGamepads; ++i) {
+		g_gamepads[i] = new Gamepad(i);
 
-	for (int id = 0; id < maxGamepads; ++id) {
-		g_gamepads[id] = new Gamepad(id);
-		if (glfwJoystickPresent(id)) g_gamepads[id]->onConnected();
+		if (glfwJoystickPresent(i)) g_gamepads[i]->onConnected();
 	}
 
 	glfwSetJoystickCallback([](int id, int event) {
@@ -38,29 +41,21 @@ void Gamepad::createGamepads() {
 			g_gamepads[id]->onDisconnected();
 		}
 	});
-}
 
-void Gamepad::updateGamepads() {
-
-#ifdef __EMSCRIPTEN__
-	emscripten_sample_gamepad_data();
-#endif
-
-	for (int id = 0; id < maxGamepads; ++id) g_gamepads[id]->update();
-}
-
-Gamepad::Gamepad(uint32_t id) : UIDevice(numButtons), m_id(id) {
+	return g_gamepads[id];
 }
 
 void Gamepad::onConnected() {
 	SGD_ASSERT(!m_connected);
-	if (!glfwJoystickIsGamepad(m_id)) return;
+	if (!glfwJoystickIsGamepad((int)m_id)) return;
 
 	m_connected = true;
 #ifndef __EMSCRIPTEN__
-	auto p = glfwGetGamepadName(m_id);
+	auto p = glfwGetGamepadName((int)m_id);
 	m_name = p ? String(p) : String();
 #endif
+
+	poll();
 
 	log() << "### Gamepad" << m_id << m_name << "connected.";
 }
@@ -76,14 +71,14 @@ void Gamepad::onDisconnected() {
 	log() << "### Gamepad" << m_id << "disconnected.";
 }
 
-void Gamepad::onPoll() {
+void Gamepad::poll() {
 	if (!m_connected) return;
 
 #ifndef __EMSCRIPTEN__
 	GLFWgamepadstate state;
-	glfwGetGamepadState(m_id, &state);
+	glfwGetGamepadState((int)m_id, &state);
 
-	for (int i = 0; i < numButtons; ++i) setButtonValue(i, state.buttons[i]);
+	for (int i = 0; i < numButtons; ++i) setButtonDown(i, state.buttons[i]);
 
 	std::memcpy(m_axes, state.axes, sizeof(m_axes));
 #endif

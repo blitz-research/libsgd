@@ -6,7 +6,7 @@ namespace sgd {
 
 using AppEventFunc = Function<void()>;
 
-void runOnMainThread(AppEventFunc func, bool sync);
+void runOnMainThread(AppEventFunc func, bool sync = true);
 
 void beginAppEventLoop();
 

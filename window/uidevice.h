@@ -2,7 +2,7 @@
 
 #include <geom/exports.h>
 
-struct GLFWwindow;
+struct window;
 
 namespace sgd {
 
@@ -10,12 +10,7 @@ SGD_SHARED(Window);
 
 class Button : public Object {
 public:
-	Signal<float> valueChanged;
 	Signal<> pressed;
-
-	float value() const {
-		return m_value;
-	}
 
 	bool down() const {
 		return m_down;
@@ -28,15 +23,12 @@ public:
 private:
 	friend class UIDevice;
 
-	float m_value = 0;
 	bool m_down = false;
 	bool m_hit = false;
 };
 
 class UIDevice : public Object {
 public:
-	static constexpr float buttonDownThreshold = .1f;
-
 	uint32_t maxButtons() const {
 		return m_maxButtons;
 	}
@@ -48,29 +40,18 @@ public:
 
 	void flush();
 
-	void resetButtonHits();
-
-	void update();
-
 protected:
-	UIDevice(uint32_t maxButtons);
-	virtual ~UIDevice() = default;
-
-	void setButtonValue(uint32_t index, float value);
+	explicit UIDevice(uint32_t maxButtons);
+	~UIDevice() override = default;
 
 	void setButtonDown(uint32_t index, bool down);
 
-	virtual void onPoll() {
-	}
+	void resetKeyHits();
 
 private:
-	friend class Window;
-
 	uint32_t m_maxButtons;
 	Button* m_buttons;
 	Vector<uint32_t> m_hits;
-
-	void setButtonState(uint32_t index, float value, bool down);
 };
 
-} // namespace sgf
+} // namespace sgd
