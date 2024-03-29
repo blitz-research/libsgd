@@ -82,7 +82,8 @@ void start() {
 	insts[0].color = {1, 1, 1, 1};
 	meshRenderer->unlockInstances();
 
-	while(window->pollEvents()) {
+	for(;;){
+		pollEvents();
 		requestRender(render);
 	}
 }

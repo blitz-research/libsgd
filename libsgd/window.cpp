@@ -50,7 +50,7 @@ int SGD_DECL sgd_PollEvents() {
 	if (!sgd::mainWindow) sgd_Error("Window has not been created");
 
 	g_windowEvents = 0;
-	sgd::mainWindow->pollEvents();
+	sgd::pollEvents();
 
 	return g_windowEvents;
 }

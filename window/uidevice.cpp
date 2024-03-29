@@ -1,5 +1,7 @@
 #include "uidevice.h"
 
+#include "window.h"
+
 #ifdef __EMSCRIPTEN__
 #include "emscripten/html5.h"
 #endif
@@ -9,14 +11,16 @@ namespace sgd {
 // ***** UIDevice *****
 
 UIDevice::UIDevice(uint32_t maxButtons) : m_maxButtons(maxButtons), m_buttons(new Button[maxButtons]) {
+	beginPollEvents.connect(this, [=] { //
+		resetKeyHits();
+	});
 }
 
-void UIDevice::setButtonState(uint32_t index, float value, bool down) {
+void UIDevice::setButtonDown(uint32_t index, bool down) {
 	SGD_ASSERT(index < m_maxButtons);
 
 	auto& b = m_buttons[index];
-
-	b.m_value = value;
+	if (b.m_down == down) return;
 	b.m_down = down;
 	if (!down) return;
 
@@ -25,24 +29,9 @@ void UIDevice::setButtonState(uint32_t index, float value, bool down) {
 	b.pressed.emit();
 }
 
-void UIDevice::setButtonValue(uint32_t index, float value) {
-	SGD_ASSERT(index < m_maxButtons);
-
-	auto& b = m_buttons[index];
-	if (b.m_value == value) return;
-
-	setButtonState(index, value, value > buttonDownThreshold);
-
-	b.valueChanged.emit(value);
-}
-
-void UIDevice::setButtonDown(uint32_t index, bool down) {
-	SGD_ASSERT(index < m_maxButtons);
-
-	auto& b = m_buttons[index];
-	if (b.m_down == down) return;
-
-	setButtonState(index, float(down), down);
+void UIDevice::resetKeyHits() {
+	for (auto index : m_hits) m_buttons[index].m_hit = false;
+	m_hits.clear();
 }
 
 void UIDevice::flush() {
@@ -50,15 +39,6 @@ void UIDevice::flush() {
 		b->m_down = b->m_hit = false;
 	}
 	m_hits.clear();
-}
-
-void UIDevice::resetButtonHits() {
-	for (auto index : m_hits) m_buttons[index].m_hit = false;
-	m_hits.clear();
-}
-
-void UIDevice::update() {
-	onPoll();
 }
 
 } // namespace sgd

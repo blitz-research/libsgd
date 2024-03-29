@@ -18,17 +18,7 @@ namespace {
 
 struct Die {};
 
-struct AppEvent {
-	AppEventFunc func;
-	bool sync;
-
-	AppEvent() = default;
-
-	AppEvent(AppEventFunc func, bool sync) : func(std::move(func)), sync(sync) {
-	}
-};
-
-std::deque<AppEvent> g_deque;
+std::deque<AppEventFunc> g_deque;
 std::mutex g_dequeMutex;
 
 size_t g_enqueued;
@@ -40,15 +30,15 @@ std::condition_variable g_dispatchedCV;
 volatile bool g_running;
 
 void waitEvent() {
-	AppEvent event;
+	AppEventFunc func;
 	{
 		std::unique_lock<std::mutex> lock(g_dequeMutex);
 		if(!g_running) return;
 		//
 		g_enqueuedCV.wait(lock, [] { return !g_deque.empty(); });
-		event = g_deque.front();
+		func = g_deque.front();
 	}
-	event.func();
+	func();
 	{
 		std::lock_guard<std::mutex> lock(g_dequeMutex);
 		if(!g_running) return;
@@ -71,7 +61,7 @@ void runOnMainThread(AppEventFunc func, bool sync) {
 		std::lock_guard<std::mutex> lock(g_dequeMutex);
 		if(!g_running) return;
 		//
-		g_deque.emplace_back(std::move(func), sync);
+		g_deque.emplace_back(std::move(func));
 		enqueued = ++g_enqueued;
 	}
 	g_enqueuedCV.notify_one();
@@ -100,7 +90,6 @@ void beginAppEventLoop() {
 #else
 
 	std::atexit([] {
-//		log() << "### atexit!!!!!";
 		g_running = false;
 	});
 

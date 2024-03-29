@@ -48,19 +48,26 @@ std::filesystem::path Path::filePath() const {
 	if (startsWith(m_str, "${")) {
 		auto i = m_str.find('}', 2);
 		if (i == String::npos) return {};
+
 		auto id = m_str.substr(2, i - 2);
-		Path prefix;
+		++i;
+
+		std::filesystem::path prefix;
+
 		if (id == "HOME") {
 #if SGD_OS_WINDOWS
 			auto home = getenv("USERPROFILE");
-			if(!home) home=getenv("HOMEPATH");
+			if (!home) home = getenv("HOMEPATH");
 #else
 			auto home = getenv("HOME");
 #endif
-			if(!home) return {};
-			return std::filesystem::path(home) / m_str.substr(i + 1);
+			if (!home) return {};
+			prefix = home;
+		}else{
+			return {};
 		}
-		return {};
+		while(i < m_str.size() && m_str[i] == '/' || m_str[i] == '\\') ++i;
+		return prefix / m_str.substr(i);
 	}
 	return std::filesystem::absolute(m_str).u8string();
 }

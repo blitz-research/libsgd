@@ -63,7 +63,6 @@ SkinnedMeshRenderer::SkinnedMeshRenderer(CMesh* mesh) : m_mesh(mesh), m_bindGrou
 }
 
 SkinnedMeshInstance* SkinnedMeshRenderer::lockInstances(uint32_t count) {
-//	log() << "### Locking instance buffer";
 	m_instanceCount = count;
 	if (m_instanceCount > m_instanceCapacity) {
 		m_instanceCapacity = m_instanceCount;
@@ -79,8 +78,6 @@ void SkinnedMeshRenderer::unlockInstances() {
 }
 
 void SkinnedMeshRenderer::onValidate(GraphicsContext* gc) const {
-//	log() << "### Validating renderer";
-
 	for (int i = 0; i < renderPassCount; ++i) m_renderOps[i].clear();
 	m_renderPassMask = 0;
 

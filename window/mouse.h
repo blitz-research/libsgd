@@ -2,6 +2,8 @@
 
 #include "uidevice.h"
 
+struct GLFWwindow;
+
 namespace sgd {
 
 class Mouse : public UIDevice {

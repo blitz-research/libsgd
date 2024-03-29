@@ -18,15 +18,29 @@ Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
 	envTexture = texture;
 }
 
-void Scene::add(Entity* entity) {
+void Scene::clear() {
+	Vector<Entity*> roots;
+	for (Entity* entity : m_entities) {
+		if (!entity->parent()) roots.push_back(entity);
+	}
+	while (!roots.empty()) {
+		remove(roots.back());
+		roots.pop_back();
+	}
+	m_renderers = {};
+
+	SGD_ASSERT(m_entities.empty());
+}
+
+void Scene::add(Entity* entity) { // NOLINT (recursive)
 	SGD_ASSERT(!entity->m_scene);
 	SGD_ASSERT(!entity->parent() || entity->parent()->scene() == this);
 
-	m_entities.push_back(entity);
+	m_entities.emplace_back(entity);
 	if (entity->is<Camera>()) {
-		m_cameras.push_back(entity->as<Camera>());
+		m_cameras.emplace_back(entity->as<Camera>());
 	} else if (entity->is<Light>()) {
-		m_lights.push_back(entity->as<Light>());
+		m_lights.emplace_back(entity->as<Light>());
 	}
 
 	entity->m_scene = this;
@@ -34,22 +48,27 @@ void Scene::add(Entity* entity) {
 	if (entity->enabled()) entity->onEnable();
 	if (entity->visible()) entity->onShow();
 
-	for (auto child : entity->children()) add(child);
+	for (Entity* child : entity->children()) add(child);
 }
 
-void Scene::remove(Entity* entity) {
+void Scene::remove(Entity* entity) { // NOLINT (recursive)
 	SGD_ASSERT(entity->m_scene == this);
 	SGD_ASSERT(!entity->parent() || entity->parent()->scene() == this);
 
-	for (auto child : entity->children()) remove(child);
-	entity->m_children.clear();
+	while(!entity->children().empty()){
+		auto child = entity->children().back();
+//		log() << "### child"<<child;
+		remove(child);
+	}
 
+	entity->setParent(nullptr);
 	entity->setVisible(false);
 	entity->setEnabled(false);
 	entity->onDestroy();
 	entity->m_scene = nullptr;
 
-	sgd::remove(m_entities, entity);
+	if(!sgd::rremove(m_entities, entity)) SGD_PANIC("Failed to remove entity from scene");
+
 	if (entity->is<Camera>()) {
 		sgd::remove(m_cameras, entity->as<Camera>());
 	} else if (entity->is<Light>()) {
@@ -103,9 +122,9 @@ void Scene::updateLightingUniforms(LightingUniforms& uniforms) const {
 
 	uniforms.ambientLightColor = ambientLightColor();
 
-	uniforms.directionalLightCount=0;
-	uniforms.pointLightCount=0;
-	uniforms.spotLightCount=0;
+	uniforms.directionalLightCount = 0;
+	uniforms.pointLightCount = 0;
+	uniforms.spotLightCount = 0;
 
 	for (Light* light : m_lights) {
 		if (!light->visible()) continue;

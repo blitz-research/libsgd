@@ -68,7 +68,9 @@ void start() {
 
 	float time = 0;
 
-	while (window->pollEvents()) {
+	for(;;) {
+
+		pollEvents();
 
 		if (window->keyboard()->key((uint32_t)KeyCode::LEFT).down()) {
 			turn(model, {0, -.1, 0});

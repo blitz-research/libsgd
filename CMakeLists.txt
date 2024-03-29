@@ -216,7 +216,7 @@ add_subdirectory(geom)          # core
 add_subdirectory(dawn)          # geom
 #add_subdirectory(xrsession)     # dawn
 add_subdirectory(window)        # geom
-add_subdirectory(graphics)      # window
-add_subdirectory(libsgd)        # window
+add_subdirectory(graphics)      # window dawn
+add_subdirectory(libsgd)        # graphics
 
-add_subdirectory(emgdb)
+#add_subdirectory(emgdb)

@@ -2,34 +2,37 @@
 
 namespace sgd {
 
-Mesh::Mesh(const Vertex* vertices, uint32_t vertexCount, const Triangle* triangles, uint32_t triangleCount,
-		   CVector<Surface> surfaces, MeshFlags flags)
+Mesh::Mesh(const Vertex* vertices, uint32_t vertexCount,	  //
+		   const Triangle* triangles, uint32_t triangleCount, //
+		   const Surface* surfaces, uint32_t surfaceCount,	  //
+		   MeshFlags flags)
 	: m_vertexBuffer(new Buffer(BufferType::vertex, vertices, vertexCount * sizeof(Vertex))),		//
 	  m_vertexCount(vertexCount),																	//
 	  m_triangleBuffer(new Buffer(BufferType::index, triangles, triangleCount * sizeof(Triangle))), //
 	  m_triangleCount(triangleCount),																//
-	  m_surfaces(surfaces),																			//
+	  m_surfaces(surfaces, surfaces + surfaceCount),												//
 	  m_flags(flags) {
 
 	addDependency(m_vertexBuffer);
 	addDependency(m_triangleBuffer);
+	for (auto& surf : m_surfaces) addDependency(surf.material);
 }
 
 Mesh::Mesh(CVector<Vertex> vertices, CVector<Triangle> triangles, CVector<Surface> surfaces, MeshFlags flags)
-	: //
-	  Mesh(vertices.data(), vertices.size(), triangles.data(), triangles.size(), surfaces, flags) {
+	: Mesh(vertices.data(), vertices.size(), //
+		   triangles.data(), triangles.size(), //
+		   surfaces.data(), surfaces.size(), //
+		   flags) {
 }
 
 void Mesh::resizeVertices(uint32_t size) {
 	if (size == m_vertexCount) return;
-
 	m_vertexCount = size;
 	m_vertexBuffer->resize(m_vertexCount * sizeof(Vertex));
 }
 
 void Mesh::resizeTriangles(uint32_t size) {
 	if (size == m_triangleCount) return;
-
 	m_triangleCount = size;
 	m_triangleBuffer->resize(m_triangleCount * sizeof(Triangle));
 }
@@ -66,20 +69,14 @@ void Mesh::unlockTriangles() {
 
 void Mesh::clearSurfaces() {
 	if (m_surfaces.empty()) return;
-
 	for (auto& surf : m_surfaces) removeDependency(surf.material);
-
 	m_surfaces.clear();
-
 	invalidate(true);
 }
 
 void Mesh::addSurface(CSurface surface) {
-
 	m_surfaces.push_back(surface);
-
 	addDependency(surface.material);
-
 	invalidate(true);
 }
 

@@ -53,9 +53,15 @@ void Entity::setParent(Entity* parent) {
 	} else {
 		invalidateLocalMatrix();
 	}
-	if (m_parent) sgd::remove(m_parent->m_children, this);
+	if (m_parent) {
+		SGD_ASSERT(sgd::contains(m_parent->m_children, this));
+		sgd::rremove(m_parent->m_children, this);
+	}
 	m_parent = parent;
-	if (m_parent) m_parent->m_children.push_back(this);
+	if (parent) {
+		SGD_ASSERT(!sgd::contains(m_parent->m_children, this));
+		parent->m_children.emplace_back(this);
+	}
 }
 
 void Entity::setEnabled(bool enabled) {

@@ -74,51 +74,20 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 					window->closeClicked.emit();
 				});
 			}
+
 			m_keyboard = new Keyboard(m_glfwWindow);
 
 			m_mouse = new Mouse(m_glfwWindow);
-
-			Gamepad::createGamepads();
 		},
 		true);
 	SGD_ASSERT(m_glfwWindow);
 }
 
 Window::~Window() {
-	runOnMainThread(
-		[=] {
-			// SGD_ASSERT(!m_glfwWindow);
-			close();
-		},
-		true);
-}
-
-bool Window::pollEvents() {
-	bool result{};
-
-	runOnMainThread(
-		[=, &result] {
-#if SGD_OS_EMSCRIPTEN
-			Vec2u size;
-			getCanvasBufferSize(&size.x, &size.y);
-			if (size != m_size) sizeChanged.emit((m_size = size));
-#endif
-			glfwPollEvents();
-
-			m_keyboard->update();
-			m_mouse->update();
-
-			Gamepad::updateGamepads();
-
-			result = !glfwWindowShouldClose(m_glfwWindow);
-		},
-		true);
-
-	return result;
+	if (m_glfwWindow) close();
 }
 
 void Window::close() {
-
 	runOnMainThread(
 		[=] {
 			if (!m_glfwWindow) return;
@@ -130,6 +99,37 @@ void Window::close() {
 
 Window* Window::getWindow(GLFWwindow* glfwWindow) {
 	return static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+}
+
+template <class FunTy, class RetTy = typename std::invoke_result_t<FunTy>> //
+RetTy runSync(FunTy fun) {
+
+	RetTy result;
+	CondVar<bool> done;
+
+	runOnMainThread([&]{
+		result=fun();
+		done.set(true);
+	}, true);
+
+	done.waiteq(true);
+
+	return 0;
+}
+
+void pollEvents() {
+
+	runSync([]() -> int { //
+		return 0;
+	});
+
+	runOnMainThread(
+		[] { //
+			beginPollEvents.emit();
+			glfwPollEvents();
+			endPollEvents.emit();
+		},
+		true);
 }
 
 } // namespace sgd

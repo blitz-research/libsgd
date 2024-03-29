@@ -12,6 +12,7 @@ int main() {
 		std::exit(0);
 	});
 
-	while(window->pollEvents()) {
+	for(;;) {
+		sgd::pollEvents();
 	}
 }

@@ -47,8 +47,6 @@ struct Window : Shared {
 		return m_mouse;
 	}
 
-	bool pollEvents();
-
 	void close();
 
 	// ***** Internal *****
@@ -69,7 +67,13 @@ private:
 
 	Keyboard* m_keyboard;
 	Mouse* m_mouse;
-	Gamepad* m_gamepads[maxGamepads];
 };
+
+// TODO: ***** system.h *****
+//
+inline Signal<> beginPollEvents;
+inline Signal<> endPollEvents;
+
+void pollEvents();
 
 } // namespace sgd

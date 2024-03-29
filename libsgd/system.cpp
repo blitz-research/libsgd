@@ -14,16 +14,16 @@ void SGD_DECL sgd_Startup() {
 }
 
 void SGD_DECL sgd_Shutdown() {
-	if(sgd::mainWindow) {
-		if(sgd::mainGC) {
-			if(sgd::mainScene) {
+	if (sgd::mainWindow) {
+		if (sgd::mainGC) {
+			if (sgd::mainScene) {
 				sgd::mainScene = nullptr;
 			}
 			sgd::mainGC->wgpuDevice().Destroy();
-			sgd::mainGC=nullptr;
+			sgd::mainGC = nullptr;
 		}
 		sgd::mainWindow->close();
-		sgd::mainWindow=nullptr;
+		sgd::mainWindow = nullptr;
 	}
 }
 
@@ -50,4 +50,21 @@ void SGD_DECL sgd_Error(SGD_String error) {
 
 void SGD_DECL sgd_Alert(SGD_String message) {
 	sgd::alert(message);
+}
+
+void SGD_DECL sgd_Debug() {
+#if SGD_CONFIG_DEBUG
+	static sgd::Map<sgd::ObjectType*, int> g_instanceCounts;
+	static const sgd::String pad = "                   ";
+	for (auto type = sgd::ObjectType::allTypes(); type; type = type->succ) {
+		int count = type->instanceCount();
+		int diff = count - g_instanceCounts[type];
+		g_instanceCounts[type] = count;
+		if (!diff) continue; // count && !diff) continue;
+		sgd::String dstr = diff ? (sgd::String(diff > 0 ? "(+" : "(") + std::to_string(diff) + ')') : "";
+		sgd::String name = (sgd::String(type->name) + pad).substr(0, pad.size());
+		sgd::log() << name << count << dstr;
+	}
+	sgd::log() << "---------------------------------";
+#endif
 }

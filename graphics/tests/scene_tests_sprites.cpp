@@ -21,9 +21,8 @@ void entry() {
 		move(sprite, {0, -1.5, rnd(100)});
 	}
 
-	//	move(sprite, {0, 0, 3});
-
-	while (window->pollEvents()) {
+	for(;;){
+		pollEvents();
 		render();
 	}
 }
