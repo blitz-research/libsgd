@@ -29,7 +29,8 @@ struct Varying {
     let color = textureSample(srcTexture, srcSampler, srcCoords);
 
     if !srgbTarget {
-        return vec4f(pow(color.rgb, vec3f(1.0  /2.2)), color.a);
+        return vec4f(pow(color.rgb, vec3f(1.0 / 2.2)), color.a);
+//        return color;
     }
 
     return color;

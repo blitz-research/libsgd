@@ -16,4 +16,8 @@ void updateNormals(Mesh* mesh);
 
 void updateTangents(Mesh* mesh);
 
+void flip(Mesh* mesh);
+
+Mesh* copy(CMesh* mesh);
+
 }

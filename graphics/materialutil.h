@@ -4,13 +4,10 @@
 
 namespace sgd {
 
-Material* createPBRMaterial();
+Material* createPBRMaterial(CVec4f albedoColor = Vec4f{1});
 Expected<Material*, FileioEx> loadPBRMaterial(CPath path);
 
-Material* createMatteMaterial();
-Expected<Material*, FileioEx> loadMatteMaterial(CPath path);
-
-Material* createSpriteMaterial();
-Expected<Material*, FileioEx> loadSpriteMaterial(CPath path);
+Material* createPrelitMaterial(CVec4f albedoColor = Vec4f{1});
+Expected<Material*, FileioEx> loadPrelitMaterial(CPath path);
 
 }

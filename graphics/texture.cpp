@@ -41,10 +41,8 @@ wgpu::Sampler createWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
 	desc.addressModeU = bool(flags & TextureFlags::clampU) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.addressModeV = bool(flags & TextureFlags::clampV) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.addressModeW = bool(flags & TextureFlags::clampW) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
-	desc.magFilter =
-		bool(flags & (TextureFlags::filter | TextureFlags::mipmap)) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
-	//	desc.minFilter = bool(flags & (TextureFlags::filter | TextureFlags::mipmap)) ? wgpu::FilterMode::Linear :
-	//wgpu::FilterMode::Nearest;
+	desc.magFilter = bool((flags & TextureFlags::filter) | (flags & TextureFlags::mipmap)) ? wgpu::FilterMode::Linear
+																						   : wgpu::FilterMode::Nearest;
 	desc.minFilter = wgpu::FilterMode::Linear;
 	desc.mipmapFilter = bool(flags & TextureFlags::mipmap) ? wgpu::MipmapFilterMode::Linear : wgpu::MipmapFilterMode::Nearest;
 
@@ -58,35 +56,20 @@ Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags
 
 	m_data = (uint8_t*)std::malloc(SIZE(m_size));
 
-//	log() << "### Created texture:" << this << size << depth;
+	//	log() << "### Created texture:" << this << size << depth;
+}
+
+Texture::Texture(Texture* texture, uint32_t layer)
+	: m_size(texture->m_size), m_depth(1), m_format(texture->m_format), m_flags(TextureFlags::layerView), //
+	  m_texture(texture), m_layer(layer), m_data(nullptr) {
+	addDependency(m_texture);
 }
 
 Texture::~Texture() {
 
-//	log() << "### Deleting texture:" << this << m_size << m_depth;
+	//	log() << "### Deleting texture:" << this << m_size << m_depth;
 
 	std::free(m_data);
-}
-
-void Texture::resize(CVec2u size) {
-	if (size == m_size) return;
-
-	auto data = (uint8_t*)std::malloc(SIZE(size));
-
-	auto srcPitch = PITCH(m_size);
-	auto dstPitch = PITCH(size);
-	auto rowSize = std::min(srcPitch, dstPitch);
-	auto numrows = std::min(size.y, m_size.y) * m_depth;
-	for (int y = 0; y < numrows; ++y) {
-		std::memcpy(data + dstPitch * y, m_data + srcPitch * y, rowSize);
-	}
-
-	std::swap(m_data, data);
-	m_size = size;
-	std::free(data);
-
-	m_wgpuTexture = {};
-	invalidate(true);
 }
 
 void Texture::update(const void* src, size_t srcPitch) {
@@ -107,6 +90,18 @@ void Texture::update(const void* src, size_t srcPitch) {
 }
 
 void Texture::onValidate(GraphicsContext* gc) const {
+
+	if (m_flags == TextureFlags::layerView) {
+		m_wgpuTexture = m_texture->m_wgpuTexture;
+		m_wgpuSampler = m_texture->m_wgpuSampler;
+		wgpu::TextureViewDescriptor tvDesc{};
+		tvDesc.format = m_wgpuTexture.GetFormat();
+		tvDesc.dimension = wgpu::TextureViewDimension::e2D;
+		tvDesc.baseArrayLayer = m_layer;
+		tvDesc.arrayLayerCount = 1;
+		m_wgpuTextureView = m_wgpuTexture.CreateView(&tvDesc);
+		return;
+	}
 
 	if (!m_wgpuTexture) {
 
@@ -129,8 +124,13 @@ void Texture::onValidate(GraphicsContext* gc) const {
 		wgpu::TextureViewDescriptor tvDesc{};
 		tvDesc.format = m_wgpuTexture.GetFormat();
 		if (bool(m_flags & TextureFlags::cube)) {
-			tvDesc.dimension = wgpu::TextureViewDimension::Cube;
-			tvDesc.arrayLayerCount = 6;
+			if (bool(m_flags & TextureFlags::array)) {
+				tvDesc.dimension = wgpu::TextureViewDimension::CubeArray;
+				tvDesc.arrayLayerCount = m_depth;
+			} else {
+				tvDesc.dimension = wgpu::TextureViewDimension::Cube;
+				tvDesc.arrayLayerCount = m_depth;
+			}
 		} else {
 			tvDesc.dimension = wgpu::TextureViewDimension::e2D;
 			tvDesc.arrayLayerCount = 1;

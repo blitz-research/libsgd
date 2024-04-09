@@ -17,9 +17,11 @@ void reset() {
 
 void start(void(*entry)()) {
 
+	sgd_Startup();
+
 	sgd_CreateWindow(1280, 720, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE);
 
-	//	sgd_SetWebGPUBackend("Vulkan");
+	sgd_SetWebGPUBackend("Vulkan");
 
 	sgd_CreateScene();
 

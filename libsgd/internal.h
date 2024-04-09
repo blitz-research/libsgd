@@ -5,11 +5,18 @@
 
 #include <sgd/sgd.h>
 
-namespace sgd {
+namespace sgdx {
 
-inline WindowPtr mainWindow;
-inline GraphicsContextPtr mainGC;
-inline ScenePtr mainScene;
+using namespace sgd;
+
+struct SGD_Event {
+	int type;
+};
+
+inline bool g_started;
+inline WindowPtr g_mainWindow;
+inline GraphicsContextPtr g_mainGC;
+inline ScenePtr g_mainScene;
 
 enum struct HandleType {
 	object,
@@ -25,6 +32,13 @@ struct HandleTypeInfo {
 	HandleTypeInfo(ObjectType* objectType, HandleType handleType);
 };
 
+void error(CString message);
+void error(CString error, CString message);
+void error(CString error, CFileioEx& ex);
+
+void postEvent(SGD_Event event);
+void getEventQueue(Deque<SGD_Event>& queue);
+
 SGD_Handle createHandle(HandleTypeInfo* type, Shared* shared);
 SGD_Handle getOrCreateHandle(HandleTypeInfo* type, Shared* shared);
 Shared* resolveHandle(HandleTypeInfo* type, SGD_Handle handle);
@@ -32,10 +46,6 @@ void destroyHandle(HandleTypeInfo* type, SGD_Handle handle);
 bool destroyHandle(HandleTypeInfo* type, Shared* shared);
 void destroyHandles(HandleType type);
 void destroyAllHandles();
-
-void error(CString message);
-void error(CString error, CString message);
-void error(CString error, CFileioEx& ex);
 
 template<class T> HandleTypeInfo* handleTypeInfo();
 
@@ -57,6 +67,25 @@ template<class T> void destroyHandle(SGD_Handle handle) {
 
 template<class T> bool destroyHandle(T* shared) {
 	return destroyHandle(handleTypeInfo<T>(), shared);
+}
+
+inline void started() {
+	if(!g_started) error("Startup has not been called");
+}
+
+inline Window* mainWindow(){
+	if(!g_mainWindow) error("Main window does not exist");
+	return g_mainWindow;
+}
+
+inline GraphicsContext* mainGC() {
+	if(!g_mainGC) error( "Graphics context does not exist");
+	return g_mainGC;
+}
+
+inline Scene* mainScene(){
+	if(!g_mainScene) error("Main scene does not exist");
+	return g_mainScene;
 }
 
 // ***** Type infos *****

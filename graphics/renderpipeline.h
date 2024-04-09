@@ -25,17 +25,23 @@ enum struct CullMode { undefined, none, front, back };
 // wgpu::PrimitiveTopology
 enum struct DrawMode { undefined, pointList, lineList, lineStrip, triangleList, triangleStrip };
 
+// BlendMode::undefined == no color buffer
+// BlendMode::opaque && DepthFunc::undefined == no depth write (ie: clear pass)
 wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
-											   BindGroup* material, //
+											   CBindGroup* material, //
 											   BlendMode blendMode, //
 											   DepthFunc depthFunc, //
 											   CullMode cullMode,	//
-											   BindGroup* renderer, //
+											   CBindGroup* renderer, //
 											   DrawMode drawMode);
 
 wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
-											   Material* material,	//
-											   BindGroup* renderer, //
+											   CMaterial* material,	//
+											   CBindGroup* renderer, //
+											   DrawMode drawMode);
+
+wgpu::RenderPipeline getOrCreateShadowPipeline(GraphicsContext* gc, //
+											   CBindGroup* renderer, //
 											   DrawMode drawMode);
 
 } // namespace sgd

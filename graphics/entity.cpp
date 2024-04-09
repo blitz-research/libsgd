@@ -7,61 +7,66 @@ namespace sgd {
 Entity::Entity(const Entity* that)
 	: m_enabled(that->m_enabled), //
 	  m_visible(that->m_visible) {
-	for (auto child : that->m_children) child->copy()->setParent(this);
+	for (Entity* child : that->m_children) child->copy()->setParent(this);
 }
 
-void Entity::invalidateWorldMatrix() const {
+void Entity::invalidateWorldMatrix() const { // NOLINT (recursive)
 	if (bool(m_dirty & Dirty::worldMatrix)) return;
-	for (auto child : m_children) child->invalidateWorldMatrix();
-	validateLocalMatrix();
 	m_dirty |= Dirty::worldMatrix;
+	for (Entity* child : m_children) child->invalidateWorldMatrix();
 }
 
-void Entity::invalidateLocalMatrix() const {
-	if (bool(m_dirty & Dirty::localMatrix)) return;
-	validateWorldMatrix();
+void Entity::invalidateLocalMatrix() const { // NOLINT (recursive)
 	m_dirty |= Dirty::localMatrix;
-}
-
-void Entity::validateWorldMatrix() const {
-	if (!bool(m_dirty & Dirty::worldMatrix)) return;
-	m_worldMatrix = m_parent ? m_parent->worldMatrix() * m_localMatrix : m_localMatrix;
-	m_dirty &= ~Dirty::worldMatrix;
-}
-
-void Entity::validateLocalMatrix() const {
-	if (!bool(m_dirty & Dirty::localMatrix)) return;
-	m_localMatrix = m_parent ? inverse(m_parent->worldMatrix()) * m_worldMatrix : m_worldMatrix;
-	m_dirty &= ~Dirty::localMatrix;
+	invalidateWorldMatrix();
 }
 
 void Entity::setWorldMatrix(CAffineMat4f matrix) {
-	for (auto child : m_children) child->invalidateWorldMatrix();
-	m_worldMatrix = matrix;
-	m_dirty = Dirty::localMatrix;
+	setWorldPosition(matrix.t);
+	setWorldBasis(normalize(matrix.r));
+	setWorldScale(scale(matrix.r));
+}
+
+AffineMat4f Entity::worldMatrix() const { // NOLINT (recursive)
+	if (bool(m_dirty & Dirty::worldMatrix)) {
+		m_worldMatrix = m_parent ? m_parent->worldMatrix() * localMatrix() : localMatrix();
+		m_dirty &= ~Dirty::worldMatrix;
+	}
+	return m_worldMatrix;
 }
 
 void Entity::setLocalMatrix(CAffineMat4f matrix) {
-	for (auto child : m_children) child->invalidateWorldMatrix();
-	m_localMatrix = matrix;
-	m_dirty = Dirty::worldMatrix;
+	setLocalPosition(matrix.t);
+	setLocalBasis(normalize(matrix.r));
+	setLocalScale(scale(matrix.r));
+}
+
+AffineMat4f Entity::localMatrix() const { // NOLINT (recursive)
+	if (bool(m_dirty & Dirty::localMatrix)) {
+		m_localMatrix.r = m_localBasis * Mat3f::scale(m_localScale);
+		m_dirty &= ~Dirty::localMatrix;
+	}
+	return m_localMatrix;
 }
 
 void Entity::setParent(Entity* parent) {
-	if (parent) {
-		invalidateWorldMatrix();
-	} else {
-		invalidateLocalMatrix();
-	}
+
 	if (m_parent) {
 		SGD_ASSERT(sgd::contains(m_parent->m_children, this));
 		sgd::rremove(m_parent->m_children, this);
 	}
-	m_parent = parent;
-	if (parent) {
+
+	if(parent) {
+		m_parent = parent;
 		SGD_ASSERT(!sgd::contains(m_parent->m_children, this));
-		parent->m_children.emplace_back(this);
+		m_parent->m_children.emplace_back(this);
+		invalidateWorldMatrix();
+		return;
 	}
+
+	auto matrix = worldMatrix();
+	m_parent = nullptr;
+	setWorldMatrix(matrix);
 }
 
 void Entity::setEnabled(bool enabled) {

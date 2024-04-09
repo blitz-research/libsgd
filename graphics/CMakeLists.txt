@@ -27,8 +27,6 @@ add_library(graphics
 	material.h
 	materialutil.cpp
 	materialutil.h
-	mattematerial.cpp
-	mattematerial.h
 	mesh.cpp
 	mesh.h
 	meshprimitives.cpp
@@ -43,16 +41,22 @@ add_library(graphics
 	modelrenderer.h
 	pbrmaterial.cpp
 	pbrmaterial.h
+	prelitmaterial.cpp
+	prelitmaterial.h
+	rendercontext.cpp
+	rendercontext.h
 	renderer.cpp
 	renderer.h
+	renderop.cpp
+	renderop.h
 	renderpipeline.cpp
 	renderpipeline.h
-	renderqueue.cpp
-	renderqueue.h
 	scene.cpp
 	scene.h
 	scenebindings.cpp
 	scenebindings.h
+	shadowmaterial.cpp
+	shadowmaterial.h
 	skinnedmeshrenderer.cpp
 	skinnedmeshrenderer.h
 	skinnedmodelrenderer.cpp
@@ -63,8 +67,6 @@ add_library(graphics
 	skyboxrenderer.h
 	sprite.cpp
 	sprite.h
-	spritematerial.cpp
-	spritematerial.h
 	spriterenderer.cpp
 	spriterenderer.h
 	texture.cpp
@@ -74,6 +76,7 @@ add_library(graphics
 
 	shaders/meshrenderer.wgsl
 	shaders/pbrmaterial.wgsl
+	shaders/prelitmaterial.wgsl
 	shaders/scene.wgsl
 	shaders/skinnedmeshrenderer.wgsl
 	shaders/skyboxrenderer.wgsl

@@ -71,36 +71,30 @@ struct Varying {
 
 	out.clipPosition = camera_uniforms.viewProjectionMatrix * vec4f(position, 1);
 	out.position = position;
-	out.texCoords = vertex.texCoords;
-	out.color = (*instance).color * vertex.color;
-
 	if mesh_uniforms.tangentsEnabled != 0 {
-        out.tanMatrix2 = normalize(normal);
-        out.tanMatrix0 = normalize(tangent.xyz);
+        out.tanMatrix2 = normal;
+        out.tanMatrix0 = tangent.xyz;
         out.tanMatrix1 = cross(out.tanMatrix0, out.tanMatrix2) * tangent.a;
     } else {
-    	out.normal = normalize(normal);
+        out.tanMatrix2 = normal;
     }
+	out.texCoords = vertex.texCoords;
+	out.color = (*instance).color * vertex.color;
 
 	return out;
 }
 
 @fragment fn fragmentMain(in: Varying) -> @location(0) vec4f {
 
-    let material = evaluateMaterial(in.position, in.normal, in.texCoords, in.color);
-
-    var normal:vec3f;
+    var tanMatrix: mat3x3f;
 
     if mesh_uniforms.tangentsEnabled != 0 {
-        let tanMatrix = mat3x3f(in.tanMatrix0, in.tanMatrix1, in.tanMatrix2);
-        normal = normalize(tanMatrix * material.normal);
+        tanMatrix = mat3x3f(normalize(in.tanMatrix0), normalize(in.tanMatrix1), normalize(in.tanMatrix2));
     }else{
-        normal = normalize(in.normal);
+        tanMatrix[2] = in.tanMatrix2;
     }
 
-    let lighting = evaluateLighting(in.position, normal, material.albedo.rgb, material.metallic, material.roughness, material.occlusion);
-
-    return vec4f(lighting + material.emissive, material.albedo.a);
+    return evaluateMaterial(in.position, tanMatrix, in.texCoords, in.color);
 }
 
 )"

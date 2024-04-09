@@ -13,18 +13,18 @@ auto shaderSource{
 #include "shaders/spriterenderer.wgsl"
 };
 
-BindGroupDescriptor bindGroupDescriptor //
-	(2,
-	 {
-		 bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
-									wgpu::BufferBindingType::ReadOnlyStorage),
-	 },
-	 {}, //
-	 shaderSource);
+BindGroupDescriptor bindGroupDescriptor( //
+	2,
+	{
+		bufferBindGroupLayoutEntry( //
+			0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::ReadOnlyStorage),
+	},
+	{}, //
+	shaderSource);
+
 } // namespace
 
 SpriteRenderer::SpriteRenderer() : m_bindGroup(new BindGroup(&bindGroupDescriptor)) {
-
 	addDependency(m_bindGroup);
 }
 
@@ -52,57 +52,39 @@ void SpriteRenderer::onUpdate(CVec3f eye) {
 	}
 
 	auto instp = (SpriteInstance*)m_instanceBuffer->lock(0, m_instanceCount * sizeof(SpriteInstance));
-
-	m_renderOps[0].clear();
-	m_renderOps[1].clear();
-	Material* material = nullptr;
-	uint32_t firstInstance = 0;
-	uint32_t instanceCount = 0;
-	for (auto it = m_instances.begin(); it != m_instances.end(); ++instanceCount, ++instp, ++it) {
-		if ((*it)->material() != material) {
-			material = (*it)->material();
-			if (instanceCount) {
-				m_renderOps[material->blendMode() == BlendMode::opaque].push_back(RenderOp{firstInstance, instanceCount});
-				firstInstance += instanceCount;
-				instanceCount = 0;
-			}
-		}
+	for (auto it = m_instances.begin(); it != m_instances.end(); ++instp, ++it) {
 		instp->matrix = Mat4f((*it)->worldMatrix());
 		instp->color = (*it)->color();
 		instp->rect = (*it)->rect();
 	}
-	if (instanceCount) {
-		m_renderOps[material->blendMode() == BlendMode::opaque].push_back(RenderOp{firstInstance, instanceCount});
-	}
-
 	m_instanceBuffer->unlock();
 
 	invalidate(true);
 }
 
 void SpriteRenderer::onValidate(GraphicsContext* gc) const {
-	for (auto& ops : m_renderOps) {
-		for (auto& op : ops) {
-			auto material = m_instances[op.firstInstance]->material();
-			material->validate(gc);
-			op.material = material->bindGroup()->wgpuBindGroup();
-			op.pipeline = getOrCreateRenderPipeline(gc, material, m_bindGroup, DrawMode::triangleList);
-		}
-	}
-	m_renderPassMask = 0;
-	if (!m_renderOps[1].empty()) m_renderPassMask |= 1 << (int)RenderPass::opaque;
-	if (!m_renderOps[0].empty()) m_renderPassMask |= 1 << (int)RenderPass::blend;
-}
 
-void SpriteRenderer::onRender(GraphicsContext* gc) const {
-	auto& ops = gc->renderPass() == RenderPass::opaque ? m_renderOps[1] : m_renderOps[0];
-	auto& rpass = gc->wgpuRenderPassEncoder();
-	rpass.SetBindGroup(2, m_bindGroup->wgpuBindGroup());
-	for (auto& op : ops) {
-		rpass.SetBindGroup(1, op.material);
-		rpass.SetPipeline(op.pipeline);
-		rpass.Draw(op.instanceCount * 6, 1, op.firstInstance * 6);
+	auto addOp = [&](Material* material, uint32_t count) {
+		auto pipeline = getOrCreateRenderPipeline(gc, material, m_bindGroup, DrawMode::triangleList);
+		auto& ops = m_renderOps[(int)renderPassType(material->blendMode())];
+		auto first = ops.empty() ? 0 : ops.back().firstElement + ops.back().elementCount;
+		ops.emplace_back(nullptr, nullptr, nullptr, material->bindGroup(), m_bindGroup, pipeline, count * 6, 1, first);
+	};
+
+	m_renderOps = {};
+
+	Material* material = nullptr;
+	uint32_t count = 0;
+
+	for (Sprite* sprite : m_instances) {
+		if (sprite->material() != material) {
+			if (count) addOp(material, count);
+			material = sprite->material();
+			count = 0;
+		}
+		++count;
 	}
+	if (count) addOp(material, count);
 }
 
 } // namespace sgd

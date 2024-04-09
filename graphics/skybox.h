@@ -19,6 +19,8 @@ struct Skybox : Entity {
 
 	Property<float> roughness;
 
+	Property<Mat3f> matrix;
+
 private:
 	SkyboxRendererPtr m_renderer;
 
@@ -32,4 +34,3 @@ private:
 };
 
 }
-

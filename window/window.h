@@ -17,7 +17,7 @@ struct Gamepad;
 enum struct WindowFlags {
 	none = 0,
 	fullscreen = 1,
-	resizable = 2
+	resizable = 2,
 };
 
 struct Window : Shared {
@@ -26,6 +26,8 @@ struct Window : Shared {
 	static constexpr uint32_t maxGamepads = 4;
 
 	Signal<Vec2u> sizeChanged;
+	Signal<> lostFocus;
+	Signal<> gotFocus;
 	Signal<> closeClicked;
 
 	Window(CVec2u size, CString title, WindowFlags flags);
@@ -37,6 +39,10 @@ struct Window : Shared {
 
 	WindowFlags flags() const {
 		return m_flags;
+	}
+
+	bool hasFocus() const {
+		return m_hasFocus;
 	}
 
 	Keyboard* keyboard()const {
@@ -59,11 +65,9 @@ struct Window : Shared {
 
 private:
 	GLFWwindow* m_glfwWindow{};
-
 	WindowFlags m_flags;
-
 	Vec2u m_size;
-	Vec2f m_mousePos;
+	bool m_hasFocus;
 
 	Keyboard* m_keyboard;
 	Mouse* m_mouse;
@@ -73,6 +77,8 @@ private:
 //
 inline Signal<> beginPollEvents;
 inline Signal<> endPollEvents;
+inline Signal<> appSuspended;
+inline Signal<> appResumed;
 
 void pollEvents();
 

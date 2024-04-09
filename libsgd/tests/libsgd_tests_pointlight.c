@@ -1,0 +1,70 @@
+#include "start.c"
+
+void entry() {
+
+	sgd_SetSceneAmbientLightColor(0, 0, 0, 1);
+
+	SGD_Camera camera = sgd_CreatePerspectiveCamera();
+	sgd_TurnEntity(camera, -30, 0, 0);
+
+	SGD_Material material = sgd_CreatePBRMaterial(1,1,1,1);
+
+	SGD_Mesh mesh = sgd_CreateBoxMesh(-10, -10, -10, 10, 10, 10, material);
+	sgd_FlipMesh(mesh);
+	SGD_Model model = sgd_CreateModel();
+	sgd_SetModelMesh(model, mesh);
+
+	SGD_Mesh mesh2 = sgd_CreateSphereMesh(1, 24, 12, material);
+	sgd_SetMeshCastsShadow(mesh2, 1);
+	SGD_Model model2 = sgd_CreateModel();
+	sgd_SetModelMesh(model2, mesh2);
+	sgd_MoveEntity(model2, 0, 0, 0);
+
+	// Red, left back
+	SGD_Light light0 = sgd_CreatePointLight();
+	sgd_SetLightCastsShadow(light0, 1);
+	sgd_MoveEntity(light0, -5, 5, 5);
+	sgd_SetLightColor(light0, 1, 0, 0, 1);
+	sgd_SetLightRange(light0, 25);
+
+	// Green, right back
+	SGD_Light light1 = sgd_CreatePointLight();
+	sgd_SetLightCastsShadow(light1, 1);
+	sgd_MoveEntity(light1, 5, 5, 5);
+	sgd_SetLightColor(light1, 0, 1, 0, 1);
+	sgd_SetLightRange(light1, 25);
+
+	// Blue, left front
+	SGD_Light light2 = sgd_CreatePointLight();
+	sgd_SetLightCastsShadow(light2, 1);
+  	sgd_MoveEntity(light2, -5, 5, -5);
+	sgd_SetLightColor(light2, 0, 0, 1, 1);
+	sgd_SetLightRange(light2, 25);
+
+#if 0
+	// white, right front
+	SGD_Light light3 = sgd_CreatePointLight();
+	sgd_SetLightCastsShadow(light3, 1);
+	sgd_MoveEntity(light3, 5, 5, -5);
+	sgd_SetLightColor(light3, 1, 1, 1, 1);
+	sgd_SetLightRange(light3, 25);
+#endif
+
+	for (;;) {
+		if (sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) break;
+
+		sgd_SetEntityPosition(camera, 0, 0, 0);
+		sgd_RotateEntity(camera, 0, .3f, 0);
+		sgd_MoveEntity(camera, 0, 0, -5);
+
+		sgd_RenderScene();
+
+		sgd_Present();
+	}
+
+	exit(0);
+}
+
+int main() {
+	start(entry);
+}

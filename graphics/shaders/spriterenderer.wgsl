@@ -42,9 +42,10 @@ struct VertexOut {
 
 @fragment fn fragmentMain(in: VertexOut) -> @location(0) vec4f {
 
-    let material = evaluateMaterial(in.position, in.normal, in.texCoords, in.color);
+    var tanMatrix: mat3x3f;
+    tanMatrix[2] = normalize(in.normal);
 
-    return vec4f(material.albedo.rgb + material.emissive.rgb, material.albedo.a);
+    return evaluateMaterial(in.position, tanMatrix, in.texCoords, in.color);
 }
 
 )"

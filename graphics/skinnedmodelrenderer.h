@@ -24,7 +24,7 @@ private:
 
 	void onUpdate(CVec3f eye) override;
 
-	void onRender(GraphicsContext* gc) const override;
+	void render(RenderContext* rc) const override;
 };
 
 }

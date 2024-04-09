@@ -13,6 +13,7 @@ set(LIBSGD_SOURCES
         graphics.cpp
         internal.cpp
         internal.h
+        scene.cpp
         system.cpp
         window.cpp
         types.cpp
@@ -170,8 +171,12 @@ endif ()
 
 ##### More libsgds! #####
 
-add_subdirectory(python)
-
+if(SGD_NODEJS_TARGET_ENABLED)
 add_subdirectory(nodejs)
+endif()
+
+if(SGD_PYTHON_TARGET_ENABLED)
+add_subdirectory(python)
+endif()
 
 add_subdirectory(tests)

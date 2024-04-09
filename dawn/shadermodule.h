@@ -11,9 +11,13 @@ constexpr wgpu::BindGroupLayoutEntry bufferBindGroupLayoutEntry(uint32_t binding
 	return wgpu::BindGroupLayoutEntry{nullptr, binding, visibility, {nullptr, bindingType}};
 }
 
-constexpr wgpu::BindGroupLayoutEntry textureBindGroupLayoutEntry(uint32_t binding, wgpu::ShaderStage visibility, wgpu::TextureViewDimension viewDimension=wgpu::TextureViewDimension::e2D) {
-	return wgpu::BindGroupLayoutEntry{
-		nullptr, binding, visibility, {}, {}, {nullptr, wgpu::TextureSampleType::Float, viewDimension}};
+constexpr wgpu::BindGroupLayoutEntry textureBindGroupLayoutEntry(				//
+	uint32_t binding,															//
+	wgpu::ShaderStage visibility,												//
+	wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::e2D, //
+	wgpu::TextureSampleType sampleType = wgpu::TextureSampleType::Float) {
+	return wgpu::BindGroupLayoutEntry{nullptr, binding, visibility,
+									  {},	   {},		{nullptr, sampleType, viewDimension}};
 }
 
 constexpr wgpu::BindGroupLayoutEntry samplerBindGroupLayoutEntry(uint32_t binding, wgpu::ShaderStage visibility) {
@@ -32,4 +36,4 @@ inline wgpu::BindGroupEntry samplerBindGroupEntry(uint32_t binding, wgpu::Sample
 	return wgpu::BindGroupEntry{nullptr, binding, {}, {}, {}, sampler};
 }
 
-}
+} // namespace sgd

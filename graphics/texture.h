@@ -26,7 +26,11 @@ enum struct TextureFlags {
 	filter = 0x08,
 	mipmap = 0x10,
 	cube = 0x20,
-	renderTarget=0x40,
+	array = 0x40,
+	renderTarget = 0x80,
+	layerView = 0x100,
+
+	envCube = cube | mipmap | filter
 };
 
 SGD_SHARED(Texture);
@@ -35,7 +39,8 @@ struct Texture : GraphicsResource {
 	SGD_OBJECT_TYPE(Texture, Shared);
 
 	Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags);
-	~Texture();
+	Texture(Texture* texture, uint32_t layer);
+	~Texture() override;
 
 	CVec2u size() const {
 		return m_size;
@@ -52,8 +57,6 @@ struct Texture : GraphicsResource {
 	TextureFlags flags() const {
 		return m_flags;
 	}
-
-	void resize(CVec2u size);
 
 	void update(const void* data, size_t pitch);
 
@@ -77,7 +80,11 @@ private:
 	uint32_t m_depth;
 	TextureFormat m_format;
 	TextureFlags m_flags;
+	TexturePtr m_texture;
+	uint32_t m_layer;
 	uint8_t* m_data;
+
+	wgpu::TextureViewDescriptor m_viewDesc;
 
 	// TODO: Should be a rect
 	mutable bool m_dirty{};

@@ -32,11 +32,15 @@ Material::Material(const MaterialDescriptor* desc)
 	for (auto& kv : m_desc->textureDescs) {
 		m_bindGroup->setTexture(kv.second.binding, kv.second.defValue);
 	}
-
-	blendMode.changed.connect(this, [=](BlendMode) { invalidate(true); });
-	depthFunc.changed.connect(this, [=](DepthFunc) { invalidate(true); });
-	cullMode.changed.connect(this, [=](CullMode) { invalidate(true); });
-
+	blendMode.changed.connect(this, [=](BlendMode) { //
+		invalidate(true);
+	});
+	depthFunc.changed.connect(this, [=](DepthFunc) { //
+		invalidate(true);
+	});
+	cullMode.changed.connect(this, [=](CullMode) { //
+		invalidate(true);
+	});
 	addDependency(m_bindGroup);
 }
 

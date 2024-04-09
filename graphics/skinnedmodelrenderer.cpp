@@ -53,9 +53,9 @@ void SkinnedModelRenderer::onUpdate(CVec3f eye) {
 	}
 }
 
-void SkinnedModelRenderer::onRender(GraphicsContext* gc) const {
+void SkinnedModelRenderer::render(RenderContext* rc) const {
 	for(auto& kv : m_instanceLists) {
-		if (kv.first) kv.second->meshRenderer->render(gc);
+		if (kv.first) kv.second->meshRenderer->render(rc);
 	}
 }
 

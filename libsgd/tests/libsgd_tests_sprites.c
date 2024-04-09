@@ -5,7 +5,7 @@ void entry() {
 	SGD_Light light = sgd_CreateDirectionalLight();
 	sgd_TurnEntity(light, 0,-45,0);
 
-	SGD_Material material = sgd_LoadSpriteMaterial("sgd://misc/grass1.png");
+	SGD_Material material = sgd_LoadPrelitMaterial("sgd://misc/スノー.png");
 	sgd_SetMaterialBlendMode(material, SGD_BLEND_MODE_ALPHA);
 
 	int n = 10000;

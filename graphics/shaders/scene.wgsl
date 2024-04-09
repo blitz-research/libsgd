@@ -1,5 +1,9 @@
 R"(
 
+// If the uniformity analysis is wrong because it can't prove uniformity, but you want to assert that the control flow is actually uniform,
+// in a fragment shader you can use:
+// @diagnostic(off, derivative_uniformity)
+
 // ***** Camera *****
 
 struct CameraUniforms {
@@ -30,6 +34,7 @@ struct PointLight {
  	color: vec4f,
 	range: f32,
 	falloff: f32,
+ 	castsShadow: i32,
 }
 
 struct SpotLight {
@@ -53,8 +58,12 @@ struct LightingUniforms {
 }
 
 @group(0) @binding(1) var<uniform> lighting_uniforms: LightingUniforms;
+
 @group(0) @binding(2) var lighting_envTexture: texture_cube<f32>;
 @group(0) @binding(3) var lighting_envSampler: sampler;
+
+@group(0) @binding(4) var lighting_pointShadowTexture: texture_depth_cube_array;
+@group(0) @binding(5) var lighting_pointShadowSampler: sampler;
 
 fn pointLightAtten(d: f32, range: f32, falloff: f32) -> f32 {
     // Attenuation - This seems like the most practially useful:
@@ -119,6 +128,17 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec3f, metallic: f32
 	    var lvec = light.position - position;
 	    let d = length(lvec);
 	    if d >= light.range {continue;}
+
+	    // check shadow map
+	    if light.castsShadow != 0 {
+            let near = .1;
+            let far = light.range;
+            let zw = textureSampleLevel(lighting_pointShadowTexture, lighting_pointShadowSampler, -lvec, i, 0);
+            let vz = far * near / (far + zw * (near - far));
+            let dz = max(abs(lvec.x), max(abs(lvec.y), abs(lvec.z)));
+            if dz > vz {continue;}
+        }
+
 	    lvec /= d;
 	    let atten = pointLightAtten(d, light.range, light.falloff);
 
@@ -145,18 +165,6 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec3f, metallic: f32
 	}
 
 	return color;
-}
-
-// ***** Material *****
-
-// fn evaluateMaterial(position: vec3f, normal: vec3f, texCoords: vec2f, color: vec4f) -> MaterialResult;
-struct MaterialResult {
-    albedo: vec4f,
-    emissive: vec3f,
-    metallic: f32,
-    roughness: f32,
-    occlusion: f32,
-    normal: vec3f,
 }
 
 )"

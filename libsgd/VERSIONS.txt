@@ -1,0 +1,20 @@
+***** v0.03 *****
+
+* Fixed CreateCubeMesh cubes scaled by 2 for some reason.
+
+* Added sgd_SetMeshCastsShadoqw and sgd_SetLightCastsShadow.
+
+* Begin work on shadowmapping!
+
+* Added sgd_DebugMemory() for debug LibSGD builds only right now.
+
+* Added sgd_ClearScene() and sgd_DestroyEntity(). Note ClearScene() just destroys everything, more subtle memory
+management coming but this is enough to write a game with at least.
+
+* Added sgd_Startup() and sgd_Shutdown() (not required in Blitz3D).
+
+* Added suspend-on-minimize behaviour, and EVENT_MASK_SUSPENDED and EVENT_MASK_RESUMED events.
+
+* Added sgd_WindowHasFocus(), and EVENT_MASK_LOST_FOCUS and EVENT_MASK_GOT_FOCUS events.
+
+* Added sgd_CopyEntity(), sgd_FPS().

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <geom/exports.h>
+#include "rendercontext.h"
 
 namespace sgd {
 
@@ -11,7 +12,8 @@ SGD_SHARED(Camera);
 SGD_SHARED(Light);
 SGD_SHARED(Renderer)
 SGD_SHARED(GraphicsContext);
-
+SGD_SHARED(SceneBindings);
+SGD_SHARED(RenderContext);
 SGD_SHARED(Scene);
 
 enum struct RendererType {
@@ -34,6 +36,8 @@ struct Scene : Shared {
 	Property<Vec4f> ambientLightColor{Vec4f(1, 1, 1, 0)};
 	Property<TexturePtr> envTexture;
 
+	Signal<> beginRender;
+
 	Scene(GraphicsContext* gc);
 
 	void clear();
@@ -54,13 +58,25 @@ private:
 	Vector<EntityPtr> m_entities;
 	Vector<CameraPtr> m_cameras;
 	Vector<LightPtr> m_lights;
-
 	Array<RendererPtr,8> m_renderers;
 
-	void updateCameraUniforms(CameraUniforms& uniforms) const;
-	void updateLightingUniforms(LightingUniforms& uniforms) const;
+	SceneBindingsPtr m_sceneBindings;
+	Array<SceneBindingsPtr,6> m_shadowBindings;
 
-	void renderASync();
+	Vector<Light*> m_pointShadowLights;
+	TexturePtr m_pointShadowTexture;
+
+	Vector<TexturePtr> m_pointShadowTextureFaces;
+
+	RenderContextPtr m_renderContext;
+
+	void updateCameraBindings();
+	void updateLightingBindings();
+
+	void renderPointLightShadowMaps() const;
+	void renderGeometry(RenderPassType renderPassType) const;
+
+	void renderASync() const;
 };
 
 } // namespace sgd

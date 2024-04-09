@@ -17,27 +17,17 @@ struct SpriteRenderer : Renderer {
 	void remove(Sprite* sprite);
 
 private:
-	struct RenderOp {
-		uint32_t firstInstance;
-		uint32_t instanceCount;
-		wgpu::BindGroup material;
-		wgpu::RenderPipeline pipeline;
-	};
-
 	BindGroupPtr m_bindGroup;
 
 	Vector<Sprite*> m_instances;
+
 	uint32_t m_instanceCount{};
 	BufferPtr m_instanceBuffer;
 	uint32_t m_instanceCapacity{};
 
-	mutable Vector<RenderOp> m_renderOps[2];
-
 	void onUpdate(CVec3f eye) override;
 
 	void onValidate(GraphicsContext* gc) const override;
-
-	void onRender(GraphicsContext* gc) const override;
 };
 
 }

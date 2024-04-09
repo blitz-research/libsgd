@@ -13,13 +13,32 @@ restart:
 
 	SGD_Model model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", 1);
 
-	sgd_Debug();
+	SGD_Light plight = sgd_CreatePointLight();
+	sgd_SetLightRange(plight, 10);
+	sgd_MoveEntity(plight,-2, 2, 0);
+
+	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/PavingStones065_1K-JPG");
+	SGD_Mesh mesh = sgd_CreateBoxMesh(-10, -1, -10, 10, 0, 10, material);
+
+	SGD_Model ground = sgd_CreateModel();
+	sgd_SetModelMesh(ground,mesh);
+
+	sgd_DebugMemory();
+
+	int fps = 0;
 
 	for (;;) {
 
-		if (sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) break;
+		int mask = sgd_PollEvents();
 
-#if 0
+		if (mask & SGD_EVENT_MASK_CLOSE_CLICKED) break;
+
+		if (mask & SGD_EVENT_MASK_SUSPENDED) puts("### App suspended");
+
+		if (mask & SGD_EVENT_MASK_RESUMED) puts("### App resumed");
+
+		fflush(stdout);
+
 		// Gamepad...
 		if (sgd_GamepadButtonDown(0, SGD_GAMEPAD_BUTTON_LEFT_BUMPER)) {
 			sgd_TurnEntity(model, 0, 3, 0);
@@ -36,17 +55,23 @@ restart:
 
 		static float time;
 		sgd_AnimateModel(model, 0, time += .03f, SGD_ANIMATION_MODE_LOOP);
-#endif
 
 		sgd_RenderScene();
 		sgd_Present();
 
-		if(sgd_KeyHit(32)) {
-			//goto restart;
-			sgd_DestroyEntity(model);
-			model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", 1);
+		if (sgd_FPS() != fps) {
+			fps = sgd_FPS();
+			printf("### FPS: %i\n", fps);
+			fflush(stdout);
 		}
 
+		sgd_AnimateModel(model, 0, 0, SGD_ANIMATION_MODE_LOOP);
+
+		if (sgd_KeyHit(32)) {
+			goto restart;
+			//			sgd_DestroyEntity(model);
+			//			model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", 1);
+		}
 	}
 }
 

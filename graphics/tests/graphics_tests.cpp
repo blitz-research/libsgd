@@ -6,6 +6,8 @@ using namespace sgd;
 
 WindowPtr window;
 GraphicsContextPtr gc;
+SceneBindingsPtr sceneBindings;
+RenderContextPtr rc;
 
 MeshRendererPtr meshRenderer;
 
@@ -21,9 +23,9 @@ void render() {
 	camera.projectionMatrix = Mat4f::perspective(45, (float)window->size().x / (float)window->size().y, .1, 100);
 	camera.inverseProjectionMatrix = inverse(camera.projectionMatrix);
 	camera.viewProjectionMatrix = camera.projectionMatrix * camera.viewMatrix;
-	gc->sceneBindings()->cameraUniforms()->update(&camera, 0, sizeof(camera));
 
-	gc->sceneBindings()->lightingUniforms()->update(&lighting, 0, sizeof(lighting));
+	sceneBindings->updateCameraUniforms(camera);
+	sceneBindings->updateLightingUniforms(lighting);
 
 	{
 		static float meshRot;
@@ -32,18 +34,20 @@ void render() {
 		insts[0].color = {1, 1, 1, 1};
 		meshRenderer->unlockInstances();
 	}
+
 	GraphicsResource::validateAll(gc);
 
-	gc->beginRender({0, 0, 0, 1}, 1);
+	rc->beginRender();
 	{
-		gc->beginRenderPass(RenderPass::clear);
-		gc->endRenderPass();
+		rc->beginRenderPass(RenderPassType::clear, gc->colorBuffer(), gc->depthBuffer(), {1,.5,0,1}, 1);
+		rc->endRenderPass();
 
-		gc->beginRenderPass(RenderPass::opaque);
-		meshRenderer->render(gc);
-		gc->endRenderPass();
+		rc->beginRenderPass(RenderPassType::opaque, gc->colorBuffer(), gc->depthBuffer(), {}, {});
+		rc->wgpuRenderPassEncoder().SetBindGroup(0, sceneBindings->bindGroup()->wgpuBindGroup());
+		meshRenderer->render(rc);
+		rc->endRenderPass();
 	}
-	gc->endRender();
+	rc->endRender();
 
 	gc->present(gc->colorBuffer());
 }
@@ -51,8 +55,10 @@ void render() {
 void start() {
 
 	window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::resizable);
-
 	gc = new GraphicsContext(window);
+	rc = new RenderContext(gc);
+
+	sceneBindings = new SceneBindings();
 
 	window->sizeChanged.connect(nullptr, [](CVec2u){
 		render();
@@ -61,7 +67,7 @@ void start() {
 	TexturePtr envTexture =
 		loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::filter).result();
 
-	gc->sceneBindings()->bindGroup()->setTexture(2, envTexture);
+	sceneBindings->setEnvTexture(envTexture);
 
 	lighting.pointLightCount = 1;
 	lighting.ambientLightColor = {1, 1, 1, 0};
@@ -71,9 +77,7 @@ void start() {
 	lighting.pointLights[0].range = 25;
 
 	MaterialPtr material = loadPBRMaterial(Path("sgd://materials/PavingStones131_1K-JPG")).result();
-
 	MeshPtr mesh = createSphereMesh(1, 64, 32, material);
-
 	transformTexCoords(mesh, {4,2}, {0,0});
 
 	meshRenderer = new MeshRenderer(mesh);

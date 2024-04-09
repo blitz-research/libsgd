@@ -1,8 +1,11 @@
 #include "skinnedmeshrenderer.h"
 
+#include "shadowmaterial.h"
+
 #include "shaders/uniforms.h"
 
 namespace sgd {
+
 namespace {
 
 auto shaderSource{
@@ -23,7 +26,7 @@ static_assert(sizeof(Vertex) == 84);
 wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(Vertex), wgpu::VertexStepMode::Vertex, std::size(vertexBufferAttribs),
 												  vertexBufferAttribs};
 
-static BindGroupDescriptor bindGroupDescriptor //
+BindGroupDescriptor bindGroupDescriptor //
 	(2,
 	 {
 		 bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
@@ -34,41 +37,46 @@ static BindGroupDescriptor bindGroupDescriptor //
 	 {vertexBufferLayout}, //
 	 shaderSource);
 
-RenderPass renderPass(BlendMode blendMode) {
-	switch (blendMode) {
-	case BlendMode::opaque:
-		return RenderPass::opaque;
-	case BlendMode::alpha:
-	case BlendMode::additive:
-	case BlendMode::multiply:
-		return RenderPass::blend;
-	}
-	unreachable();
-}
-
 } // namespace
 
 } // namespace sgd
 namespace sgd {
 
-SkinnedMeshRenderer::SkinnedMeshRenderer(CMesh* mesh) : m_mesh(mesh), m_bindGroup(new BindGroup(&bindGroupDescriptor)) {
+SkinnedMeshRenderer::SkinnedMeshRenderer(CMesh* mesh)
+	: m_mesh(mesh), //
+	  m_bindGroup(new BindGroup(&bindGroupDescriptor)),
+	  m_instanceBuffer(new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(SkinnedMeshInstance))) {
 
 	MeshUniforms meshUniforms;
 	meshUniforms.tangentsEnabled = int(bool(m_mesh->flags() & MeshFlags::tangentsEnabled));
-
 	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, &meshUniforms, sizeof(meshUniforms)));
+	m_bindGroup->setBuffer(1, m_instanceBuffer);
 
-	addDependency(m_mesh);
-	addDependency(m_bindGroup);
+	addDependency(m_mesh, [=] {
+		m_rebuildRenderOps = true;
+		invalidate();
+	});
+
+	addDependency(m_bindGroup, [=] {
+		m_rebuildRenderOps = true;
+		invalidate();
+	});
+
+	addDependency(m_instanceBuffer, [=] {
+		m_rebuildRenderOps = true;
+		invalidate();
+	});
 }
 
 SkinnedMeshInstance* SkinnedMeshRenderer::lockInstances(uint32_t count) {
-	m_instanceCount = count;
-	if (m_instanceCount > m_instanceCapacity) {
-		m_instanceCapacity = m_instanceCount;
+	if (count > m_instanceCapacity) {
+		m_instanceCapacity = count;
 		m_instanceBuffer = new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(SkinnedMeshInstance));
-		log() << "### Reallocating instance buffer";
-		m_bindGroup->setBuffer(1, m_instanceBuffer);
+	}
+	if (count != m_instanceCount) {
+		m_instanceCount = count;
+		m_updateInstanceCounts = true;
+		invalidate();
 	}
 	return (SkinnedMeshInstance*)m_instanceBuffer->lock(0, m_instanceCount * sizeof(SkinnedMeshInstance));
 }
@@ -78,37 +86,52 @@ void SkinnedMeshRenderer::unlockInstances() {
 }
 
 void SkinnedMeshRenderer::onValidate(GraphicsContext* gc) const {
-	for (int i = 0; i < renderPassCount; ++i) m_renderOps[i].clear();
-	m_renderPassMask = 0;
 
-	m_vertexBuffer = m_mesh->vertexBuffer()->wgpuBuffer();
-	m_indexBuffer = m_mesh->indexBuffer()->wgpuBuffer();
+	if (m_rebuildRenderOps) {
 
-	for (int i = 0; i < m_mesh->surfaces().size(); ++i) {
-		auto& surf = m_mesh->surfaces()[i];
-		int rpass = (int)renderPass(surf.material->blendMode());
+		m_renderOps = {};
 
-		auto pipeline = getOrCreateRenderPipeline(gc, surf.material, m_bindGroup, DrawMode::triangleList);
+		for (int i = 0; i < m_mesh->surfaces().size(); ++i) {
 
-		m_renderOps[rpass].push_back({pipeline, surf.material->bindGroup()->wgpuBindGroup(), surf.firstTriangle * 3, surf.triangleCount * 3});
+			auto& surf = m_mesh->surfaces()[i];
+			int rpass = (int)renderPassType(surf.material->blendMode());
 
-		m_renderPassMask |= 1 << rpass;
+			auto pipeline = getOrCreateRenderPipeline(gc, surf.material, m_bindGroup, DrawMode::triangleList);
+
+			m_renderOps[rpass].emplace_back( //
+				m_mesh->vertexBuffer(),		 //
+				nullptr,					 //
+				m_mesh->indexBuffer(),		 //
+				surf.material->bindGroup(),	 //
+				m_bindGroup,				 //
+				pipeline,					 //
+				surf.triangleCount * 3, m_instanceCount, surf.firstTriangle * 3);
+
+			if (surf.material->blendMode() == BlendMode::opaque) {
+
+				auto shadowPipeline = getOrCreateShadowPipeline(gc, m_bindGroup, DrawMode::triangleList);
+
+				m_renderOps[(int)RenderPassType::shadow].emplace_back( //
+					m_mesh->vertexBuffer(),							   //
+					nullptr,										   //
+					m_mesh->indexBuffer(),							   //
+					shadowBindGroup(),								   //
+					m_bindGroup,									   //
+					shadowPipeline,									   //
+					surf.triangleCount * 3, m_instanceCount, surf.firstTriangle * 3);
+			}
+		}
+
+		m_rebuildRenderOps = m_updateInstanceCounts = false;
 	}
-}
 
-void SkinnedMeshRenderer::onRender(GraphicsContext* gc) const {
-	if (!m_instanceCount) return;
-
-	auto& encoder = gc->wgpuRenderPassEncoder();
-
-	encoder.SetVertexBuffer(0, m_vertexBuffer);
-	encoder.SetIndexBuffer(m_indexBuffer, wgpu::IndexFormat::Uint32);
-	encoder.SetBindGroup(2, m_bindGroup->wgpuBindGroup());
-
-	for (auto& op : m_renderOps[(int)gc->renderPass()]) {
-		encoder.SetBindGroup(1, op.bindGroup1);
-		encoder.SetPipeline(op.pipeline);
-		encoder.DrawIndexed(op.indexCount, m_instanceCount, op.firstIndex);
+	if (m_updateInstanceCounts) {
+		for (auto& ops : m_renderOps) {
+			for (auto& op : ops) {
+				op.instanceCount = m_instanceCount;
+			}
+		}
+		m_updateInstanceCounts = false;
 	}
 }
 

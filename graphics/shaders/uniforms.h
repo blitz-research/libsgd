@@ -18,6 +18,10 @@ struct alignas(16) CameraUniforms {
 
 struct alignas(16) LightingUniforms {
 
+	static constexpr int maxDirectionalLights = 4;
+	static constexpr int maxPointLights = 8;
+	static constexpr int maxSpotLights = 8;
+
 	struct alignas(16) DirectionalLight {
 		alignas(16) Vec3f direction{0, 0, -1}; // -forward
 		alignas(16) Vec4f color{1};
@@ -28,7 +32,9 @@ struct alignas(16) LightingUniforms {
 		alignas(16) Vec4f color{1};
 		float range{100};
 		float falloff{1};
+		int castsShadow{0};
 	};
+	static_assert(sizeof(PointLight)==48);
 
 	struct alignas(16) SpotLight {
 		alignas(16) Vec3f position{0, 0, 0};
@@ -39,10 +45,6 @@ struct alignas(16) LightingUniforms {
 		float innerConeAngle{0};
 		float outerConeAngle{halfPi}; // 45 degrees
 	};
-
-	static constexpr int maxDirectionalLights = 4;
-	static constexpr int maxPointLights = 8;
-	static constexpr int maxSpotLights = 8;
 
 	Vec4f ambientLightColor{1, 1, 1, 0};
 
@@ -59,6 +61,8 @@ struct alignas(16) LightingUniforms {
 // @group(0) @binding(1) var<uniform> lighting_uniforms: LightingUniforms;
 // @group(0) @binding(2) var lighting_envTexture: texture_cube<f32>;
 // @group(0) @binding(3) var lighting_envSampler: sampler;
+// @group(0) @binding(4) var lighting_pointShadowTexture: array<texture_cube<f32>, maxPointLights>;
+// @group(1) @binding(5) var lighting_pointShadowSampler: sampler;
 
 // ***** MatteMaterial *****
 
@@ -96,6 +100,7 @@ struct alignas(16) PBRMaterialUniforms {
 // ***** SkyboxRenderer *****
 
 struct alignas(16) SkyboxUniforms {
+	Mat4f worldMatrix;
 	float mipmapBias{0};
 };
 // @group(2) @binding(0) var<uniform> skybox_uniforms: SkyboxUniforms;
@@ -119,12 +124,12 @@ struct alignas(16) SkinnedMeshInstance {
 };
 //@group(2) @binding(1) var<storage> meshInstances: array<SkinnedMeshInstance>;
 
-// ***** SpriteMaterial *****
+// ***** PrelitMaterial *****
 
-// @group(1) @binding(0) var<uniform> material_uniforms: SpriteMaterialUniforms;
+// @group(1) @binding(0) var<uniform> material_uniforms: PrelitMaterialUniforms;
 // @group(1) @binding(1) var material_albedoTexture: texture_2d<f32>;
 // @group(1) @binding(2) var material_albedoSampler: sampler;
-struct alignas(16) SpriteMaterialUniforms {
+struct alignas(16) PrelitMaterialUniforms {
 	Vec4f albedoColor{1};
 };
 

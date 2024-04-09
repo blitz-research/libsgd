@@ -11,11 +11,17 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 # Use cmake's FindPythonInterp/FindPythonLibs
 set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
 
-message("### Configuring LibSGD for:")
-message("### CMAKE_SYSTEM_NAME:     ${CMAKE_SYSTEM_NAME}")
-message("### CMAKE_BUILD_TYPE:      ${CMAKE_BUILD_TYPE}")
-message("### CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
-message("### CMAKE_SIZEOF_VOID_P:   ${CMAKE_SIZEOF_VOID_P}")
+# Options
+option(SGD_NODEJS_TARGET_ENABLED "Nodejs target enabled" OFF)
+option(SGD_PYTHON_TARGET_ENABLED "Python target enabled" OFF)
+
+message("### Configuring LibSGD:")
+message("### SGD_NODEJS_TARGET_ENABLED  ${SGD_NODEJS_TARGET_ENABLED}")
+message("### SGD_PYTHON_TARGET_ENABLED  ${SGD_PYTHON_TARGET_ENABLED}")
+message("### CMAKE_SYSTEM_NAME          ${CMAKE_SYSTEM_NAME}")
+message("### CMAKE_BUILD_TYPE           ${CMAKE_BUILD_TYPE}")
+message("### CMAKE_CXX_COMPILER_ID      ${CMAKE_CXX_COMPILER_ID}")
+message("### CMAKE_SIZEOF_VOID_P        ${CMAKE_SIZEOF_VOID_P}")
 
 # Config
 #

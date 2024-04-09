@@ -11,5 +11,7 @@ endfunction()
 
 add(libsgd_tests_skinnedmesh)
 add(libsgd_tests_directionallight)
+add(libsgd_tests_pointlight)
 add(libsgd_tests_spotlight)
 add(libsgd_tests_sprites)
+add(libsgd_tests_primitives)

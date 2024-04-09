@@ -43,7 +43,7 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 	wgpu::AdapterProperties props{};
 	adapter.GetProperties(&props);
 
-	log() << "### wgpu Adapter Properties:";
+	log() << "### Dawn WGPU Adapter Properties:";
 	log() << "### Vender name:" << (props.vendorName ? props.vendorName : "???");
 	log() << "### Architecture:" << (props.architecture ? props.architecture : "???");
 	log() << "### Name:" << (props.name ? props.name : "???");

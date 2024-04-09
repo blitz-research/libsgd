@@ -20,26 +20,14 @@ struct SkinnedMeshRenderer : Renderer{
 private:
 	CMeshPtr m_mesh;
 	BindGroupPtr m_bindGroup;
-	uint32_t m_instanceCount;
+	uint32_t m_instanceCount{};
+	uint32_t m_instanceCapacity{10};
+	BufferPtr m_instanceBuffer;
 
-	mutable BufferPtr m_instanceBuffer;
-	mutable uint32_t m_instanceCapacity{0};
-
-	mutable wgpu::Buffer m_vertexBuffer;
-	mutable wgpu::Buffer m_indexBuffer;
-
-	struct RenderOp {
-		wgpu::RenderPipeline pipeline;
-		wgpu::BindGroup bindGroup1;
-		uint32_t firstIndex{};
-		uint32_t indexCount{};
-	};
-
-	mutable Vector<RenderOp> m_renderOps[renderPassCount];
+	mutable bool m_rebuildRenderOps{true};
+	mutable bool m_updateInstanceCounts{true};
 
 	void onValidate(GraphicsContext* gc) const override;
-
-	void onRender(GraphicsContext* gc) const override;
 };
 
 }

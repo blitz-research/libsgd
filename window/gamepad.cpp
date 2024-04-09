@@ -56,8 +56,6 @@ void Gamepad::onConnected() {
 #endif
 
 	poll();
-
-	log() << "### Gamepad" << m_id << m_name << "connected.";
 }
 
 void Gamepad::onDisconnected() {
@@ -67,8 +65,6 @@ void Gamepad::onDisconnected() {
 	memset(m_axes, 0, sizeof(m_axes));
 	m_name = "";
 	flush();
-
-	log() << "### Gamepad" << m_id << "disconnected.";
 }
 
 void Gamepad::poll() {

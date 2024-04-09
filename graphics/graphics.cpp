@@ -1,5 +1,4 @@
 #include "graphics.h"
-#include "renderpipeline.h"
 #include "scenebindings.h"
 #include "texture.h"
 
@@ -7,8 +6,6 @@
 
 #include <window/exports.h>
 
-#include <condition_variable>
-#include <mutex>
 #include <thread>
 
 namespace sgd {
@@ -35,20 +32,28 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 			requestWGPUDevice(opts, [&](const wgpu::Device& device) {
 				m_wgpuDevice = device;
 				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
-				m_wgpuSwapChain = createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, m_window->size(),
-													  preferredWGPUSwapChainFormat(m_wgpuDevice));
 
-				m_colorBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
-				m_depthBuffer = new Texture(m_window->size(), 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
+				auto createSwapChain = [=](CVec2u size) {
+					m_canRender = size.x && size.y;
+					if (!m_canRender) {
+						m_wgpuSwapChain = {};
+						m_colorBuffer = {};
+						m_depthBuffer = {};
+						return;
+					}
 
-				m_sceneBindings = new SceneBindings();
-
-				m_window->sizeChanged.connect(this, [=](CVec2u size) {
 					m_wgpuSwapChain =
 						createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, size, preferredWGPUSwapChainFormat(m_wgpuDevice));
 
-					m_colorBuffer->resize(size);
-					m_depthBuffer->resize(size);
+					m_colorBuffer =
+						new Texture(m_window->size(), 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
+					m_depthBuffer =
+						new Texture(m_window->size(), 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
+				};
+
+				createSwapChain(m_window->size());
+				m_window->sizeChanged.connect(this, [=](CVec2u size) { //
+					createSwapChain(size);
 				});
 
 				ready.set(true);
@@ -59,80 +64,22 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 	ready.waiteq(true);
 }
 
-void GraphicsContext::beginRender(CVec4f clearColor, float clearDepth) {
-	SGD_ASSERT(isMainThread() && !m_wgpuCommandEncoder);
-
-	m_clearColor = clearColor;
-	m_clearDepth = clearDepth;
-
-	m_wgpuCommandEncoder = m_wgpuDevice.CreateCommandEncoder();
-}
-
-void GraphicsContext::beginRenderPass(RenderPass rpass) {
-	SGD_ASSERT(isMainThread() && m_wgpuCommandEncoder && !m_wgpuRenderPassEncoder);
-
-	m_renderPass = rpass;
-
-	wgpu::RenderPassColorAttachment colorAttachment;
-	colorAttachment.view = m_colorBuffer->wgpuTextureView();
-	colorAttachment.clearValue = {m_clearColor.x, m_clearColor.y, m_clearColor.z, m_clearColor.w};
-	colorAttachment.loadOp = wgpu::LoadOp::Load;
-	colorAttachment.storeOp = wgpu::StoreOp::Store;
-
-	wgpu::RenderPassDepthStencilAttachment depthAttachment;
-	depthAttachment.view = m_depthBuffer->wgpuTextureView();
-	depthAttachment.depthClearValue = m_clearDepth;
-	depthAttachment.depthLoadOp = wgpu::LoadOp::Clear;
-	depthAttachment.depthStoreOp = wgpu::StoreOp::Store;
-
-	wgpu::RenderPassDescriptor renderPassDescriptor;
-	renderPassDescriptor.colorAttachments = &colorAttachment;
-	renderPassDescriptor.colorAttachmentCount = 1;
-	renderPassDescriptor.depthStencilAttachment = &depthAttachment;
-
-	switch (m_renderPass) {
-	case RenderPass::clear:
-		colorAttachment.loadOp = wgpu::LoadOp::Clear;
-		depthAttachment.depthLoadOp = wgpu::LoadOp::Clear;
-		break;
-	case RenderPass::opaque:
-		break;
-	case RenderPass::blend:
-		depthAttachment.depthLoadOp = wgpu::LoadOp::Undefined;
-		depthAttachment.depthStoreOp = wgpu::StoreOp::Undefined;
-		depthAttachment.depthReadOnly = true;
-		break;
-	}
-	m_wgpuRenderPassEncoder = m_wgpuCommandEncoder.BeginRenderPass(&renderPassDescriptor);
-
-	// Default?
-	m_wgpuRenderPassEncoder.SetViewport(0, 0, (float)m_colorBuffer->size().x, (float)m_colorBuffer->size().y, 0, 1);
-
-	m_wgpuRenderPassEncoder.SetBindGroup(0, m_sceneBindings->bindGroup()->wgpuBindGroup());
-}
-
-void GraphicsContext::endRenderPass() {
-	SGD_ASSERT(isMainThread() && m_wgpuRenderPassEncoder);
-
-	m_wgpuRenderPassEncoder.End();
-	m_wgpuRenderPassEncoder = {};
-}
-
-void GraphicsContext::endRender() {
-	SGD_ASSERT(isMainThread() && m_wgpuCommandEncoder && !m_wgpuRenderPassEncoder);
-
-	auto commandBuffer = m_wgpuCommandEncoder.Finish();
-	m_wgpuDevice.GetQueue().Submit(1, &commandBuffer);
-
-	m_wgpuCommandEncoder = {};
-}
-
 void GraphicsContext::present(Texture* texture) {
+	auto elapsed = sgd::micros() - m_micros;
+	++m_frames;
 
-	auto wgpuTexture = texture->wgpuTexture();
+	if (elapsed >= 1000000) {
+		float seconds = (float)elapsed / 1000000.0f;
+		m_fps = (int)std::round((float)m_frames / seconds);
+		m_micros += 1000000;
+		m_frames = 0;
+	}
+
+	if (!m_canRender) return;
+
+	auto& wgpuTexture = texture->wgpuTexture();
 
 	requestRender([=] {
-		SGD_ASSERT(!m_wgpuCommandEncoder);
 		copyTexture(m_wgpuDevice, wgpuTexture, m_wgpuSwapChain.GetCurrentTexture());
 #if !SGD_OS_EMSCRIPTEN
 		m_wgpuSwapChain.Present();
@@ -148,11 +95,11 @@ GraphicsResource::GraphicsResource() {
 
 GraphicsResource::~GraphicsResource() {
 	auto it = sgd::find(g_invalidQueue, this);
-	if(m_invalid) {
-		SGD_ASSERT(it!=g_invalidQueue.end());
+	if (m_invalid) {
+		SGD_ASSERT(it != g_invalidQueue.end());
 		g_invalidQueue.erase(it);
-	}else{
-		SGD_ASSERT(it==g_invalidQueue.end());
+	} else {
+		SGD_ASSERT(it == g_invalidQueue.end());
 	}
 }
 
@@ -165,6 +112,8 @@ void GraphicsResource::validate(GraphicsContext* gc) const { // NOLINT (recursiv
 }
 
 void GraphicsResource::validateAll(GraphicsContext* gc) {
+	gc->colorBuffer()->validate(gc);
+	gc->depthBuffer()->validate(gc);
 	while (!g_invalidQueue.empty()) {
 		auto r = g_invalidQueue.back();
 		g_invalidQueue.pop_back();
@@ -180,17 +129,18 @@ void GraphicsResource::addDependency(CGraphicsResource* dep, bool emit) {
 	});
 }
 
+void GraphicsResource::addDependency(CGraphicsResource* dep, CFunction<void()> func) {
+	if (!dep) return;
+	m_dependencies.emplace_back(dep);
+	dep->invalidated.connect(this, func);
+}
+
 void GraphicsResource::removeDependency(CGraphicsResource* dep) {
 	if (!dep) return;
 	auto it = find(m_dependencies, dep);
 	SGD_ASSERT(it != m_dependencies.end());
 	m_dependencies.erase(it);
 	dep->invalidated.disconnect(this);
-}
-
-void GraphicsResource::updateDependency(CGraphicsResource* from, CGraphicsResource* to, bool emit) {
-	removeDependency(from);
-	addDependency(to, emit);
 }
 
 void GraphicsResource::invalidate(bool emit) {

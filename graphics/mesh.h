@@ -55,14 +55,18 @@ enum struct MeshFlags {
 struct Mesh : GraphicsResource {
 	SGD_OBJECT_TYPE(Mesh, GraphicsResource);
 
-	Mesh(const Vertex* vertices, uint32_t vertexCount, //
+	Mesh(const Vertex* vertices, uint32_t vertexCount,		//
 		 const Triangle* triangles, uint32_t triangleCount, //
-		 const Surface* surfaces, uint32_t surfaceCount, //
+		 const Surface* surfaces, uint32_t surfaceCount,	//
 		 MeshFlags flags);
 
 	Mesh(CVector<Vertex> vertices, CVector<Triangle> triangles, CVector<Surface> surfaces, MeshFlags flags);
 
-	MeshFlags flags()const{ return m_flags;}
+	Property<bool> castsShadow{false};
+
+	MeshFlags flags() const {
+		return m_flags;
+	}
 
 	const Vertex* vertices() const {
 		return (Vertex*)m_vertexBuffer->data();

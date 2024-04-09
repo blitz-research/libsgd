@@ -6,7 +6,7 @@
 
 //! @file
 
-#define SGD_DEBUG_SHARED_REFS 1
+//#define SGD_DEBUG_SHARED_REFS 1
 
 namespace sgd {
 
@@ -32,7 +32,6 @@ struct Shared : public Object {
 #if SGD_DEBUG_SHARED_REFS
 		validateRefs();
 		if (!--m_refs) {
-//			log() << "### Releasing" << this;
 			this->~Shared();
 			m_refs = deadrefs;
 		}

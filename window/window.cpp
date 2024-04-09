@@ -44,6 +44,26 @@ EM_JS(void, getCanvasBufferSize, (uint32_t * width, uint32_t* height), {
 
 namespace sgd {
 
+namespace {
+
+int g_suspended;
+
+void suspendApp() {
+	if (++g_suspended == 1) {
+		log() << "### App suspended";
+		appSuspended.emit();
+	}
+}
+
+void resumeApp() {
+	if (--g_suspended == 0) {
+		log() << "### App resumed";
+		appResumed.emit();
+	}
+}
+
+} // namespace
+
 Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 	runOnMainThread(
 		[=] {
@@ -54,19 +74,34 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 
 			auto monitor = bool(flags & WindowFlags::fullscreen) ? glfwGetPrimaryMonitor() : nullptr;
 
-			m_glfwWindow = glfwCreateWindow(size.x, size.y, title.c_str(), monitor, nullptr);
+			m_glfwWindow = glfwCreateWindow((int)size.x, (int)size.y, title.c_str(), monitor, nullptr);
 
 			glfwSetWindowUserPointer(m_glfwWindow, this);
 
 			{
 				glfwSetWindowSizeCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, int w, int h) {
 					auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+					if(window->m_size == Vec2u(w,h)) return;
+					if (w && h) {
+						if (!window->m_size.x || !window->m_size.y) resumeApp();
+					} else {
+						if (window->m_size.x && window->m_size.y) suspendApp();
+					}
 					window->m_size = Vec2u(w, h);
 					window->sizeChanged.emit(window->m_size);
 				});
 				int w, h;
 				glfwGetWindowSize(m_glfwWindow, &w, &h);
+				g_suspended = !w || !h;
 				m_size = Vec2u(w, h);
+			}
+			{
+				glfwSetWindowFocusCallback(m_glfwWindow, [](GLFWwindow * glfwWindow, int focused){
+					auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
+					if((bool)focused == window->m_hasFocus) return;
+					(window->m_hasFocus = focused) ? window->gotFocus.emit() : window->lostFocus.emit();
+				});
+				m_hasFocus = glfwGetWindowAttrib(m_glfwWindow, GLFW_FOCUSED);
 			}
 			{
 				glfwSetWindowCloseCallback(m_glfwWindow, [](GLFWwindow* glfwWindow) {
@@ -101,32 +136,20 @@ Window* Window::getWindow(GLFWwindow* glfwWindow) {
 	return static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
 }
 
-template <class FunTy, class RetTy = typename std::invoke_result_t<FunTy>> //
-RetTy runSync(FunTy fun) {
-
-	RetTy result;
-	CondVar<bool> done;
-
-	runOnMainThread([&]{
-		result=fun();
-		done.set(true);
-	}, true);
-
-	done.waiteq(true);
-
-	return 0;
-}
-
 void pollEvents() {
 
-	runSync([]() -> int { //
-		return 0;
-	});
+	// This is to delay glfwWaitEvents by 1 poll, so user can 'see' suspend events.
+	static bool wait;
 
 	runOnMainThread(
 		[] { //
 			beginPollEvents.emit();
-			glfwPollEvents();
+			if (g_suspended && wait) {
+				glfwWaitEvents();
+			} else {
+				glfwPollEvents();
+			}
+			wait = g_suspended;
 			endPollEvents.emit();
 		},
 		true);

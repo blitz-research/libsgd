@@ -139,4 +139,24 @@ void updateTangents(Mesh* mesh) {
 	mesh->unlockVertices();
 }
 
+Mesh* copy(CMesh* mesh) {
+	return new Mesh(mesh->vertices(), mesh->vertexCount(), //
+					mesh->triangles(), mesh->triangleCount(), //
+					mesh->surfaces().data(), mesh->surfaces().size(), mesh->flags());
+}
+
+void flip(Mesh* mesh) {
+
+	for (auto vp = mesh->lockVertices(0, mesh->vertexCount()), ep = vp + mesh->vertexCount(); vp != ep; ++vp) {
+		vp->normal = -vp->normal;
+		vp->tangent.w = -vp->tangent.w;	//?
+	}
+	mesh->unlockVertices();
+
+	for (auto tp = mesh->lockTriangles(0, mesh->triangleCount()), ep = tp + mesh->triangleCount(); tp != ep; ++tp) {
+		std::swap(tp->indices[1], tp->indices[2]);
+	}
+	mesh->unlockTriangles();
+}
+
 } // namespace sgd

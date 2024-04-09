@@ -5,9 +5,11 @@
 namespace sgd {
 
 void Skybox::init() {
+
 	skyTexture.changed.connect(this, [=](Texture* texture) { //
 		if (m_renderer) m_renderer->skyTexture = texture;
 	});
+
 	roughness.changed.connect(this, [=](float roughness) { //
 		if (m_renderer) m_renderer->roughness = roughness;
 	});
@@ -36,6 +38,10 @@ void Skybox::onCreate() {
 	m_renderer->enabled = false;
 
 	scene()->setRenderer(RendererType::skybox, m_renderer);
+
+	scene()->beginRender.connect(this, [=]{
+		m_renderer->worldMatrix = inverse(worldMatrix());
+	});
 }
 
 void Skybox::onDestroy() {

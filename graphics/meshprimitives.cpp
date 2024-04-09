@@ -9,11 +9,11 @@ namespace {
 
 Mesh* createMesh(CVector<Vertex> vertices, CVector<Triangle> triangles, Material* material) {
 
-	if(!material) material = createMatteMaterial();
+	if(!material) material = createPBRMaterial();
 
 	auto mesh = new Mesh(vertices, triangles, {{material, 0, (uint32_t)triangles.size()}}, material->hasNormalTexture() ? MeshFlags::tangentsEnabled : MeshFlags::none);
 
-	updateTangents(mesh);
+	if(material->hasNormalTexture()) updateTangents(mesh);
 
 	return mesh;
 }
@@ -25,10 +25,10 @@ Mesh* createBoxMesh(CBoxf box, Material* material) {
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;
 
-	Vec3f verts[]{{box.min.x / 2, box.max.y / 2, box.min.z / 2}, {box.max.x / 2, box.max.y / 2, box.min.z / 2},
-				  {box.max.x / 2, box.min.y / 2, box.min.z / 2}, {box.min.x / 2, box.min.y / 2, box.min.z / 2},
-				  {box.min.x / 2, box.max.y / 2, box.max.z / 2}, {box.max.x / 2, box.max.y / 2, box.max.z / 2},
-				  {box.max.x / 2, box.min.y / 2, box.max.z / 2}, {box.min.x / 2, box.min.y / 2, box.max.z / 2}};
+	Vec3f verts[]{{box.min.x, box.max.y, box.min.z}, {box.max.x, box.max.y, box.min.z},
+				  {box.max.x, box.min.y, box.min.z}, {box.min.x, box.min.y, box.min.z},
+				  {box.min.x, box.max.y, box.max.z}, {box.max.x, box.max.y, box.max.z},
+				  {box.max.x, box.min.y, box.max.z}, {box.min.x, box.min.y, box.max.z}};
 
 	Vec3f norms[]{{0, 0, -1}, {1, 0, 0}, {0, 0, 1}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}};
 
@@ -52,52 +52,52 @@ Mesh* createSphereMesh(float radius, uint32_t xSegs, uint32_t ySegs, Material* m
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;
 
-	for (auto i = 0u; i < xSegs; ++i) vertices.emplace_back(Vec3f(0, radius, 0), Vec2f((i + 0.5f) / xSegs, 0));
+	for (int i = 0; i < xSegs; ++i) vertices.emplace_back(Vec3f(0, radius, 0), Vec2f((i + 0.5f) / xSegs, 0));
 
-	for (auto j = 1u; j < ySegs; ++j) {
+	for (int j = 1; j < ySegs; ++j) {
 		float pitch = j * pi / ySegs - halfPi;
-		for (auto i = 0u; i <= xSegs; ++i) {
+		for (int i = 0; i <= xSegs; ++i) {
 			float yaw = i * twoPi / xSegs;
-			auto p = Mat3f::rotation({pitch, yaw, 0}).k * radius;
+			auto p = Mat3f::rotation({-pitch, yaw, 0}).k * radius;
 			vertices.emplace_back(p, Vec2f(float(i) / xSegs, float(j) / ySegs));
 		}
 	}
 
-	for (auto i = 0u; i < xSegs; ++i) vertices.emplace_back(Vec3f{0, -radius, 0}, Vec2f{(i + 0.5f) / xSegs, 1});
+	for (int i = 0; i < xSegs; ++i) vertices.emplace_back(Vec3f{0, -radius, 0}, Vec2f{(i + 0.5f) / xSegs, 1});
 
 	for (auto& v : vertices) v.normal = normalize(v.position);
 
 	// Polygons
-	for (auto i = 0u; i < xSegs; ++i) triangles.emplace_back(i, i + xSegs + 1, i + xSegs);
+	for (int i = 0; i < xSegs; ++i) triangles.emplace_back(i, i + xSegs, i + xSegs + 1);
 
-	for (auto j = 1u; j < ySegs - 1; ++j) {
-		for (auto i = 0u; i < xSegs; ++i) {
-			auto v0 = j * (xSegs + 1) + i - 1;
-			auto v2 = v0 + xSegs + 2;
-			triangles.emplace_back(v0, v0 + 1, v2);
-			triangles.emplace_back(v0, v2, v2 - 1);
+	for (int j = 1; j < ySegs - 1; ++j) {
+		for (int i = 0; i < xSegs; ++i) {
+			int v0 = j * (xSegs + 1) + i - 1;
+			int v2 = v0 + xSegs + 2;
+			triangles.emplace_back(v0, v2, v0 + 1);
+			triangles.emplace_back(v0, v2-1, v2);
 		}
 	}
 
-	for (auto i = 0u; i < xSegs; ++i) {
-		auto v0 = (xSegs + 1) * (ySegs - 1) + i - 1;
-		triangles.emplace_back(v0, v0 + 1, v0 + xSegs + 1);
+	for (int i = 0; i < xSegs; ++i) {
+		int v0 = (xSegs + 1) * (ySegs - 1) + i - 1;
+		triangles.emplace_back(v0, v0 + xSegs + 1, v0+1);
 	}
 
 	return createMesh(vertices, triangles, material);
 }
 
-Mesh* createCylinderMesh(float length, float radius, uint32_t segs, Material* material) {
+Mesh* createCylinderMesh(float height, float radius, uint32_t segs, Material* material) {
 
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;
 
-	float top = length, bot = 0;
+	float top = height/2, bot = -top;
 
 	// Sides
-	for (auto i = 0u; i <= segs; ++i) {
-		float yaw = (i % segs) * twoPi / segs;
-		auto v = Vec3f(cosf(yaw) * radius, top, sinf(yaw) * radius);
+	for (int i = 0; i <= segs; ++i) {
+		float yaw = i * twoPi / segs;
+		auto v = Vec3f(std::cos(yaw) * radius, top, std::sin(yaw) * radius);
 		auto n = normalize(Vec3f(v.x, 0, v.z));
 		auto t = Vec2f(float(i) / segs, 0);
 		vertices.emplace_back(v, n, t);
@@ -105,16 +105,16 @@ Mesh* createCylinderMesh(float length, float radius, uint32_t segs, Material* ma
 		t.y = 1;
 		vertices.emplace_back(v, n, t);
 	}
-	for (auto i = 0u; i < segs; ++i) {
-		triangles.emplace_back(i * 2, i * 2 + 2, i * 2 + 3);
-		triangles.emplace_back(i * 2, i * 2 + 3, i * 2 + 1);
+	for (int i = 0; i < segs; ++i) {
+		triangles.emplace_back(i * 2, i * 2 + 3, i * 2 + 2);
+		triangles.emplace_back(i * 2, i * 2 + 1, i * 2 + 3);
 	}
 
 	// Caps
 	int v0 = vertices.size();
-	for (auto i = 0u; i < segs; ++i) {
+	for (int i = 0; i < segs; ++i) {
 		float yaw = i * twoPi / segs;
-		auto v = Vec3f(cosf(yaw) * radius, top, sinf(yaw) * radius);
+		auto v = Vec3f(std::cos(yaw) * radius, top, std::sin(yaw) * radius);
 		auto n = Vec3f(0, 1, 0);
 		auto t = Vec2f(v.x * .5f + .5f, 1 - (v.z * .5f + .5f));
 		vertices.emplace_back(v, n, t);
@@ -122,9 +122,9 @@ Mesh* createCylinderMesh(float length, float radius, uint32_t segs, Material* ma
 		n.y = -n.y;
 		vertices.emplace_back(v, n, t);
 	}
-	for (auto i = 1u; i < segs - 1; ++i) {
-		triangles.emplace_back(v0 + (i + 1) * 2, v0 + i * 2, v0);
-		triangles.emplace_back(v0 + i * 2 + 1, v0 + (i + 1) * 2 + 1, v0 + 1);
+	for (int i = 1; i < segs - 1; ++i) {
+		triangles.emplace_back(v0 + (i + 1) * 2, v0, v0 + i * 2);
+		triangles.emplace_back(v0 + i * 2 + 1, v0 + 1, v0 + (i + 1) * 2 + 1);
 	}
 
 	return createMesh(vertices, triangles, material);
@@ -135,33 +135,46 @@ Mesh* createConeMesh(float length, float radius, uint32_t segs, Material* materi
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;
 
-	float top = length, bot = 0;
+	float top = length/2, bot = -top;
 
 	// Peak
-	for (auto i = 0u; i < segs; ++i) {
+	for (int i = 0; i < segs; ++i) {
 		vertices.emplace_back(Vec3f(0, top, 0), Vec3f(0, 1, 0), Vec2f((i + 0.f) / segs, 0));
 	}
 
 	// Sides
 	for (int i = 0; i <= segs; ++i) {
-		float yaw = (i % segs) * twoPi / segs;
-		auto n = Vec3f(cosf(yaw), 0, sinf(yaw));
+		float yaw = i * twoPi / segs;
+		auto n = Vec3f(std::cos(yaw), 0, std::sin(yaw));
 		auto v = Vec3f(n.x * radius, bot, n.z * radius);
 		auto t = Vec2f(float(i) / segs, 1);
 		vertices.emplace_back(v, n, t);
 	}
-	for (auto i = 0u; i < segs; ++i) triangles.emplace_back(i, i + segs + 1, i + segs);
+	for (int i = 0; i < segs; ++i) triangles.emplace_back(i, i + segs, i + segs + 1);
 
+	// Caps
+	int v0 = vertices.size();
+	for (int i = 0; i < segs; ++i) {
+		float yaw = i * twoPi / segs;
+		auto v = Vec3f(std::cos(yaw) * radius, bot, std::sin(yaw) * radius);
+		auto n = Vec3f(0, -1, 0);
+		auto t = Vec2f(v.x * .5f + .5f, 1 - (v.z * .5f + .5f));
+		vertices.emplace_back(v, n, t);
+	}
+	for (int i = 1; i < segs - 1; ++i) triangles.emplace_back(v0, v0 + i + 1 , v0 + i);
+
+/*
 	// Cap
 	uint32_t v0 = vertices.size();
-	for (auto i = 0u; i < segs; ++i) {
-		float yaw = (i % segs) * twoPi / segs;
-		auto n = Vec3f(cosf(yaw), 0, sinf(yaw));
+	for (int i = 0; i < segs; ++i) {
+		float yaw = i % segs * twoPi / segs;
+		auto n = Vec3f(std::cos(yaw), 0, std::sin(yaw));
 		auto v = Vec3f(n.x * radius, bot, n.z * radius);
 		auto t = Vec2f(n.x * 0.5f + 0.5f, n.z * 0.5f + 0.5f);
 		vertices.emplace_back(v, n, t);
 	}
-	for (auto i = 1u; i < segs - 1; ++i) triangles.emplace_back(v0, v0 + i, v0 + i + 1);
+	for (int i = 1; i < segs - 1; ++i) triangles.emplace_back(v0, v0 + i + 1, v0 + i);
+ */
 
 	return createMesh(vertices, triangles, material);
 }
@@ -171,11 +184,11 @@ Mesh* createTorusMesh(float outerRadius, float innerRadius, uint32_t outerSegs, 
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;
 
-	for (auto outer = 0u; outer <= outerSegs; ++outer) {
+	for (int outer = 0; outer <= outerSegs; ++outer) {
 
 		auto sweep = Mat3f::yaw(outer * twoPi / outerSegs);
 
-		for (auto inner = 0u; inner <= innerSegs; ++inner) {
+		for (int inner = 0; inner <= innerSegs; ++inner) {
 
 			float r = inner * twoPi / innerSegs;
 			float c = std::cos(r), s = std::sin(r);
@@ -189,12 +202,12 @@ Mesh* createTorusMesh(float outerRadius, float innerRadius, uint32_t outerSegs, 
 	}
 
 	// Polygons
-	for (auto outer = 0u; outer < outerSegs; ++outer) {
+	for (int outer = 0; outer < outerSegs; ++outer) {
 		auto v0 = outer * (innerSegs + 1);
-		for (auto inner = 0u; inner < innerSegs; ++v0, ++inner) {
+		for (int inner = 0; inner < innerSegs; ++v0, ++inner) {
 			auto v2 = v0 + innerSegs + 2;
-			triangles.emplace_back(v0, v0 + 1, v2);
-			triangles.emplace_back(v0, v2, v2 - 1);
+			triangles.emplace_back(v0, v2, v0 + 1);
+			triangles.emplace_back(v0, v2-1, v2);
 		}
 	}
 

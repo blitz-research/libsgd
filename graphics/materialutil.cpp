@@ -1,30 +1,39 @@
 #include "materialutil.h"
 
-#include "mattematerial.h"
 #include "pbrmaterial.h"
-#include "spritematerial.h"
+#include "prelitmaterial.h"
 
 #include "textureutil.h"
 
 namespace sgd {
 
-Material* createPBRMaterial() {
-	return new Material(&pbrMaterialDescriptor);
+Material* createPBRMaterial(CVec4f albedoColor) {
+	auto material = new Material(&pbrMaterialDescriptor);
+	material->setVector4f("albedoColor4f", albedoColor);
+
+	return material;
 }
 
 Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
-	if (!path.isUrl() && !path.isDir()) return FileioEx("Material directory does not exist");
-
-	auto material = new Material(&pbrMaterialDescriptor);
-
-	auto prefix = path / path.stem();
+	if (!path.isUrl() && !path.exists()) return FileioEx("Material directory does not exist");
 
 	auto texFlags = TextureFlags::mipmap | TextureFlags::filter;
 
+	Set<String> exts{".png",".jpg",".jpeg",".bmp",".tga",".gif"};
+	if(exts.find(path.ext())!=exts.end()) {
+		auto texture = loadTexture(path, TextureFormat::srgba8, texFlags);
+		if(!texture) return texture.error();
+		auto material = new Material(&pbrMaterialDescriptor);
+		material->setTexture("albedoTexture", texture.result());
+		return material;
+	}
+
 	auto tryLoad = [=](CString suffix, TextureFormat format) -> Texture* {
-		auto texture = loadTexture(prefix + suffix, format, texFlags);
+		auto texture = loadTexture(path / path.stem() + suffix, format, texFlags);
 		return texture ? texture.result() : nullptr;
 	};
+
+	auto material = new Material(&pbrMaterialDescriptor);
 
 	if (auto texture = tryLoad("_Color.jpg", TextureFormat::srgba8)) {
 		material->setTexture("albedoTexture", texture);
@@ -51,29 +60,19 @@ Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
 	return material;
 }
 
-Material* createMatteMaterial() {
-	return new Material(&matteMaterialDescriptor);
-}
+Material* createPrelitMaterial(CVec4f albedoColor) {
+	auto material = new Material(&prelitMaterialDescriptor);
 
-Expected<Material*, FileioEx> loadMatteMaterial(CPath path) {
-	auto texture = loadTexture(path, TextureFormat::srgba8, TextureFlags::mipmap | TextureFlags::filter);
-	if (!texture) return texture.error();
-
-	auto material = createMatteMaterial();
-	material->setTexture("albedoTexture", texture.result());
+	material->setVector4f("albedoColor4f", albedoColor);
 
 	return material;
 }
 
-Material* createSpriteMaterial() {
-	return new Material(&spriteMaterialDescriptor);
-}
-
-Expected<Material*, FileioEx> loadSpriteMaterial(CPath path) {
+Expected<Material*, FileioEx> loadPrelitMaterial(CPath path) {
 	auto texture = loadTexture(path, TextureFormat::srgba8, TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clampU | TextureFlags::clampV);
 	if (!texture) return texture.error();
 
-	auto material = createSpriteMaterial();
+	auto material = createPrelitMaterial();
 	material->setTexture("albedoTexture", texture.result());
 
 	return material;

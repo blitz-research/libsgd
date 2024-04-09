@@ -32,8 +32,6 @@ bool initCache() {
 	if (done) return g_cacheOk;
 	done = true;
 
-	log() << "###  Initializing fetch cache" << g_cacheDir.filePath().u8string();
-
 	if (!g_cacheDir.isDir()) {
 		std::filesystem::create_directory(g_cacheDir.filePath());
 		SGD_ASSERT(g_cacheDir.isDir());
@@ -80,8 +78,6 @@ Path cacheFile(CString url) {
 
 	auto it = g_cacheFiles.find(key);
 	if (it == g_cacheFiles.end()) return {};
-
-	log() << "### Cache hit for:" << url;
 
 	return g_cacheDir / Path(it->second);
 }
@@ -130,7 +126,6 @@ String fetch(CString url, curl_write_callback writeFunc, void* writeData) {
 	if (startsWith(url, sgdPrefix)) {
 		static const String SGD_URL = "https://skirmish-dev.net/assets/";
 		turl = SGD_URL + url.substr(6);
-		log() << "### Remapped url:" << url << "to" << turl;
 	}
 
 	auto curl = openCurl();
@@ -147,7 +142,6 @@ String fetch(CString url, curl_write_callback writeFunc, void* writeData) {
 	long httpStatus = -1;
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
 	if (result != CURLcode::CURLE_OK) {
-		// if (httpStatus < 200 || httpStatus >= 300) log() << "### CURL HttpStatus:" << httpStatus;
 		log() << "### CURL HttpStatus:" << httpStatus;
 		log() << "### CURL code:" << curl_easy_strerror(result);
 		log() << "### CURL errors:" << error;

@@ -56,6 +56,7 @@ template <class T> Vec3<T> scale(CMat3<T> v);
 template <class T> Mat3<T> transpose(CMat3<T> m);
 template <class T> Mat3<T> cofactor(CMat3<T> m);
 template <class T> Mat3<T> inverse(CMat3<T> m);
+template <class T> Mat3<T> normalize(CMat3<T> m);
 
 } // namespace sgd
 

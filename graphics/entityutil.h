@@ -5,29 +5,46 @@
 namespace sgd {
 
 inline void setPosition(Entity* entity, CVec3f pos) {
-	entity->setWorldMatrix({entity->worldMatrix().r, pos});
+	entity->setWorldPosition(pos);
+}
+
+inline Vec3f position(const Entity* entity) {
+	return entity->worldPosition();
 }
 
 inline void setRotation(Entity* entity, CVec3f rot) {
-	entity->setWorldMatrix({Mat3f::rotation(rot * degreesToRadians), entity->worldMatrix().t});
+	auto basis = Mat3f::rotation(rot * degreesToRadians);
+	entity->setWorldBasis(basis);
+}
+
+inline Vec3f rotation( const Entity* entity) {
+	return rotation(entity->worldBasis());
+}
+
+inline void setScale(Entity* entity, CVec3f scl) {
+	entity->setWorldScale(scl);
 }
 
 inline void move(Entity* entity, CVec3f trans) {
-	entity->setWorldMatrix(entity->worldMatrix() * AffineMat4f::translation(trans));
+	entity->setWorldPosition(entity->worldPosition() + entity->worldMatrix().r * trans);
 }
 
 inline void turn(Entity* entity, CVec3f rot) {
-	entity->setWorldMatrix(entity->worldMatrix() * AffineMat4f::rotation(rot * degreesToRadians));
+	auto basis = Mat3f::rotation(rot * degreesToRadians);
+	entity->setWorldBasis(entity->worldBasis() * basis);
 }
 
 inline void translate(Entity* entity, CVec3f trans) {
-	auto m = AffineMat4f::translation(trans) * entity->worldMatrix();
-	entity->setWorldMatrix({entity->worldMatrix().r, m.t});
+	entity->setWorldPosition(trans + entity->worldPosition());
 }
 
 inline void rotate(Entity* entity, CVec3f rot) {
-	auto m = AffineMat4f::rotation(rot * degreesToRadians) * entity->worldMatrix();
-	entity->setWorldMatrix({m.r, entity->worldMatrix().t});
+	auto basis = Mat3f::rotation(rot * degreesToRadians);
+	entity->setWorldBasis(basis * entity->worldBasis());
+}
+
+inline void scale(Entity* entity, CVec3f scl) {
+	entity->setWorldScale(scl * entity->worldScale());
 }
 
 } // namespace sgd

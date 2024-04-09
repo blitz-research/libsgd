@@ -23,18 +23,18 @@ struct MaterialUniforms {
 @group(1) @binding(11) var material_normalTexture: texture_2d<f32>;
 @group(1) @binding(12) var material_normalSampler: sampler;
 
-fn evaluateMaterial(position: vec3f, normal: vec3f, texCoords: vec2f, color: vec4f) -> MaterialResult {
+fn evaluateMaterial(position: vec3f, tanMatrix: mat3x3f, texCoords: vec2f, color: vec4f) -> vec4f {
 
-    var result: MaterialResult;
-    
-	result.albedo = textureSample(material_albedoTexture, material_albedoSampler, texCoords) * material_uniforms.albedoColor * color;
-	result.emissive = textureSample(material_emissiveTexture, material_emissiveSampler, texCoords).rgb * material_uniforms.emissiveColor;
-	result.metallic = textureSample(material_metallicTexture, material_metallicSampler, texCoords).b * material_uniforms.metallicFactor;
-	result.roughness = textureSample(material_roughnessTexture, material_roughnessSampler, texCoords).g * material_uniforms.roughnessFactor;
-	result.occlusion = textureSample(material_occlusionTexture, material_occlusionSampler, texCoords).r;
-   	result.normal = textureSample(material_normalTexture, material_normalSampler, texCoords).rgb * 2.0 - 1.0;
+	let albedo = textureSample(material_albedoTexture, material_albedoSampler, texCoords) * material_uniforms.albedoColor * color;
+	let emissive = textureSample(material_emissiveTexture, material_emissiveSampler, texCoords).rgb * material_uniforms.emissiveColor;
+	let metallic = textureSample(material_metallicTexture, material_metallicSampler, texCoords).b * material_uniforms.metallicFactor;
+	let roughness = textureSample(material_roughnessTexture, material_roughnessSampler, texCoords).g * material_uniforms.roughnessFactor;
+	let occlusion = textureSample(material_occlusionTexture, material_occlusionSampler, texCoords).r;
+   	let normal = textureSample(material_normalTexture, material_normalSampler, texCoords).rgb * 2 - 1;
 
-	return result;
+   	let litColor = evaluateLighting(position, normalize(tanMatrix * normal), albedo.rgb, metallic, roughness, occlusion);
+
+   	return vec4f(litColor + emissive, albedo.a);
 }
 
 )"

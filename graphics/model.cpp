@@ -94,8 +94,9 @@ void Model::animate(uint32_t index, float time, AnimationMode mode) {
 		auto rot = seq->evaluateRotation(time, Quatf::rotation(bone->localMatrix().r));
 		auto scl = seq->evaluateScale(time, scale(bone->localMatrix().r));
 
-		auto matrix = AffineMat4f::translation(pos) * AffineMat4f{Mat3f::rotation(rot), {}} * AffineMat4f::scale(scl);
-		bone->setLocalMatrix(matrix);
+		bone->setLocalPosition(pos);
+		bone->setLocalBasis(Mat3f::rotation(rot));
+		bone->setLocalScale(scl);
 	}
 
 	for (int i = 0; i < m_joints.size(); ++i) {

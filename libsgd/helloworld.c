@@ -6,6 +6,8 @@
 #include <sgd/sgd.h>
 
 int main() {
+
+	sgd_Startup();
     
     sgd_CreateWindow(640, 480, "Hello World!", 0);
     sgd_CreateScene();
@@ -15,4 +17,6 @@ int main() {
         sgd_RenderScene();
         sgd_Present();
     }
+
+	sgd_Shutdown();
 }

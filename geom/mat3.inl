@@ -1,4 +1,4 @@
-//#include "mat3.h"
+// #include "mat3.h"
 #include "quat.h"
 
 namespace sgd {
@@ -131,6 +131,10 @@ template <class T> Mat3<T> inverse(CMat3<T> m) {
 	T s = T(1) / (m.i.x * r.i.x + m.i.y * r.j.x + m.i.z * r.k.x);
 
 	return {r.i * s, r.j * s, r.k * s};
+}
+
+template <class T> Mat3<T> normalize(CMat3<T> m) {
+	return {normalize(m.i), normalize(m.j), normalize(m.k)};
 }
 
 } // namespace sgd

@@ -47,9 +47,9 @@ void ModelRenderer::onUpdate(CVec3f eye) {
 	}
 }
 
-void ModelRenderer::onRender(GraphicsContext* gc) const {
+void ModelRenderer::render(RenderContext* rc) const {
 	for(auto& kv : m_instanceLists) {
-		if(kv.first) kv.second->meshRenderer->render(gc);
+		if(kv.first) kv.second->meshRenderer->render(rc);
 	}
 }
 

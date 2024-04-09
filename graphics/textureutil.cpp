@@ -20,7 +20,6 @@ const Texture* rgbaTexture(uint32_t rgba) {
 }
 
 Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags) {
-
 	if (format != TextureFormat::rgba8 && format != TextureFormat::srgba8) SGD_ABORT();
 
 	auto bpp = bytesPerTexel(format);
@@ -91,6 +90,7 @@ Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, Textu
 }
 
 void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pitch) {
+	if(format!=TextureFormat::rgba8 && format!=TextureFormat::srgba8) return;
 
 	auto bpp = bytesPerTexel(format);
 

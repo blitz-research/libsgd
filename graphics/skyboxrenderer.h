@@ -21,11 +21,10 @@ private:
 	BindGroupPtr m_bindGroup;
 	BufferPtr m_uniformBuffer;
 
-	mutable wgpu::RenderPipeline m_pipeline;
+	mutable bool m_rebuildRenderOps{true};
+	mutable bool m_updateUniforms{true};
 
 	void onValidate(GraphicsContext* gc) const override;
-
-	void onRender(GraphicsContext* gc) const override;
 };
 
 }

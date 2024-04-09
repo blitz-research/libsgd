@@ -28,10 +28,11 @@ struct Light : Entity {
 	}
 
 	Property<Vec4f> color{Vec4f(1)};
-	Property<float> range{25};
+	Property<float> range{10};
 	Property<float> falloff{1};
 	Property<float> innerConeAngle{0};
 	Property<float> outerConeAngle{45};
+	Property<bool> castsShadow{false};
 
 private:
 	LightType m_type{LightType::directional};

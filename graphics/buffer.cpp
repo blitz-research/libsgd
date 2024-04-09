@@ -73,7 +73,6 @@ void Buffer::onValidate(GraphicsContext* gc) const {
 	} else if (m_dirtyEnd > m_dirtyBegin) {
 
 		SGD_ASSERT(m_dirtyBegin < m_size && m_dirtyEnd <= m_size);
-//		log() << "### Updating buffer bytes" << m_dirtyEnd - m_dirtyBegin;
 		gc->wgpuDevice().GetQueue().WriteBuffer(m_wgpuBuffer, m_dirtyBegin, m_data + m_dirtyBegin, m_dirtyEnd - m_dirtyBegin);
 	}
 

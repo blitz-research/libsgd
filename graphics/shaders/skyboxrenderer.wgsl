@@ -1,7 +1,8 @@
 R"(
 
 struct SkyboxUniforms {
-    mipmapBias:f32
+    worldMatrix: mat4x4f,
+    mipmapBias: f32
 }
 
 @group(2) @binding(0) var<uniform> skybox_uniforms: SkyboxUniforms;
@@ -31,9 +32,9 @@ struct Varying {
 
     let tv = camera_uniforms.inverseProjectionMatrix * vec4f(in.clipCoords, 0, 1);
 
-    var cubeVec = camera_uniforms.worldMatrix * vec4f(tv.xyz / tv.w, 0);
+    let wv = camera_uniforms.worldMatrix * skybox_uniforms.worldMatrix * vec4f(tv.xyz / tv.w, 0);
 
-    return textureSampleBias(skybox_skyboxTexture, skybox_skyboxSampler, cubeVec.xyz, skybox_uniforms.mipmapBias);
+    return textureSampleBias(skybox_skyboxTexture, skybox_skyboxSampler, wv.xyz, skybox_uniforms.mipmapBias);
 }
 
 )"

@@ -46,8 +46,8 @@ BindGroup::BindGroup(const BindGroupDescriptor* desc) : m_desc(desc), m_resource
 void BindGroup::setResource(uint32_t index, CGraphicsResource* resource) {
 	if (m_resources[index] == resource) return;
 
-	updateDependency(m_resources[index], resource);
-	m_resources[index] = resource;
+	removeDependency(m_resources[index]);
+	addDependency(m_resources[index] = resource);
 
 	invalidate(true);
 }
@@ -114,12 +114,12 @@ BindGroup* emptyBindGroup(uint32_t index) {
 
 	static BindGroupPtr bindGroups[3];
 
-	if(bindGroups[index]) return bindGroups[index];
+	if (bindGroups[index]) return bindGroups[index];
 
-	static const BindGroupDescriptor descs[]{ //
-		{0, {}, {}, {}}, //
-		{1, {}, {}, {}}, //
-		{2, {}, {}, {}}};
+	static const BindGroupDescriptor descs[]{				  //
+											 {0, {}, {}, {}}, //
+											 {1, {}, {}, {}}, //
+											 {2, {}, {}, {}}};
 
 	return bindGroups[index] = new BindGroup(&descs[index]);
 }
