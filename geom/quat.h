@@ -7,6 +7,9 @@ namespace sgd {
 using Quatf = Quat<float>;
 using CQuatf = CQuat<float>;
 
+using Quatr = Quat<real>;
+using CQuatr = CQuat<real>;
+
 template <class T> struct Quat {
 
 	Vec3<T> v{};

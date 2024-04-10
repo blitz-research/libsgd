@@ -5,7 +5,7 @@ namespace sgd {
 template <class T> constexpr Vec4<T>::Vec4(T s) : x(s), y(s), z(s), w(s) {
 }
 
-template <class T> template <class C> constexpr Vec4<T>::Vec4(const Vec4<C>& v) : x(v.x), y(v.y), z(v.z), w(v.w) {
+template <class T> template <class C> constexpr Vec4<T>::Vec4(const Vec4<C>& v) : x(T(v.x)), y(T(v.y)), z(T(v.z)), w(T(v.w)) {
 }
 
 template <class T> constexpr Vec4<T>::Vec4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {

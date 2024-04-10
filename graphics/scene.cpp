@@ -57,6 +57,7 @@ void Scene::add(Entity* entity) { // NOLINT (recursive)
 	SGD_ASSERT(!entity->parent() || entity->parent()->scene() == this);
 
 	m_entities.emplace_back(entity);
+
 	if (entity->is<Camera>()) {
 		m_cameras.emplace_back(entity->as<Camera>());
 	} else if (entity->is<Light>()) {
@@ -76,8 +77,7 @@ void Scene::remove(Entity* entity) { // NOLINT (recursive)
 	SGD_ASSERT(!entity->parent() || entity->parent()->scene() == this);
 
 	while (!entity->children().empty()) {
-		auto child = entity->children().back();
-		remove(child);
+		remove(entity->children().back());
 	}
 
 	entity->setParent(nullptr);
@@ -86,13 +86,14 @@ void Scene::remove(Entity* entity) { // NOLINT (recursive)
 	entity->onDestroy();
 	entity->m_scene = nullptr;
 
-	if (!sgd::rremove(m_entities, entity)) SGD_PANIC("Failed to remove entity from scene");
-
 	if (entity->is<Camera>()) {
 		sgd::remove(m_cameras, entity->as<Camera>());
 	} else if (entity->is<Light>()) {
 		sgd::remove(m_lights, entity->as<Light>());
 	}
+
+	// Careful, this could delete entity
+	if (!sgd::rremove(m_entities, entity)) SGD_PANIC("Failed to remove entity from scene");
 }
 
 void Scene::setRenderer(RendererType type, Renderer* renderer) {
@@ -162,7 +163,7 @@ void Scene::updateLightingBindings() {
 	}
 
 	// sort point lights
-	auto eye = Vec3f(m_sceneBindings->cameraUniforms().worldMatrix.t);
+	auto eye = Vec3r(Vec3f(m_sceneBindings->cameraUniforms().worldMatrix.t));
 	auto cmp = [=](const Light* lhs, const Light* rhs) {
 		return length(rhs->worldMatrix().t - eye) > length(lhs->worldMatrix().t - eye);
 	};

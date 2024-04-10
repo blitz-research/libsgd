@@ -13,7 +13,7 @@ struct SkyboxRenderer : Renderer {
 
 	Property<TexturePtr> skyTexture;
 
-	Property<AffineMat4f> worldMatrix;
+	Property<AffineMat4r> worldMatrix;
 
 	Property<float> roughness;
 

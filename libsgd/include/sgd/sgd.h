@@ -3,6 +3,8 @@
 
 #include "keycodes.h"
 
+#include <stdint.h>
+
 //! @file
 
 //! @mainpage
@@ -64,6 +66,12 @@ typedef SGD_Handle SGD_Light;
 typedef SGD_Handle SGD_Model;
 typedef SGD_Handle SGD_Sprite;
 typedef SGD_Handle SGD_Skybox;
+
+#if UINTPTR_MAX == 0xffffffffffffffff
+typedef double SGD_Real;
+#else
+typedef float SGD_Real;
+#endif
 
 //! @}
 
@@ -440,46 +448,55 @@ SGD_API void SGD_DECL sgd_SetEntityParent(SGD_Entity entity, SGD_Entity parent);
 SGD_API SGD_Entity SGD_DECL sgd_EntityParent(SGD_Entity entity);
 
 //! Set entity position in world space.
-SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity entity, float tx, float ty, float tz);
+SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity entity, SGD_Real tx, SGD_Real ty, SGD_Real tz);
 
 //! Set entity rotation in world space.
-SGD_API void SGD_DECL sgd_SetEntityRotation(SGD_Entity entity, float rx, float ry, float rz);
+SGD_API void SGD_DECL sgd_SetEntityRotation(SGD_Entity entity, SGD_Real rx, SGD_Real ry, SGD_Real rz);
 
 //! Set entity scale in world space.
-SGD_API void SGD_DECL sgd_SetEntityScale(SGD_Entity entity, float sx, float sy, float sz);
+SGD_API void SGD_DECL sgd_SetEntityScale(SGD_Entity entity, SGD_Real sx, SGD_Real sy, SGD_Real sz);
 
 //! Translate entity in world space.
-SGD_API void SGD_DECL sgd_TranslateEntity(SGD_Entity entity, float tx, float ty, float tz);
+SGD_API void SGD_DECL sgd_TranslateEntity(SGD_Entity entity, SGD_Real tx, SGD_Real ty, SGD_Real tz);
 
 //! Rotate entity in world space.
-SGD_API void SGD_DECL sgd_RotateEntity(SGD_Entity entity, float rx, float ry, float rz);
+SGD_API void SGD_DECL sgd_RotateEntity(SGD_Entity entity, SGD_Real rx, SGD_Real ry, SGD_Real rz);
 
 //! Scale entity in world space.
-SGD_API void SGD_DECL sgd_ScaleEntity(SGD_Entity entity, float sx, float sy, float sz);
+SGD_API void SGD_DECL sgd_ScaleEntity(SGD_Entity entity, SGD_Real sx, SGD_Real sy, SGD_Real sz);
 
 //! Move an entity relative to it's current orientation.
-SGD_API void SGD_DECL sgd_MoveEntity(SGD_Entity entity, float tx, float ty, float tz);
+SGD_API void SGD_DECL sgd_MoveEntity(SGD_Entity entity, SGD_Real tx, SGD_Real ty, SGD_Real tz);
 
 //! Turn an entity relative to it's current orientation.
-SGD_API void SGD_DECL sgd_TurnEntity(SGD_Entity entity, float rx, float ry, float rz);
+SGD_API void SGD_DECL sgd_TurnEntity(SGD_Entity entity, SGD_Real rx, SGD_Real ry, SGD_Real rz);
 
 //! Get the X component of an entity's position in world space.
-SGD_API float SGD_DECL sgd_EntityX(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_EntityX(SGD_Entity entity);
 
 //! Get the Y component of an entity's position in world space.
-SGD_API float SGD_DECL sgd_EntityY(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_EntityY(SGD_Entity entity);
 
 //! Get the Z component of an entity's position in world space.
-SGD_API float SGD_DECL sgd_EntityZ(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_EntityZ(SGD_Entity entity);
 
 //! Get the X rotation component (ie: 'pitch') of an entity's orientation in world space.
-SGD_API float SGD_DECL sgd_EntityRX(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_EntityRX(SGD_Entity entity);
 
 //! Get the Y rotation component (ie: 'yaw') of an entity's orientation in world space.
-SGD_API float SGD_DECL sgd_EntityRY(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_EntityRY(SGD_Entity entity);
 
 //! Get the Z rotation component (ie: 'roll') of an entity's orientation in world space.
-SGD_API float SGD_DECL sgd_EntityRZ(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_EntityRZ(SGD_Entity entity);
+
+//! Get the X rotation component (ie: 'pitch') of an entity's orientation in world space.
+SGD_API SGD_Real SGD_DECL sgd_EntitySX(SGD_Entity entity);
+
+//! Get the Y rotation component (ie: 'yaw') of an entity's orientation in world space.
+SGD_API SGD_Real SGD_DECL sgd_EntitySY(SGD_Entity entity);
+
+//! Get the Z rotation component (ie: 'roll') of an entity's orientation in world space.
+SGD_API SGD_Real SGD_DECL sgd_EntitySZ(SGD_Entity entity);
 
 //! @}
 
@@ -558,6 +575,9 @@ SGD_API SGD_Model SGD_DECL sgd_CreateModel();
 
 //! Set model mesh.
 SGD_API void SGD_DECL sgd_SetModelMesh(SGD_Model model, SGD_Mesh mesh);
+
+//! Get model mesh.
+SGD_API SGD_Mesh SGD_DECL sgd_ModelMesh(SGD_Model model);
 
 //! Set model color.
 SGD_API void SGD_DECL sgd_SetModelColor(SGD_Model model, float red, float green, float blue, float alpha);

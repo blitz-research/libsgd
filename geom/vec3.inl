@@ -7,7 +7,7 @@ namespace sgd {
 template <class T> constexpr Vec3<T>::Vec3(T s) : x(s), y(s), z(s) {
 }
 
-template <class T> template <class C> constexpr Vec3<T>::Vec3(const Vec3<C>& v) : x(T(v.x)), y(T(v.y)), z(T(v.z)) {
+template <class T> template <class C> constexpr Vec3<T>::Vec3(CVec3<C>& v) : x(T(v.x)), y(T(v.y)), z(T(v.z)) {
 }
 
 template <class T> constexpr Vec3<T>::Vec3(CVec2<T> v, float z) : x(v.x), y(v.y), z(z) {
@@ -157,7 +157,7 @@ template <class T> Vec3<T> cross(CVec3<T> p, CVec3<T> q) {
 }
 
 template <class T> Vec3<T> normalize(CVec3<T> v) {
-	float d = length(v);
+	T d = length(v);
 	return d ? v / d : v;
 }
 

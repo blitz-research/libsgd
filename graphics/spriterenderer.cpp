@@ -36,7 +36,7 @@ void SpriteRenderer::remove(Sprite* sprite) {
 	sgd::remove(m_instances, sprite);
 }
 
-void SpriteRenderer::onUpdate(CVec3f eye) {
+void SpriteRenderer::onUpdate(CVec3r eye) {
 
 	// Sort sprites
 	auto cmp = [=](const Sprite* lhs, const Sprite* rhs) {

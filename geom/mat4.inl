@@ -9,7 +9,10 @@ namespace sgd {
 template <class T> constexpr Mat4<T>::Mat4(T s) : i(s, 0, 0, 0), j(0, s, 0, 0), k(0, 0, s, 0), t(0, 0, 0, s) {
 }
 
-template <class T> constexpr Mat4<T>::Mat4(CAffineMat4<T> m) : i(m.r.i, 0), j(m.r.j, 0), k(m.r.k, 0), t(m.t, 1) {
+template <class T> template<class C> constexpr Mat4<T>::Mat4(CMat4<C> m) : i(m.i), j(m.j), k(m.k), t(m.t) {
+}
+
+template <class T> template<class C> constexpr Mat4<T>::Mat4(CAffineMat4<C> m) : i(m.r.i, 0), j(m.r.j, 0), k(m.r.k, 0), t(m.t, 1) {
 }
 
 template <class T> constexpr Mat4<T>::Mat4(CVec4<T> i, CVec4<T> j, CVec4<T> k, CVec4<T> t) : i(i), j(j), k(k), t(t) {

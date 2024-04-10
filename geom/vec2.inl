@@ -128,7 +128,7 @@ template <class T> T dot(CVec2<T> p, CVec2<T> q) {
 }
 
 template <class T> Vec2<T> normalize(CVec2<T> v) {
-	float d = length(v);
+	T d = length(v);
 	return d ? v / d : v;
 }
 

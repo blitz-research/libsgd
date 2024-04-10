@@ -7,6 +7,9 @@ namespace sgd {
 template <class T> constexpr AffineMat4<T>::AffineMat4(CMat3<T> r, CVec3<T> t) : r(r), t(t) {
 }
 
+template <class T> template <class C> constexpr AffineMat4<T>::AffineMat4(CAffineMat4<C>& m) : r(m.r), t(m.t) {
+}
+
 template <class T> AffineMat4<T> AffineMat4<T>::translation(CVec3<T> t) {
 	return {{}, t};
 }

@@ -25,7 +25,7 @@ private:
 	BufferPtr m_instanceBuffer;
 	uint32_t m_instanceCapacity{};
 
-	void onUpdate(CVec3f eye) override;
+	void onUpdate(CVec3r eye) override;
 
 	void onValidate(GraphicsContext* gc) const override;
 };

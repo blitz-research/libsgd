@@ -33,7 +33,7 @@ void SkinnedModelRenderer::remove(CModel* model) {
 	model->mesh.changed.disconnect(this);
 }
 
-void SkinnedModelRenderer::onUpdate(CVec3f eye) {
+void SkinnedModelRenderer::onUpdate(CVec3r eye) {
 	for(auto& kv : m_instanceLists) {
 		CMesh* mesh = kv.first;
 		if(!mesh) continue;

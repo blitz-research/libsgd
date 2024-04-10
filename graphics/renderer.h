@@ -15,7 +15,7 @@ struct Renderer : GraphicsResource {
 
 	Property<bool> enabled{true};
 
-	virtual void onUpdate(CVec3f eye) {
+	virtual void onUpdate(CVec3r eye) {
 	}
 
 	virtual void render(RenderContext* rc) const {

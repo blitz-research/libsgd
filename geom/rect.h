@@ -12,6 +12,9 @@ template <class T> using CRect = const Rect<T>&;
 using Rectf = Rect<float>;
 using CRectf = CRect<float>;
 
+using Rectr = Rect<real>;
+using CRectr = CRect<real>;
+
 using Recti = Rect<int32_t>;
 using CRecti = CRect<int32_t>;
 

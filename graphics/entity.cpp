@@ -21,13 +21,13 @@ void Entity::invalidateLocalMatrix() const { // NOLINT (recursive)
 	invalidateWorldMatrix();
 }
 
-void Entity::setWorldMatrix(CAffineMat4f matrix) {
+void Entity::setWorldMatrix(CAffineMat4r matrix) {
 	setWorldPosition(matrix.t);
 	setWorldBasis(normalize(matrix.r));
 	setWorldScale(scale(matrix.r));
 }
 
-AffineMat4f Entity::worldMatrix() const { // NOLINT (recursive)
+AffineMat4r Entity::worldMatrix() const { // NOLINT (recursive)
 	if (bool(m_dirty & Dirty::worldMatrix)) {
 		m_worldMatrix = m_parent ? m_parent->worldMatrix() * localMatrix() : localMatrix();
 		m_dirty &= ~Dirty::worldMatrix;
@@ -35,15 +35,15 @@ AffineMat4f Entity::worldMatrix() const { // NOLINT (recursive)
 	return m_worldMatrix;
 }
 
-void Entity::setLocalMatrix(CAffineMat4f matrix) {
+void Entity::setLocalMatrix(CAffineMat4r matrix) {
 	setLocalPosition(matrix.t);
 	setLocalBasis(normalize(matrix.r));
 	setLocalScale(scale(matrix.r));
 }
 
-AffineMat4f Entity::localMatrix() const { // NOLINT (recursive)
+AffineMat4r Entity::localMatrix() const { // NOLINT (recursive)
 	if (bool(m_dirty & Dirty::localMatrix)) {
-		m_localMatrix.r = m_localBasis * Mat3f::scale(m_localScale);
+		m_localMatrix.r = m_localBasis * Mat3r::scale(m_localScale);
 		m_dirty &= ~Dirty::localMatrix;
 	}
 	return m_localMatrix;

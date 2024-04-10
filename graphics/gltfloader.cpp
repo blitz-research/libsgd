@@ -520,9 +520,9 @@ Expected<Mesh*, FileioEx> GLTFLoader::loadStaticMesh() {
 		const auto& worldMatrix = bones[i] ? bones[i]->worldMatrix() : AffineMat4f{};
 		auto cof = cofactor(worldMatrix.r);
 		for (auto vp = meshVertices.begin() + firstVertex; vp != meshVertices.end(); ++vp) {
-			vp->position = worldMatrix * vp->position;
-			vp->normal = normalize(cof * vp->normal);
-			vp->tangent = Vec4f(normalize(cof * Vec3f(vp->tangent)), vp->tangent.w);
+			vp->position = worldMatrix * Vec3r(vp->position);
+			vp->normal = normalize(cof * Vec3r(vp->normal));
+			vp->tangent = Vec4f(normalize(cof * Vec3r(Vec3f(vp->tangent))), vp->tangent.w);
 		}
 	}
 	return endMesh();

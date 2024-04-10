@@ -100,7 +100,7 @@ void Model::animate(uint32_t index, float time, AnimationMode mode) {
 	}
 
 	for (int i = 0; i < m_joints.size(); ++i) {
-		m_jointMatrices[i] = m_bones[m_joints[i].bone]->worldMatrix() * m_joints[i].inverseBindMatrix;
+		m_jointMatrices[i] = m_bones[m_joints[i].bone]->worldMatrix() * AffineMat4r(m_joints[i].inverseBindMatrix);
 	}
 }
 

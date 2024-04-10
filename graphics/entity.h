@@ -13,64 +13,64 @@ struct Entity : Shared {
 
 	Entity() = default;
 
-	void setWorldPosition(CVec3f position) { // NOLINT (recursive)
+	void setWorldPosition(CVec3r position) { // NOLINT (recursive)
 		setLocalPosition(m_parent ? inverse(m_parent->worldMatrix()) * position : position);
 	}
 
-	void setWorldBasis(CMat3f basis) { // NOLINT (recursive)
+	void setWorldBasis(CMat3r basis) { // NOLINT (recursive)
 		setLocalBasis(m_parent ? transpose(m_parent->worldBasis()) * basis : basis);
 	}
 
-	void setWorldScale(CVec3f scale) { // NOLINT (recursive)
-		setLocalScale(m_parent ? (1.0f / m_parent->worldScale()) * scale : scale);
+	void setWorldScale(CVec3r scale) { // NOLINT (recursive)
+		setLocalScale(m_parent ? (real(1) / m_parent->worldScale()) * scale : scale);
 	}
 
-	Vec3f worldPosition() const { // NOLINT (recursive)
+	Vec3r worldPosition() const { // NOLINT (recursive)
 		return m_parent ? m_parent->worldMatrix() * m_localMatrix.t : m_localMatrix.t;
 	}
 
-	Mat3f worldBasis() const { // NOLINT (recursive)
+	Mat3r worldBasis() const { // NOLINT (recursive)
 		return m_parent ? m_parent->worldBasis() * m_localBasis : m_localBasis;
 	}
 
-	Vec3f worldScale() const { // NOLINT (recursive)
+	Vec3r worldScale() const { // NOLINT (recursive)
 		return m_parent ? m_parent->worldScale() * m_localScale : m_localScale;
 	}
 
-	void setLocalPosition(CVec3f position) {
+	void setLocalPosition(CVec3r position) {
 		m_localMatrix.t = position;
 		invalidateWorldMatrix();
 	}
 
-	void setLocalBasis(CMat3f basis) {
+	void setLocalBasis(CMat3r basis) {
 		m_localBasis = basis;
 		invalidateLocalMatrix();
 	}
 
-	void setLocalScale(CVec3f scale) {
+	void setLocalScale(CVec3r scale) {
 		m_localScale = scale;
 		invalidateLocalMatrix();
 	}
 
-	Vec3f localPosition() const {
+	Vec3r localPosition() const {
 		return m_localMatrix.t;
 	}
 
-	Mat3f localBasis() const {
+	Mat3r localBasis() const {
 		return m_localBasis;
 	}
 
-	Vec3f localScale() const {
+	Vec3r localScale() const {
 		return m_localScale;
 	}
 
-	void setWorldMatrix(CAffineMat4f matrix);
+	void setWorldMatrix(CAffineMat4r matrix);
 
-	AffineMat4f worldMatrix() const;
+	AffineMat4r worldMatrix() const;
 
-	void setLocalMatrix(CAffineMat4f matrix);
+	void setLocalMatrix(CAffineMat4r matrix);
 
-	AffineMat4f localMatrix() const;
+	AffineMat4r localMatrix() const;
 
 	void setParent(Entity* parent);
 
@@ -119,10 +119,10 @@ private:
 
 	enum struct Dirty { none = 0, localMatrix = 1, worldMatrix = 2 };
 
-	mutable AffineMat4f m_worldMatrix;
-	mutable AffineMat4f m_localMatrix;
-	mutable Mat3f m_localBasis;
-	mutable Vec3f m_localScale{1};
+	mutable AffineMat4r m_worldMatrix;
+	mutable AffineMat4r m_localMatrix;
+	mutable Mat3r m_localBasis;
+	mutable Vec3r m_localScale{1};
 	mutable Dirty m_dirty{Dirty::none};
 
 	Entity* m_parent{};

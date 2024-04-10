@@ -2,6 +2,8 @@
 
 void entry() {
 
+start:
+
 	sgd_SetSceneAmbientLightColor(0, 0, 0, 1);
 
 	//	SGD_Camera camera = sgd_CreatePerspectiveCamera();
@@ -11,10 +13,10 @@ void entry() {
 //	sgd_MoveEntity(light0,0,5,0);
 	sgd_SetLightRange(light0, 50);
 
-	//SGD_Material material = sgd_LoadPBRMaterial("sgd://misc/test-texture.png");
-	//sgd_SetMaterialFloat(material, "roughnessFactor1f", .5f);
+	SGD_Material material = sgd_LoadPBRMaterial("sgd://misc/test-texture.png");
+	sgd_SetMaterialFloat(material, "roughnessFactor1f", .5f);
 
-	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/Fabric050_1K-JPG");
+	//SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/Fabric050_1K-JPG");
 
 	float r = .5f, z=3.5f;
 
@@ -46,6 +48,16 @@ void entry() {
 
 	for (;;) {
 		if (sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) break;
+
+		if(sgd_KeyHit(SGD_KEY_ESCAPE)) {
+			sgd_DestroyEntity(model0);
+			sgd_DestroyEntity(model1);
+			sgd_DestroyEntity(model2);
+			sgd_DestroyEntity(model3);
+			sgd_DestroyEntity(model4);
+			reset();
+			goto start;
+		}
 
 		sgd_TurnEntity(model0, .3, .7, 0);
 		sgd_TurnEntity(model1, .3, .7, 0);

@@ -109,88 +109,106 @@ SGD_Entity SGD_DECL sgd_EntityParent(SGD_Entity hentity) {
 	return parent ? sgdx::getOrCreateHandle(parent) : 0;
 }
 
-void SGD_DECL sgd_SetEntityPosition(SGD_Entity hentity, float tx, float ty, float tz) {
+void SGD_DECL sgd_SetEntityPosition(SGD_Entity hentity, SGD_Real tx, SGD_Real ty, SGD_Real tz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	setPosition(entity, {tx, ty, tz});
 }
 
-void SGD_DECL sgd_SetEntityRotation(SGD_Entity hentity, float rx, float ry, float rz) {
+void SGD_DECL sgd_SetEntityRotation(SGD_Entity hentity, SGD_Real rx, SGD_Real ry, SGD_Real rz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	setRotation(entity, {rx, ry, rz});
 }
 
-void SGD_DECL sgd_SetEntityScale(SGD_Entity hentity, float sx, float sy, float sz) {
+void SGD_DECL sgd_SetEntityScale(SGD_Entity hentity, SGD_Real sx, SGD_Real sy, SGD_Real sz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	setScale(entity, {sx, sy, sz});
 }
 
-void SGD_DECL sgd_MoveEntity(SGD_Entity hentity, float tx, float ty, float tz) {
+void SGD_DECL sgd_MoveEntity(SGD_Entity hentity, SGD_Real tx, SGD_Real ty, SGD_Real tz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	move(entity, {tx, ty, tz});
 }
 
-void SGD_DECL sgd_TurnEntity(SGD_Entity hentity, float rx, float ry, float rz) {
+void SGD_DECL sgd_TurnEntity(SGD_Entity hentity, SGD_Real rx, SGD_Real ry, SGD_Real rz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	turn(entity, {rx, ry, rz});
 }
 
-void SGD_DECL sgd_TranslateEntity(SGD_Entity hentity, float tx, float ty, float tz) {
+void SGD_DECL sgd_TranslateEntity(SGD_Entity hentity, SGD_Real tx, SGD_Real ty, SGD_Real tz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	translate(entity, {tx, ty, tz});
 }
 
-void SGD_DECL sgd_RotateEntity(SGD_Entity hentity, float rx, float ry, float rz) {
+void SGD_DECL sgd_RotateEntity(SGD_Entity hentity, SGD_Real rx, SGD_Real ry, SGD_Real rz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	rotate(entity, {rx, ry, rz});
 }
 
-void SGD_DECL sgd_ScaleEntity(SGD_Entity hentity, float sx, float sy, float sz) {
+void SGD_DECL sgd_ScaleEntity(SGD_Entity hentity, SGD_Real sx, SGD_Real sy, SGD_Real sz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	scale(entity, {sx, sy, sz});
 }
 
-float SGD_DECL sgd_EntityX(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_EntityX(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	return entity->worldMatrix().t.x;
 }
 
-float SGD_DECL sgd_EntityY(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_EntityY(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	return entity->worldMatrix().t.y;
 }
 
-float SGD_DECL sgd_EntityZ(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_EntityZ(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	return entity->worldMatrix().t.z;
 }
 
-float SGD_DECL sgd_EntityRX(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_EntityRX(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	return sgdx::pitch(entity->worldMatrix().r) * sgdx::radiansToDegrees;
 }
 
-float SGD_DECL sgd_EntityRY(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_EntityRY(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	return sgdx::yaw(entity->worldMatrix().r) * sgdx::radiansToDegrees;
 }
 
-float SGD_DECL sgd_EntityRZ(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_EntityRZ(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
 	return sgdx::roll(entity->worldMatrix().r) * sgdx::radiansToDegrees;
+}
+
+SGD_Real SGD_DECL sgd_EntitySX(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+
+	return entity->worldScale().x;
+}
+
+SGD_Real SGD_DECL sgd_EntitySY(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+
+	return entity->worldScale().y;
+}
+
+SGD_Real SGD_DECL sgd_EntitySZ(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+
+	return entity->worldScale().z;
 }
 
 // ***** Camera *****
@@ -352,6 +370,14 @@ void SGD_DECL sgd_SetModelMesh(SGD_Model hmodel, SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
 
 	model->mesh = mesh;
+}
+
+SGD_Mesh SGD_DECL sgd_ModelMesh(SGD_Model hmodel) {
+	auto model = sgdx::resolveHandle<sgdx::Model>(hmodel);
+
+	auto mesh = model->mesh().get();
+
+	return sgdx::getOrCreateHandle(mesh);
 }
 
 void SGD_DECL sgd_SetModelColor(SGD_Model hmodel, float red, float green, float blue, float alpha) {

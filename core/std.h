@@ -48,6 +48,12 @@
 //! Namespace sgd
 namespace sgd {
 
+#if SGD_ARCH_64_BIT
+using real = double;
+#else
+using real = float;
+#endif
+
 using Any = std::any;
 using CAny = const Any&;
 

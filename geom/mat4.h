@@ -12,6 +12,9 @@ template <class T> using CMat4 = const Mat4<T>&;
 using Mat4f = Mat4<float>;
 using CMat4f = CMat4<float>;
 
+using Mat4r = Mat4<real>;
+using CMat4r = CMat4<real>;
+
 template <class T> struct Mat4 {
 
 	Vec4<T> i{1, 0, 0, 0};
@@ -21,7 +24,9 @@ template <class T> struct Mat4 {
 
 	constexpr Mat4() = default;
 	constexpr explicit Mat4(T s);
-	constexpr explicit Mat4(CAffineMat4<T> m);
+	template <class C> constexpr Mat4(CMat4<C> m);		 // NOLINT (non-explicit ctor)
+	template <class C> constexpr Mat4(CAffineMat4<C> m); // NOLINT (non-explicit ctor)
+
 	constexpr Mat4(CVec4<T> i, CVec4<T> j, CVec4<T> k, CVec4<T> t);
 
 	static Mat4 ortho(T left, T right, T bottom, T top, T near, T far);

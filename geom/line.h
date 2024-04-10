@@ -10,6 +10,9 @@ template <class T> using CLine = const Line<T>&;
 using Linef = Line<float>;
 using CLinef = CLine<float>;
 
+using Liner = Line<real>;
+using CLiner = CLine<real>;
+
 template <class T> struct Line {
 
 	Vec3<T> o{};

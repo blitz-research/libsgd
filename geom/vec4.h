@@ -10,8 +10,8 @@ template <class T> using CVec4 = const Vec4<T>&;
 using Vec4f = Vec4<float>;
 using CVec4f = CVec4<float>;
 
-using Vec4u = Vec4<uint32_t>;
-using CVec4u = CVec4<uint32_t>;
+using Vec4r = Vec4<real>;
+using CVec4r = CVec4<real>;
 
 template <class T> struct Vec4 {
 
@@ -22,7 +22,7 @@ template <class T> struct Vec4 {
 
 	constexpr Vec4() = default;
 	constexpr explicit Vec4(T s);
-	template <class C> constexpr explicit Vec4(const Vec4<C>& v);
+	template <class C> constexpr Vec4(const Vec4<C>& v); // NOLINT (non-explicit ctor)
 	constexpr Vec4(const Vec3<T>& v, T w);
 	constexpr Vec4(T x, T y, T z, T w);
 

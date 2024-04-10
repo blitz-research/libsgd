@@ -13,6 +13,9 @@ template <class T> using CPlane = const Plane<T>&;
 using Planef = Plane<float>;
 using CPlanef = CPlane<float>;
 
+using Planer = Plane<real>;
+using CPlaner = CPlane<real>;
+
 template <class T> struct Plane {
 
 	Vec3<T> n{0, 1, 0};

@@ -22,7 +22,7 @@ struct Model : Entity {
 
 	Model(Vector<EntityPtr> bones, Vector<AnimationPtr> animations, Vector<Joint> joints);
 
-	Property<CMeshPtr> mesh;
+	Property<MeshPtr> mesh;
 
 	Property<Vec4f> color{Vec4f{1, 1, 1, 1}};
 

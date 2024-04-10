@@ -14,6 +14,9 @@ template <class T> using CAffineMat4 = const AffineMat4<T>&;
 using AffineMat4f = AffineMat4<float>;
 using CAffineMat4f = CAffineMat4<float>;
 
+using AffineMat4r = AffineMat4<real>;
+using CAffineMat4r = CAffineMat4<real>;
+
 template <class T> struct AffineMat4 {
 
 	Mat3<T> r{};
@@ -21,6 +24,7 @@ template <class T> struct AffineMat4 {
 
 	constexpr AffineMat4() = default;
 	constexpr AffineMat4(CMat3<T> r, CVec3<T> t);
+	template <class C> constexpr AffineMat4(CAffineMat4<C>& m); // NOLINT (non-explicit ctor)
 
 	static AffineMat4 translation(CVec3<T> t);
 	static AffineMat4 rotation(CVec3<T> r);
@@ -44,9 +48,9 @@ template <class T> bool operator!=(CAffineMat4<T> m, CAffineMat4<T> n);
 
 template <class T> std::ostream& operator<<(std::ostream& os, CAffineMat4<T> m);
 
-template<class T> Vec3<T> translation(CAffineMat4<T> m);
-template<class T> Vec3<T> rotation(CAffineMat4<T> m);
-template<class T> Vec3<T> scale(CAffineMat4<T> m);
+template <class T> Vec3<T> translation(CAffineMat4<T> m);
+template <class T> Vec3<T> rotation(CAffineMat4<T> m);
+template <class T> Vec3<T> scale(CAffineMat4<T> m);
 
 template <class T> AffineMat4<T> transpose(CAffineMat4<T> m);
 template <class T> AffineMat4<T> inverse(CAffineMat4<T> m);

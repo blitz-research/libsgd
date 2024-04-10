@@ -7,11 +7,14 @@ namespace sgd {
 template <class T> struct Mat3;
 template <class T> using CMat3 = const Mat3<T>&;
 
-template <class T> struct Quat;
-template <class T> using CQuat = const Quat<T>&;
-
 using Mat3f = Mat3<float>;
 using CMat3f = CMat3<float>;
+
+using Mat3r = Mat3<real>;
+using CMat3r = CMat3<real>;
+
+template <class T> struct Quat;
+template <class T> using CQuat = const Quat<T>&;
 
 template <class T> struct Mat3 {
 
@@ -21,6 +24,7 @@ template <class T> struct Mat3 {
 
 	constexpr Mat3() = default;
 	constexpr explicit Mat3(T s);
+	template <class C> constexpr Mat3(CMat3<C> m); // NOLINT (non-explicit ctor)
 	constexpr Mat3(CVec3<T> i, CVec3<T> j, CVec3<T> k);
 
 	static Mat3 yaw(T r);

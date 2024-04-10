@@ -6,6 +6,9 @@ namespace sgd {
 template <class T> constexpr Mat3<T>::Mat3(T s) : i(s), j(s), k(s) {
 }
 
+template <class T> template <class C> constexpr Mat3<T>::Mat3(CMat3<C> m) : i(m.i), j(m.j), k(m.k) {
+}
+
 template <class T> constexpr Mat3<T>::Mat3(CVec3<T> i, CVec3<T> j, CVec3<T> k) : i(i), j(j), k(k) {
 }
 

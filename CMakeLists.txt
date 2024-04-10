@@ -66,6 +66,16 @@ else ()
     message(FATAL_ERROR "!!! Unsupported compiler: ${CMAKE_SYSTEM_NAME}")
 endif ()
 
+# Arch bit size
+#
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(SGD_ARCH_64_BIT 1)
+    add_compile_definitions(SGD_ARCH_64_BIT=1)
+else()
+    set(SGD_ARCH_32_BIT 1)
+    add_compile_definitions(SGD_ARCH_32_BIT=1)
+endif()
+
 # Using C++ 17
 #
 set(CMAKE_CXX_STANDARD 17)

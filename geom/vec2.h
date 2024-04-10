@@ -10,6 +10,9 @@ template <class T> using CVec2 = const Vec2<T>&;
 using Vec2f = Vec2<float>;
 using CVec2f = CVec2<float>;
 
+using Vec2r = Vec2<real>;
+using CVec2r = CVec2<real>;
+
 using Vec2i = Vec2<int32_t>;
 using CVec2i = CVec2<int32_t>;
 
@@ -23,7 +26,7 @@ template <class T> struct Vec2 {
 
 	constexpr Vec2() = default;
 	constexpr explicit Vec2(T s);
-	template <class C> constexpr explicit Vec2(const Vec2<C>& v);
+	template <class C> constexpr Vec2(CVec2<C>& v); // NOLINT (non-explicit ctor)
 	constexpr Vec2(T x, T y);
 
 	Vec2& operator*=(CVec2<T> v);

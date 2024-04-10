@@ -22,7 +22,7 @@ private:
 	};
 	Map<CMesh*, UniquePtr<InstanceList>> m_instanceLists;
 
-	void onUpdate(CVec3f eye) override;
+	void onUpdate(CVec3r eye) override;
 
 	void render(RenderContext* rc) const override;
 };

@@ -42,6 +42,10 @@ struct Shared : public Object {
 #endif
 	}
 
+	int refs() const {
+		return m_refs;
+	}
+
 protected:
 	Shared() = default;
 

@@ -9,13 +9,13 @@ restart:
 	SGD_Camera camera = sgd_CreatePerspectiveCamera();
 	sgd_MoveEntity(camera, 0, 1, -3);
 
-	SGD_Light light = sgd_CreateDirectionalLight();
+	SGD_Light light = sgd_CreatePointLight();
+//	sgd_SetLightCastsShadow(light, SGD_TRUE);
+	sgd_MoveEntity(light, 0, 3, -3);
+	sgd_SetLightRange(light, 10);
 
-	SGD_Model model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", 1);
-
-	SGD_Light plight = sgd_CreatePointLight();
-	sgd_SetLightRange(plight, 10);
-	sgd_MoveEntity(plight,-2, 2, 0);
+	SGD_Model model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", SGD_TRUE);
+//	sgd_SetMeshCastsShadow(sgd_ModelMesh(model), SGD_TRUE);
 
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/PavingStones065_1K-JPG");
 	SGD_Mesh mesh = sgd_CreateBoxMesh(-10, -1, -10, 10, 0, 10, material);

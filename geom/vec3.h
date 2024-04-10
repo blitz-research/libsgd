@@ -10,6 +10,9 @@ template <class T> using CVec3 = const Vec3<T>&;
 using Vec3f = Vec3<float>;
 using CVec3f = CVec3<float>;
 
+using Vec3r = Vec3<real>;
+using CVec3r = CVec3<real>;
+
 template <class T> struct Vec3 {
 
 	T x{};
@@ -18,7 +21,7 @@ template <class T> struct Vec3 {
 
 	constexpr Vec3() = default;
 	constexpr explicit Vec3(T s);
-	template <class C> constexpr explicit Vec3(const Vec3<C>& v);
+	template <class C> constexpr Vec3(CVec3<C>& v); // NOLINT (non-explicit ctor)
 	constexpr Vec3(CVec2<T> v, float z);
 	constexpr Vec3(T x, T y, T z);
 
