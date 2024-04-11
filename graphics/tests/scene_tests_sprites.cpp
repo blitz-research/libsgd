@@ -3,10 +3,10 @@
 void entry() {
 
 	TexturePtr texture =
-		loadTexture(Path("~/dev/assets/grass.png"), TextureFormat::srgba8, TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clampU | TextureFlags::clampV)
+		loadTexture(Path("sgd://misc/grass1.png"), TextureFormat::srgba8, TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clampU | TextureFlags::clampV)
 			.result();
 
-	MaterialPtr material = new Material(&pbrMaterialDescriptor);
+	MaterialPtr material = new Material(&prelitMaterialDescriptor);
 	material->setTexture("albedoTexture", texture);
 	material->blendMode = BlendMode::alpha;
 

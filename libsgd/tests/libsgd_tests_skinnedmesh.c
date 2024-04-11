@@ -19,9 +19,9 @@ restart:
 
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/PavingStones065_1K-JPG");
 	SGD_Mesh mesh = sgd_CreateBoxMesh(-10, -1, -10, 10, 0, 10, material);
-
+	sgd_TransformMeshTexCoords(mesh, 4,4,0,0);
 	SGD_Model ground = sgd_CreateModel();
-	sgd_SetModelMesh(ground,mesh);
+	sgd_SetModelMesh(ground, mesh);
 
 	sgd_DebugMemory();
 
@@ -51,6 +51,12 @@ restart:
 			sgd_TurnEntity(model, 0, 3, 0);
 		} else if (sgd_KeyDown(SGD_KEY_RIGHT)) {
 			sgd_TurnEntity(model, 0, -3, 0);
+		}
+
+		if(sgd_KeyDown(SGD_KEY_UP)) {
+			sgd_MoveEntity(model, 0, 0, -.03);
+		} else if(sgd_KeyDown(SGD_KEY_DOWN)) {
+			sgd_MoveEntity(model, 0, 0, .03);
 		}
 
 		static float time;

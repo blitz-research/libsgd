@@ -27,7 +27,7 @@ void Entity::setWorldMatrix(CAffineMat4r matrix) {
 	setWorldScale(scale(matrix.r));
 }
 
-AffineMat4r Entity::worldMatrix() const { // NOLINT (recursive)
+CAffineMat4r Entity::worldMatrix() const { // NOLINT (recursive)
 	if (bool(m_dirty & Dirty::worldMatrix)) {
 		m_worldMatrix = m_parent ? m_parent->worldMatrix() * localMatrix() : localMatrix();
 		m_dirty &= ~Dirty::worldMatrix;
@@ -41,7 +41,7 @@ void Entity::setLocalMatrix(CAffineMat4r matrix) {
 	setLocalScale(scale(matrix.r));
 }
 
-AffineMat4r Entity::localMatrix() const { // NOLINT (recursive)
+CAffineMat4r Entity::localMatrix() const { // NOLINT (recursive)
 	if (bool(m_dirty & Dirty::localMatrix)) {
 		m_localMatrix.r = m_localBasis * Mat3r::scale(m_localScale);
 		m_dirty &= ~Dirty::localMatrix;

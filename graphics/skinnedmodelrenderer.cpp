@@ -34,17 +34,25 @@ void SkinnedModelRenderer::remove(CModel* model) {
 }
 
 void SkinnedModelRenderer::onUpdate(CVec3r eye) {
-	for(auto& kv : m_instanceLists) {
+	for (auto& kv : m_instanceLists) {
 		CMesh* mesh = kv.first;
-		if(!mesh) continue;
+		if (!mesh) continue;
 		auto list = kv.second.get();
 		auto inst = list->meshRenderer->lockInstances(list->models.size());
 		for (CModel* model : list->models) {
-			inst->worldMatrix = Mat4f(model->worldMatrix());
+			auto& worldMatrix = model->worldMatrix();
+			inst->matrix.i = {worldMatrix.r.i, 0};
+			inst->matrix.j = {worldMatrix.r.j, 0};
+			inst->matrix.k = {worldMatrix.r.k, 0};
+			inst->matrix.t = {worldMatrix.t - eye, 1};
 			inst->color = model->color();
-			int i = 0;
+			auto mp = inst->jointMatrices;
 			for (auto& matrix : model->jointMatrices()) {
-				inst->jointMatrices[i++] = Mat4f(matrix);
+				mp->i = {matrix.r.i, 0};
+				mp->j = {matrix.r.j, 0};
+				mp->k = {matrix.r.k, 0};
+				mp->t = {matrix.t - eye, 1};
+				++mp;
 			}
 			++inst;
 		}
@@ -54,7 +62,7 @@ void SkinnedModelRenderer::onUpdate(CVec3r eye) {
 }
 
 void SkinnedModelRenderer::render(RenderContext* rc) const {
-	for(auto& kv : m_instanceLists) {
+	for (auto& kv : m_instanceLists) {
 		if (kv.first) kv.second->meshRenderer->render(rc);
 	}
 }

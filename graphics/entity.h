@@ -66,11 +66,11 @@ struct Entity : Shared {
 
 	void setWorldMatrix(CAffineMat4r matrix);
 
-	AffineMat4r worldMatrix() const;
+	CAffineMat4r worldMatrix() const;
 
 	void setLocalMatrix(CAffineMat4r matrix);
 
-	AffineMat4r localMatrix() const;
+	CAffineMat4r localMatrix() const;
 
 	void setParent(Entity* parent);
 

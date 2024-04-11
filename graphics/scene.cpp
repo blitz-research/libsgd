@@ -12,11 +12,14 @@ namespace sgd {
 
 namespace {
 
-void setCameraUniforms(CameraUniforms& uniforms, CAffineMat4f worldMatrix, CMat4f projMatrix) {
-	uniforms.worldMatrix = Mat4f(worldMatrix);
-	uniforms.viewMatrix = Mat4f(inverse(worldMatrix));
+void setCameraUniforms(CameraUniforms& uniforms, CAffineMat4r worldMatrix, CMat4f projMatrix) {
+	uniforms.worldMatrix.i = {worldMatrix.r.i, 0};
+	uniforms.worldMatrix.j = {worldMatrix.r.j, 0};
+	uniforms.worldMatrix.k = {worldMatrix.r.k, 0};
+	uniforms.worldMatrix.t = {0, 0, 0, 1};
 	uniforms.projectionMatrix = projMatrix;
-	uniforms.inverseProjectionMatrix = inverse(projMatrix);
+	uniforms.viewMatrix = inverse(uniforms.worldMatrix);
+	uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
 	uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
 }
 
@@ -111,12 +114,14 @@ void Scene::updateCameraBindings() {
 	if (m_cameras.empty()) {
 		auto curs = m_gc->window()->mouse()->position() / Vec2f(m_gc->window()->size());
 		curs = curs * Vec2f(twoPi, pi) - Vec2f(pi, halfPi);
-		auto matrix = AffineMat4f::rotation({-curs.y, -curs.x, 0});
+		auto matrix = AffineMat4r::rotation({-curs.y, -curs.x, 0});
 		setCameraUniforms(uniforms, matrix, Mat4f::perspective(45, aspect, .1, 100));
+		m_eye = {};
 	} else {
 		auto camera = m_cameras.front();
 		setCameraUniforms(uniforms, camera->worldMatrix(),
 						  Mat4f::perspective(camera->fov(), aspect, camera->near(), camera->far()));
+		m_eye = camera->worldPosition();
 	}
 
 	m_sceneBindings->updateCameraUniforms(uniforms);
@@ -150,7 +155,7 @@ void Scene::updateLightingBindings() {
 		case LightType::spot: {
 			if (uniforms.spotLightCount == LightingUniforms::maxSpotLights) break;
 			auto& ulight = uniforms.spotLights[uniforms.spotLightCount++];
-			ulight.position = light->worldMatrix().t;
+			ulight.position = light->worldMatrix().t - m_eye;
 			ulight.direction = -light->worldMatrix().r.k;
 			ulight.color = light->color();
 			ulight.range = light->range();
@@ -163,9 +168,8 @@ void Scene::updateLightingBindings() {
 	}
 
 	// sort point lights
-	auto eye = Vec3r(Vec3f(m_sceneBindings->cameraUniforms().worldMatrix.t));
 	auto cmp = [=](const Light* lhs, const Light* rhs) {
-		return length(rhs->worldMatrix().t - eye) > length(lhs->worldMatrix().t - eye);
+		return length(rhs->worldMatrix().t - m_eye) > length(lhs->worldMatrix().t - m_eye);
 	};
 	std::sort(pointLights.begin(), pointLights.end(), cmp);
 
@@ -176,13 +180,13 @@ void Scene::updateLightingBindings() {
 	for (int i = 0; i < uniforms.pointLightCount; ++i) {
 		auto light = pointLights[i];
 		auto& ulight = uniforms.pointLights[i];
-		ulight.position = light->worldMatrix().t;
+		ulight.position = light->worldMatrix().t - m_eye;
 		ulight.color = light->color();
 		ulight.range = light->range();
 		ulight.falloff = light->falloff();
 		ulight.castsShadow = light->castsShadow();
 
-		if(light->castsShadow()) m_pointShadowLights.push_back(light);
+		if (light->castsShadow()) m_pointShadowLights.push_back(light);
 	}
 
 	m_sceneBindings->updateLightingUniforms(uniforms);
@@ -207,12 +211,13 @@ void Scene::render() {
 	beginRender.emit();
 
 	updateCameraBindings();
+
+	//	log() << "### Eye" << std::setprecision(12) << m_eye;
+
 	updateLightingBindings();
 
-	auto eye = Vec3f(m_sceneBindings->cameraUniforms().worldMatrix.t);
-
 	for (Renderer* r : m_renderers) {
-		if (r && r->enabled()) r->onUpdate(eye);
+		if (r && r->enabled()) r->onUpdate(m_eye);
 	}
 
 	runOnMainThread(
@@ -251,7 +256,7 @@ void Scene::renderPointLightShadowMaps() const {
 			float far = light->range();
 
 			auto projMatrix = Mat4f::frustum(-near, near, -near, near, near, far);
-			auto faceMatrix = AffineMat4f(faceTransforms[face],{}) * inverse(AffineMat4f::TRS(light->worldPosition()));
+			auto faceMatrix = AffineMat4f(faceTransforms[face], {}) * inverse(AffineMat4f({}, light->worldPosition() - m_eye));
 
 			cameraUniforms.projectionMatrix = projMatrix;
 			cameraUniforms.worldMatrix = Mat4f(inverse(faceMatrix));

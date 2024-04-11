@@ -32,13 +32,17 @@ void ModelRenderer::remove(CModel* model) {
 }
 
 void ModelRenderer::onUpdate(CVec3r eye) {
-	for(auto& kv : m_instanceLists) {
-		CMesh* mesh=kv.first;
+	for (auto& kv : m_instanceLists) {
+		CMesh* mesh = kv.first;
 		if (!mesh) continue;
 		auto list = kv.second.get();
 		auto inst = list->meshRenderer->lockInstances(list->models.size());
 		for (CModel* model : list->models) {
-			inst->matrix = Mat4f(model->worldMatrix());
+			auto& worldMatrix = model->worldMatrix();
+			inst->matrix.i = {worldMatrix.r.i, 0};
+			inst->matrix.j = {worldMatrix.r.j, 0};
+			inst->matrix.k = {worldMatrix.r.k, 0};
+			inst->matrix.t = {worldMatrix.t - eye, 1};
 			inst->color = model->color();
 			++inst;
 		}
@@ -48,8 +52,8 @@ void ModelRenderer::onUpdate(CVec3r eye) {
 }
 
 void ModelRenderer::render(RenderContext* rc) const {
-	for(auto& kv : m_instanceLists) {
-		if(kv.first) kv.second->meshRenderer->render(rc);
+	for (auto& kv : m_instanceLists) {
+		if (kv.first) kv.second->meshRenderer->render(rc);
 	}
 }
 

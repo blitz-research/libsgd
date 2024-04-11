@@ -28,14 +28,14 @@ struct Model : Entity {
 
 	void animate(uint32_t index, float time, AnimationMode mode);
 
-	CVector<AffineMat4f> jointMatrices() const {return m_jointMatrices;}
+	CVector<AffineMat4r> jointMatrices() const {return m_jointMatrices;}
 
 private:
 	Vector<AnimationPtr> m_animations;
 	Vector<EntityPtr> m_bones;
 	Vector<Joint> m_joints;
 	bool m_skinned{};
-	Vector<AffineMat4f> m_jointMatrices;
+	Vector<AffineMat4r> m_jointMatrices;
 
 	void onCreate() override;
 	void onShow() override;

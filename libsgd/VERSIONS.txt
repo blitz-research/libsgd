@@ -1,8 +1,10 @@
 ***** V0.03.1 *****
 
-* Fixed sgd_DestroyEntity bug.
+* Changed floating point type of entity transforms on 64 bit targets to double.
 
-* Added sgd_ClearScene to Blitz3d runtime.dll
+* Fixed a (the?) sgd_DestroyEntity bug.
+
+* Added sgd_ClearScene to Blitz3d API.
 
 
 ***** v0.03 *****

@@ -51,11 +51,16 @@ void SpriteRenderer::onUpdate(CVec3r eye) {
 		m_bindGroup->setBuffer(0, m_instanceBuffer);
 	}
 
-	auto instp = (SpriteInstance*)m_instanceBuffer->lock(0, m_instanceCount * sizeof(SpriteInstance));
-	for (auto it = m_instances.begin(); it != m_instances.end(); ++instp, ++it) {
-		instp->matrix = Mat4f((*it)->worldMatrix());
-		instp->color = (*it)->color();
-		instp->rect = (*it)->rect();
+	auto inst = (SpriteInstance*)m_instanceBuffer->lock(0, m_instanceCount * sizeof(SpriteInstance));
+	for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
+		auto& worldMatrix =(*it)->worldMatrix();
+		inst->matrix.i = {worldMatrix.r.i, 0};
+		inst->matrix.j = {worldMatrix.r.j, 0};
+		inst->matrix.k = {worldMatrix.r.k, 0};
+		inst->matrix.t = {worldMatrix.t - eye, 1};
+		inst->color = (*it)->color();
+		inst->rect = (*it)->rect();
+		++inst;
 	}
 	m_instanceBuffer->unlock();
 

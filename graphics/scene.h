@@ -63,6 +63,8 @@ private:
 	SceneBindingsPtr m_sceneBindings;
 	Array<SceneBindingsPtr,6> m_shadowBindings;
 
+	Vec3r m_eye;
+
 	Vector<Light*> m_pointShadowLights;
 	TexturePtr m_pointShadowTexture;
 

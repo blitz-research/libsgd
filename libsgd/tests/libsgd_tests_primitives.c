@@ -2,68 +2,101 @@
 
 void entry() {
 
+	SGD_Real tz = 0;
+
 start:
 
-	sgd_SetSceneAmbientLightColor(0, 0, 0, 1);
+	printf("### TZ: %f\n", tz);
 
-	//	SGD_Camera camera = sgd_CreatePerspectiveCamera();
-	//	sgd_TurnEntity(camera, -30, 0, 0);
+	SGD_Camera camera = sgd_CreatePerspectiveCamera();
+	sgd_MoveEntity(camera, 0, 2, tz - 5.0);
+
+	// SGD_Light light0 = sgd_CreateDirectionalLight();
+	// sgd_TurnEntity(light0, -90, 0, 0);
+	// sgd_SetLightRange(light0, 50);
 
 	SGD_Light light0 = sgd_CreatePointLight();
-//	sgd_MoveEntity(light0,0,5,0);
+	sgd_SetLightCastsShadow(light0, SGD_TRUE);
+	sgd_MoveEntity(light0, 0, 5, 0);
+	sgd_SetEntityParent(light0, camera);
 	sgd_SetLightRange(light0, 50);
 
-	SGD_Material material = sgd_LoadPBRMaterial("sgd://misc/test-texture.png");
+	SGD_Material material = sgd_CreatePBRMaterial(1, .5f, 1, 1);
+	SGD_Model ground = sgd_CreateModel();
+	sgd_SetModelMesh(ground, sgd_CreateBoxMesh(-10, -1, -20, 10, 0, 20, material));
+
+	material = sgd_LoadPBRMaterial("sgd://misc/test-texture.png");
 	sgd_SetMaterialFloat(material, "roughnessFactor1f", .5f);
 
-	//SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/Fabric050_1K-JPG");
+	float r = .5f;
+	float y = 1;
 
-	float r = .5f, z=3.5f;
+	SGD_Model models[5];
 
 	SGD_Mesh mesh0 = sgd_CreateSphereMesh(r, 96, 48, material);
-	SGD_Model model0 = sgd_CreateModel();
-	sgd_SetModelMesh(model0, mesh0);
-	sgd_MoveEntity(model0, -2.5f, 0, z);
+	sgd_SetMeshCastsShadow(mesh0, SGD_TRUE);
+	models[0] = sgd_CreateModel();
+	sgd_SetModelMesh(models[0], mesh0);
+	sgd_MoveEntity(models[0], -2.5f, y, tz);
 
-	float r2=r*.7071f;
+	float r2 = r * .7071f;
 	SGD_Mesh mesh1 = sgd_CreateBoxMesh(-r2, -r2, -r2, r2, r2, r2, material);
-	SGD_Model model1 = sgd_CreateModel();
-	sgd_SetModelMesh(model1, mesh1);
-	sgd_MoveEntity(model1, -1.25f, 0, z);
+	sgd_SetMeshCastsShadow(mesh1, SGD_TRUE);
+	models[1] = sgd_CreateModel();
+	sgd_SetModelMesh(models[1], mesh1);
+	sgd_MoveEntity(models[1], -1.25f, y, tz);
 
 	SGD_Mesh mesh2 = sgd_CreateCylinderMesh(r * 2, r / 2, 96, material);
-	SGD_Model model2 = sgd_CreateModel();
-	sgd_SetModelMesh(model2, mesh2);
-	sgd_MoveEntity(model2, 0, 0, z);
+	sgd_SetMeshCastsShadow(mesh2, SGD_TRUE);
+	models[2] = sgd_CreateModel();
+	sgd_SetModelMesh(models[2], mesh2);
+	sgd_MoveEntity(models[2], 0, y, tz);
 
 	SGD_Mesh mesh3 = sgd_CreateConeMesh(r * 2, r / 2, 96, material);
-	SGD_Model model3 = sgd_CreateModel();
-	sgd_SetModelMesh(model3, mesh3);
-	sgd_MoveEntity(model3, 1.25f, 0, z);
+	sgd_SetMeshCastsShadow(mesh3, SGD_TRUE);
+	models[3] = sgd_CreateModel();
+	sgd_SetModelMesh(models[3], mesh3);
+	sgd_MoveEntity(models[3], 1.25f, y, tz);
 
 	SGD_Mesh mesh4 = sgd_CreateTorusMesh(r * .75f, r * .25f, 96, 48, material);
-	SGD_Model model4 = sgd_CreateModel();
-	sgd_SetModelMesh(model4, mesh4);
-	sgd_MoveEntity(model4, 2.5f, 0, z);
+	sgd_SetMeshCastsShadow(mesh4, SGD_TRUE);
+	models[4] = sgd_CreateModel();
+	sgd_SetModelMesh(models[4], mesh4);
+	sgd_MoveEntity(models[4], 2.5f, y, tz);
 
 	for (;;) {
+
 		if (sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) break;
 
-		if(sgd_KeyHit(SGD_KEY_ESCAPE)) {
-			sgd_DestroyEntity(model0);
-			sgd_DestroyEntity(model1);
-			sgd_DestroyEntity(model2);
-			sgd_DestroyEntity(model3);
-			sgd_DestroyEntity(model4);
-			reset();
-			goto start;
+		if (sgd_KeyHit(SGD_KEY_ESCAPE)) {
+			SGD_Real dz = 1ll << 33;
+
+			if (sgd_EntityZ(camera) > dz / 2) dz = -dz;
+
+			sgd_TranslateEntity(camera, 0, 0, dz);
+			sgd_TranslateEntity(ground, 0, 0, dz);
+			for (int i = 0; i < 5; ++i) sgd_TranslateEntity(models[i], 0, 0, dz);
+
+			printf("### Camera Z: %f\n", sgd_EntityZ(camera));
 		}
 
-		sgd_TurnEntity(model0, .3, .7, 0);
-		sgd_TurnEntity(model1, .3, .7, 0);
-		sgd_TurnEntity(model2, .3, .7, 0);
-		sgd_TurnEntity(model3, .3, .7, 0);
-		sgd_TurnEntity(model4, .3, .7, 0);
+		if (sgd_KeyDown(SGD_KEY_A)) {
+			sgd_MoveEntity(camera, 0, 0, .3);
+			printf("### Camera Z: %f\n", sgd_EntityZ(camera));
+		} else if (sgd_KeyDown(SGD_KEY_Z)) {
+			sgd_MoveEntity(camera, 0, 0, -.3);
+			printf("### Camera Z: %f\n", sgd_EntityZ(camera));
+		}
+
+		fflush(stdout);
+
+		if (sgd_KeyDown(SGD_KEY_LEFT)) {
+			sgd_TurnEntity(camera, 0, 3, 0);
+		} else if (sgd_KeyDown(SGD_KEY_RIGHT)) {
+			sgd_TurnEntity(camera, 0, -3, 0);
+		}
+
+		for (int i = 0; i < 5; ++i) sgd_TurnEntity(models[i], i / 10.0f, i / 5.0f + .1f, 0);
 
 		sgd_RenderScene();
 

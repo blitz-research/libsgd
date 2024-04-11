@@ -8,6 +8,8 @@ ScenePtr scene;
 
 int main() {
 
+	log() << "### sizeof(Entity)" << sizeof(Entity);
+
 	window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::resizable);
 
 	window->closeClicked.connect(nullptr, [] { std::exit(0); });
