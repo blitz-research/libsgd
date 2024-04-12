@@ -1,15 +1,18 @@
+***** V0.03.1b *****
+
+* Renamed sgd_Startup()/sgd_Shutdown() to sgd_Init()/sgd_Terminate() to keep MS Windows Defender happy.
+
+
 ***** V0.03.1 *****
 
-* Changed floating point type of entity transforms on 64 bit targets to double.
+* Entity matrices now use 64 bit double precision floats on 64 bit targets, for initial WIP 'huge world' support.
 
-* Fixed a (the?) sgd_DestroyEntity bug.
+* Fixed a (the?) DestroyEntity bug.
 
-* Added sgd_ClearScene to Blitz3d API.
+* Added ClearScene to blitz3d.
 
 
 ***** v0.03 *****
-
-* Probably lots more...
 
 * Fixed lots of mesh primitive issues, including all box meshes scaled by 2 for some reason.
 

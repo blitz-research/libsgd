@@ -70,7 +70,7 @@ template<class T> bool destroyHandle(T* shared) {
 }
 
 inline void started() {
-	if(!g_started) error("Startup has not been called");
+	if(!g_started) error("LibSGD has not been initialized");
 }
 
 inline Window* mainWindow(){

@@ -2,7 +2,7 @@
 
 void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flags) {
 	if (sgdx::g_mainWindow) sgd_Error("Window has already been created");
-	sgd_Startup();
+	sgdx::started();
 
 	auto window = new sgd::Window(sgdx::Vec2u(width, height), title, (sgdx::WindowFlags)flags);
 

@@ -7,7 +7,7 @@
 
 int main() {
 
-	sgd_Startup();
+	sgd_Init();
     
     sgd_CreateWindow(640, 480, "Hello World!", 0);
     sgd_CreateScene();
@@ -18,5 +18,5 @@ int main() {
         sgd_Present();
     }
 
-	sgd_Shutdown();
+	sgd_Terminate();
 }

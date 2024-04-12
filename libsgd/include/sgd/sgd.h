@@ -79,10 +79,10 @@ typedef float SGD_Real;
 //! @{
 
 //! Start up libsgd.
-SGD_API void SGD_DECL sgd_Startup();
+SGD_API void SGD_DECL sgd_Init();
 
 //! Shut down libsgd.
-SGD_API void SGD_DECL sgd_Shutdown();
+SGD_API void SGD_DECL sgd_Terminate();
 
 //! Set WebGPU backend: D3D12, D3D11, Vulkan. Must be called before sgd_CreateScene().
 SGD_API void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend);
@@ -282,13 +282,13 @@ SGD_API SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int fl
 //!
 
 //! Create a new PBR material.
-SGD_API SGD_Material SGD_DECL sgd_CreatePBRMaterial(float red, float green, float blue, float alpha);
+SGD_API SGD_Material SGD_DECL sgd_CreatePBRMaterial();
 
 //! Load a new PBR material.
 SGD_API SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path);
 
 //! Create a new prelit matterial.
-SGD_API SGD_Material SGD_DECL sgd_CreatePrelitMaterial(float red, float green, float blue, float alpha);
+SGD_API SGD_Material SGD_DECL sgd_CreatePrelitMaterial();
 
 //! Load a new prelit material.
 SGD_API SGD_Material SGD_DECL sgd_LoadPrelitMaterial(SGD_String path);

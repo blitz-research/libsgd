@@ -1,6 +1,6 @@
 import sgd
 
-sgd.Startup()
+sgd.Init()
 
 sgd.CreateWindow(640, 480, "Hello World!", 0)
 sgd.CreateScene()
@@ -10,4 +10,4 @@ while((sgd.PollEvents() & sgd.EVENT_MASK_CLOSE_CLICKED) == 0):
     sgd.RenderScene()
     sgd.Present()
 
-sgd.Shutdown()
+sgd.Terminate()

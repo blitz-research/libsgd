@@ -15,7 +15,7 @@ sgd::Deque<sgdx::SGD_Event> g_eventQueue;
 
 } // namespace
 
-void SGD_DECL sgd_Startup() {
+void SGD_DECL sgd_Init() {
 	if (sgdx::g_started) return;
 	sgdx::g_started = true;
 
@@ -28,7 +28,7 @@ void SGD_DECL sgd_Startup() {
 	sgd::appResumed.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_RESUMED}); });
 }
 
-void SGD_DECL sgd_Shutdown() {
+void SGD_DECL sgd_Terminate() {
 	if (!sgdx::g_started) return;
 	sgdx::g_started = false;
 

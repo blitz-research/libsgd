@@ -1,6 +1,6 @@
 const sgd = require("./sgd");
 
-sgd.Startup();
+sgd.Init();
 
 sgd.CreateWindow(640, 480, "Hello World!", 0);
 sgd.CreateScene();
@@ -11,4 +11,4 @@ while(!sgd.PollEvents()) {
     sgd.Present();
 }
 
-sgd.Shutdown();
+sgd.Terminate();

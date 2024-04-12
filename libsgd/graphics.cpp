@@ -13,10 +13,10 @@ SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags) {
 
 // ***** Material *****
 
-SGD_Material SGD_DECL sgd_CreatePBRMaterial(float red, float green, float blue, float alpha) {
+SGD_Material SGD_DECL sgd_CreatePBRMaterial() {
 	sgdx::started();
 
-	auto material = sgd::createPBRMaterial({red, green, blue, alpha});
+	auto material = sgd::createPBRMaterial();
 
 	return sgdx::createHandle(material);
 }
@@ -30,10 +30,10 @@ SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path) {
 	return sgdx::createHandle(material.result());
 }
 
-SGD_Material SGD_DECL sgd_CreatePrelitMaterial(float red, float green, float blue, float alpha) {
+SGD_Material SGD_DECL sgd_CreatePrelitMaterial() {
 	sgdx::started();
 
-	auto material = sgd::createPrelitMaterial({red, green, blue, alpha});
+	auto material = sgd::createPrelitMaterial();
 
 	return sgdx::createHandle(material);
 }
