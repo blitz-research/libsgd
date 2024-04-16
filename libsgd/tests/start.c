@@ -19,9 +19,9 @@ void start(void(*entry)()) {
 
 	sgd_Init();
 
-	sgd_CreateWindow(1280, 720, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE);
+	sgd_CreateWindow(1280, 720, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE);// | SGD_WINDOW_FLAGS_FULLSCREEN);
 
-	sgd_SetWebGPUBackend("Vulkan");
+	//sgd_SetWebGPUBackend("Vulkan");
 
 	sgd_CreateScene();
 

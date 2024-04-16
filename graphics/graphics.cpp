@@ -47,8 +47,11 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 
 					m_colorBuffer =
 						new Texture(m_window->size(), 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
+					m_colorBuffer->validate(this);
+
 					m_depthBuffer =
 						new Texture(m_window->size(), 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
+					m_depthBuffer->validate(this);
 				};
 
 				createSwapChain(m_window->size());

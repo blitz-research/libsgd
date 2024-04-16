@@ -17,12 +17,16 @@ inline bool g_started;
 inline WindowPtr g_mainWindow;
 inline GraphicsContextPtr g_mainGC;
 inline ScenePtr g_mainScene;
+inline OverlayPtr g_overlay;
+inline DrawListPtr g_drawList;
+inline FontPtr g_defaultFont;
 
 enum struct HandleType {
 	object,
 	texture,
 	material,
 	mesh,
+	font,
 	entity,
 };
 
@@ -32,9 +36,9 @@ struct HandleTypeInfo {
 	HandleTypeInfo(ObjectType* objectType, HandleType handleType);
 };
 
-void error(CString message);
-void error(CString error, CString message);
-void error(CString error, CFileioEx& ex);
+[[noreturn]] void error(CString message);
+[[noreturn]] void error(CString error, CString message);
+[[noreturn]] void error(CString error, CFileioEx& ex);
 
 void postEvent(SGD_Event event);
 void getEventQueue(Deque<SGD_Event>& queue);
@@ -74,18 +78,23 @@ inline void started() {
 }
 
 inline Window* mainWindow(){
-	if(!g_mainWindow) error("Main window does not exist");
-	return g_mainWindow;
+	if(g_mainWindow) return g_mainWindow;
+	error("Main window has not been created");
 }
 
 inline GraphicsContext* mainGC() {
-	if(!g_mainGC) error( "Graphics context does not exist");
-	return g_mainGC;
+	if(g_mainGC) return g_mainGC;
+	error( "Graphics context does not exist");
 }
 
 inline Scene* mainScene(){
-	if(!g_mainScene) error("Main scene does not exist");
-	return g_mainScene;
+	if(g_mainScene) return g_mainScene;
+	error("Main scene has not been created");
+}
+
+inline DrawList* drawList() {
+	if(g_drawList) return g_drawList;
+	error("Draw list has not been created");
 }
 
 // ***** Type infos *****
@@ -99,6 +108,7 @@ template<> inline HandleTypeInfo* handleTypeInfo<T>(){return &_sgdHandleTypeInfo
 SGD_HANDLE_TYPE_INFO(Texture, HandleType::texture);
 SGD_HANDLE_TYPE_INFO(Material, HandleType::material);
 SGD_HANDLE_TYPE_INFO(Mesh, HandleType::mesh);
+SGD_HANDLE_TYPE_INFO(Font, HandleType::font);
 SGD_HANDLE_TYPE_INFO(Entity, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Camera, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Light, HandleType::entity);

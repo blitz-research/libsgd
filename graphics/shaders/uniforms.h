@@ -133,6 +133,15 @@ struct alignas(16) PrelitMaterialUniforms {
 	Vec4f albedoColor{1};
 };
 
+// ***** FontMaterial *****
+
+// @group(1) @binding(0) var<uniform> material_uniforms: FontMaterialUniforms;
+// @group(1) @binding(1) var material_atlasTexture: texture_2d<f32>;
+// @group(1) @binding(2) var material_atlasSampler: sampler;
+struct alignas(16) FontMaterialUniforms {
+	Vec4f atlasColor{1};
+};
+
 // ***** SpriteRenderer *****
 
 struct SpriteInstance {
@@ -141,5 +150,11 @@ struct SpriteInstance {
 	Rectf rect;
 };
 // @group(2) @binding(0) var<storage> spriteInstances: array<SpriteInstance>;
+
+// ***** DrawListRenderer *****
+
+struct DrawListUniforms {
+	Mat4f matrix;
+};
 
 } // namespace sgd

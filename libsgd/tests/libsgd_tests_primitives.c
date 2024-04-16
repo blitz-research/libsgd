@@ -5,15 +5,8 @@ void entry() {
 	SGD_Real tz = 0;
 
 start:
-
-	printf("### TZ: %f\n", tz);
-
 	SGD_Camera camera = sgd_CreatePerspectiveCamera();
 	sgd_MoveEntity(camera, 0, 2, tz - 5.0);
-
-	// SGD_Light light0 = sgd_CreateDirectionalLight();
-	// sgd_TurnEntity(light0, -90, 0, 0);
-	// sgd_SetLightRange(light0, 50);
 
 	SGD_Light light0 = sgd_CreatePointLight();
 	sgd_SetLightCastsShadow(light0, SGD_TRUE);
@@ -64,8 +57,10 @@ start:
 	sgd_SetModelMesh(models[4], mesh4);
 	sgd_MoveEntity(models[4], 2.5f, y, tz);
 
-	for (;;) {
+	sgd_Cls();
+	sgd_DrawText("Hello World!",0,0);
 
+	for (;;) {
 		if (sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) break;
 
 		if (sgd_KeyHit(SGD_KEY_ESCAPE)) {
@@ -97,6 +92,13 @@ start:
 		}
 
 		for (int i = 0; i < 5; ++i) sgd_TurnEntity(models[i], i / 10.0f, i / 5.0f + .1f, 0);
+
+		{
+			char buf[80];
+			sprintf(buf, "FPS: %i", sgd_FPS());
+			sgd_Cls();
+			sgd_DrawText(buf, 2, 2);
+		}
 
 		sgd_RenderScene();
 

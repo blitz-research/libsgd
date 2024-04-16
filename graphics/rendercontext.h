@@ -7,7 +7,7 @@
 namespace sgd {
 
 enum struct RenderPassType { clear, shadow, opaque, blend };
-constexpr int renderPassTypeCount = 4;
+constexpr int renderPassTypeCount = 5;
 
 SGD_SHARED(RenderContext);
 
@@ -55,6 +55,8 @@ struct RenderContext : Shared {
 
 private:
 	GraphicsContextPtr m_gc;
+
+	RenderOp m_rop;
 
 	RenderPassType m_renderPassType{};
 	wgpu::CommandEncoder m_wgpuCommandEncoder;

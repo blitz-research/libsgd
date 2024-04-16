@@ -30,8 +30,7 @@ void generateMipmaps(const wgpu::Device& device, const wgpu::Texture& texture) {
 		bgLayout = device.CreateBindGroupLayout(&bglDesc);
 	}
 
-	using PipelinesMap = Map<wgpu::TextureFormat, wgpu::RenderPipeline>;
-	static PipelinesMap pipelinesMap;
+	static Map<wgpu::TextureFormat, wgpu::RenderPipeline> pipelinesMap;
 	auto& pipeline = pipelinesMap[format];
 	if(!pipeline) {
 		const char* shaderSource{

@@ -12,7 +12,9 @@ namespace {
 
 wgpu::TextureFormat getFormat(TextureFormat format) {
 	static const Map<TextureFormat, wgpu::TextureFormat> //
-		formats{{TextureFormat::rgba8, wgpu::TextureFormat::RGBA8Unorm},
+		formats{{TextureFormat::r8, wgpu::TextureFormat::R8Unorm},
+				{TextureFormat::rg8, wgpu::TextureFormat::RG8Unorm},
+				{TextureFormat::rgba8, wgpu::TextureFormat::RGBA8Unorm},
 				{TextureFormat::srgba8, wgpu::TextureFormat::RGBA8UnormSrgb},
 				{TextureFormat::rgba16f, wgpu::TextureFormat::RGBA16Float},
 				{TextureFormat::depth32f, wgpu::TextureFormat::Depth32Float}};
@@ -22,7 +24,9 @@ wgpu::TextureFormat getFormat(TextureFormat format) {
 
 TextureFormat getFormat(wgpu::TextureFormat format) {
 	static const Map<wgpu::TextureFormat, TextureFormat> //
-		formats{{wgpu::TextureFormat::RGBA8Unorm, TextureFormat::rgba8},
+		formats{{wgpu::TextureFormat::R8Unorm, TextureFormat::r8},
+				{wgpu::TextureFormat::RG8Unorm, TextureFormat::rg8},
+				{wgpu::TextureFormat::RGBA8Unorm, TextureFormat::rgba8},
 				{wgpu::TextureFormat::RGBA8UnormSrgb, TextureFormat::srgba8},
 				{wgpu::TextureFormat::RGBA16Float, TextureFormat::rgba16f},
 				{wgpu::TextureFormat::Depth32Float, TextureFormat::depth32f}};
@@ -77,6 +81,7 @@ void Texture::update(const void* src, size_t srcPitch) {
 	auto dstPitch = PITCH(m_size);
 
 	if (dstPitch != srcPitch) {
+		SGD_ABORT();
 		auto rowSize = std::min(srcPitch, dstPitch);
 		for (int y = 0; y < m_size.y * m_depth; ++y) {
 			std::memcpy(m_data + dstPitch * y, (uint8_t*)src + srcPitch * y, rowSize);
@@ -144,7 +149,7 @@ void Texture::onValidate(GraphicsContext* gc) const {
 		dst.texture = m_wgpuTexture;
 
 		wgpu::TextureDataLayout layout{};
-		layout.bytesPerRow = m_size.x * bytesPerTexel(m_format);
+		layout.bytesPerRow = PITCH(m_size);
 		layout.rowsPerImage = m_size.y;
 
 		wgpu::Extent3D extent{m_size.x, m_size.y, m_depth};

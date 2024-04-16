@@ -21,6 +21,7 @@ enum struct RendererType {
 	model,
 	skinnedModel,
 	sprite,
+	overlay,
 	//8 MAX!
 };
 

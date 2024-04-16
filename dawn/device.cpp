@@ -185,7 +185,8 @@ wgpu::SwapChain createWGPUSwapChain(const wgpu::Device& device, const wgpu::Surf
 #if SGD_OS_EMSCRIPTEN
 		desc.presentMode = wgpu::PresentMode::Fifo;
 #else
-		//	desc.presentMode = wgpu::PresentMode::Mailbox;	// vsync = off
+		//desc.presentMode = wgpu::PresentMode::Immediate;	// ?!?
+		//desc.presentMode = wgpu::PresentMode::Mailbox;	// vsync = off
 		desc.presentMode = wgpu::PresentMode::Fifo; // vsync = on
 #endif
 		result = device.CreateSwapChain(surface, &desc);

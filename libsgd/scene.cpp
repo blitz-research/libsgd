@@ -6,6 +6,19 @@ namespace {
 
 wgpu::BackendType g_backendType{wgpu::BackendType::Undefined};
 
+void createOverlay() {
+	if (!sgdx::g_defaultFont) {
+#if _WIN32
+		auto font = sgd::loadFont(sgd::Path("C:/windows/fonts/consola.ttf"), 16);
+		if (font) sgdx::g_defaultFont = font.result();
+#endif
+	}
+	sgdx::g_overlay = new sgd::Overlay();
+	sgdx::g_mainScene->add(sgdx::g_overlay);
+	sgdx::g_drawList = sgdx::g_overlay->drawList();
+	sgdx::g_drawList->font = sgdx::g_defaultFont;
+}
+
 }
 
 SGD_API void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend) {
@@ -27,7 +40,18 @@ void SGD_DECL sgd_CreateScene() {
 	sgdx::mainWindow();
 
 	sgdx::g_mainGC = new sgdx::GraphicsContext(sgdx::g_mainWindow, g_backendType);
+
 	sgdx::g_mainScene = new sgdx::Scene(sgdx::g_mainGC);
+
+	createOverlay();
+}
+
+void SGD_DECL sgd_ClearScene() {
+	sgdx::mainScene()->clear();
+
+	createOverlay();
+
+	sgdx::destroyAllHandles();
 }
 
 void SGD_DECL sgd_SetSceneAmbientLightColor(float red, float green, float blue, float alpha) {
@@ -61,12 +85,6 @@ int SGD_DECL sgd_FPS() {
 }
 
 // ***** Entity *****
-
-void SGD_DECL sgd_ClearScene() {
-	sgdx::mainScene()->clear();
-
-	sgdx::destroyAllHandles();
-}
 
 void SGD_DECL sgd_DestroyEntity(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
@@ -449,7 +467,7 @@ void SGD_DECL sgd_SetSkyboxTexture(SGD_Skybox hskybox, SGD_Texture htexture) {
 	skybox->skyTexture = texture;
 }
 
-SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness) {
+void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness) {
 	auto skybox = sgdx::resolveHandle<sgdx::Skybox>(hskybox);
 	if (roughness < -1 || roughness > 1) sgdx::error("Skybox roughness outside of range -1 to 1");
 

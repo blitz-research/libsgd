@@ -66,43 +66,43 @@ void RenderContext::beginRenderPass(RenderPassType type, Texture* colorBuffer, T
 
 	m_wgpuRenderPassEncoder = m_wgpuCommandEncoder.BeginRenderPass(&renderPassDescriptor);
 
+	m_wgpuRenderPassEncoder.SetBindGroup(1, emptyBindGroup(1)->wgpuBindGroup());
+	m_rop={};
+
 	// Default?
 //	auto size = (colorBuffer ? colorBuffer : depthBuffer)->size();
 //	m_wgpuRenderPassEncoder.SetViewport(0, 0, (float)size.x, (float)size.y, 0, 1);
 }
 
 void RenderContext::render(CVector<RenderOp> ops) {
-	RenderOp top;
 
 	auto& encoder = m_wgpuRenderPassEncoder;
 
-	encoder.SetBindGroup(1, emptyBindGroup(1)->wgpuBindGroup());
-
 	for (auto& op : ops) {
-		if (op.vertexBuffer.Get() != top.vertexBuffer.Get()) {
-			if ((top.vertexBuffer = op.vertexBuffer)) encoder.SetVertexBuffer(0, top.vertexBuffer);
+		if (op.vertexBuffer.Get() != m_rop.vertexBuffer.Get()) {
+			if ((m_rop.vertexBuffer = op.vertexBuffer)) encoder.SetVertexBuffer(0, m_rop.vertexBuffer);
 		}
-		if (op.instanceBuffer.Get() != top.instanceBuffer.Get()) {
-			if ((top.instanceBuffer = op.instanceBuffer)) encoder.SetVertexBuffer(1, top.instanceBuffer);
+		if (op.instanceBuffer.Get() != m_rop.instanceBuffer.Get()) {
+			if ((m_rop.instanceBuffer = op.instanceBuffer)) encoder.SetVertexBuffer(1, m_rop.instanceBuffer);
 		}
-		if (op.indexBuffer.Get() != top.indexBuffer.Get()) {
-			if ((top.indexBuffer = op.indexBuffer)) encoder.SetIndexBuffer(top.indexBuffer, wgpu::IndexFormat::Uint32);
+		if (op.indexBuffer.Get() != m_rop.indexBuffer.Get()) {
+			if ((m_rop.indexBuffer = op.indexBuffer)) encoder.SetIndexBuffer(m_rop.indexBuffer, wgpu::IndexFormat::Uint32);
 		}
-		if (op.materialBindings.Get() != top.materialBindings.Get()) {
-			if ((top.materialBindings = op.materialBindings)) {
-				encoder.SetBindGroup(1, top.materialBindings);
+		if (op.materialBindings.Get() != m_rop.materialBindings.Get()) {
+			if ((m_rop.materialBindings = op.materialBindings)) {
+				encoder.SetBindGroup(1, m_rop.materialBindings);
 			} else {
 				encoder.SetBindGroup(1, emptyBindGroup(1)->wgpuBindGroup());
 			}
 		}
-		if (op.rendererBindings.Get() != top.rendererBindings.Get()) {
-			encoder.SetBindGroup(2, top.rendererBindings = op.rendererBindings);
+		if (op.rendererBindings.Get() != m_rop.rendererBindings.Get()) {
+			encoder.SetBindGroup(2, m_rop.rendererBindings = op.rendererBindings);
 		}
-		if (op.pipeline.Get() != top.pipeline.Get()) {
-			encoder.SetPipeline(top.pipeline = op.pipeline);
+		if (op.pipeline.Get() != m_rop.pipeline.Get()) {
+			encoder.SetPipeline(m_rop.pipeline = op.pipeline);
 		}
 
-		if (top.indexBuffer) {
+		if (m_rop.indexBuffer) {
 			encoder.DrawIndexed(op.elementCount, op.instanceCount, op.firstElement);
 		} else {
 			encoder.Draw(op.elementCount, op.instanceCount, op.firstElement);

@@ -1,3 +1,7 @@
+
+* Warning! Add 2 new texture formats so existing texture format enums have changed!
+
+
 ***** V0.03.1b *****
 
 * Renamed sgd_Startup()/sgd_Shutdown() to sgd_Init()/sgd_Terminate() to keep MS Windows Defender happy.

@@ -22,7 +22,7 @@ BindGroupDescriptor bindGroupDescriptor( //
 } // namespace
 
 const MaterialDescriptor prelitMaterialDescriptor( //
-	"pbr",										   //
+	"prelit",										   //
 	&bindGroupDescriptor,						   //
 	sizeof(PrelitMaterialUniforms),				   //
 	{
@@ -31,5 +31,7 @@ const MaterialDescriptor prelitMaterialDescriptor( //
 	{
 		{"albedoTexture", {1, whiteTexture()}},
 	});
+
+CMaterialPtr defaultPrelitMaterial = new Material(&prelitMaterialDescriptor);
 
 } // namespace sgd

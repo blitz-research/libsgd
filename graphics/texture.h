@@ -9,11 +9,18 @@ namespace sgd {
 //! TextureFormat enum
 enum struct TextureFormat {
 	undefined = 0,
+	r8,
+	rg8,
 	rgba8,
 	srgba8,
 	rgba16f,
 	depth32f,
 };
+
+inline uint32_t bytesPerTexel(TextureFormat format) {
+	uint32_t bpp[]{0, 1, 2, 4, 4, 16, 4};
+	return bpp[(int)format];
+}
 
 //! TextureFlags enum
 enum struct TextureFlags {

@@ -60,6 +60,7 @@ typedef const char* SGD_String;
 typedef SGD_Handle SGD_Texture;
 typedef SGD_Handle SGD_Material;
 typedef SGD_Handle SGD_Mesh;
+typedef SGD_Handle SGD_Font;
 typedef SGD_Handle SGD_Entity;
 typedef SGD_Handle SGD_Camera;
 typedef SGD_Handle SGD_Light;
@@ -118,6 +119,18 @@ SGD_API void SGD_DECL sgd_Alert(SGD_String message);
 //! SGD_EVENT_MASK_SUSPENDED       | 16            | App suspended
 //! SGD_EVENT_MASK_RESUMED         | 32            | App resumed
 SGD_API SGD_Bool SGD_DECL sgd_PollEvents();
+
+//! Get internal GLFW Window.
+SGD_API void* SGD_DECL sgd_GetGLFWWindow();
+
+//! Get internal WebGPU Device.
+SGD_API void* SGD_DECL sgd_GetWGPUDevice();
+
+//! Get internal WebGPU color buffer.
+SGD_API void* SGD_DECL sgd_GetWGPUColorBuffer();
+
+//! Get internal WebGPU depth buffer.
+SGD_API void* SGD_DECL sgd_GetWGPUDepthBuffer();
 
 //! Debug memory state, does nothing in release builds.
 SGD_API void SGD_DECL sgd_DebugMemory();
@@ -201,10 +214,12 @@ SGD_API float SGD_DECL sgd_GamepadAxis(int gamepad, int axis);
 //! @{
 
 //! @cond Texture format constants
-#define SGD_TEXTURE_FORMAT_RGBA8 1
-#define SGD_TEXTURE_FORMAT_SRGBA8 2
-#define SGD_TEXTURE_FORMAT_RGBA16F 3
-#define SGD_TEXTURE_FORMAT_DEPTH32F 4
+#define SGD_TEXTURE_FORMAT_R8 1
+#define SGD_TEXTURE_FORMAT_RG8 2
+#define SGD_TEXTURE_FORMAT_RGBA8 3
+#define SGD_TEXTURE_FORMAT_SRGBA8 4
+#define SGD_TEXTURE_FORMAT_RGBA16F 5
+#define SGD_TEXTURE_FORMAT_DEPTH32F 6
 //! @endcond
 
 //! @cond Texture flag constants
@@ -397,6 +412,54 @@ SGD_API void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh mesh, float scaleX, fl
 //! Flip mesh.
 SGD_API void SGD_DECL sgd_FlipMesh(SGD_Mesh mesh);
 
+//! @}
+
+//! @name Font
+//! @{
+
+//! Load a new font
+SGD_API SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height);
+
+//! Get font height
+SGD_API float SGD_DECL sgd_FontHeight(SGD_Font font);
+
+//! @}
+
+//! @name 2D Overlay
+//! @{
+
+//! Set current font.
+SGD_API void SGD_DECL sgd_SetFont(SGD_Font font);
+
+//! Set current fill color for drawing shapes.
+SGD_API void SGD_DECL sgd_SetFillColor(float red, float green, float blue, float alpha);
+
+//! Set current fill material for drawing shapes.
+SGD_API void SGD_DECL sgd_SetFillMaterial(SGD_Material material);
+
+//! Set current outline color for drawing shapes.
+SGD_API void SGD_DECL sgd_SetOutlineColor(float red, float green, float blue, float alpha);
+
+//! Set current text color.
+SGD_API void SGD_DECL sgd_SetTextColor(float red, float green, float blue, float alpha);
+
+//! Set current line width, defaults to 3.
+SGD_API void SGD_DECL sgd_SetLineWidth(float width);
+
+//! Clear the current 2d overlay.
+SGD_API void SGD_DECL sgd_Cls();
+
+//! Draw line using current fill and outline colors.
+SGD_API void SGD_DECL sgd_DrawLine(float x0, float y0, float x1, float y1);
+
+//! Draw rect using current fill and outline colors.
+SGD_API void SGD_DECL sgd_DrawRect(float minX, float minY, float maxX, float maxY);
+
+//! Draw oval using current fill and outline colors.
+SGD_API void SGD_DECL sgd_DrawOval(float minX, float minY, float maxX, float maxY);
+
+//! Draw text using current text color.
+SGD_API void SGD_DECL sgd_DrawText(SGD_String text, float x,float y);
 
 //! @}
 

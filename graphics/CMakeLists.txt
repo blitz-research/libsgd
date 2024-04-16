@@ -13,10 +13,14 @@ add_library(graphics
 	buffer.h
 	camera.cpp
 	camera.h
+	drawlist.cpp
+	drawlist.h
 	entity.cpp
 	entity.h
 	entityutil.cpp
 	entityutil.h
+	font.cpp
+	font.h
 	gltfloader.cpp
 	gltfloader.h
 	graphics.cpp
@@ -39,6 +43,8 @@ add_library(graphics
 	model.h
 	modelrenderer.cpp
 	modelrenderer.h
+	overlay.cpp
+	overlay.h
 	pbrmaterial.cpp
 	pbrmaterial.h
 	prelitmaterial.cpp
@@ -74,6 +80,7 @@ add_library(graphics
 	textureutil.cpp
 	textureutil.h
 
+	shaders/drawlistrenderer.wgsl
 	shaders/meshrenderer.wgsl
 	shaders/pbrmaterial.wgsl
 	shaders/prelitmaterial.wgsl

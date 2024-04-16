@@ -4,11 +4,6 @@
 
 namespace sgd {
 
-inline uint32_t bytesPerTexel(TextureFormat format) {
-	uint32_t bpp[]{0, 4, 4, 16, 4};
-	return bpp[(int)format];
-}
-
 const Texture* rgbaTexture(uint32_t rgba);
 
 inline const Texture* blackTexture() {

@@ -85,7 +85,8 @@ void SGD_DECL sgd_SetMaterialVector4f(SGD_Material hmaterial, SGD_String propert
 
 	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
 
-	if (!material->setVector4f(property, {x, y, z, w})) sgdx::error(sgd::String("Material property \"") + property + "\" not found");
+	if (!material->setVector4f(property, {x, y, z, w}))
+		sgdx::error(sgd::String("Material property \"") + property + "\" not found");
 }
 
 void SGD_DECL sgd_SetMaterialVector3f(SGD_Material hmaterial, SGD_String property, float x, float y, float z) {
@@ -93,7 +94,8 @@ void SGD_DECL sgd_SetMaterialVector3f(SGD_Material hmaterial, SGD_String propert
 
 	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
 
-	if (!material->setVector3f(property, {x, y, z})) sgdx::error(sgd::String("Material property \"") + property + "\" not found");
+	if (!material->setVector3f(property, {x, y, z}))
+		sgdx::error(sgd::String("Material property \"") + property + "\" not found");
 }
 
 void SGD_DECL sgd_SetMaterialVector2f(SGD_Material hmaterial, SGD_String property, float x, float y) {
@@ -158,7 +160,8 @@ SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int segs, SGD_M
 }
 
 //! Create a new torus mesh.
-SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs, SGD_Material hmaterial) {
+SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs,
+											  SGD_Material hmaterial) {
 	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
 
 	auto mesh = sgd::createTorusMesh(outerRadius, innerRadius, outerSegs, innerSegs, material);
@@ -213,4 +216,71 @@ void SGD_DECL sgd_FlipMesh(SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
 
 	sgd::flip(mesh);
+}
+
+// ***** Font *****
+
+SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height) {
+	sgdx::started();
+	auto font = sgd::loadFont(sgd::Path(path), height);
+	if (!font) sgdx::error("Failed to load font:" + font.error().message());
+
+	return sgdx::createHandle(font.result());
+}
+
+float SGD_DECL sgd_FontHeight(SGD_Font hfont) {
+	auto font = sgdx::resolveHandle<sgd::Font>(hfont);
+
+	return font->height;
+}
+
+// ***** DrawList *****
+
+void SGD_DECL sgd_SetFont(SGD_Font hfont) {
+	sgdx::drawList()->font = sgdx::resolveHandle<sgd::Font>(hfont);
+}
+
+void SGD_DECL sgd_SetFillColor(float red, float green, float blue, float alpha) {
+	sgdx::drawList()->fillColor = {red, green, blue, alpha};
+}
+
+void SGD_DECL sgd_SetFillMaterial(SGD_Material hmaterial) {
+	sgdx::drawList()->fillMaterial = sgdx::resolveHandle<sgd::Material>(hmaterial);
+}
+
+void SGD_DECL sgd_SetOutlineColor(float red, float green, float blue, float alpha) {
+	sgdx::drawList()->outlineColor = {red, green, blue, alpha};
+}
+
+void SGD_DECL sgd_SetTextColor(float red, float green, float blue, float alpha) {
+	sgdx::drawList()->textColor = {red, green, blue, alpha};
+}
+
+void SGD_DECL sgd_SetLineWidth(float width) {
+	sgdx::drawList()->lineWidth=width;
+}
+
+void SGD_DECL sgd_Cls() {
+	sgdx::drawList()->clear();
+}
+
+void SGD_DECL sgd_DrawLine(float x0, float y0, float x1, float y1) {
+	sgdx::drawList()->addLine(x0,y0,x1,y1);
+}
+
+void SGD_DECL sgd_DrawRect(float minX, float minY, float maxX, float maxY) {
+	sgdx::drawList()->addRect(minX, minY, maxX, maxY);
+}
+
+void SGD_DECL sgd_DrawOval(float minX, float minY, float maxX, float maxY) {
+	sgdx::drawList()->addOval(minX, minY, maxX, maxY);
+}
+
+void SGD_DECL sgd_DrawText(SGD_String text, float x, float y) {
+	sgdx::drawList()->addText(text, x, y);
+}
+
+SGD_API void SGD_DECL sgd_SetOverlayRenderCallback(void(SGD_DECL*callback)(void* wgpuRenderPassEncoder, void* context)) {
+
+
 }

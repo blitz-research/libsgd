@@ -76,6 +76,22 @@ int SGD_DECL sgd_PollEvents() {
 	return mask;
 }
 
+SGD_API void* SGD_DECL sgd_GetGLFWWindow() {
+	return sgdx::mainWindow()->glfwWindow();
+}
+
+void* SGD_DECL sgd_GetWGPUDevice() {
+	return sgdx::mainGC()->wgpuDevice().Get();
+}
+
+SGD_API void* SGD_DECL sgd_GetWGPUColorBuffer() {
+	return sgdx::mainGC()->colorBuffer()->wgpuTexture().Get();
+}
+
+SGD_API void* SGD_DECL sgd_GetWGPUDepthBuffer() {
+	return sgdx::mainGC()->depthBuffer()->wgpuTexture().Get();
+}
+
 void SGD_DECL sgd_DebugMemory() {
 #if SGD_CONFIG_DEBUG
 	sgdx::started();

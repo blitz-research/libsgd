@@ -15,3 +15,6 @@ add(libsgd_tests_pointlight)
 add(libsgd_tests_spotlight)
 add(libsgd_tests_sprites)
 add(libsgd_tests_primitives)
+
+add_executable(libsgd_tests_imgui libsgd_tests_imgui.cpp)
+target_link_libraries(libsgd_tests_imgui libsgd imgui)

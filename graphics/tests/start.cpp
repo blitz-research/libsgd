@@ -22,7 +22,7 @@ void start(void(*entry)()) {
 	window->closeClicked.connect(nullptr, [] { std::exit(0); });
 
 	window->sizeChanged.connect(nullptr, [](CVec2u) {
-		if (scene) scene->render();
+		if (scene) render();
 	});
 
 	gc = new GraphicsContext(window, wgpu::BackendType::D3D12);
