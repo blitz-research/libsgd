@@ -12,9 +12,6 @@ class Mouse : public UIDevice {
 public:
 	static constexpr uint32_t maxButtons = 3;
 
-	Signal<Vec2f> positionChanged;
-	Signal<Vec2f> scrollChanged;
-
 	explicit Mouse(GLFWwindow* window);
 
 	Property<CursorMode> cursorMode;
