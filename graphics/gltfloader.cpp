@@ -517,7 +517,7 @@ Expected<Mesh*, FileioEx> GLTFLoader::loadStaticMesh() {
 
 		auto firstVertex = meshVertices.size();
 		updateMesh(gltfModel.meshes[mesh]);
-		const auto& worldMatrix = bones[i] ? bones[i]->worldMatrix() : AffineMat4f{};
+		const auto& worldMatrix = bones[i] ? bones[i]->worldMatrix() : AffineMat4r{};
 		auto cof = cofactor(worldMatrix.r);
 		for (auto vp = meshVertices.begin() + firstVertex; vp != meshVertices.end(); ++vp) {
 			vp->position = worldMatrix * Vec3r(vp->position);

@@ -12,7 +12,7 @@ void entry() {
 
 	dc->addText("Hello World!", {4, 4});
 
-	window->mouse()->cursorMode = CursorMode::disabled;
+//	window->mouse()->cursorMode = CursorMode::disabled;
 
 	// dc->lineWidth = 3;
 	// dc->pointSize = 3;
@@ -36,8 +36,8 @@ void entry() {
 		//		dc->clear();
 		//		dc->addText("FPS:" + std::to_string(gc->FPS()), 0, 0);
 
-		dc->clear();
-		dc->addText("Position: " + toString(window->mouse()->position()) + " Velocity: " + toString(window->mouse()->velocity()), {0,0});
+		//dc->clear();
+		//dc->addText("Position: " + toString(window->mouse()->position()) + " Velocity: " + toString(window->mouse()->velocity()), {0,0});
 
 		pollEvents();
 		render();
