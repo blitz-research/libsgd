@@ -52,6 +52,13 @@ template <class T> bool operator!=(CRect<T> r, CRect<T> s);
 
 template <class T> std::ostream& operator<<(std::ostream& os, CRect<T>& r);
 
+template <class T> Vec2<T> center(CRect<T> r);
+template <class T> Vec2<T> size(CRect<T> r);
+template <class T> Vec2<T> topLeft(CRect<T> r);
+template <class T> Vec2<T> topRight(CRect<T> r);
+template <class T> Vec2<T> bottomRight(CRect<T> r);
+template <class T> Vec2<T> bottomLeft(CRect<T> r);
+
 } // namespace sgd
 
 #include "rect.inl"

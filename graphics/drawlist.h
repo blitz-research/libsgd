@@ -18,13 +18,24 @@ struct DrawList : public Renderer {
 	};
 	using CVertex = const Vertex&;
 
+	Property<Mat4f> projectionMatrix;
+
 	Property<Vec4f> fillColor{Vec4f(0, 0, 0, 1)};
 	Property<CMaterialPtr> fillMaterial{};
-	Property<Vec4f> outlineColor{Vec4f(0)};
-	Property<Vec4f> textColor{Vec4f(1, 1, 1, 1)};
-	Property<float> lineWidth{3};
+	Property<bool> fillEnabled{true};
+
+	Property<Vec4f> outlineColor{Vec4f(1)};
+	Property<float> outlineWidth{3};
+	Property<bool> outlineEnabled{false};
+
 	Property<bool> lineSmoothing{true};
+	Property<float> lineWidth{3};
+
+	Property<float> pointSize{3};
+
 	Property<CFontPtr> font;
+	Property<Vec4f> textColor{Vec4f(1)};
+
 	Property<float> depth{0};
 
 	DrawList();
@@ -32,10 +43,12 @@ struct DrawList : public Renderer {
 	void clear();
 	void flush();
 
-	void addLine(float x0, float y0, float x1, float y1);
-	void addRect(float x0, float y0, float x1, float y1);
-	void addOval(float x, float y, float xr, float yr);
-	void addText(CString text, float x, float y);
+	void addOutline(CVec2f v0, CVec2f v1);
+	void addLine(CVec2f v0, CVec2f v1);
+	void addRect(CRectf rect);
+	void addOval(CRectf rect);
+	void addPoint(CVec2f p);
+	void addText(CString text, CVec2f v);
 
 private:
 	struct DrawOp {
@@ -45,7 +58,7 @@ private:
 
 	BindGroupPtr m_bindGroup;
 	BufferPtr m_uniformBuffer;
-	uint32_t m_vertexCapacity{10};
+	uint32_t m_vertexCapacity{1000};
 	uint32_t m_vertexCount{};
 	BufferPtr m_vertexBuffer;
 
@@ -76,4 +89,4 @@ private:
 	void render(RenderContext* rc) const override;
 };
 
-} // namespace wb
+} // namespace sgd

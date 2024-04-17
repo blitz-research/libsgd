@@ -33,12 +33,18 @@ Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
 	envTexture = texture;
 
 	m_sceneBindings = new SceneBindings();
-
 	for (int i = 0; i < 6; ++i) {
 		m_shadowBindings[i] = new SceneBindings();
 	}
 
 	m_renderContext = new RenderContext(m_gc);
+
+	m_viewportSize = m_gc->window()->size();
+	m_gc->window()->sizeChanged1.connect(this, [=](CVec2u size){
+		SGD_ASSERT(size == m_gc->colorBuffer()->size());
+		m_viewportSize = size;
+		viewportSizeChanged.emit(size);
+	});
 }
 
 void Scene::clear() {
@@ -110,7 +116,7 @@ Renderer* Scene::getRenderer(RendererType type) {
 void Scene::updateCameraBindings() {
 
 	CameraUniforms uniforms;
-	auto aspect = (float)m_gc->colorBuffer()->size().x / (float)m_gc->colorBuffer()->size().y;
+	auto aspect = (float)m_viewportSize.x / (float)m_viewportSize.y;
 	if (m_cameras.empty()) {
 		auto curs = m_gc->window()->mouse()->position() / Vec2f(m_gc->window()->size());
 		curs = curs * Vec2f(twoPi, pi) - Vec2f(pi, halfPi);
@@ -123,7 +129,6 @@ void Scene::updateCameraBindings() {
 						  Mat4f::perspective(camera->fov(), aspect, camera->near(), camera->far()));
 		m_eye = camera->worldPosition();
 	}
-
 	m_sceneBindings->updateCameraUniforms(uniforms);
 }
 

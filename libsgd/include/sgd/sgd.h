@@ -184,11 +184,36 @@ SGD_API float SGD_DECL sgd_MouseX();
 //! Mouse Y position in window coordinates.
 SGD_API float SGD_DECL sgd_MouseY();
 
-//! Mouse scroll X value.
+//! Mouse X velocity in window coordinates.
+SGD_API float SGD_DECL sgd_MouseVX();
+
+//! Mouse Y velocity in window coordinates.
+SGD_API float SGD_DECL sgd_MouseVY();
+
+//! Mouse X scroll value.
 SGD_API float SGD_DECL sgd_MouseScrollX();
 
-//! Mouse scroll Y value.
+//! Mouse Y scroll value.
 SGD_API float SGD_DECL sgd_MouseScrollY();
+
+//! @cond Cursor modes for use with SetCursorMode.
+#define SGD_CURSOR_MODE_NORMAL 1
+#define SGD_CURSOR_MODE_HIDDEN 2
+#define SGD_CURSOR_MODE_DISABLED 3
+#define SGD_CURSOR_MODE_CAPTURED 4
+//! @endcond
+
+//! Set mouse cursor mode.
+//!
+//! @cursorMode should be one or more of the following bit mask values:
+//!
+//! Cursor mode              | Integer value | Description
+//! -------------------------|---------------|------------
+//! SGD_CURSOR_MODE_NORMAL   | 1             | Normal mouse cursor behaviour
+//! SGD_CURSOR_MODE_HIDDEN   | 2             | Mouse cursor is hidden
+//! SGD_CURSOR_MODE_DISABLED | 3             | Mouse cursor is hidden and locked to window
+//! SGD_CURSOR_MODE_CAPTURED | 4             | Mouse cursor is locked to window
+SGD_API void SGD_DECL sgd_SetCursorMode(int cursorMode);
 
 //! True if mouse button is curently held down.
 SGD_API SGD_Bool SGD_DECL sgd_MouseButtonDown(int button);
@@ -414,52 +439,62 @@ SGD_API void SGD_DECL sgd_FlipMesh(SGD_Mesh mesh);
 
 //! @}
 
-//! @name Font
-//! @{
-
-//! Load a new font
-SGD_API SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height);
-
-//! Get font height
-SGD_API float SGD_DECL sgd_FontHeight(SGD_Font font);
-
-//! @}
-
 //! @name 2D Overlay
 //! @{
 
-//! Set current font.
-SGD_API void SGD_DECL sgd_SetFont(SGD_Font font);
+//! Load a new font
+SGD_API SGD_Font SGD_DECL sgd_Load2DFont(SGD_String path, float height);
+
+//! Get font height
+SGD_API float SGD_DECL sgd_Get2DFontHeight(SGD_Font font);
 
 //! Set current fill color for drawing shapes.
-SGD_API void SGD_DECL sgd_SetFillColor(float red, float green, float blue, float alpha);
+SGD_API void SGD_DECL sgd_Set2DFillColor(float red, float green, float blue, float alpha);
 
 //! Set current fill material for drawing shapes.
-SGD_API void SGD_DECL sgd_SetFillMaterial(SGD_Material material);
+SGD_API void SGD_DECL sgd_Set2DFillMaterial(SGD_Material material);
+
+//! SetCurrent file enabled flag for drawing shapes.
+SGD_API void SGD_DECL sgd_Set2DFillEnabled(SGD_Bool enabled);
 
 //! Set current outline color for drawing shapes.
-SGD_API void SGD_DECL sgd_SetOutlineColor(float red, float green, float blue, float alpha);
+SGD_API void SGD_DECL sgd_Set2DOutlineColor(float red, float green, float blue, float alpha);
 
-//! Set current text color.
-SGD_API void SGD_DECL sgd_SetTextColor(float red, float green, float blue, float alpha);
+//! Set current outline width, defaults to 3.
+SGD_API void SGD_DECL sgd_Set2DOutlineWidth(float width);
+
+//! SetCurrent outline enabled flag for drawing shapes.
+SGD_API void SGD_DECL sgd_Set2DOutlineEnabled(SGD_Bool enabled);
 
 //! Set current line width, defaults to 3.
-SGD_API void SGD_DECL sgd_SetLineWidth(float width);
+SGD_API void SGD_DECL sgd_Set2DLineWidth(float width);
+
+//! Set current point size, defaults to 3.
+SGD_API void SGD_DECL sgd_Set2DPointSize(float size);
+
+//! Set current font.
+SGD_API void SGD_DECL sgd_Set2DFont(SGD_Font font);
+
+//! Set current text color.
+SGD_API void SGD_DECL sgd_Set2DTextColor(float red, float green, float blue, float alpha);
 
 //! Clear the current 2d overlay.
-SGD_API void SGD_DECL sgd_Cls();
+SGD_API void SGD_DECL sgd_Clear2D();
+
+//! Draw point using current fill and outline colors.
+SGD_API void SGD_DECL sgd_Draw2DPoint(float x0, float y0);
 
 //! Draw line using current fill and outline colors.
-SGD_API void SGD_DECL sgd_DrawLine(float x0, float y0, float x1, float y1);
+SGD_API void SGD_DECL sgd_Draw2DLine(float x0, float y0, float x1, float y1);
 
 //! Draw rect using current fill and outline colors.
-SGD_API void SGD_DECL sgd_DrawRect(float minX, float minY, float maxX, float maxY);
+SGD_API void SGD_DECL sgd_Draw2DRect(float minX, float minY, float maxX, float maxY);
 
 //! Draw oval using current fill and outline colors.
-SGD_API void SGD_DECL sgd_DrawOval(float minX, float minY, float maxX, float maxY);
+SGD_API void SGD_DECL sgd_Draw2DOval(float minX, float minY, float maxX, float maxY);
 
 //! Draw text using current text color.
-SGD_API void SGD_DECL sgd_DrawText(SGD_String text, float x,float y);
+SGD_API void SGD_DECL sgd_Draw2DText(SGD_String text, float x,float y);
 
 //! @}
 

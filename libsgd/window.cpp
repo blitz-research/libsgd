@@ -6,13 +6,25 @@ void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flag
 
 	auto window = new sgd::Window(sgdx::Vec2u(width, height), title, (sgdx::WindowFlags)flags);
 
-	window->closeClicked.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_CLOSE_CLICKED}); });
+	window->closeClicked.connect(nullptr, [] { //
+		sgdx::postEvent({SGD_EVENT_MASK_CLOSE_CLICKED});
+	});
 
-	window->sizeChanged.connect(nullptr, [](sgdx::CVec2u size) { sgdx::postEvent({SGD_EVENT_MASK_SIZE_CHANGED}); });
+	window->sizeChanged.connect(nullptr, [](sgdx::CVec2u size) { //
+		if (sgdx::g_mainScene) {
+			sgd_RenderScene();
+			sgd_Present();
+		}
+		sgdx::postEvent({SGD_EVENT_MASK_SIZE_CHANGED});
+	});
 
-	window->lostFocus.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_LOST_FOCUS}); });
+	window->lostFocus.connect(nullptr, [] { //
+		sgdx::postEvent({SGD_EVENT_MASK_LOST_FOCUS});
+	});
 
-	window->gotFocus.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_GOT_FOCUS}); });
+	window->gotFocus.connect(nullptr, [] { //
+		sgdx::postEvent({SGD_EVENT_MASK_GOT_FOCUS});
+	});
 
 	sgdx::g_mainWindow = window;
 }
@@ -59,12 +71,24 @@ float SGD_DECL sgd_MouseY() {
 	return sgdx::mainWindow()->mouse()->position().y;
 }
 
+float SGD_DECL sgd_MouseVX() {
+	return sgdx::mainWindow()->mouse()->velocity().x;
+}
+
+float SGD_DECL sgd_MouseVY() {
+	return sgdx::mainWindow()->mouse()->velocity().y;
+}
+
 float SGD_DECL sgd_MouseScrollX() {
 	return sgdx::mainWindow()->mouse()->scroll().x;
 }
 
 float SGD_DECL sgd_MouseScrollY() {
 	return sgdx::mainWindow()->mouse()->scroll().y;
+}
+
+void SGD_DECL sgd_SetCursorMode(int cursorMode) {
+	sgdx::mainWindow()->mouse()->cursorMode = (sgd::CursorMode)cursorMode;
 }
 
 SGD_Bool SGD_DECL sgd_MouseButtonDown(int button) {

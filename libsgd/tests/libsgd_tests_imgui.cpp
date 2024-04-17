@@ -39,7 +39,7 @@ void initImGui() {
 
 	ImGui_ImplWGPU_Init(&init_info);
 
-	ImGui_ImplWGPU_CreateDeviceObjects();
+//	ImGui_ImplWGPU_CreateDeviceObjects();
 }
 
 ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
@@ -83,7 +83,7 @@ int main(int, char**) {
 
 	sgd_Init();
 
-	sgd_CreateWindow(1280, 720, "Hello World!", 0);
+	sgd_CreateWindow(1280, 720, "Hello World!", 2);
 
 	sgd_CreateScene();
 

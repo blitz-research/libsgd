@@ -2,6 +2,9 @@
 
 void entry() {
 
+	CameraPtr camera= new Camera();
+ scene->add(camera);
+
 	TexturePtr texture =
 		loadTexture(Path("sgd://misc/grass1.png"), TextureFormat::srgba8, TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clampU | TextureFlags::clampV)
 			.result();

@@ -218,9 +218,9 @@ void SGD_DECL sgd_FlipMesh(SGD_Mesh hmesh) {
 	sgd::flip(mesh);
 }
 
-// ***** Font *****
+// ***** 2D Overlay *****
 
-SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height) {
+SGD_Font SGD_DECL sgd_Load2DFont(SGD_String path, float height) {
 	sgdx::started();
 	auto font = sgd::loadFont(sgd::Path(path), height);
 	if (!font) sgdx::error("Failed to load font:" + font.error().message());
@@ -228,59 +228,72 @@ SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height) {
 	return sgdx::createHandle(font.result());
 }
 
-float SGD_DECL sgd_FontHeight(SGD_Font hfont) {
+float SGD_DECL sgd_Get2DFontHeight(SGD_Font hfont) {
 	auto font = sgdx::resolveHandle<sgd::Font>(hfont);
 
 	return font->height;
 }
 
-// ***** DrawList *****
-
-void SGD_DECL sgd_SetFont(SGD_Font hfont) {
-	sgdx::drawList()->font = sgdx::resolveHandle<sgd::Font>(hfont);
-}
-
-void SGD_DECL sgd_SetFillColor(float red, float green, float blue, float alpha) {
+void SGD_DECL sgd_Set2DFillColor(float red, float green, float blue, float alpha) {
 	sgdx::drawList()->fillColor = {red, green, blue, alpha};
 }
 
-void SGD_DECL sgd_SetFillMaterial(SGD_Material hmaterial) {
+void SGD_DECL sgd_Set2DFillMaterial(SGD_Material hmaterial) {
 	sgdx::drawList()->fillMaterial = sgdx::resolveHandle<sgd::Material>(hmaterial);
 }
 
-void SGD_DECL sgd_SetOutlineColor(float red, float green, float blue, float alpha) {
+void SGD_DECL sgd_Set2DFillEnabled(SGD_Bool enabled) {
+	sgdx::drawList()->fillEnabled = enabled;
+}
+
+void SGD_DECL sgd_Set2DOutlineColor(float red, float green, float blue, float alpha) {
 	sgdx::drawList()->outlineColor = {red, green, blue, alpha};
 }
 
-void SGD_DECL sgd_SetTextColor(float red, float green, float blue, float alpha) {
+void SGD_DECL sgd_Set2DOutlineWidth(float width) {
+	sgdx::drawList()->outlineWidth = width;
+}
+
+void SGD_DECL sgd_Set2DOutlineEnabled(SGD_Bool enabled) {
+	sgdx::drawList()->outlineEnabled = enabled;
+}
+
+void SGD_DECL sgd_Set2DLineWidth(float width) {
+	sgdx::drawList()->lineWidth = width;
+}
+
+void SGD_DECL sgd_Set2DPointSize(float size) {
+	sgdx::drawList()->pointSize = size;
+}
+
+void SGD_DECL sgd_Set2DFont(SGD_Font hfont) {
+	sgdx::drawList()->font = sgdx::resolveHandle<sgd::Font>(hfont);
+}
+
+void SGD_DECL sgd_Set2DTextColor(float red, float green, float blue, float alpha) {
 	sgdx::drawList()->textColor = {red, green, blue, alpha};
 }
 
-void SGD_DECL sgd_SetLineWidth(float width) {
-	sgdx::drawList()->lineWidth=width;
-}
-
-void SGD_DECL sgd_Cls() {
+void SGD_DECL sgd_Clear2D() {
 	sgdx::drawList()->clear();
 }
 
-void SGD_DECL sgd_DrawLine(float x0, float y0, float x1, float y1) {
-	sgdx::drawList()->addLine(x0,y0,x1,y1);
+void SGD_DECL sgd_Draw2DPoint(float x, float y) {
+	sgdx::drawList()->addPoint({x, y});
 }
 
-void SGD_DECL sgd_DrawRect(float minX, float minY, float maxX, float maxY) {
-	sgdx::drawList()->addRect(minX, minY, maxX, maxY);
+void SGD_DECL sgd_Draw2DLine(float x0, float y0, float x1, float y1) {
+	sgdx::drawList()->addLine({x0, y0}, {x1, y1});
 }
 
-void SGD_DECL sgd_DrawOval(float minX, float minY, float maxX, float maxY) {
-	sgdx::drawList()->addOval(minX, minY, maxX, maxY);
+void SGD_DECL sgd_Draw2DRect(float minX, float minY, float maxX, float maxY) {
+	sgdx::drawList()->addRect({minX, minY, maxX, maxY});
 }
 
-void SGD_DECL sgd_DrawText(SGD_String text, float x, float y) {
-	sgdx::drawList()->addText(text, x, y);
+void SGD_DECL sgd_Draw2DOval(float minX, float minY, float maxX, float maxY) {
+	sgdx::drawList()->addOval({minX, minY, maxX, maxY});
 }
 
-SGD_API void SGD_DECL sgd_SetOverlayRenderCallback(void(SGD_DECL*callback)(void* wgpuRenderPassEncoder, void* context)) {
-
-
+void SGD_DECL sgd_Draw2DText(SGD_String text, float x, float y) {
+	sgdx::drawList()->addText(text, {x, y});
 }

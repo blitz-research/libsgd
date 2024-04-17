@@ -2,6 +2,8 @@
 
 #include "scene.h"
 
+#include <window/window.h>
+
 namespace sgd {
 
 Overlay::Overlay(const Overlay* that) : Entity(that){
@@ -18,22 +20,35 @@ void Overlay::onCreate() {
 	m_drawList->enabled = false;
 
 	scene()->setRenderer(RendererType::overlay, m_drawList);
+}
+
+void Overlay::onDestroy() {
+
+	scene()->setRenderer(RendererType::overlay, nullptr);
+}
+
+void Overlay::onShow() {
+
+	m_drawList->enabled = true;
+
+	scene()->viewportSizeChanged.connect(this, [=](CVec2u size){
+		m_drawList->projectionMatrix = Mat4f::ortho(0, (float)size.x, (float)size.y, 0, 0, 1);
+		//log() << "### Update draw list projection matrix for size"<<size;
+	});
+	m_drawList->projectionMatrix = Mat4f::ortho(0, (float)scene()->viewportSize().x, (float)scene()->viewportSize().y, 0, 0, 1);
 
 	scene()->beginRender.connect(this, [=]{
 		m_drawList->flush();
 	});
 }
 
-void Overlay::onDestroy() {
-	scene()->setRenderer(RendererType::overlay, nullptr);
-}
-
-void Overlay::onShow() {
-	m_drawList->enabled = true;
-}
-
 void Overlay::onHide() {
+
 	m_drawList->enabled = false;
+
+	scene()->viewportSizeChanged.disconnect(this);
+
+	scene()->beginRender.disconnect(this);
 }
 
 }

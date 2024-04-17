@@ -22,11 +22,19 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 			opts.backendType = wgpuBackendType;
 			if (opts.backendType == wgpu::BackendType::Undefined) {
 #ifdef SGD_OS_WINDOWS
-				opts.backendType = wgpu::BackendType::D3D12;
+#ifndef _WIN32_WINNT_WIN10
+				// Because our 1 Windows 7 user could only get Vulkan to work.
+				opts.backendType = wgpu::BackendType::Vulkan; // Windows 7
+#elif _MSC_VER && !_WIN64
+				// Because D3D12 backend is 'freezing' in windows mode on some users' Blitz3D.
+				opts.backendType = wgpu::BackendType::D3D11; // Blitz3D
+#else
+				opts.backendType = wgpu::BackendType::D3D12; // Windows
+#endif
 #elif SGD_OS_LINUX
-				opts.backendType = wgpu::BackendType::Vulkan;
+				opts.backendType = wgpu::BackendType::Vulkan; // Linux
 #elif SGD_OS_MACOS
-				opts.backendType = wgpu::BackendType::Metal;
+				opts.backendType = wgpu::BackendType::Metal; // MacOS
 #endif
 			}
 			requestWGPUDevice(opts, [&](const wgpu::Device& device) {
@@ -55,7 +63,7 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 				};
 
 				createSwapChain(m_window->size());
-				m_window->sizeChanged.connect(this, [=](CVec2u size) { //
+				m_window->sizeChanged0.connect(this, [=](CVec2u size) { //
 					createSwapChain(size);
 				});
 
@@ -98,12 +106,7 @@ GraphicsResource::GraphicsResource() {
 
 GraphicsResource::~GraphicsResource() {
 	auto it = sgd::find(g_invalidQueue, this);
-	if (m_invalid) {
-		SGD_ASSERT(it != g_invalidQueue.end());
-		g_invalidQueue.erase(it);
-	} else {
-		SGD_ASSERT(it == g_invalidQueue.end());
-	}
+	if (it != g_invalidQueue.end()) g_invalidQueue.erase(it);
 }
 
 void GraphicsResource::validate(GraphicsContext* gc) const { // NOLINT (recursive)
@@ -115,8 +118,6 @@ void GraphicsResource::validate(GraphicsContext* gc) const { // NOLINT (recursiv
 }
 
 void GraphicsResource::validateAll(GraphicsContext* gc) {
-	gc->colorBuffer()->validate(gc);
-	gc->depthBuffer()->validate(gc);
 	while (!g_invalidQueue.empty()) {
 		auto r = g_invalidQueue.back();
 		g_invalidQueue.pop_back();

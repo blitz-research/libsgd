@@ -57,11 +57,7 @@ start:
 	sgd_SetModelMesh(models[4], mesh4);
 	sgd_MoveEntity(models[4], 2.5f, y, tz);
 
-	sgd_Cls();
-	sgd_DrawText("Hello World!",0,0);
-
-	for (;;) {
-		if (sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) break;
+	while(!(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)) {
 
 		if (sgd_KeyHit(SGD_KEY_ESCAPE)) {
 			SGD_Real dz = 1ll << 33;
@@ -96,12 +92,11 @@ start:
 		{
 			char buf[80];
 			sprintf(buf, "FPS: %i", sgd_FPS());
-			sgd_Cls();
-			sgd_DrawText(buf, 2, 2);
+			sgd_Clear2D();
+			sgd_Draw2DText(buf, 2, 2);
 		}
 
 		sgd_RenderScene();
-
 		sgd_Present();
 	}
 

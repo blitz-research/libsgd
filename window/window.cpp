@@ -88,6 +88,9 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 						if (window->m_size.x && window->m_size.y) suspendApp();
 					}
 					window->m_size = Vec2u(w, h);
+					window->sizeChanged0.emit(window->m_size);
+					window->sizeChanged1.emit(window->m_size);
+					window->sizeChanged2.emit(window->m_size);
 					window->sizeChanged.emit(window->m_size);
 				});
 				int w, h;

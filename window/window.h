@@ -25,6 +25,9 @@ struct Window : Shared {
 
 	static constexpr uint32_t maxGamepads = 4;
 
+	Signal<Vec2u> sizeChanged0;
+	Signal<Vec2u> sizeChanged1;
+	Signal<Vec2u> sizeChanged2;
 	Signal<Vec2u> sizeChanged;
 	Signal<> lostFocus;
 	Signal<> gotFocus;

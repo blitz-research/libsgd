@@ -41,7 +41,7 @@ template <class T> Vec2<T> Rect<T>::size() const {
 	return max - min;
 }
 
-// ***** Non-members *****
+// ***** Non-member operators *****
 
 template <class T> Rect<T> operator&(CRect<T> r, CRect<T> s) {
 	return {std::max(r.min.x, s.min.x), std::max(r.min.y, s.min.y), //
@@ -71,6 +71,32 @@ template <class T> bool operator!=(CRect<T> r, CRect<T> s) {
 
 template <class T> std::ostream& operator<<(std::ostream& os, CRect<T>& r) {
 	return os << "Rect(" << r.min.x << ',' << r.min.y << ',' << r.max.x << ',' << r.max.y << ')';
+}
+
+// ***** Non-member functions *****
+
+template <class T> Vec2<T> center(CRect<T> r) {
+	return (r.min + r.max) * .5f;
+}
+
+template <class T> Vec2<T> size(CRect<T> r) {
+	return r.max - r.min;
+}
+
+template <class T> Vec2<T> topLeft(CRect<T> r) {
+	return r.min;
+}
+
+template <class T> Vec2<T> topRight(CRect<T> r) {
+	return {r.max.x, r.min.y};
+}
+
+template <class T> Vec2<T> bottomRight(CRect<T> r) {
+	return {r.max.x, r.max.y};
+}
+
+template <class T> Vec2<T> bottomLeft(CRect<T> r) {
+	return {r.min.x, r.max.y};
 }
 
 } // namespace sgd

@@ -16,10 +16,6 @@ template <class T> constexpr Vec3<T>::Vec3(CVec2<T> v, float z) : x(v.x), y(v.y)
 template <class T> constexpr Vec3<T>::Vec3(T x, T y, T z) : x(x), y(y), z(z) {
 }
 
-template <class T> Vec2<T> Vec3<T>::xy() const {
-	return {x, y};
-}
-
 template <class T> Vec3<T>& Vec3<T>::operator*=(CVec3<T> v) {
 	return *this = *this * v;
 }
@@ -50,6 +46,10 @@ template <class T> Vec3<T>& Vec3<T>::operator+=(T s) {
 
 template <class T> Vec3<T>& Vec3<T>::operator-=(T s) {
 	return *this = *this - s;
+}
+
+template<class T> Vec3<T>::operator Vec2<T>() const {
+	return {x,y};
 }
 
 // ***** Non-member operators *****

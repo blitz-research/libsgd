@@ -34,7 +34,7 @@ const char* errorNames[] = {"No error", "Validation", "Out of memory", "Internal
 
 void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
 	auto name = (uint32_t)type < std::size(errorNames) ? errorNames[(uint32_t)type] : "OOPS";
-	log() << "!!! Dawn error:" << name << message;
+	alert(String("Dawn Device error:\n") + name + "\n" + message);
 	SGD_ABORT();
 }
 

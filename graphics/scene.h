@@ -1,7 +1,7 @@
 #pragma once
 
-#include <geom/exports.h>
 #include "rendercontext.h"
+#include <geom/exports.h>
 
 namespace sgd {
 
@@ -22,7 +22,7 @@ enum struct RendererType {
 	skinnedModel,
 	sprite,
 	overlay,
-	//8 MAX!
+	// 8 MAX!
 };
 
 struct CameraUniforms;
@@ -37,9 +37,14 @@ struct Scene : Shared {
 	Property<Vec4f> ambientLightColor{Vec4f(1, 1, 1, 0)};
 	Property<TexturePtr> envTexture;
 
+	Signal<Vec2u> viewportSizeChanged;
 	Signal<> beginRender;
 
-	Scene(GraphicsContext* gc);
+	explicit Scene(GraphicsContext* gc);
+
+	CVec2u viewportSize() {
+		return m_viewportSize;
+	}
 
 	void clear();
 
@@ -56,13 +61,15 @@ private:
 
 	GraphicsContextPtr m_gc;
 
+	Vec2u m_viewportSize;
+
+	SceneBindingsPtr m_sceneBindings;
+	Array<SceneBindingsPtr, 6> m_shadowBindings;
+
 	Vector<EntityPtr> m_entities;
 	Vector<CameraPtr> m_cameras;
 	Vector<LightPtr> m_lights;
-	Array<RendererPtr,8> m_renderers;
-
-	SceneBindingsPtr m_sceneBindings;
-	Array<SceneBindingsPtr,6> m_shadowBindings;
+	Array<RendererPtr, 8> m_renderers;
 
 	Vec3r m_eye;
 

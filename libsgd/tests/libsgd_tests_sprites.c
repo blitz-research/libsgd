@@ -2,6 +2,8 @@
 
 void entry() {
 
+	sgd_CreatePerspectiveCamera();
+
 	SGD_Light light = sgd_CreateDirectionalLight();
 	sgd_TurnEntity(light, 0,-45,0);
 

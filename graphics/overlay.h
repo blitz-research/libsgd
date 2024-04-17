@@ -20,6 +20,7 @@ struct Overlay : Entity {
 
 private:
 	DrawListPtr m_drawList;
+	Vec2u m_size;
 
 	void onCreate() override;
 	void onDestroy() override;

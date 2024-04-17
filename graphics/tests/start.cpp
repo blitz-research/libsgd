@@ -30,7 +30,7 @@ void start(void(*entry)()) {
 	scene = new Scene(gc);
 	scene->ambientLightColor = {1, 1, 1, 0};
 
-	auto skyTexture = loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8,
+	auto skyTexture = loadTexture(Path("sgd://envmaps/grimmnight-cube.jpg"), TextureFormat::srgba8,
 								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
 						  .result();
 
