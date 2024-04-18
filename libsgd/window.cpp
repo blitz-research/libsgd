@@ -87,7 +87,7 @@ float SGD_DECL sgd_MouseScrollY() {
 	return sgdx::mainWindow()->mouse()->scroll().y;
 }
 
-void SGD_DECL sgd_SetCursorMode(int cursorMode) {
+void SGD_DECL sgd_SetMouseCursorMode(int cursorMode) {
 	sgdx::mainWindow()->mouse()->cursorMode = (sgd::CursorMode)cursorMode;
 }
 

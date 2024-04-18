@@ -7,7 +7,7 @@ void entry() {
 	SGD_Camera camera = sgd_CreatePerspectiveCamera();
 	sgd_TurnEntity(camera, -30, 0, 0);
 
-	SGD_Material material = sgd_CreatePBRMaterial(1, 1, 1, 1);
+	SGD_Material material = sgd_CreatePBRMaterial();
 
 	SGD_Mesh mesh = sgd_CreateBoxMesh(-10, -10, -10, 10, 10, 10, material);
 	sgd_FlipMesh(mesh);

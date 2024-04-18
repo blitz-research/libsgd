@@ -25,8 +25,6 @@ restart:
 
 	sgd_DebugMemory();
 
-	int fps = 0;
-
 	for (;;) {
 
 		int mask = sgd_PollEvents();
@@ -65,18 +63,12 @@ restart:
 		sgd_RenderScene();
 		sgd_Present();
 
-		if (sgd_FPS() != fps) {
-			fps = sgd_FPS();
-			printf("### FPS: %i\n", fps);
-			fflush(stdout);
-		}
-
 		sgd_AnimateModel(model, 0, 0, SGD_ANIMATION_MODE_LOOP);
 
 		if (sgd_KeyHit(32)) {
 			goto restart;
-			//			sgd_DestroyEntity(model);
-			//			model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", 1);
+			// sgd_DestroyEntity(model);
+			// model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", 1);
 		}
 	}
 }

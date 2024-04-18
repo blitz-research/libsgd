@@ -5,46 +5,43 @@
 namespace sgd {
 
 inline void setPosition(Entity* entity, CVec3r pos) {
-	entity->setWorldPosition(pos);
+	entity->setLocalPosition(pos);
 }
 
 inline Vec3r position(const Entity* entity) {
-	return entity->worldPosition();
+	return entity->localPosition();
 }
 
 inline void setRotation(Entity* entity, CVec3r rot) {
-	auto basis = Mat3r::rotation(rot * real(degreesToRadians));
-	entity->setWorldBasis(basis);
+	entity->setLocalBasis(Mat3r::rotation(rot * real(degreesToRadians)));
 }
 
 inline Vec3r rotation( const Entity* entity) {
-	return rotation(entity->worldBasis());
+	return rotation(entity->localBasis());
 }
 
 inline void setScale(Entity* entity, CVec3r scl) {
-	entity->setWorldScale(scl);
+	entity->setLocalScale(scl);
 }
 
 inline void move(Entity* entity, CVec3r trans) {
-	entity->setWorldPosition(entity->worldPosition() + entity->worldMatrix().r * trans);
+	entity->setLocalPosition(entity->localPosition() + entity->localMatrix().r * trans);
 }
 
 inline void turn(Entity* entity, CVec3r rot) {
-	auto basis = Mat3r::rotation(rot * real(degreesToRadians));
-	entity->setWorldBasis(entity->worldBasis() * basis);
+	entity->setLocalBasis(entity->localBasis() * Mat3r::rotation(rot * real(degreesToRadians)));
 }
 
 inline void translate(Entity* entity, CVec3r trans) {
-	entity->setWorldPosition(trans + entity->worldPosition());
+	entity->setLocalPosition(trans + entity->localPosition());
 }
 
 inline void rotate(Entity* entity, CVec3r rot) {
-	auto basis = Mat3r::rotation(rot * real(degreesToRadians));
-	entity->setWorldBasis(basis * entity->worldBasis());
+	entity->setLocalBasis(Mat3r::rotation(rot * real(degreesToRadians)) * entity->localBasis());
 }
 
 inline void scale(Entity* entity, CVec3r scl) {
-	entity->setWorldScale(scl * entity->worldScale());
+	entity->setLocalScale(scl * entity->localScale());
 }
 
 } // namespace sgd

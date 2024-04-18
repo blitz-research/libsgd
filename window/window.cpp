@@ -72,9 +72,28 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			glfwWindowHint(GLFW_RESIZABLE, bool(m_flags & WindowFlags::resizable));
 
-			auto monitor = bool(flags & WindowFlags::fullscreen) ? glfwGetPrimaryMonitor() : nullptr;
+			int w=(int)size.x, h=(int)size.y;
 
-			m_glfwWindow = glfwCreateWindow((int)size.x, (int)size.y, title.c_str(), monitor, nullptr);
+			GLFWmonitor* monitor{};
+			if(bool(flags & WindowFlags::fullscreen)) {
+				monitor = glfwGetPrimaryMonitor();
+				if(bool(flags & WindowFlags::rgba8_60hz)) {
+					glfwWindowHint(GLFW_RED_BITS, 8);
+					glfwWindowHint(GLFW_GREEN_BITS, 8);
+					glfwWindowHint(GLFW_BLUE_BITS, 8);
+					glfwWindowHint(GLFW_REFRESH_RATE, 60);
+				} else{
+					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+ 					glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+					glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+					glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+					glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+					w = mode->width;
+					h = mode->height;
+				}
+			}
+
+			m_glfwWindow = glfwCreateWindow(w, h, title.c_str(), monitor, nullptr);
 
 			glfwSetWindowUserPointer(m_glfwWindow, this);
 

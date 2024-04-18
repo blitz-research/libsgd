@@ -28,7 +28,8 @@ wgpu::TextureFormat preferredWGPUSwapChainFormat(const wgpu::Device& device);
 
 wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window);
 
-wgpu::SwapChain createWGPUSwapChain(const wgpu::Device& device, const wgpu::Surface& surface, CVec2u size, wgpu::TextureFormat format);
+wgpu::SwapChain createWGPUSwapChain(const wgpu::Device& device, const wgpu::Surface& surface, CVec2u size,
+									wgpu::TextureFormat format);
 
 void requestRender(CFunction<void()> renderFunc);
 

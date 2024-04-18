@@ -19,13 +19,15 @@ void start(void(*entry)()) {
 
 	sgd_Init();
 
-	sgd_CreateWindow(1280, 720, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE);// | SGD_WINDOW_FLAGS_FULLSCREEN);
+	sgd_CreateWindow(1280, 720, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE|SGD_WINDOW_FLAGS_FULLSCREEN);//|SGD_WINDOW_FLAGS_RGBA8_60HZ);
 
-	//sgd_SetWebGPUBackend("Vulkan");
+	sgd_SetMouseCursorMode(SGD_MOUSE_CURSOR_MODE_HIDDEN);
 
 	sgd_CreateScene();
 
 	reset();
 
 	entry();
+
+	sgd_Terminate();
 }

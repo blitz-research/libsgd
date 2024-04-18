@@ -1,5 +1,13 @@
 
-* Warning! Add 2 new texture formats so existing texture format enums have changed!
+***** V0.03 *****
+
+* Changed fullscreen mode to use faster "windowed fullscreen" by default. Added experimental window flag to force rgba8 60hz fullscreen.
+
+* Warning! Add 2 new texture formats so existing texture format enums have changed, this will affect all blitz3d env map loaders that use texture format 2 - change to 4!
+
+* Added SetMouseCursorMode to show, hide, disable or capture the mouse cursor.
+
+* Added a bunch of 2D overlay functions, more to come. See overlay.bb
 
 
 ***** V0.03.1b *****

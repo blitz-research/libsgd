@@ -170,16 +170,23 @@ FetchContent_Declare(imgui
 
 FetchContent_MakeAvailable(imgui)
 
-add_library(imgui
+# imgui-core used by demo only
+add_library(imgui-core
 	${imgui_SOURCE_DIR}/imgui.cpp
 	${imgui_SOURCE_DIR}/imgui_demo.cpp
 	${imgui_SOURCE_DIR}/imgui_draw.cpp
 	${imgui_SOURCE_DIR}/imgui_tables.cpp
 	${imgui_SOURCE_DIR}/imgui_widgets.cpp
+)
+target_include_directories(imgui-core PUBLIC ${imgui_SOURCE_DIR})
+
+target_link_libraries(imgui-core lib-dawn glfw)
+
+# imgui-backends used by dynamic lib builds
+add_library(imgui-backends
 	${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
 	${imgui_SOURCE_DIR}/backends/imgui_impl_wgpu.cpp
 )
+target_include_directories(imgui-backends PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
 
-target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
-
-target_link_libraries(imgui lib-dawn glfw)
+target_link_libraries(imgui-backends lib-dawn glfw)

@@ -143,16 +143,18 @@ SGD_API void SGD_DECL sgd_DebugMemory();
 //! @cond Window flags for use with CreateWindow.
 #define SGD_WINDOW_FLAGS_FULLSCREEN 1
 #define SGD_WINDOW_FLAGS_RESIZABLE 2
+#define SGD_WINDOW_FLAGS_RGBA8_60HZ 256
 //! @endcond
 
 //! Create a new window.
 //!
-//! @flags should be one or more of the following bit mask values:
+//! `flags` should be one or more of the following bit mask values:
 //!
 //! Window flag                 | Integer value | Description
 //! ----------------------------|---------------|------------
 //! SGD_WINDOW_FLAGS_FULLSCREEN | 1             | Create a fullscreen window.
 //! SGD_WINDOW_FLAGS_RESIZABLE  | 2             | Create a resizable window.
+//! SGD_WINDOW_FLAGS_RGBA8_60HZ | 256           | Create an exclusive mode fullscreen window.
 SGD_API void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flags);
 
 //! Destroy window.
@@ -196,24 +198,24 @@ SGD_API float SGD_DECL sgd_MouseScrollX();
 //! Mouse Y scroll value.
 SGD_API float SGD_DECL sgd_MouseScrollY();
 
-//! @cond Cursor modes for use with SetCursorMode.
-#define SGD_CURSOR_MODE_NORMAL 1
-#define SGD_CURSOR_MODE_HIDDEN 2
-#define SGD_CURSOR_MODE_DISABLED 3
-#define SGD_CURSOR_MODE_CAPTURED 4
+//! @cond Cursor modes for use with SetMouseCursorMode.
+#define SGD_MOUSE_CURSOR_MODE_NORMAL 1
+#define SGD_MOUSE_CURSOR_MODE_HIDDEN 2
+#define SGD_MOUSE_CURSOR_MODE_DISABLED 3
+#define SGD_MOUSE_CURSOR_MODE_CAPTURED 4
 //! @endcond
 
 //! Set mouse cursor mode.
 //!
 //! @cursorMode should be one or more of the following bit mask values:
 //!
-//! Cursor mode              | Integer value | Description
-//! -------------------------|---------------|------------
-//! SGD_CURSOR_MODE_NORMAL   | 1             | Normal mouse cursor behaviour
-//! SGD_CURSOR_MODE_HIDDEN   | 2             | Mouse cursor is hidden
-//! SGD_CURSOR_MODE_DISABLED | 3             | Mouse cursor is hidden and locked to window
-//! SGD_CURSOR_MODE_CAPTURED | 4             | Mouse cursor is locked to window
-SGD_API void SGD_DECL sgd_SetCursorMode(int cursorMode);
+//! Cursor mode                    | Integer value | Description
+//! -------------------------------|---------------|------------
+//! SGD_MOUSE_CURSOR_MODE_NORMAL   | 1             | Normal mouse cursor behaviour
+//! SGD_MOUSE_CURSOR_MODE_HIDDEN   | 2             | Mouse cursor is hidden
+//! SGD_MOUSE_CURSOR_MODE_DISABLED | 3             | Mouse cursor is hidden and locked to window
+//! SGD_MOUSE_CURSOR_MODE_CAPTURED | 4             | Mouse cursor is locked to window
+SGD_API void SGD_DECL sgd_SetMouseCursorMode(int cursorMode);
 
 //! True if mouse button is curently held down.
 SGD_API SGD_Bool SGD_DECL sgd_MouseButtonDown(int button);
@@ -727,7 +729,18 @@ SGD_API void SGD_DECL sgd_SetSpriteRect(SGD_Sprite sprite, float minX, float min
 
 //! @}
 
-//! @name Skybox
+//! @name ImGui
 //! @{
+
+#if SGD_DYNAMIC
+//! @cond ImGui interface. Only in dll for now.
+SGD_API SGD_Bool SGD_DECL sgd_ImGui_ImplSGD_Init(void* imguiProcs);
+SGD_API void SGD_DECL sgd_ImGui_ImplSGD_Shutdown();
+SGD_API void SGD_DECL sgd_ImGui_ImplSGD_NewFrame();
+SGD_API void SGD_DECL sgd_ImGui_ImplSGD_RenderDrawData(void* imguiDrawData);
+//! @endcond
+#endif
+
+//! @}
 
 #endif

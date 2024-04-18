@@ -14,7 +14,9 @@ start:
 	sgd_SetEntityParent(light0, camera);
 	sgd_SetLightRange(light0, 50);
 
-	SGD_Material material = sgd_CreatePBRMaterial(1, .5f, 1, 1);
+	SGD_Material material = sgd_CreatePBRMaterial();
+	sgd_SetMaterialVector4f(material, "albedoColor4f", 1, .5f, 0, 1);
+
 	SGD_Model ground = sgd_CreateModel();
 	sgd_SetModelMesh(ground, sgd_CreateBoxMesh(-10, -1, -20, 10, 0, 20, material));
 
