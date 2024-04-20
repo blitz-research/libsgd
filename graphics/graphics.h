@@ -33,7 +33,7 @@ struct GraphicsContext : Shared {
 
 	void present(Texture* colorBuffer);
 
-	int FPS() const {
+	float FPS() const {
 		return m_fps;
 	}
 
@@ -57,7 +57,7 @@ private:
 
 	int64_t m_micros{};
 	int m_frames{};
-	int m_fps{};
+	float m_fps{};
 };
 
 struct GraphicsResource : Shared {

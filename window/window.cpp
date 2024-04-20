@@ -10,7 +10,9 @@
 #define GLFW_EXPOSE_NATIVE_WIN32 1
 #define GLFW_EXPOSE_NATIVE_WGL 1
 #define WIN32_LEAN_AND_MEAN
+
 #include <GLFW/glfw3native.h>
+
 #undef min
 #undef max
 
@@ -65,6 +67,7 @@ void resumeApp() {
 } // namespace
 
 Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
+
 	runOnMainThread(
 		[=] {
 			if (!glfwInit()) SGD_ABORT();
@@ -72,27 +75,18 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			glfwWindowHint(GLFW_RESIZABLE, bool(m_flags & WindowFlags::resizable));
 
-			int w=(int)size.x, h=(int)size.y;
+			int w = (int)size.x, h = (int)size.y;
 
 			GLFWmonitor* monitor{};
-			if(bool(flags & WindowFlags::fullscreen)) {
+			if (bool(flags & WindowFlags::fullscreen)) {
 				monitor = glfwGetPrimaryMonitor();
-				if(bool(flags & WindowFlags::rgba8_60hz)) {
-					glfwWindowHint(GLFW_RED_BITS, 8);
-					glfwWindowHint(GLFW_GREEN_BITS, 8);
-					glfwWindowHint(GLFW_BLUE_BITS, 8);
-					glfwWindowHint(GLFW_REFRESH_RATE, 60);
-				} else{
-					const GLFWvidmode* mode = glfwGetVideoMode(monitor);
- 					glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-					glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-					glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-					glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-					w = mode->width;
-					h = mode->height;
-				}
+#if 0
+				glfwWindowHint(GLFW_RED_BITS, 8);
+				glfwWindowHint(GLFW_GREEN_BITS, 8);
+				glfwWindowHint(GLFW_BLUE_BITS, 8);
+				glfwWindowHint(GLFW_REFRESH_RATE, 60);
+#endif
 			}
-
 			m_glfwWindow = glfwCreateWindow(w, h, title.c_str(), monitor, nullptr);
 
 			glfwSetWindowUserPointer(m_glfwWindow, this);
@@ -100,7 +94,7 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 			{
 				glfwSetWindowSizeCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, int w, int h) {
 					auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
-					if(window->m_size == Vec2u(w,h)) return;
+					if (window->m_size == Vec2u(w, h)) return;
 					if (w && h) {
 						if (!window->m_size.x || !window->m_size.y) resumeApp();
 					} else {
@@ -118,9 +112,9 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 				m_size = Vec2u(w, h);
 			}
 			{
-				glfwSetWindowFocusCallback(m_glfwWindow, [](GLFWwindow * glfwWindow, int focused){
+				glfwSetWindowFocusCallback(m_glfwWindow, [](GLFWwindow* glfwWindow, int focused) {
 					auto window = static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
-					if((bool)focused == window->m_hasFocus) return;
+					if ((bool)focused == window->m_hasFocus) return;
 					(window->m_hasFocus = focused) ? window->gotFocus.emit() : window->lostFocus.emit();
 				});
 				m_hasFocus = glfwGetWindowAttrib(m_glfwWindow, GLFW_FOCUSED);
@@ -158,8 +152,13 @@ Window* Window::getWindow(GLFWwindow* glfwWindow) {
 	return static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
 }
 
-void pollEvents() {
+Vec2u desktopSize() {
+	auto monitor = glfwGetPrimaryMonitor();
+	auto mode = glfwGetVideoMode(monitor);
+	return Vec2i{mode->width, mode->height};
+}
 
+void pollEvents() {
 	// This is to delay glfwWaitEvents by 1 poll, so user can 'see' suspend events.
 	static bool wait;
 

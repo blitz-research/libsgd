@@ -25,13 +25,13 @@ struct DrawList : public Renderer {
 	Property<bool> fillEnabled{true};
 
 	Property<Vec4f> outlineColor{Vec4f(1)};
-	Property<float> outlineWidth{3};
+	Property<float> outlineWidth{1};
 	Property<bool> outlineEnabled{false};
 
 	Property<bool> lineSmoothing{true};
-	Property<float> lineWidth{3};
+	Property<float> lineWidth{2};
 
-	Property<float> pointSize{3};
+	Property<float> pointSize{2};
 
 	Property<CFontPtr> font;
 	Property<Vec4f> textColor{Vec4f(1)};

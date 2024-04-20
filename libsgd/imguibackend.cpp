@@ -1,12 +1,13 @@
-
 #if !SGD_DYNAMIC
-#error ImGui backend should only be used in dynalic libs
+#error ImGui backend should only be used in dynamic libs
 #endif
 
 #include "internal.h"
 
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_wgpu.h>
+
+#include <glfw/glfw3.h>
 
 namespace {
 
@@ -36,7 +37,7 @@ struct ImGuiProcs {
 
 	// struct ImGuiStorage members
 	void* (ImGuiStorage::*GetVoidPtr)(ImGuiID key) const;
-	void (ImGuiStorage::*SetVoidPtr)(ImGuiID key, void *value);
+	void (ImGuiStorage::*SetVoidPtr)(ImGuiID key, void* value);
 
 	// Struct ImFontAtlas members
 	void (ImFontAtlas::*GetTexDataAsRGBA32)(unsigned char**, int*, int*, int*);
@@ -44,17 +45,53 @@ struct ImGuiProcs {
 
 ImGuiProcs g_procs{};
 
-}
+void (*g_sgdCursorEnterCallback)(GLFWwindow* window, int entered);
+void (*g_sgdCursorPosCallback)(GLFWwindow* window, double x, double y);
+void (*g_sgdKeyCallback)(GLFWwindow* window, int key, int scancode, int action, int mods);
+void (*g_sgdCharCallback)(GLFWwindow* window, unsigned int chr);
+void (*g_sgdMouseButtonCallback)(GLFWwindow* window, int button, int action, int mods);
+
+bool g_imguiEnabled;
+
+} // namespace
 
 // ***** ImGui_ImplGlfw *****
 
 SGD_Bool SGD_DECL sgd_ImGui_ImplSGD_Init(void* imguiProcs) {
 
-	g_procs=*(ImGuiProcs*)imguiProcs;
+	g_procs = *(ImGuiProcs*)imguiProcs;
 
-	if(!ImGui_ImplGlfw_InitForOther(sgdx::mainWindow()->glfwWindow(), true)) {
+	auto glfwWindow = sgdx::mainWindow()->glfwWindow();
+
+	g_sgdCursorEnterCallback = glfwSetCursorEnterCallback(glfwWindow, [](GLFWwindow* window, int entered) {
+		if (ImGui::GetIO().WantCaptureMouse) return;
+		if (g_sgdCursorEnterCallback) g_sgdCursorEnterCallback(window, entered);
+	});
+
+	g_sgdCursorPosCallback = glfwSetCursorPosCallback(glfwWindow, [](GLFWwindow* window, double x, double y) {
+		if (ImGui::GetIO().WantCaptureMouse) return;
+		if (g_sgdCursorPosCallback) g_sgdCursorPosCallback(window, x, y);
+	});
+
+	g_sgdMouseButtonCallback = glfwSetMouseButtonCallback(glfwWindow, [](GLFWwindow* window, int button, int action, int mods) {
+		if (ImGui::GetIO().WantCaptureMouse) return;
+		if (g_sgdMouseButtonCallback) g_sgdMouseButtonCallback(window, button, action, mods);
+	});
+
+	g_sgdKeyCallback = glfwSetKeyCallback(glfwWindow, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+		if (ImGui::GetIO().WantCaptureKeyboard) return;
+		if (g_sgdKeyCallback) g_sgdKeyCallback(window, key, scancode, action, mods);
+	});
+
+	g_sgdCharCallback = glfwSetCharCallback(glfwWindow, [](GLFWwindow* window, unsigned int chr) {
+		if (ImGui::GetIO().WantCaptureKeyboard) return;
+		if (g_sgdKeyCallback) g_sgdCharCallback(window, chr);
+	});
+
+	if (!ImGui_ImplGlfw_InitForOther(glfwWindow, true)) {
 		return false;
 	}
+
 #ifdef __EMSCRIPTEN__
 	ImGui_ImplGlfw_InstallEmscriptenCanvasResizeCallback("#canvas");
 #endif
@@ -79,7 +116,7 @@ void SGD_DECL sgd_ImGui_ImplSGD_NewFrame() {
 
 SGD_API void SGD_DECL sgd_ImGui_ImplSGD_RenderDrawData(void* imguiDrawData) {
 
-	if(!sgdx::mainGC()->canRender()) return;
+	if (!sgdx::mainGC()->canRender()) return;
 
 	auto device = sgdx::mainGC()->wgpuDevice().Get();
 	auto renderTarget = sgdx::mainGC()->colorBuffer()->wgpuTexture().Get();
@@ -177,11 +214,11 @@ void ImGuiIO::SetKeyEventNativeData(ImGuiKey key, int native_keycode, int native
 	return (this->*g_procs.SetKeyEventNativeData)(key, native_keycode, native_keycode, native_legacy_index);
 }
 
-void* ImGuiStorage::GetVoidPtr(ImGuiID key) const{
+void* ImGuiStorage::GetVoidPtr(ImGuiID key) const {
 	return (this->*g_procs.GetVoidPtr)(key);
 }
 
-void ImGuiStorage::SetVoidPtr(ImGuiID key, void *value) {
+void ImGuiStorage::SetVoidPtr(ImGuiID key, void* value) {
 	return (this->*g_procs.SetVoidPtr)(key, value);
 }
 

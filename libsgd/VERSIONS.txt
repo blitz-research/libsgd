@@ -1,11 +1,20 @@
 
-***** V0.03 *****
+***** V0.04.1 *****
 
-* Changed fullscreen mode to use faster "windowed fullscreen" by default. Added experimental window flag to force rgba8 60hz fullscreen.
+* Tidied up external CMakeLists.txt
 
-* Warning! Add 2 new texture formats so existing texture format enums have changed, this will affect all blitz3d env map loaders that use texture format 2 - change to 4!
+* Merged Dawn with upstream version.
+
+* Fixed ImGui backend always passing mouse/keyboard events to SGD app.
+
+
+***** V0.04 *****
+
+* Added an ImGui backend to sgd_dynamic! See tests/libsgd_tests_imgui.cpp for example usage. This wont run 'as is', you'll need to add sgd_dynamic.dll to the exe dir.
 
 * Added SetMouseCursorMode to show, hide, disable or capture the mouse cursor.
+
+* Added 2 new texture formats. WARNING! This will likely affect all blitz3d env map loaders that use texture format 2, change to 4!
 
 * Added a bunch of 2D overlay functions, more to come. See overlay.bb
 

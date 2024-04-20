@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(libsgd_nodejs)
 
-# No 32 bit nodejs
+# 64 bit only for now
 if (NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
 	return()
 endif ()
@@ -10,7 +10,7 @@ endif ()
 # Check we have SWIG
 find_program(SWIG_PATH swig)
 if (SWIG_PATH STREQUAL SWIG_PATH-NOTFOUND)
-	message(WARNING "Can't find swig program, skipping nodejs target.")
+	message(WARNING "### Can't find swig program, skipping nodejs target.")
 	return()
 endif ()
 
@@ -23,9 +23,11 @@ endif ()
 # Check for npm
 execute_process(COMMAND ${CMD} npm --version RESULT_VARIABLE RV)
 if (NOT RV EQUAL 0)
-	message(WARNING "Can't find npm command, skipping nodejs target.")
+	message(WARNING "### Can't find npm command, skipping nodejs target.")
 	return()
 endif ()
+
+message("### Configuring nodejs target...")
 
 # Install npm packages
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/package.json ${CMAKE_CURRENT_BINARY_DIR})

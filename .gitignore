@@ -20,3 +20,5 @@ help
 # Go not going yet
 libsgd/go
 
+# Ignore Blitz3d backup files
+*.bb

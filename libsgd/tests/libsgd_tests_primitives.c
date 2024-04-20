@@ -93,7 +93,7 @@ start:
 
 		{
 			char buf[80];
-			sprintf(buf, "FPS: %i", sgd_FPS());
+			sprintf(buf, "FPS: %f", sgd_FPS());
 			sgd_Clear2D();
 			sgd_Draw2DText(buf, 2, 2);
 		}

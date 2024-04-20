@@ -1,5 +1,3 @@
-### LibSGD release V0.03
-
 #### Contents:
 
 ``include``: LibSGD Header files for C/C++ programs.
@@ -25,14 +23,18 @@ This release only contains the 'dll' version of the sgd library, as the static v
 ##### Credits
 
 Big shout out to my awesome Patreon supporters!
-	
-MarLupin
-Dan
+
 Martin
+Shane
+Simon Harrison
+Michael Hartlef
+MarLupin
+James Boyd
 Michael Denathorn
 Dex
-Michael Hartlef
 Andy Hewco
-James Boyd
-Shane
+Dan
 Markus Rosse
+Panayiotis Yianni
+JaviCervera
+Chaduke

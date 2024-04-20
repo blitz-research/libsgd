@@ -19,7 +19,8 @@ void start(void(*entry)()) {
 
 	sgd_Init();
 
-	sgd_CreateWindow(1280, 720, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE|SGD_WINDOW_FLAGS_FULLSCREEN);//|SGD_WINDOW_FLAGS_RGBA8_60HZ);
+//	sgd_CreateWindow(sgd_DesktopWidth(), sgd_DesktopHeight(), "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE|SGD_WINDOW_FLAGS_FULLSCREEN);
+	sgd_CreateWindow(sgd_DesktopWidth()/2, sgd_DesktopHeight()*3/4, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE);
 
 	sgd_SetMouseCursorMode(SGD_MOUSE_CURSOR_MODE_HIDDEN);
 

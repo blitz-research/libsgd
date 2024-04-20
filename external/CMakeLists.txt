@@ -4,7 +4,86 @@ project(external)
 
 include(FetchContent)
 
-set(FETCHCONTENT_QUIET OFF)
+# set(FETCHCONTENT_QUIET OFF)
+
+# Do the scary one first in case it fails...
+#
+##### target: lib-dawn #####
+
+add_library(lib-dawn INTERFACE)
+
+if (SGD_OS_EMSCRIPTEN)
+
+	target_link_options(lib-dawn INTERFACE -sUSE_WEBGPU=1)
+
+else ()
+
+	FetchContent_Declare(dawn
+		GIT_REPOSITORY https://github.com/blitz-research/dawn.git
+		GIT_TAG openxr-dev
+		GIT_SUBMODULES ""
+		GIT_SHALLOW TRUE
+		EXCLUDE_FROM_ALL
+	)
+
+	set(DAWN_FETCH_DEPENDENCIES ON)
+	set(DAWN_BUILD_SAMPLES OFF)
+	set(DAWN_USE_GLFW OFF)
+
+	set(TINT_BUILD_CMD_TOOLS OFF)
+	set(TINT_BUILD_DOCS OFF)
+	set(TINT_BUILD_TESTS OFF)
+
+    message("### Configuring Dawn...")
+	FetchContent_MakeAvailable(dawn)
+
+	target_link_libraries(lib-dawn INTERFACE webgpu_dawn webgpu_cpp)
+
+	target_include_directories(lib-dawn INTERFACE ${DAWN_INCLUDE_DIR})
+
+endif ()
+
+# Less scary but takes ages to config
+#
+##### target: libcurl #####
+
+if (NOT SGD_OS_EMSCRIPTEN)
+
+	FetchContent_Declare(libcurl
+		GIT_REPOSITORY https://github.com/blitz-research/curl.git
+		GIT_TAG master	#ea7322ed14e26eb9ea715f4637b28fdecbefe2a1
+		GIT_SUBMODULES ""
+		GIT_SHALLOW TRUE
+		EXCLUDE_FROM_ALL
+	)
+
+	set(BUILD_CURL_EXE OFF)
+	set(BUILD_SHARED_LIBS OFF)
+	set(CURL_DISABLE_TESTS ON)
+
+	if (SGD_OS_WINDOWS)
+		set(CURL_USE_SCHANNEL ON)
+	else ()
+		set(CURL_USE_OPENSSL ON)
+		set(CURL_DISABLE_ALTSVC ON) # Missing header?
+	endif ()
+
+	message("### Configuring Curl...")
+	FetchContent_MakeAvailable(libcurl)
+
+endif ()
+
+##### json11 #####
+
+FetchContent_Declare(json11
+	GIT_REPOSITORY https://github.com/blitz-research/json11.git
+	GIT_TAG master
+	GIT_SUBMODULES ""
+	GIT_SHALLOW TRUE
+	EXCLUDE_FROM_ALL
+)
+
+FetchContent_MakeAvailable(json11)
 
 ##### stb #####
 
@@ -15,26 +94,10 @@ FetchContent_Declare(stb
 	GIT_TAG master
 	GIT_SUBMODULES ""
 	GIT_SHALLOW TRUE
-	GIT_PROGRESS TRUE
 	EXCLUDE_FROM_ALL
 )
 
 FetchContent_MakeAvailable(stb)
-
-target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
-
-##### json11 #####
-
-FetchContent_Declare(json11
-	GIT_REPOSITORY https://github.com/blitz-research/json11.git
-	GIT_TAG master
-	GIT_SUBMODULES ""
-	GIT_SHALLOW TRUE
-	GIT_PROGRESS TRUE
-	EXCLUDE_FROM_ALL
-)
-
-FetchContent_MakeAvailable(json11)
 
 ##### glfw #####
 
@@ -51,13 +114,14 @@ else ()
 		GIT_TAG master
 		GIT_SUBMODULES ""
 		GIT_SHALLOW TRUE
-		GIT_PROGRESS TRUE
 		EXCLUDE_FROM_ALL
 	)
 
 	FetchContent_MakeAvailable(glfw)
 
 endif ()
+
+target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
 
 ##### tinygltf #####
 
@@ -66,7 +130,6 @@ FetchContent_Declare(tinygltf
 	GIT_TAG master
 	GIT_SUBMODULES ""
 	GIT_SHALLOW TRUE
-	GIT_PROGRESS TRUE
 	EXCLUDE_FROM_ALL
 )
 
@@ -75,88 +138,6 @@ set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
 
 FetchContent_MakeAvailable(tinygltf)
 
-##### openxr_loader ####
-
-#[[
-if (SGD_OS_WINDOWS)
-
-    FetchContent_Declare(openxr-sdk
-            GIT_REPOSITORY "https://github.com/blitz-research/OpenXR-SDK.git"
-            GIT_TAG main
-            GIT_SUBMODULES ""
-            GIT_SHALLOW TRUE
-            EXCLUDE_FROM_ALL
-            )
-
-    FetchContent_MakeAvailable(openxr-sdk)
-
-endif ()
-]]
-
-##### target: libcurl #####
-
-if (NOT SGD_OS_EMSCRIPTEN)
-
-	FetchContent_Declare(libcurl
-		GIT_REPOSITORY https://github.com/blitz-research/curl.git
-		GIT_TAG ea7322ed14e26eb9ea715f4637b28fdecbefe2a1
-		GIT_SUBMODULES ""
-		GIT_SHALLOW TRUE
-		GIT_PROGRESS TRUE
-		EXCLUDE_FROM_ALL
-	)
-
-	set(BUILD_CURL_EXE OFF)
-	set(BUILD_SHARED_LIBS OFF)
-	set(CURL_DISABLE_TESTS ON)
-
-	if (SGD_OS_WINDOWS)
-		set(CURL_USE_SCHANNEL ON)
-	else ()
-		set(CURL_USE_OPENSSL ON)
-		set(CURL_DISABLE_ALTSVC ON) # Missing header?
-	endif ()
-
-	FetchContent_MakeAvailable(libcurl)
-
-endif ()
-
-##### target: lib-dawn #####
-
-add_library(lib-dawn INTERFACE)
-
-if (SGD_OS_EMSCRIPTEN)
-
-	target_link_options(lib-dawn INTERFACE -sUSE_WEBGPU=1)
-
-else ()
-
-	FetchContent_Declare(dawn
-		GIT_REPOSITORY https://github.com/blitz-research/dawn.git
-		GIT_TAG d1955726b120bac568ec65b1f4c2ab441b63acbe
-		#GIT_TAG openxr-dev
-		GIT_SUBMODULES ""
-		GIT_SHALLOW TRUE
-		GIT_PROGRESS TRUE
-		EXCLUDE_FROM_ALL
-	)
-
-	set(DAWN_FETCH_DEPENDENCIES ON)
-	set(DAWN_BUILD_SAMPLES OFF)
-	set(DAWN_USE_GLFW OFF)
-
-	set(TINT_BUILD_CMD_TOOLS OFF)
-	set(TINT_BUILD_DOCS OFF)
-	set(TINT_BUILD_TESTS OFF)
-
-	FetchContent_MakeAvailable(dawn)
-
-	target_link_libraries(lib-dawn INTERFACE webgpu_dawn webgpu_cpp)
-
-	target_include_directories(lib-dawn INTERFACE ${DAWN_INCLUDE_DIR})
-
-endif ()
-
 ##### imgui #####
 
 FetchContent_Declare(imgui
@@ -164,7 +145,6 @@ FetchContent_Declare(imgui
 	GIT_TAG master
 	GIT_SUBMODULES ""
 	GIT_SHALLOW TRUE
-	GIT_PROGRESS TRUE
 	EXCLUDE_FROM_ALL
 )
 

@@ -5,6 +5,8 @@
 #include <clocale>
 #endif
 
+#include <GLFW/glfw3.h>
+
 namespace {
 
 void(SGD_DECL* g_errorHandler)(SGD_String error, void* context);
@@ -26,6 +28,9 @@ void SGD_DECL sgd_Init() {
 	sgd::appSuspended.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_SUSPENDED}); });
 
 	sgd::appResumed.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_RESUMED}); });
+
+	// So we can use desktop width/height before creating a window
+	glfwInit();
 }
 
 void SGD_DECL sgd_Terminate() {
@@ -65,6 +70,14 @@ void SGD_DECL sgd_Alert(SGD_String message) {
 	sgd::alert(message);
 }
 
+int SGD_DECL sgd_DesktopWidth() {
+	return (int)sgd::desktopSize().x;
+}
+
+int SGD_DECL sgd_DesktopHeight() {
+	return (int)sgd::desktopSize().y;
+}
+
 int SGD_DECL sgd_PollEvents() {
 	sgdx::started();
 
@@ -74,22 +87,6 @@ int SGD_DECL sgd_PollEvents() {
 	int mask = 0;
 	for (auto& ev : g_eventQueue) mask |= ev.type;
 	return mask;
-}
-
-SGD_API void* SGD_DECL sgd_GetGLFWWindow() {
-	return sgdx::mainWindow()->glfwWindow();
-}
-
-void* SGD_DECL sgd_GetWGPUDevice() {
-	return sgdx::mainGC()->wgpuDevice().Get();
-}
-
-SGD_API void* SGD_DECL sgd_GetWGPUColorBuffer() {
-	return sgdx::mainGC()->colorBuffer()->wgpuTexture().Get();
-}
-
-SGD_API void* SGD_DECL sgd_GetWGPUDepthBuffer() {
-	return sgdx::mainGC()->depthBuffer()->wgpuTexture().Get();
 }
 
 void SGD_DECL sgd_DebugMemory() {

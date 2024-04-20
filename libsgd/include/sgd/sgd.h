@@ -97,6 +97,12 @@ SGD_API void SGD_DECL sgd_Error(SGD_String error);
 //! Generate modal alert dialog.
 SGD_API void SGD_DECL sgd_Alert(SGD_String message);
 
+//! Return width of desktop in pixels.
+SGD_API int SGD_DECL sgd_DesktopWidth();
+
+//! Return height of desktop in pixels.
+SGD_API int SGD_DECL sgd_DesktopHeight();
+
 //! @cond Event mask  constants returned by sgd_NextEvent.
 #define SGD_EVENT_MASK_CLOSE_CLICKED 1
 #define SGD_EVENT_MASK_SIZE_CHANGED  2
@@ -120,20 +126,9 @@ SGD_API void SGD_DECL sgd_Alert(SGD_String message);
 //! SGD_EVENT_MASK_RESUMED         | 32            | App resumed
 SGD_API SGD_Bool SGD_DECL sgd_PollEvents();
 
-//! Get internal GLFW Window.
-SGD_API void* SGD_DECL sgd_GetGLFWWindow();
-
-//! Get internal WebGPU Device.
-SGD_API void* SGD_DECL sgd_GetWGPUDevice();
-
-//! Get internal WebGPU color buffer.
-SGD_API void* SGD_DECL sgd_GetWGPUColorBuffer();
-
-//! Get internal WebGPU depth buffer.
-SGD_API void* SGD_DECL sgd_GetWGPUDepthBuffer();
-
-//! Debug memory state, does nothing in release builds.
+//! @cond Debug memory state, does nothing in release builds.
 SGD_API void SGD_DECL sgd_DebugMemory();
+//! @endcond
 
 //! @}
 
@@ -528,7 +523,7 @@ SGD_API void SGD_DECL sgd_RenderScene();
 SGD_API void SGD_DECL sgd_Present();
 
 //! Return frames per second.
-SGD_API int SGD_DECL sgd_FPS();
+SGD_API float SGD_DECL sgd_FPS();
 
 //! @}
 
@@ -733,7 +728,7 @@ SGD_API void SGD_DECL sgd_SetSpriteRect(SGD_Sprite sprite, float minX, float min
 //! @{
 
 #if SGD_DYNAMIC
-//! @cond ImGui interface. Only in dll for now.
+//! @cond Private internal ImGui interface used by sgd/imgui_impl_sgd.h glue
 SGD_API SGD_Bool SGD_DECL sgd_ImGui_ImplSGD_Init(void* imguiProcs);
 SGD_API void SGD_DECL sgd_ImGui_ImplSGD_Shutdown();
 SGD_API void SGD_DECL sgd_ImGui_ImplSGD_NewFrame();

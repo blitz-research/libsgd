@@ -70,6 +70,11 @@ restart:
 			// sgd_DestroyEntity(model);
 			// model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", 1);
 		}
+
+		char buf[80];
+		sprintf(buf, "FPS:%f",sgd_FPS());
+		sgd_Clear2D();
+		sgd_Draw2DText(buf,0,0);
 	}
 }
 

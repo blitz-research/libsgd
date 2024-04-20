@@ -29,21 +29,23 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 			opts.backendType = wgpuBackendType;
 			if (opts.backendType == wgpu::BackendType::Undefined) {
 #ifdef SGD_OS_WINDOWS
-				if (IsWindows10OrGreater()) {
-#if _MSC_VER && !_WIN64
-			// Because D3D12 backend is 'freezing' in windowed mode on some users' Blitz3D.
-			opts.backendType = wgpu::BackendType::D3D11; // Blitz3D
+				OSVERSIONINFO info{sizeof(OSVERSIONINFO)};
+				GetVersionEx((OSVERSIONINFO*)&info);
+				if (info.dwMajorVersion > 6 ||
+					(info.dwMajorVersion == 6 && info.dwMinorVersion > 1)) { // 6.2 is Windows 8, 6.1 is Windows 7.
+#if _WIN64
+					opts.backendType = wgpu::BackendType::D3D12; // 64 bit Windows 8+ case
 #else
-			opts.backendType = wgpu::BackendType::D3D12; // Windows
+					// Because D3D12 backend is 'freezing' Blitz3D in windowed mode for some users.
+					opts.backendType = wgpu::BackendType::D3D11; // 32 bit Windows 8+ case
 #endif
 				} else {
-					// Because our 1 Windows 7 user can only get Vulkan to work.
-					opts.backendType = wgpu::BackendType::Vulkan; // Windows 7
+					opts.backendType = wgpu::BackendType::Vulkan; // 32/64 bit Windows 7 case
 				}
 #elif SGD_OS_LINUX
 				opts.backendType = wgpu::BackendType::Vulkan; // Linux
 #elif SGD_OS_MACOS
-		opts.backendType = wgpu::BackendType::Metal; // MacOS
+				opts.backendType = wgpu::BackendType::Metal; // MacOS
 #endif
 			}
 			requestWGPUDevice(opts, [&](const wgpu::Device& device) {
@@ -85,13 +87,13 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 }
 
 void GraphicsContext::present(Texture* texture) {
-	auto elapsed = sgd::micros() - m_micros;
-	++m_frames;
 
+	++m_frames;
+	auto elapsed = sgd::micros() - m_micros;
 	if (elapsed >= 1000000) {
 		float seconds = (float)elapsed / 1000000.0f;
-		m_fps = (int)std::round((float)m_frames / seconds);
-		m_micros += 1000000;
+		m_fps = (float)m_frames / seconds;
+		m_micros += elapsed;
 		m_frames = 0;
 	}
 

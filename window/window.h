@@ -18,7 +18,6 @@ enum struct WindowFlags {
 	none = 0,
 	fullscreen = 1,
 	resizable = 2,
-	rgba8_60hz = 0x100,
 };
 
 struct Window : Shared {
@@ -76,6 +75,8 @@ private:
 	Keyboard* m_keyboard;
 	Mouse* m_mouse;
 };
+
+Vec2u desktopSize();
 
 // TODO: ***** system.h *****
 //

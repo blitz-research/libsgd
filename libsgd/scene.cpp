@@ -80,7 +80,7 @@ void SGD_DECL sgd_Present() {
 	sgdx::mainGC()->present(sgdx::mainGC()->colorBuffer());
 }
 
-int SGD_DECL sgd_FPS() {
+float SGD_DECL sgd_FPS() {
 	return sgdx::mainGC()->FPS();
 }
 

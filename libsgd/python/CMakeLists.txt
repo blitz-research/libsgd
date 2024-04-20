@@ -2,23 +2,25 @@ cmake_minimum_required(VERSION 3.16)
 
 project(libsgd_python)
 
-# No 32 bit python support yet
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+# 64 bit only for now
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     return()
 endif()
 
 # Check we have SWIG
 if(SWIG_PATH STREQUAL SWIG_PATH-NOTFOUND)
-    message(WARNING "Can't find swig program, skipping python target.")
+    message(WARNING "### Can't find swig program, skipping python target.")
     return()
 endif()
 
 # Check we have Python development
 find_package(Python COMPONENTS Development)
 if(NOT Python_Development_FOUND)
-    message(WARNING "Python development package not found, skipping python target")
+    message(WARNING "### Python development package not found, skipping python target")
     return()
 endif()
+
+message("### Configuring python target...")
 
 add_library(libsgd_python SHARED sgd_wrap.c sgd.py sgd.i)
 

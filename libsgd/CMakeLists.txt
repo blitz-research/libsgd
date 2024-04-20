@@ -28,7 +28,14 @@ target_include_directories(libsgd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(libsgd graphics)
 
 if (SGD_INSTALL_DIR)
+	# Headers
 	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/sgd DESTINATION include)
+	# Blitz3d demos
+	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/blitz3d DESTINATION .)
+	# Help files
+	install(DIRECTORY ${CMAKE_SOURCE_DIR}/help DESTINATION .)
+	# Text files
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/VERSIONS.txt ${CMAKE_CURRENT_SOURCE_DIR}/README.md DESTINATION .)
 endif ()
 
 ##### sgd_static *****
@@ -76,9 +83,9 @@ function(create_bundled_lib output_lib output_libname input_lib)
 
 	list(REMOVE_DUPLICATES static_libs)
 
-	message("### Dependencies: ${static_libs}")
+	# message("### Static lib dependencies: ${static_libs}")
 
-	set(output_file ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX} ${output_libname} ${CMAKE_STATIC_LIBRARY_SUFFIX})
+	set(output_file "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${output_libname}${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
 	if (SGD_OS_WINDOWS)
 
@@ -150,7 +157,7 @@ create_bundled_lib(libsgd_static sgd_static libsgd)
 
 ##### libsgd_dynamic #####
 
-add_library(libsgd_dynamic SHARED ${LIBSGD_SOURCES} imgui.cpp)
+add_library(libsgd_dynamic SHARED ${LIBSGD_SOURCES} imguibackend.cpp)
 
 set_target_properties(libsgd_dynamic PROPERTIES OUTPUT_NAME sgd_dynamic)
 

@@ -134,10 +134,15 @@ void DrawList::addRect(CRectf r) {
 
 void DrawList::addOutline(CVec2f v0, CVec2f v1) {
 
-	Vec3f p0{v0, depth()};
-	Vec3f p1{v1, depth()};
-	Vec3f tv{v0.y - v1.y, v1.x - v0.x, 0};
-	tv = normalize(tv) * (outlineWidth() * 0.5f);
+	Vec2f dv = normalize(v1 - v0) * outlineWidth() * .5f;
+	Vec3f p0{v0 - dv, depth()};
+	Vec3f p1{v1 + dv, depth()};
+	Vec3f tv{-dv.y, dv.x, 0};
+
+	// Vec3f p0{v0, depth()};
+	// Vec3f p1{v1, depth()};
+	// Vec3f tv{v0.y - v1.y, v1.x - v0.x, 0};
+	// tv = normalize(tv) * (outlineWidth() * 0.5f);
 
 	auto pmaterial = fillMaterial();
 	fillMaterial = m_defaultMaterial;
@@ -156,10 +161,15 @@ void DrawList::addOutline(CVec2f v0, CVec2f v1) {
 
 void DrawList::addLine(CVec2f v0, CVec2f v1) {
 
-	Vec3f p0{v0, depth()};
-	Vec3f p1{v1, depth()};
-	Vec3f tv{v0.y - v1.y, v1.x - v0.x, 0};
-	tv = normalize(tv) * (lineWidth() * 0.5f);
+	Vec2f dv = normalize(v1 - v0) * lineWidth() * .5f;
+	Vec3f p0{v0 - dv, depth()};
+	Vec3f p1{v1 + dv, depth()};
+	Vec3f tv{-dv.y, dv.x, 0};
+
+	// Vec3f p0{v0, depth()};
+	// Vec3f p1{v1, depth()};
+	// Vec3f tv{v0.y - v1.y, v1.x - v0.x, 0};
+	// tv = normalize(tv) * (lineWidth() * 0.5f);
 
 	if (fillEnabled()) {
 		if (lineSmoothing()) {

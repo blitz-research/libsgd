@@ -4,12 +4,15 @@ project("LibSGD")
 
 set(CMAKE_VERBOSE_MAKEFILE 0)
 
-# So you can set options using 'set' before add_subdirectory, maybe? Doing this only seems to upset tinygltf.
-# cmake_policy(SET CMP0077 NEW) FAILS?
+#  The OLD behavior for this policy is to proceed even when a normal variable of the same name exists. If the cache entry does not already exist and have a type then it is created and/or given a type and the normal variable is removed. The NEW behavior for this policy is to do nothing when a normal variable of the same name exists. The normal variable is not removed. The cache entry is not created or updated and is ignored if it exists.
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
-# Use cmake's FindPythonInterp/FindPythonLibs
+# The OLD behavior of this policy is for find_package(PythonInterp) and find_package(PythonLibs) to load the deprecated modules. The NEW behavior is for uses of the modules to fail as if they do not exist.
 set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
+
+# The OLD behavior for this policy is for GIT_SUBMODULES when set to an empty string to initialize and update all git submodules. The NEW behavior for this policy is for GIT_SUBMODULES when set to an empty string to initialize and update no git submodules.
+set(CMAKE_POLICY_DEFAULT_CMP0097 NEW)
+
 
 # Options
 option(SGD_NODEJS_TARGET_ENABLED "Nodejs target enabled" OFF)
@@ -171,19 +174,25 @@ elseif (SGD_OS_EMSCRIPTEN)
 
 endif ()
 
-# SGD_INSTALL_DIR setup for x64 release
-#
 if (SGD_CONFIG_RELEASE AND CMAKE_SIZEOF_VOID_P EQUAL 8)
 
     if (SGD_OS_WINDOWS)
-        set(SGD_INSTALL_DIR windows-x64-release)
+        set(SGD_INSTALL_OS windows)
     elseif (SGD_OS_LINUX)
-        set(SGD_INSTALL_DIR linux-x64-release)
+        set(SGD_INSTALL_OS linux)
     elseif (SGD_OS_MACOS)
-        set(SGD_INSTALL_DIR macos-x64-release)
-    endif ()
+        set(SGD_INSTALL_OS macos)
+	endif ()
 
-    set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/cmake-install-${SGD_INSTALL_DIR})
+	if(SGD_ARCH_64_BIT)
+		set(SGD_INSTALL_ARCH x64)
+	else()
+		set(SGD_INSTALL_ARCH x86)
+	endif()
+
+	set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/cmake-install-${SGD_INSTALL_OS}-release)
+
+	set(SGD_INSTALL_DIR ${SGD_INSTALL_OS}-${SGD_INSTALL_ARCH}-release)
 
 endif ()
 
