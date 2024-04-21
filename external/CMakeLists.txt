@@ -31,7 +31,6 @@ else ()
 	set(DAWN_USE_GLFW OFF)
 
 	set(TINT_BUILD_CMD_TOOLS OFF)
-	set(TINT_BUILD_DOCS OFF)
 	set(TINT_BUILD_TESTS OFF)
 
     message("### Configuring Dawn...")
