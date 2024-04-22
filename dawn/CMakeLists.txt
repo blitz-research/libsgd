@@ -30,6 +30,6 @@ endif ()
 
 add_library(dawn ${SRCS})
 
-target_link_libraries(dawn geom lib-dawn glfw)
+target_link_libraries(dawn app lib-dawn)
 
 add_subdirectory(tests)

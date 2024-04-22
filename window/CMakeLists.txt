@@ -21,6 +21,6 @@ add_library(window
         exports.h
         )
 
-target_link_libraries(window geom glfw)
+target_link_libraries(window app)
 
 add_subdirectory(tests)

@@ -51,7 +51,34 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 			requestWGPUDevice(opts, [&](const wgpu::Device& device) {
 				m_wgpuDevice = device;
 				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
+#if 0
+				auto configureSurface = [=](CVec2u size) {
+					wgpu::SurfaceConfiguration config{};
+					config.device = m_wgpuDevice;
+					config.width = size.x;
+					config.height = size.y;
+					config.format = m_wgpuSurface.GetPreferredFormat(m_wgpuDevice.GetAdapter());
+					config.usage = wgpu::TextureUsage::RenderAttachment;
+					config.presentMode = wgpu::PresentMode::Fifo;
+					config.viewFormatCount = 0;
+					config.viewFormats = nullptr;
+					config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
+					m_wgpuSurface.Configure(&config);
 
+					m_colorBuffer =
+						new Texture(size, 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
+					m_colorBuffer->validate(this);
+
+					m_depthBuffer =
+						new Texture(size, 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
+					m_depthBuffer->validate(this);
+				};
+				m_window->sizeChanged0.connect(this, [=](CVec2u size) { //
+					configureSurface(size);
+				});
+				configureSurface(m_window->size());
+#endif
+#if 1
 				auto createSwapChain = [=](CVec2u size) {
 					m_canRender = size.x && size.y;
 					if (!m_canRender) {
@@ -65,19 +92,18 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 						createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, size, preferredWGPUSwapChainFormat(m_wgpuDevice));
 
 					m_colorBuffer =
-						new Texture(m_window->size(), 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
+						new Texture(size, 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
 					m_colorBuffer->validate(this);
 
 					m_depthBuffer =
-						new Texture(m_window->size(), 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
+						new Texture(size, 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
 					m_depthBuffer->validate(this);
 				};
-
-				createSwapChain(m_window->size());
 				m_window->sizeChanged0.connect(this, [=](CVec2u size) { //
 					createSwapChain(size);
 				});
-
+				createSwapChain(m_window->size());
+#endif
 				ready.set(true);
 			});
 		},
@@ -102,10 +128,27 @@ void GraphicsContext::present(Texture* texture) {
 	auto& wgpuTexture = texture->wgpuTexture();
 
 	requestRender([=] {
+
+#if 0
+		struct wgpu::SurfaceTexture surfaceTexture {};
+		m_wgpuSurface.GetCurrentTexture(&surfaceTexture);
+		if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::Success) {
+			log() << "### OOPS";
+			return;
+		}
+		copyTexture(m_wgpuDevice, wgpuTexture, surfaceTexture.texture);
+#if !SGD_OS_EMSCRIPTEN
+		m_wgpuSurface.Present();
+#endif
+#endif
+
+#if 1
 		copyTexture(m_wgpuDevice, wgpuTexture, m_wgpuSwapChain.GetCurrentTexture());
 #if !SGD_OS_EMSCRIPTEN
 		m_wgpuSwapChain.Present();
 #endif
+#endif
+
 	});
 }
 

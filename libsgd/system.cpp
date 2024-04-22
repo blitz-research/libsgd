@@ -25,12 +25,11 @@ void SGD_DECL sgd_Init() {
 	setlocale(LC_ALL, ".utf8");
 #endif
 
+	sgd::initApp();
+
 	sgd::appSuspended.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_SUSPENDED}); });
 
 	sgd::appResumed.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_RESUMED}); });
-
-	// So we can use desktop width/height before creating a window
-	glfwInit();
 }
 
 void SGD_DECL sgd_Terminate() {

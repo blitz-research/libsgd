@@ -6,9 +6,11 @@ include(FetchContent)
 
 # set(FETCHCONTENT_QUIET OFF)
 
-# Do the scary one first in case it fails...
+# Do the big scary one first in case it fails...
 #
 ##### target: lib-dawn #####
+
+message("### Configuring Dawn...")
 
 add_library(lib-dawn INTERFACE)
 
@@ -33,7 +35,6 @@ else ()
 	set(TINT_BUILD_CMD_TOOLS OFF)
 	set(TINT_BUILD_TESTS OFF)
 
-    message("### Configuring Dawn...")
 	FetchContent_MakeAvailable(dawn)
 
 	target_link_libraries(lib-dawn INTERFACE webgpu_dawn webgpu_cpp)
@@ -46,11 +47,13 @@ endif ()
 #
 ##### target: libcurl #####
 
+message("### Configuring Curl...")
+
 if (NOT SGD_OS_EMSCRIPTEN)
 
 	FetchContent_Declare(libcurl
 		GIT_REPOSITORY https://github.com/blitz-research/curl.git
-		GIT_TAG master	#ea7322ed14e26eb9ea715f4637b28fdecbefe2a1
+		GIT_TAG master #ea7322ed14e26eb9ea715f4637b28fdecbefe2a1
 		GIT_SUBMODULES ""
 		GIT_SHALLOW TRUE
 		EXCLUDE_FROM_ALL
@@ -67,10 +70,97 @@ if (NOT SGD_OS_EMSCRIPTEN)
 		set(CURL_DISABLE_ALTSVC ON) # Missing header?
 	endif ()
 
-	message("### Configuring Curl...")
 	FetchContent_MakeAvailable(libcurl)
 
 endif ()
+
+##### miniaudio #####
+
+add_library(miniaudio INTERFACE)
+
+FetchContent_Declare(miniaudio
+	GIT_REPOSITORY https://github.com/blitz-research/miniaudio.git
+	GIT_TAG master
+	GIT_SUBMODULES ""
+	GIT_SHALLOW TRUE
+	EXCLUDE_FROM_ALL
+)
+
+FetchContent_MakeAvailable(miniaudio)
+
+target_include_directories(miniaudio INTERFACE ${miniaudio_SOURCE_DIR})
+
+##### soloud #####
+
+FetchContent_Declare(soloud
+	GIT_REPOSITORY https://github.com/blitz-research/soloud.git
+	GIT_TAG master
+	GIT_SUBMODULES ""
+	GIT_SHALLOW TRUE
+	EXCLUDE_FROM_ALL
+)
+
+FetchContent_MakeAvailable(soloud)
+
+set(CORE ${soloud_SOURCE_DIR}/src/core)
+set(BACKEND ${soloud_SOURCE_DIR}/src/backend)
+set(ASRC ${soloud_SOURCE_DIR}/src/audiosource)
+
+set(SRCS
+	${CORE}/soloud.cpp
+	${CORE}/soloud_core_basicops.cpp
+	${CORE}/soloud_core_setters.cpp
+	${CORE}/soloud_fft.cpp
+	${CORE}/soloud_misc.cpp
+	${CORE}/soloud_audiosource.cpp
+	${CORE}/soloud_core_faderops.cpp
+	${CORE}/soloud_core_voicegroup.cpp
+	${CORE}/soloud_fft_lut.cpp
+	${CORE}/soloud_queue.cpp
+	${CORE}/soloud_bus.cpp
+	${CORE}/soloud_core_filterops.cpp
+	${CORE}/soloud_core_voiceops.cpp
+	${CORE}/soloud_file.cpp
+	${CORE}/soloud_thread.cpp
+	${CORE}/soloud_core_3d.cpp
+	${CORE}/soloud_core_getters.cpp
+	${CORE}/soloud_fader.cpp
+	${CORE}/soloud_filter.cpp
+	${ASRC}/wav/soloud_wav.cpp
+	${ASRC}/wav/soloud_wavstream.cpp
+	${ASRC}/wav/stb_vorbis.c
+	${ASRC}/wav/dr_impl.cpp
+)
+
+if (SGD_OS_WINDOWS)
+	set(SRCS ${SRCS}
+		${BACKEND}/xaudio2/soloud_xaudio2.cpp
+		${BACKEND}/winmm/soloud_winmm.cpp
+	)
+	set(WITH_BACKENDS WITH_XAUDIO2=1 WITH_WINMM=1)
+elseif (SGD_OS_LINUX)
+	set(SRC ${SRCS}
+		${BACKEND}/alsa/soloud_alsa.cpp
+		${BACKEND}/oss/soloud_oss.cpp
+	)
+	set(WITH_BACKENDS WITH_ALSA=1 WITH_OSS=1)
+elseif (SGD_OS_MACOS)
+	set(SRCS ${SRCS}
+		${BACKEND}/coreaudio/soloud_coreaudio.cpp
+	)
+	set(WITH_BACKENDS WITH_COREAUDIO=1)
+elseif (SGD_OS_EMSCRIPTEN)
+	set(SRCS ${SRCS}
+		${BACKEND}/soloud_openal.cpp
+	)
+	set(WITH_BACKENDS WITH_OPENAL=1)
+endif ()
+
+add_library(soloud ${SRCS})
+
+target_compile_definitions(soloud PUBLIC ${WITH_BACKENDS})
+
+target_include_directories(soloud PUBLIC ${soloud_SOURCE_DIR}/include)
 
 ##### json11 #####
 
@@ -98,6 +188,8 @@ FetchContent_Declare(stb
 
 FetchContent_MakeAvailable(stb)
 
+target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
+
 ##### glfw #####
 
 if (SGD_OS_EMSCRIPTEN)
@@ -119,8 +211,6 @@ else ()
 	FetchContent_MakeAvailable(glfw)
 
 endif ()
-
-target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
 
 ##### tinygltf #####
 

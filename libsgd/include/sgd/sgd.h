@@ -61,6 +61,7 @@ typedef SGD_Handle SGD_Texture;
 typedef SGD_Handle SGD_Material;
 typedef SGD_Handle SGD_Mesh;
 typedef SGD_Handle SGD_Font;
+typedef SGD_Handle SGD_Sound;
 typedef SGD_Handle SGD_Entity;
 typedef SGD_Handle SGD_Camera;
 typedef SGD_Handle SGD_Light;
@@ -492,6 +493,29 @@ SGD_API void SGD_DECL sgd_Draw2DOval(float minX, float minY, float maxX, float m
 
 //! Draw text using current text color.
 SGD_API void SGD_DECL sgd_Draw2DText(SGD_String text, float x,float y);
+
+//! @}
+
+//! @name Audio
+//! @{
+
+//! Load a new sound.
+SGD_API SGD_Sound sgd_LoadSound(SGD_String path);
+
+//! Play a sound.
+SGD_API int sgd_PlaySound(SGD_Sound sound);
+
+//! Cue a sound. The returned audio stream must be unpaused before it will start.
+SGD_API int sgd_CueSound(SGD_Sound sound);
+
+//! Set audio paused
+SGD_API void sgd_SetAudioPaused(int audio, SGD_Bool paused);
+
+//! Set audio volume
+SGD_API void sgd_SetAudioVolume(int audio, float volume);
+
+//! Set audio pan
+SGD_API void sgd_SetAudioPan(int audio, float pan);
 
 //! @}
 

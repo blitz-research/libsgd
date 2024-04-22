@@ -2,7 +2,7 @@
 
 #include "keycodes.h"
 
-#include <geom/exports.h>
+#include <app/exports.h>
 
 //! @file
 
@@ -75,16 +75,5 @@ private:
 	Keyboard* m_keyboard;
 	Mouse* m_mouse;
 };
-
-Vec2u desktopSize();
-
-// TODO: ***** system.h *****
-//
-inline Signal<> beginPollEvents;
-inline Signal<> endPollEvents;
-inline Signal<> appSuspended;
-inline Signal<> appResumed;
-
-void pollEvents();
 
 } // namespace sgd

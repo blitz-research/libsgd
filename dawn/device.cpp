@@ -113,12 +113,14 @@ wgpu::Device createWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions)
 	wgpu::Device result;
 	CondVar<bool> ready;
 
-	runOnMainThread([&]{
-		requestWGPUDevice(adapterOptions, [&](const wgpu::Device& device) { //
-			result=device;
-			ready.set(true);
-		});
-	}, true);
+	runOnMainThread(
+		[&] {
+			requestWGPUDevice(adapterOptions, [&](const wgpu::Device& device) { //
+				result = device;
+				ready.set(true);
+			});
+		},
+		true);
 
 	ready.waiteq(true);
 	SGD_ASSERT(result);
@@ -135,36 +137,37 @@ wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) 
 	wgpu::Surface result;
 	CondVar<bool> ready;
 
-	runOnMainThread([&]{
+	runOnMainThread(
+		[&] {
 
 #if SGD_OS_WINDOWS
-		wgpu::SurfaceDescriptorFromWindowsHWND nativeDesc{};
-		nativeDesc.hwnd = glfwGetWin32Window(window);
-		nativeDesc.hinstance = GetModuleHandle(nullptr);
+			wgpu::SurfaceDescriptorFromWindowsHWND nativeDesc{};
+			nativeDesc.hwnd = glfwGetWin32Window(window);
+			nativeDesc.hinstance = GetModuleHandle(nullptr);
 #elif SGD_OS_LINUX
-		wgpu::SurfaceDescriptorFromXlibWindow nativeDesc{};
-		nativeDesc.window = glfwGetX11Window(window);
-		nativeDesc.display = glfwGetX11Display();
+			wgpu::SurfaceDescriptorFromXlibWindow nativeDesc{};
+			nativeDesc.window = glfwGetX11Window(window);
+			nativeDesc.display = glfwGetX11Display();
 #elif SGD_OS_MACOS
-		wgpu::SurfaceDescriptorFromMetalLayer nativeDesc{};
-		nativeDesc.layer = createMetalLayer(window);
+			wgpu::SurfaceDescriptorFromMetalLayer nativeDesc{};
+			nativeDesc.layer = createMetalLayer(window);
 #elif SGD_OS_EMSCRIPTEN
-		wgpu::SurfaceDescriptorFromCanvasHTMLSelector nativeDesc{};
-		nativeDesc.selector = "#canvas";
+			wgpu::SurfaceDescriptorFromCanvasHTMLSelector nativeDesc{};
+			nativeDesc.selector = "#canvas";
 #else
-		SGD_ABORT();
+			SGD_ABORT();
 #endif
-		wgpu::SurfaceDescriptor surfaceDesc{};
-		surfaceDesc.nextInChain = &nativeDesc;
+			wgpu::SurfaceDescriptor surfaceDesc{};
+			surfaceDesc.nextInChain = &nativeDesc;
 
-		wgpu::Surface surface = wgpuInstanceCreateSurface(getWGPUInstance().Get(), (WGPUSurfaceDescriptor*)&surfaceDesc);
-		// Can't use hits, causes weird missing symbols errors on Linux!
-		//wgpu::Surface surface = getWGPUInstance().CreateSurface(&surfaceDesc);
+			wgpu::Surface surface = wgpuInstanceCreateSurface(getWGPUInstance().Get(), (WGPUSurfaceDescriptor*)&surfaceDesc);
+			// Can't use hits, causes weird missing symbols errors on Linux!
+			// wgpu::Surface surface = getWGPUInstance().CreateSurface(&surfaceDesc);
 
-		result=surface;
-		ready.set(true);
-
-	},true);
+			result = surface;
+			ready.set(true);
+		},
+		true);
 
 	ready.waiteq(true);
 	SGD_ASSERT(result);
@@ -176,23 +179,24 @@ wgpu::SwapChain createWGPUSwapChain(const wgpu::Device& device, const wgpu::Surf
 	wgpu::SwapChain result;
 	CondVar<bool> ready;
 
-	runOnMainThread([&]{
-		wgpu::SwapChainDescriptor desc;
-		desc.usage = wgpu::TextureUsage::RenderAttachment;
-		desc.format = format;
-		desc.width = size.x;
-		desc.height = size.y;
+	runOnMainThread(
+		[&] {
+			wgpu::SwapChainDescriptor desc;
+			desc.usage = wgpu::TextureUsage::RenderAttachment;
+			desc.format = format;
+			desc.width = size.x;
+			desc.height = size.y;
 #if SGD_OS_EMSCRIPTEN
-		desc.presentMode = wgpu::PresentMode::Fifo;
+			desc.presentMode = wgpu::PresentMode::Fifo;
 #else
-		//desc.presentMode = wgpu::PresentMode::Immediate;	// ?!?
-		//desc.presentMode = wgpu::PresentMode::Mailbox;	// vsync = off
-		desc.presentMode = wgpu::PresentMode::Fifo; // vsync = on
+			// desc.presentMode = wgpu::PresentMode::Immediate;	// ?!?
+			// desc.presentMode = wgpu::PresentMode::Mailbox;	// vsync = off
+			desc.presentMode = wgpu::PresentMode::Fifo; // vsync = on
 #endif
-		result = device.CreateSwapChain(surface, &desc);
-		ready.set(true);
-
-	},true);
+			result = device.CreateSwapChain(surface, &desc);
+			ready.set(true);
+		},
+		true);
 
 	ready.waiteq(true);
 	SGD_ASSERT(result);
@@ -224,16 +228,18 @@ void requestRender(CFunction<void()> renderFunc) {
 		renderFunc();
 	});
 
-	runOnMainThread([func] { //
-		sgd_requestAnimationFrame(func);
-	}, true);
+	runOnMainThread(
+		[func] { //
+			sgd_requestAnimationFrame(func);
+		},
+		true);
 
 	ready.waiteq(true);
 }
 
 #else
 
-void  requestRender(CFunction<void()> renderFunc) {
+void requestRender(CFunction<void()> renderFunc) {
 	runOnMainThread(renderFunc, true);
 }
 

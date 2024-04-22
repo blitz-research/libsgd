@@ -238,10 +238,12 @@ add_subdirectory(external EXCLUDE_FROM_ALL)
 
 add_subdirectory(core)          #
 add_subdirectory(geom)          # core
-add_subdirectory(dawn)          # geom
-#add_subdirectory(xrsession)     # dawn
-add_subdirectory(window)        # geom
+add_subdirectory(app)           # geom [glfw]
+
+add_subdirectory(dawn)          # app
+add_subdirectory(window)        # app
+add_subdirectory(audio)         # app
 add_subdirectory(graphics)      # window dawn
-add_subdirectory(libsgd)        # graphics
+add_subdirectory(libsgd)        # graphics audio
 
 #add_subdirectory(emgdb)

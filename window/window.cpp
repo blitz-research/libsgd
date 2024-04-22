@@ -46,31 +46,11 @@ EM_JS(void, getCanvasBufferSize, (uint32_t * width, uint32_t* height), {
 
 namespace sgd {
 
-namespace {
-
-int g_suspended;
-
-void suspendApp() {
-	if (++g_suspended == 1) {
-		log() << "### App suspended";
-		appSuspended.emit();
-	}
-}
-
-void resumeApp() {
-	if (--g_suspended == 0) {
-		log() << "### App resumed";
-		appResumed.emit();
-	}
-}
-
-} // namespace
-
 Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 
 	runOnMainThread(
 		[=] {
-			if (!glfwInit()) SGD_ABORT();
+			initApp();
 
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			glfwWindowHint(GLFW_RESIZABLE, bool(m_flags & WindowFlags::resizable));
@@ -108,7 +88,7 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 				});
 				int w, h;
 				glfwGetWindowSize(m_glfwWindow, &w, &h);
-				g_suspended = !w || !h;
+//				g_suspended = !w || !h;
 				m_size = Vec2u(w, h);
 			}
 			{
@@ -150,30 +130,6 @@ void Window::close() {
 
 Window* Window::getWindow(GLFWwindow* glfwWindow) {
 	return static_cast<Window*>(glfwGetWindowUserPointer(glfwWindow));
-}
-
-Vec2u desktopSize() {
-	auto monitor = glfwGetPrimaryMonitor();
-	auto mode = glfwGetVideoMode(monitor);
-	return Vec2i{mode->width, mode->height};
-}
-
-void pollEvents() {
-	// This is to delay glfwWaitEvents by 1 poll, so user can 'see' suspend events.
-	static bool wait;
-
-	runOnMainThread(
-		[] { //
-			beginPollEvents.emit();
-			if (g_suspended && wait) {
-				glfwWaitEvents();
-			} else {
-				glfwPollEvents();
-			}
-			wait = g_suspended;
-			endPollEvents.emit();
-		},
-		true);
 }
 
 } // namespace sgd

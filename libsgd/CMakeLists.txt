@@ -10,6 +10,7 @@ endif ()
 ##### libsgd #####
 
 set(LIBSGD_SOURCES
+	audio.cpp
 	graphics.cpp
 	internal.cpp
 	internal.h
@@ -25,7 +26,7 @@ add_library(libsgd ${LIBSGD_SOURCES})
 
 target_include_directories(libsgd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(libsgd graphics)
+target_link_libraries(libsgd graphics audio)
 
 if (SGD_INSTALL_DIR)
 	# Headers
@@ -165,7 +166,7 @@ target_include_directories(libsgd_dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
 
 target_compile_definitions(libsgd_dynamic PUBLIC SGD_DYNAMIC=1 SGD_EXPORT=1)
 
-target_link_libraries(libsgd_dynamic graphics imgui-backends)
+target_link_libraries(libsgd_dynamic graphics audio imgui-backends)
 
 if (SGD_OS_LINUX)
 	target_link_options(libsgd_dynamic PRIVATE -fPIC)

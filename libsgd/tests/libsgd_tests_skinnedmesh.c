@@ -10,20 +10,22 @@ restart:
 	sgd_MoveEntity(camera, 0, 1, -3);
 
 	SGD_Light light = sgd_CreatePointLight();
-//	sgd_SetLightCastsShadow(light, SGD_TRUE);
+	//	sgd_SetLightCastsShadow(light, SGD_TRUE);
 	sgd_MoveEntity(light, 0, 3, -3);
 	sgd_SetLightRange(light, 10);
 
 	SGD_Model model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", SGD_TRUE);
-//	sgd_SetMeshCastsShadow(sgd_ModelMesh(model), SGD_TRUE);
+	//	sgd_SetMeshCastsShadow(sgd_ModelMesh(model), SGD_TRUE);
 
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/PavingStones065_1K-JPG");
 	SGD_Mesh mesh = sgd_CreateBoxMesh(-10, -1, -10, 10, 0, 10, material);
-	sgd_TransformMeshTexCoords(mesh, 4,4,0,0);
+	sgd_TransformMeshTexCoords(mesh, 4, 4, 0, 0);
 	SGD_Model ground = sgd_CreateModel();
 	sgd_SetModelMesh(ground, mesh);
 
 	sgd_DebugMemory();
+
+	SGD_Sound sound = sgd_LoadSound("sgd://audio/fine_morning.ogg");
 
 	for (;;) {
 
@@ -51,9 +53,9 @@ restart:
 			sgd_TurnEntity(model, 0, -3, 0);
 		}
 
-		if(sgd_KeyDown(SGD_KEY_UP)) {
+		if (sgd_KeyDown(SGD_KEY_UP)) {
 			sgd_MoveEntity(model, 0, 0, -.03);
-		} else if(sgd_KeyDown(SGD_KEY_DOWN)) {
+		} else if (sgd_KeyDown(SGD_KEY_DOWN)) {
 			sgd_MoveEntity(model, 0, 0, .03);
 		}
 
@@ -65,16 +67,18 @@ restart:
 
 		sgd_AnimateModel(model, 0, 0, SGD_ANIMATION_MODE_LOOP);
 
-		if (sgd_KeyHit(32)) {
-			goto restart;
-			// sgd_DestroyEntity(model);
-			// model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", 1);
-		}
+		//		if (sgd_KeyHit(32)) {
+		//			goto restart;
+		// sgd_DestroyEntity(model);
+		// model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", 1);
+		//		}
+
+		if (sgd_KeyHit(SGD_KEY_SPACE)) sgd_PlaySound(sound);
 
 		char buf[80];
-		sprintf(buf, "FPS:%f",sgd_FPS());
+		sprintf(buf, "FPS:%f", sgd_FPS());
 		sgd_Clear2D();
-		sgd_Draw2DText(buf,0,0);
+		sgd_Draw2DText(buf, 0, 0);
 	}
 }
 

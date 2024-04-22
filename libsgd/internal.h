@@ -1,7 +1,7 @@
 #pragma once
 
 #include <graphics/exports.h>
-#include <window/exports.h>
+#include <audio/exports.h>
 
 #include <sgd/sgd.h>
 
@@ -27,6 +27,7 @@ enum struct HandleType {
 	material,
 	mesh,
 	font,
+	sound,
 	entity,
 };
 
@@ -109,6 +110,7 @@ SGD_HANDLE_TYPE_INFO(Texture, HandleType::texture);
 SGD_HANDLE_TYPE_INFO(Material, HandleType::material);
 SGD_HANDLE_TYPE_INFO(Mesh, HandleType::mesh);
 SGD_HANDLE_TYPE_INFO(Font, HandleType::font);
+SGD_HANDLE_TYPE_INFO(Sound, HandleType::sound);
 SGD_HANDLE_TYPE_INFO(Entity, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Camera, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Light, HandleType::entity);
