@@ -21,13 +21,13 @@ Joins the LibSFD discussion at https://skirmish-dev.net/fourm
 
 * CD to repos checkout dir and...
 
-* Configure: cmake -S . -B cmake-build-release -DCMAKE_BUILD_TYPE=MinSizeRel -G Ninja
+* Configure: ``cmake -S . -B cmake-build-release -DCMAKE_BUILD_TYPE=MinSizeRel -G Ninja``
 
-* Build: cmake --build cmake-build-release
+* Build: ``cmake --build cmake-build-release``
 
-* Install: cmake --install cmake-build-release
+* Install: ``cmake --install cmake-build-release``
 
-After install output files should end up in cmake-install-release dir.
+After install output files should end up in cmake-install-linux-release dir.
 
 You may also need to install dev packages for things like X11 and so on.
 
@@ -40,10 +40,10 @@ You may also need to install dev packages for things like X11 and so on.
 
 * CD to repos checkout dir and...
 
-* Configure: cmake -S . -B cmake-build-release -G "Visual Studio 17 2022"
+* Configure: ``cmake -S . -B cmake-build-release -G "Visual Studio 17 2022"``
 
-* Build: cmake --build cmake-build-release --config MinSizeRel
+* Build: ``cmake --build cmake-build-release --config MinSizeRel``
 
-* Install: cmake --install cmake-build-release --config MinSizeRel
+* Install: ``cmake --install cmake-build-release --config MinSizeRel``
 
-After install output files should end up in cmake-install-release dir.
+After install output files should end up in cmake-install-windows-release dir.
