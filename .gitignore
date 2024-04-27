@@ -14,9 +14,6 @@ out
 # MSVC config
 .vs
 
-# Generated docs
-help
-
 # Go not going yet
 libsgd/go
 
