@@ -10,9 +10,9 @@ Currently supported language include C/C++, python and nodejs, support for more 
 
 LibSGD is licensed under the Zlib/PNG license.
 
-Help support LibSGD at patreon.com/libsgd
-
 Joins the LibSFD discussion at https://skirmish-dev.net/fourm
+
+Help support LibSGD at https://patreon.com/libsgd
 
 
 ## CMake build instuctions for 64bit Linux.
