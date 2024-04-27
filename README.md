@@ -6,7 +6,7 @@ LibSGD also support loading and playing audio and will eventually include networ
 
 The library is coded in C++, but the primary public API is pure 'C', making it highly compatible with a wide range of platforms and languages.
 
-Currently supported language include C/C++, python and nodejs, support for more languages is on the way.
+Currently supported languages include C/C++, python and nodejs. Support for more languages  is on the way.
 
 LibSGD is licensed under the Zlib/PNG license.
 
