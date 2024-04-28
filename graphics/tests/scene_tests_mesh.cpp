@@ -7,6 +7,7 @@ void entry() {
 	ModelPtr model = new Model();
 	model->mesh = mesh;
 	scene->add(model);
+	move(model, {0,0,5});
 
 #if 0
 	ModelPtr model = loadSkinnedModel(Path("~/Desktop/larry_walk.glb")).result();

@@ -1,7 +1,7 @@
 
 ***** V0.05 *****
 
-* Add mesh building commands, see makesphere.bb, not really enough to pull apart existing meshes.
+* Add mesh building commands, see makesphere.bb.
 
 * Added support for ~ at start of file paths.
 

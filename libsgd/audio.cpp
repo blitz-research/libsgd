@@ -32,31 +32,31 @@ void SGD_DECL sgd_SetAudioPan(int audio, float pan) {
 	sgd::setAudioPan(audio, pan);
 }
 
-void SGD_DECL sgd_SetAudioPitchScale(uint32_t audio, float scale) {
+void SGD_DECL sgd_SetAudioPitchScale(int audio, float scale) {
 	sgdx::started();
 
 	sgd::setAudioPitchScale(audio, scale);
 }
 
-void SGD_DECL sgd_SetAudioLooping(uint32_t audio, SGD_Bool looping) {
+void SGD_DECL sgd_SetAudioLooping(int audio, SGD_Bool looping) {
 	sgdx::started();
 
 	sgd::setAudioLooping(audio, looping);
 }
 
-void SGD_DECL sgd_SetAudioPaused(uint32_t audio, SGD_Bool paused) {
+void SGD_DECL sgd_SetAudioPaused(int audio, SGD_Bool paused) {
 	sgdx::started();
 
 	sgd::setAudioPaused(audio, paused);
 }
 
-SGD_Bool SGD_DECL sgd_AudioValid(uint32_t audio) {
+SGD_Bool SGD_DECL sgd_AudioValid(int audio) {
 	sgdx::started();
 
 	return sgd::audioValid(audio);
 }
 
-void SGD_DECL sgd_StopAudio(uint32_t audio) {
+void SGD_DECL sgd_StopAudio(int audio) {
 	sgdx::started();
 
 	sgd::stopAudio(audio);

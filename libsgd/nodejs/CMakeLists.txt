@@ -20,7 +20,7 @@ else ()
 	set(CMD "")
 endif ()
 
-# Check for npm
+# Check we have npm
 execute_process(COMMAND ${CMD} npm --version RESULT_VARIABLE RV)
 if (NOT RV EQUAL 0)
 	message(WARNING "### Can't find npm command, skipping nodejs target.")
@@ -55,10 +55,8 @@ execute_process(
 
 set(output_file ${CMAKE_CURRENT_BINARY_DIR}/build/Release/sgd.node)
 
-add_custom_target(libsgd_nodejs ALL DEPENDS ${output_file})
-
 # node-gyp build
-add_custom_command(
+add_custom_target(
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 	COMMAND swig -c++ -javascript -napi -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
 	COMMAND npx node-gyp build ${NODEGYP_DEBUG}
@@ -66,5 +64,8 @@ add_custom_command(
 	OUTPUT ${output_file}
 	VERBATIM)
 
+add_custom_target(libsgd_nodejs ALL DEPENDS ${output_file})
+
 install(FILES ${output_file} DESTINATION nodejs)
+
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.js DESTINATION nodejs)

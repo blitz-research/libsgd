@@ -567,19 +567,19 @@ SGD_API void SGD_DECL sgd_SetAudioVolume(int audio, float volume);
 SGD_API void SGD_DECL sgd_SetAudioPan(int audio, float pan);
 
 //! Set audio pitch scale.
-SGD_API void SGD_DECL sgd_SetAudioPitchScale(uint32_t audio, float scale);
+SGD_API void SGD_DECL sgd_SetAudioPitchScale(int audio, float scale);
 
 //! Set audio looping flag.
-SGD_API void SGD_DECL sgd_SetAudioLooping(uint32_t audio, SGD_Bool looping);
+SGD_API void SGD_DECL sgd_SetAudioLooping(int audio, SGD_Bool looping);
 
 //! Set audio paused flag.
-SGD_API void SGD_DECL sgd_SetAudioPaused(uint32_t audio, SGD_Bool paused);
+SGD_API void SGD_DECL sgd_SetAudioPaused(int audio, SGD_Bool paused);
 
 //! Get audio valid flag. Audio is valid if it is playing or paused.
-SGD_API SGD_Bool SGD_DECL sgd_AudioValid(uint32_t audio);
+SGD_API SGD_Bool SGD_DECL sgd_AudioValid(int audio);
 
 //! Stop audio.
-SGD_API void SGD_DECL sgd_StopAudio(uint32_t audio);
+SGD_API void SGD_DECL sgd_StopAudio(int audio);
 
 //! @}
 

@@ -20,3 +20,10 @@ libsgd/go
 # Ignore Blitz3d backup files
 *.bb_bak1
 *.bb_bak2
+
+# Ignore blitzmax cache dirs
+.bmx
+
+# Ignore blitzmax backup files
+*.bmx.bak
+

@@ -17,7 +17,7 @@ TurnEntity light,-45,0,0	; Tilt light down 45 degrees
 material = LoadPrelitMaterial("sgd://misc/grass1.png")
 SetMaterialBlendMode material,2
 
-Const n=10000
+Const n=60000
 For i=0 To n
 	sprite = CreateSprite()
 	SetSpriteMaterial(sprite, material)
@@ -27,5 +27,7 @@ Next
 
 While Not PollEvents()
 	RenderScene()
+	Clear2D()
+	Draw2DText FPS(), 0, 0
 	Present()
 Wend

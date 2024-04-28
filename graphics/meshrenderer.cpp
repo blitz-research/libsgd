@@ -107,7 +107,6 @@ void MeshRenderer::onValidate(GraphicsContext* gc) const {
 
 			auto pipeline = getOrCreateRenderPipeline(gc, surf->material(), m_bindGroup, DrawMode::triangleList);
 
-#if 1
 			m_renderOps[pass].emplace_back( //
 				m_mesh->vertexBuffer(),		//
 				m_instanceBuffer,			//
@@ -116,9 +115,7 @@ void MeshRenderer::onValidate(GraphicsContext* gc) const {
 				m_bindGroup,				//
 				pipeline,					//
 				surf->triangleCount() * 3, m_instanceCount, 0);
-#endif
 
-#if 0
 			if (surf->material()->blendMode() == BlendMode::opaque && m_mesh->castsShadow()) {
 
 				auto shadowPipeline = getOrCreateShadowPipeline(gc, m_bindGroup, DrawMode::triangleList);
@@ -132,7 +129,6 @@ void MeshRenderer::onValidate(GraphicsContext* gc) const {
 					shadowPipeline,									   //
 					surf->triangleCount() * 3, m_instanceCount, 0);
 			}
-#endif
 		}
 		m_rebuildRenderOps = m_updateInstanceCounts = false;
 	}

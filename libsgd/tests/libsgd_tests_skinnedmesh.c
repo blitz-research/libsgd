@@ -18,8 +18,8 @@ restart:
 	//	sgd_SetMeshCastsShadow(sgd_ModelMesh(model), SGD_TRUE);
 
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/PavingStones065_1K-JPG");
-	SGD_Mesh mesh = sgd_CreateBoxMesh(-10, -1, -10, 10, 0, 10, material);
-	sgd_TransformMeshTexCoords(mesh, 4, 4, 0, 0);
+	SGD_Mesh mesh = sgd_CreateBoxMesh(-15, -1, -10, 10, 0, 10, material);
+	sgd_TransformMeshTexCoords(mesh, 7.5, 7.5, 0, 0);
 	SGD_Model ground = sgd_CreateModel();
 	sgd_SetModelMesh(ground, mesh);
 

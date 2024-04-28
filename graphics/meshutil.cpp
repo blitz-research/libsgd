@@ -40,13 +40,13 @@ void transformTexCoords(Mesh* mesh, CVec2f scale, CVec2f offset) {
 
 void fit(Mesh* mesh, CBoxf box, bool uniform) {
 
-	auto bnds = bounds(mesh);
+	auto bbounds = bounds(mesh);
 
-	auto scale = size(box) / size(bnds);
+	auto scale = size(box) / size(bbounds);
 	if (uniform) scale = Vec3f(std::min(scale.x, std::min(scale.y, scale.z)));
 
 	auto m = Mat3f::scale(scale);
-	auto t = center(box) - m * center(bnds);
+	auto t = center(box) - m * center(bbounds);
 
 	transform(mesh, {m, t});
 }
@@ -146,8 +146,8 @@ Mesh* copy(CMesh* mesh) {
 	std::memcpy(newMesh->lockVertices(), mesh->vertices(), mesh->vertexCount() * sizeof(Vertex));
 	newMesh->unlockVertices();
 
-	for(Surface* surf : mesh->surfaces()) {
-		auto newSurf = new Surface(surf->triangleCount(),surf->material());
+	for (Surface* surf : mesh->surfaces()) {
+		auto newSurf = new Surface(surf->triangleCount(), surf->material());
 		std::memcpy(newSurf->lockTriangles(), surf->triangles(), surf->triangleCount() * sizeof(Triangle));
 		newSurf->unlockTriangles();
 		newMesh->addSurface(newSurf);
@@ -158,14 +158,16 @@ Mesh* copy(CMesh* mesh) {
 
 void flip(Mesh* mesh) {
 
-	for (auto vp = mesh->lockVertices(), ep = vp + mesh->vertexCount(); vp != ep; ++vp) {
-		vp->normal = -vp->normal;
-		vp->tangent.w = -vp->tangent.w; //?
+	auto vp = mesh->lockVertices();
+	for (int i = 0; i < mesh->vertexCount(); ++i) {
+		vp[i].normal = -vp[i].normal;
+		vp[i].tangent.w = -vp[i].tangent.w; //?
 	}
 	mesh->unlockVertices();
 
-	for(auto& surf : mesh->surfaces()) { //
-		for (auto tp = surf->lockTriangles(0, surf->triangleCount()), ep = tp + surf->triangleCount(); tp != ep; ++tp) {
+	for (Surface* surf : mesh->surfaces()) { //
+		auto tp = surf->lockTriangles();
+		for (int i = 0; i < surf->triangleCount(); ++i) {
 			std::swap(tp->indices[1], tp->indices[2]);
 		}
 		surf->unlockTriangles();

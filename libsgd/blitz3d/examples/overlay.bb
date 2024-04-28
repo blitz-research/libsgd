@@ -25,7 +25,6 @@ For i=1 To 100
 Next
 
 Set2DOutlineEnabled True
-;Set2DOutlineWidth 3
 
 ; Draw some outlined rects
 For i=1 To 100

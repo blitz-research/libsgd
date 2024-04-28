@@ -263,11 +263,13 @@ Mesh* GLTFLoader::endMesh() {
 	}
 
 	auto mesh = new Mesh(meshVertices.size(), flags);
+	std::memcpy(mesh->lockVertices(), meshVertices.data(), meshVertices.size() * sizeof(Vertex));
+	mesh->unlockVertices();
 
 	for (auto& it : this->meshTriangles) {
 		auto& triangles = it.second;
 		auto surface = new Surface(triangles.size(), loadMaterial(it.first));
-		std::memcpy(surface->lockTriangles(0, triangles.size()), triangles.data(), triangles.size() * sizeof(Triangle));
+		std::memcpy(surface->lockTriangles(), triangles.data(), triangles.size() * sizeof(Triangle));
 		surface->unlockTriangles();
 		mesh->addSurface(surface);
 	}
@@ -370,6 +372,7 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 		SGD_LOG << "TODO: Unsupported gltf component type for triangle indices";
 		SGD_ABORT();
 	}
+	for (int i = 0; i < accessor.count; ++i) tp[i] += firstVertex;
 }
 
 void GLTFLoader::updateMesh(const tinygltf::Mesh& gltfMesh) {

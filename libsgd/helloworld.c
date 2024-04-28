@@ -1,7 +1,7 @@
 //
 // This can be built with something like:
 //
-// gcc -I../../include -L. -DSGD_DYNAMIC=1 -o helloworld helloworld.c -lsgd_dynamic
+// gcc -I../include -L. -DSGD_DYNAMIC=1 -o helloworld helloworld.c -lsgd_dynamic
 
 #include <sgd/sgd.h>
 

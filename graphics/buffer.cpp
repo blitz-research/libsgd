@@ -23,7 +23,7 @@ void Buffer::resize(uint32_t size) {
 	if (size == m_size) return;
 
 	if (size > m_capacity) {
-		m_capacity = std::max(std::max(m_capacity * 2, size), 10u);
+		m_capacity = std::max(std::max(m_capacity * 3 / 2, size), 10u);
 		auto data = (uint8_t*)std::malloc(m_capacity);
 		std::memcpy(data, m_data, m_size);
 		std::swap(m_data, data);
@@ -52,7 +52,7 @@ void Buffer::onValidate(GraphicsContext* gc) const {
 		};
 		wgpu::BufferDescriptor desc{};
 		desc.usage = usages.find(m_type)->second | wgpu::BufferUsage::CopyDst;
-		desc.size = m_size;
+		desc.size = (m_capacity + 3u) & ~3u;
 		desc.mappedAtCreation = true;
 		m_wgpuBuffer = gc->wgpuDevice().CreateBuffer(&desc);
 		std::memcpy(m_wgpuBuffer.GetMappedRange(0, m_size), m_data, m_size);

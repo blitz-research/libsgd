@@ -22,6 +22,8 @@ Mesh* createMesh(CVector<Vertex> vertices, CVector<Triangle> triangles, Material
 
 	mesh->addSurface(surface);
 
+	if(bool(flags & MeshFlags::tangentsEnabled)) updateTangents(mesh);
+
 	return mesh;
 }
 
@@ -40,7 +42,7 @@ Mesh* createBoxMesh(CBoxf box, Material* material) {
 
 	uint32_t faces[]{0, 1, 2, 3, 1, 5, 6, 2, 5, 4, 7, 6, 4, 0, 3, 7, 4, 5, 1, 0, 3, 2, 6, 7};
 
-	for (auto i = 0u; i < 24; i += 4) {
+	for (int i = 0; i < 24; i += 4) {
 		CVec3f norm = norms[i / 4];
 		vertices.emplace_back(verts[faces[i + 0]], norm, Vec2f(0, 0));
 		vertices.emplace_back(verts[faces[i + 1]], norm, Vec2f(1, 0));

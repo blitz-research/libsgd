@@ -12,7 +12,7 @@ Const KEY_A = 65
 Const KEY_S = 83
 Const KEY_D = 68
 
-Const NUM_BLOCKS = 50000
+Const NUM_BLOCKS = 10000
 Const WORLD_SIZE = 100
 
 Type Camera

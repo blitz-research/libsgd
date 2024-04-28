@@ -58,7 +58,7 @@ private:
 
 	BindGroupPtr m_bindGroup;
 	BufferPtr m_uniformBuffer;
-	uint32_t m_vertexCapacity{1000};
+	uint32_t m_vertexCapacity{};
 	uint32_t m_vertexCount{};
 	BufferPtr m_vertexBuffer;
 
