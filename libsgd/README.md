@@ -2,6 +2,8 @@
 
 ``blitz3d/``: Contains Blitz3D replacement runtime.dll file and sample code. Copy runtime.dll to your existing Blitz3D 'bin' directory to install.
 
+``blitzmax/``: Contains BlitzMax module file and examples.  
+
 ``html/``: Contains Doxygen generated help files.
 
 ``include/``: Contains header files for C/C++ apps. This directory should be added to your C/C++ compiler's include directories.
