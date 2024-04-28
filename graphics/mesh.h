@@ -37,36 +37,59 @@ struct Triangle {
 };
 using CTriangle = const Triangle&;
 
-struct Surface {
-	MaterialPtr material;
-	uint32_t firstTriangle;
-	uint32_t triangleCount;
+SGD_SHARED(Surface);
+
+struct Surface : Shared {
+	SGD_OBJECT_TYPE(Surface, Shared);
+
+	Surface(uint32_t triangleCount, Material* material);
+
+	const Triangle* triangles() const {
+		return (const Triangle*)m_triangleBuffer->data();
+	}
+
+	uint32_t triangleCount() const {
+		return m_triangleCount;
+	}
+
+	void resizeTriangles(uint32_t count);
+
+	Triangle* lockTriangles(uint32_t first, uint32_t count) const {
+		return (Triangle*)m_triangleBuffer->lock(first * sizeof(Triangle), count * sizeof(Triangle));
+	}
+
+	Triangle* lockTriangles() const {
+		return lockTriangles(0, m_triangleCount);
+	}
+
+	void unlockTriangles() const {
+		m_triangleBuffer->unlock();
+	}
+
+	Buffer* triangleBuffer() const {
+		return m_triangleBuffer;
+	}
+
+	Material* material() const {
+		return m_material;
+	}
+
+private:
+	BufferPtr m_triangleBuffer;
+	uint32_t m_triangleCount;
+	MaterialPtr m_material;
 };
-using CSurface = const Surface&;
 
 SGD_SHARED(Mesh);
 
-enum struct MeshFlags {
-	none = 0,
-	tangentsEnabled = 1
-
-};
+enum struct MeshFlags { none = 0, tangentsEnabled = 1 };
 
 struct Mesh : GraphicsResource {
 	SGD_OBJECT_TYPE(Mesh, GraphicsResource);
 
-	Mesh(const Vertex* vertices, uint32_t vertexCount,		//
-		 const Triangle* triangles, uint32_t triangleCount, //
-		 const Surface* surfaces, uint32_t surfaceCount,	//
-		 MeshFlags flags);
+	Mesh(uint32_t vertexCount, MeshFlags flags);
 
-	Mesh(CVector<Vertex> vertices, CVector<Triangle> triangles, CVector<Surface> surfaces, MeshFlags flags);
-
-	Property<bool> castsShadow{false};
-
-	MeshFlags flags() const {
-		return m_flags;
-	}
+	Property<bool> castsShadow;
 
 	const Vertex* vertices() const {
 		return (Vertex*)m_vertexBuffer->data();
@@ -76,49 +99,51 @@ struct Mesh : GraphicsResource {
 		return m_vertexCount;
 	}
 
-	const Triangle* triangles() const {
-		return (Triangle*)m_triangleBuffer->data();
+	void resizeVertices(uint32_t count);
+
+	Vertex* lockVertices(uint32_t first, uint32_t count) const {
+		return (Vertex*)m_vertexBuffer->lock(first * sizeof(Vertex), count * sizeof(Vertex));
 	}
 
-	uint32_t triangleCount() const {
-		return m_triangleCount;
+	Vertex* lockVertices() const {
+		return lockVertices(0, m_vertexCount);
 	}
 
-	CVector<Surface> surfaces() const {
-		return m_surfaces;
+	void unlockVertices() const {
+		m_vertexBuffer->unlock();
 	}
 
-	void resizeVertices(uint32_t size);
-	void addVertices(const Vertex* data, uint32_t count);
-	Vertex* lockVertices(uint32_t first, uint32_t count);
-	void unlockVertices();
-
-	void resizeTriangles(uint32_t size);
-	void addTriangles(const Triangle* data, uint32_t count);
-	Triangle* lockTriangles(uint32_t first, uint32_t count);
-	void unlockTriangles();
-
-	void clearSurfaces();
-	void addSurface(CSurface surface);
-
-	CBuffer* vertexBuffer() const {
+	Buffer* vertexBuffer() const {
+		SGD_ASSERT(m_vertexBuffer);
 		return m_vertexBuffer;
 	}
 
-	CBuffer* indexBuffer() const {
-		return m_triangleBuffer;
+	void clearSurfaces();
+
+	void addSurface(Surface* surface);
+
+	CVector<SurfacePtr> surfaces() const {
+		return m_surfaces;
+	}
+
+	CSurface* surface(uint32_t index) const {
+		return m_surfaces[index];
+	}
+
+	Surface* surface(uint32_t index) {
+		return m_surfaces[index];
+	}
+
+	MeshFlags flags() const {
+		return m_flags;
 	}
 
 private:
 	BufferPtr m_vertexBuffer;
-	uint32_t m_vertexCount{};
-
-	BufferPtr m_triangleBuffer;
-	uint32_t m_triangleCount{};
-
-	Vector<Surface> m_surfaces;
-
+	uint32_t m_vertexCount;
 	MeshFlags m_flags;
+
+	Vector<SurfacePtr> m_surfaces;
 };
 
 } // namespace sgd

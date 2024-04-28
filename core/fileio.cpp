@@ -18,12 +18,12 @@ namespace sgd {
 Expected<String, FileioEx> loadString(CPath path) {
 
 	if(path.isUrl()) {
-		auto r = fetchString(path.str());
+		auto r = fetchString(path.url());
 		if(!r) return FileioEx(r.error().message());
 		return r.result();
 	}
 
-	if(!path.isValidFilePath()) return FileioEx("Invalid file path");
+	if(!path.isFilePath()) return FileioEx("Invalid file path");
 
 	auto fpath = path.filePath();
 
@@ -44,7 +44,7 @@ Expected<String, FileioEx> loadString(CPath path) {
 
 Expected<bool, FileioEx> saveString(CString str, CPath path) {
 
-	if(!path.isValidFilePath()) return FileioEx("Invalid file path");
+	if(!path.isFilePath()) return FileioEx("Invalid file path");
 
 	auto fpath = path.filePath();
 
@@ -59,12 +59,12 @@ Expected<bool, FileioEx> saveString(CString str, CPath path) {
 Expected<Data, FileioEx> loadData(CPath path) {
 
 	if(path.isUrl()) {
-		auto r = fetchData(path.str());
+		auto r = fetchData(path.url());
 		if(!r) return FileioEx(r.error().message());
 		return r.result();
 	}
 
-	if(!path.isValidFilePath()) return FileioEx("Invalid file path");
+	if(!path.isFilePath()) return FileioEx("Invalid file path");
 
 	auto fpath = path.filePath();
 
@@ -85,7 +85,7 @@ Expected<Data, FileioEx> loadData(CPath path) {
 
 Expected<bool, FileioEx> saveData(CData data, CPath path) {
 
-	if(!path.isValidFilePath()) return FileioEx("Invalid file path");
+	if(!path.isFilePath()) return FileioEx("Invalid file path");
 
 	auto fpath = path.filePath();
 
@@ -99,7 +99,7 @@ Expected<bool, FileioEx> saveData(CData data, CPath path) {
 
 Expected<bool, FileioEx> saveData(const void *data, size_t size, CPath path) {
 
-	if(!path.isValidFilePath()) return FileioEx("Invalid file path");
+	if(!path.isFilePath()) return FileioEx("Invalid file path");
 
 	auto fpath = path.filePath();
 

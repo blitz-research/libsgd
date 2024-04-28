@@ -91,34 +91,33 @@ void SkinnedMeshRenderer::onValidate(GraphicsContext* gc) const {
 
 		m_renderOps = {};
 
-		for (int i = 0; i < m_mesh->surfaces().size(); ++i) {
+		for (Surface* surf : m_mesh->surfaces()) {
 
-			auto& surf = m_mesh->surfaces()[i];
-			int rpass = (int)renderPassType(surf.material->blendMode());
+			int rpass = (int)renderPassType(surf->material()->blendMode());
 
-			auto pipeline = getOrCreateRenderPipeline(gc, surf.material, m_bindGroup, DrawMode::triangleList);
+			auto pipeline = getOrCreateRenderPipeline(gc, surf->material(), m_bindGroup, DrawMode::triangleList);
 
 			m_renderOps[rpass].emplace_back( //
 				m_mesh->vertexBuffer(),		 //
 				nullptr,					 //
-				m_mesh->indexBuffer(),		 //
-				surf.material->bindGroup(),	 //
+				surf->triangleBuffer(),		 //
+				surf->material()->bindGroup(),	 //
 				m_bindGroup,				 //
 				pipeline,					 //
-				surf.triangleCount * 3, m_instanceCount, surf.firstTriangle * 3);
+				surf->triangleCount() * 3, m_instanceCount, 0);
 
-			if (surf.material->blendMode() == BlendMode::opaque) {
+			if (surf->material()->blendMode() == BlendMode::opaque) {
 
 				auto shadowPipeline = getOrCreateShadowPipeline(gc, m_bindGroup, DrawMode::triangleList);
 
 				m_renderOps[(int)RenderPassType::shadow].emplace_back( //
 					m_mesh->vertexBuffer(),							   //
 					nullptr,										   //
-					m_mesh->indexBuffer(),							   //
+					surf->triangleBuffer(),							   //
 					shadowBindGroup(),								   //
 					m_bindGroup,									   //
 					shadowPipeline,									   //
-					surf.triangleCount * 3, m_instanceCount, surf.firstTriangle * 3);
+					surf->triangleCount() * 3, m_instanceCount, 0);
 			}
 		}
 

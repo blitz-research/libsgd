@@ -18,4 +18,5 @@ out
 libsgd/go
 
 # Ignore Blitz3d backup files
-*.bb
+*.bb_bak1
+*.bb_bak2

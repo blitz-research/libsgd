@@ -85,7 +85,7 @@ DrawList::Vertex* DrawList::allocTriangles(uint32_t count) {
 	m_vertexCount += vcount;
 	if (m_vertexCount > m_vertexCapacity) {
 		m_vertexCapacity = std::max(m_vertexCapacity * 3 / 2, m_vertexCount);
-		//		log() << "### Resizing draw list vertex buffer"<<m_vertexCapacity;
+		//		SGD_LOG << "Resizing draw list vertex buffer"<<m_vertexCapacity;
 		m_vertexBuffer->resize(m_vertexCapacity * sizeof(Vertex));
 	}
 	return (Vertex*)m_vertexBuffer->lock(first * sizeof(Vertex), vcount * sizeof(Vertex));

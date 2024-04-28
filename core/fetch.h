@@ -1,9 +1,11 @@
 #pragma once
 
-#include "std.h"
 #include "expected.h"
+#include "std.h"
 
 namespace sgd {
+
+struct StreamBuffer;
 
 struct FetchEx;
 using CFetchEx = const FetchEx&;
@@ -22,6 +24,6 @@ private:
 
 Expected<String, FetchEx> fetchString(CString url);
 
-Expected<Data, FetchEx>  fetchData(CString url);
+Expected<Data, FetchEx> fetchData(CString url);
 
-}
+} // namespace sgd

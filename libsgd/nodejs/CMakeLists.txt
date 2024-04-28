@@ -66,7 +66,5 @@ add_custom_command(
 	OUTPUT ${output_file}
 	VERBATIM)
 
-if (SGD_INSTALL_DIR)
-	install(FILES ${output_file} DESTINATION nodejs/${SGD_INSTALL_DIR})
-	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.js DESTINATION nodejs/${SGD_INSTALL_DIR})
-endif ()
+install(FILES ${output_file} DESTINATION nodejs)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.js DESTINATION nodejs)

@@ -1,6 +1,6 @@
 #include "textureutil.h"
 
-//#define STB_IMAGE_IMPLEMENTATION
+// #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 namespace sgd {
@@ -20,7 +20,9 @@ const Texture* rgbaTexture(uint32_t rgba) {
 }
 
 Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags) {
-	if (format != TextureFormat::rgba8 && format != TextureFormat::srgba8) SGD_ABORT();
+	if (format != TextureFormat::rgba8 && format != TextureFormat::srgba8) {
+		return FileioEx("Unvalid texture format");
+	}
 
 	auto bpp = bytesPerTexel(format);
 
@@ -66,7 +68,8 @@ Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, Textu
 			size = {sqsize, sqsize};
 			depth = 6;
 		} else {
-			SGD_ABORT();
+			stbi_image_free(img);
+			return FileioEx("Invalid cube texture dimensions");
 		}
 	}
 
@@ -90,7 +93,7 @@ Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, Textu
 }
 
 void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pitch) {
-	if(format!=TextureFormat::rgba8 && format!=TextureFormat::srgba8) return;
+	if (format != TextureFormat::rgba8 && format != TextureFormat::srgba8) return;
 
 	auto bpp = bytesPerTexel(format);
 

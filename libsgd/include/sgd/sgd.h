@@ -57,11 +57,12 @@ typedef int SGD_Bool;
 typedef int SGD_Handle;
 typedef const char* SGD_String;
 
-typedef SGD_Handle SGD_Texture;
-typedef SGD_Handle SGD_Material;
-typedef SGD_Handle SGD_Mesh;
 typedef SGD_Handle SGD_Font;
 typedef SGD_Handle SGD_Sound;
+typedef SGD_Handle SGD_Texture;
+typedef SGD_Handle SGD_Material;
+typedef SGD_Handle SGD_Surface;
+typedef SGD_Handle SGD_Mesh;
 typedef SGD_Handle SGD_Entity;
 typedef SGD_Handle SGD_Camera;
 typedef SGD_Handle SGD_Light;
@@ -370,19 +371,19 @@ SGD_API void SGD_DECL sgd_SetMaterialDepthFunc(SGD_Material material, int depthF
 //! SGD_CULL_MODE_BACK  | 3             | Cull back facing primitives.
 SGD_API void SGD_DECL sgd_SetMaterialCullMode(SGD_Material material, int cullMode);
 
-//! Set material vector4 property
+//! Set material vector4 property.
 SGD_API void SGD_DECL sgd_SetMaterialVector4f(SGD_Material material, SGD_String property, float x, float y, float z, float w);
 
-//! Set material vector3 property
+//! Set material vector3 property.
 SGD_API void SGD_DECL sgd_SetMaterialVector3f(SGD_Material material, SGD_String property, float x, float y, float z);
 
-//! Set material vector2 property
+//! Set material vector2 property.
 SGD_API void SGD_DECL sgd_SetMaterialVector2f(SGD_Material material, SGD_String property, float x, float y);
 
-//! Set material float property
+//! Set material float property.
 SGD_API void SGD_DECL sgd_SetMaterialFloat(SGD_Material material, SGD_String property, float n);
 
-//! Set material texture property
+//! Set material texture property.
 SGD_API void SGD_DECL sgd_SetMaterialTexture(SGD_Material material, SGD_String property, SGD_Texture texture);
 
 //! @}
@@ -393,7 +394,7 @@ SGD_API void SGD_DECL sgd_SetMaterialTexture(SGD_Material material, SGD_String p
 //! Load a new mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path);
 
-//! Create a new  sphere mesh.
+//! Create a new sphere mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_CreateSphereMesh(float radius, int xSegs, int ySegs, SGD_Material material);
 
 //! Create a new box mesh.
@@ -409,15 +410,14 @@ SGD_API SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int seg
 //! Create a new torus mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs, SGD_Material material);
 
-
-//! Copy mesh.
-SGD_API SGD_Mesh SGD_DECL sgd_CopyMesh(SGD_Mesh mesh);
-
 //! Set mesh casts shadow flag, defaults to true.
 SGD_API void SGD_DECL sgd_SetMeshCastsShadow(SGD_Mesh mesh, SGD_Bool castsShadow);
 
 //! Get mesh casts shadow flag.
 SGD_API SGD_Bool SGD_DECL sgd_MeshCastsShadow(SGD_Mesh mesh);
+
+//! Copy mesh.
+SGD_API SGD_Mesh SGD_DECL sgd_CopyMesh(SGD_Mesh mesh);
 
 //! Update mesh normals.
 SGD_API void SGD_DECL sgd_UpdateMeshNormals(SGD_Mesh mesh);
@@ -434,6 +434,58 @@ SGD_API void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh mesh, float scaleX, fl
 
 //! Flip mesh.
 SGD_API void SGD_DECL sgd_FlipMesh(SGD_Mesh mesh);
+
+//! @}
+
+//! @name Mesh Building
+//! @{
+
+//! Create a new custom mesh.
+SGD_API SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, int flags);
+
+//! Add uninitialized vertices to a mesh, returning index of the first new vertex.
+SGD_API void SGD_DECL sgd_ResizeVertices(SGD_Mesh mesh, int count);
+
+//! Get number of vertices in mesh.
+SGD_API int SGD_DECL sgd_VertexCount(SGD_Mesh mesh);
+
+//! Add a vertex to a mesh, returning index of new vertex.
+SGD_API int SGD_DECL sgd_AddVertex(SGD_Mesh mesh, float x, float y, float z, float nx, float ny, float nz, float s, float t);
+
+//! Set vertex.
+SGD_API void SGD_DECL sgd_SetVertex(SGD_Mesh mesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s, float t);
+
+//! Set vertex position.
+SGD_API void SGD_DECL sgd_SetVertexPosition(SGD_Mesh mesh, int vertex, float x, float y, float z);
+
+//! Set vertex normal.
+SGD_API void SGD_DECL sgd_SetVertexNormal(SGD_Mesh mesh, int vertex, float nx, float ny, float nz);
+
+//! Set vertex tangent.
+SGD_API void SGD_DECL sgd_SetVertexTangent(SGD_Mesh mesh, int vertex, float tx, float ty, float tz, float tw);
+
+//! Set vertex texture coordinates.
+SGD_API void SGD_DECL sgd_SetVertexTexCoords(SGD_Mesh mesh, int vertex, float u, float v);
+
+//! Set vertex color.
+SGD_API void SGD_DECL sgd_SetVertexColor(SGD_Mesh mesh, int vertex, float r, float g, float b, float a);
+
+// ***** Surfaces *****
+
+//! Create a new Surface and add it to mesh.
+SGD_API SGD_Surface SGD_DECL sgd_CreateSurface(SGD_Mesh mesh, int triangleCount, SGD_Material material);
+
+//! Add empty triangles to surface, returning index of first new triangle.
+SGD_API void SGD_DECL sgd_ResizeTriangles(SGD_Surface surface, int count);
+
+//! Add triangle to surface, returning index of new triangle.
+SGD_API int SGD_DECL sgd_AddTriangle(SGD_Surface surfacem, int v0, int v1, int v2);
+
+//! Update existing triangle vertices in surface.
+SGD_API void SGD_DECL sgd_SetTriangle(SGD_Surface surface, int triangle, int v0, int v1, int v2);
+
+//! Get number of triangles in surface.
+SGD_API int SGD_DECL sgd_TriangleCount(SGD_Surface surface);
 
 //! @}
 
@@ -500,22 +552,34 @@ SGD_API void SGD_DECL sgd_Draw2DText(SGD_String text, float x,float y);
 //! @{
 
 //! Load a new sound.
-SGD_API SGD_Sound sgd_LoadSound(SGD_String path);
+SGD_API SGD_Sound SGD_DECL sgd_LoadSound(SGD_String path);
 
-//! Play a sound.
-SGD_API int sgd_PlaySound(SGD_Sound sound);
+//! Play a sound, returning an audio stream..
+SGD_API int SGD_DECL sgd_PlaySound(SGD_Sound sound);
 
 //! Cue a sound. The returned audio stream must be unpaused before it will start.
-SGD_API int sgd_CueSound(SGD_Sound sound);
+SGD_API int SGD_DECL sgd_CueSound(SGD_Sound sound);
 
-//! Set audio paused
-SGD_API void sgd_SetAudioPaused(int audio, SGD_Bool paused);
+//! Set audio volume.
+SGD_API void SGD_DECL sgd_SetAudioVolume(int audio, float volume);
 
-//! Set audio volume
-SGD_API void sgd_SetAudioVolume(int audio, float volume);
+//! Set audio pan.
+SGD_API void SGD_DECL sgd_SetAudioPan(int audio, float pan);
 
-//! Set audio pan
-SGD_API void sgd_SetAudioPan(int audio, float pan);
+//! Set audio pitch scale.
+SGD_API void SGD_DECL sgd_SetAudioPitchScale(uint32_t audio, float scale);
+
+//! Set audio looping flag.
+SGD_API void SGD_DECL sgd_SetAudioLooping(uint32_t audio, SGD_Bool looping);
+
+//! Set audio paused flag.
+SGD_API void SGD_DECL sgd_SetAudioPaused(uint32_t audio, SGD_Bool paused);
+
+//! Get audio valid flag. Audio is valid if it is playing or paused.
+SGD_API SGD_Bool SGD_DECL sgd_AudioValid(uint32_t audio);
+
+//! Stop audio.
+SGD_API void SGD_DECL sgd_StopAudio(uint32_t audio);
 
 //! @}
 

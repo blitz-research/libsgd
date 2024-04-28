@@ -101,34 +101,38 @@ void MeshRenderer::onValidate(GraphicsContext* gc) const {
 
 		m_renderOps = {};
 
-		for (int i = 0; i < m_mesh->surfaces().size(); ++i) {
-			auto& surf = m_mesh->surfaces()[i];
-			int pass = (int)renderPassType(surf.material->blendMode());
+		for (Surface* surf : m_mesh->surfaces()) {
 
-			auto pipeline = getOrCreateRenderPipeline(gc, surf.material, m_bindGroup, DrawMode::triangleList);
+			int pass = (int)renderPassType(surf->material()->blendMode());
 
+			auto pipeline = getOrCreateRenderPipeline(gc, surf->material(), m_bindGroup, DrawMode::triangleList);
+
+#if 1
 			m_renderOps[pass].emplace_back( //
 				m_mesh->vertexBuffer(),		//
 				m_instanceBuffer,			//
-				m_mesh->indexBuffer(),		//
-				surf.material->bindGroup(), //
+				surf->triangleBuffer(),		//
+				surf->material()->bindGroup(), //
 				m_bindGroup,				//
 				pipeline,					//
-				surf.triangleCount * 3, m_instanceCount, surf.firstTriangle * 3);
+				surf->triangleCount() * 3, m_instanceCount, 0);
+#endif
 
-			if (surf.material->blendMode() == BlendMode::opaque && m_mesh->castsShadow()) {
+#if 0
+			if (surf->material()->blendMode() == BlendMode::opaque && m_mesh->castsShadow()) {
 
 				auto shadowPipeline = getOrCreateShadowPipeline(gc, m_bindGroup, DrawMode::triangleList);
 
 				m_renderOps[(int)RenderPassType::shadow].emplace_back( //
 					m_mesh->vertexBuffer(),							   //
 					m_instanceBuffer,								   //
-					m_mesh->indexBuffer(),							   //
+					surf->triangleBuffer(),							   //
 					shadowBindGroup(),								   //
 					m_bindGroup,									   //
 					shadowPipeline,									   //
-					surf.triangleCount * 3, m_instanceCount, surf.firstTriangle * 3);
+					surf->triangleCount() * 3, m_instanceCount, 0);
 			}
+#endif
 		}
 		m_rebuildRenderOps = m_updateInstanceCounts = false;
 	}

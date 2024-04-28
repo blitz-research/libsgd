@@ -25,7 +25,8 @@ restart:
 
 	sgd_DebugMemory();
 
-	SGD_Sound sound = sgd_LoadSound("sgd://audio/fine_morning.ogg");
+///	SGD_Sound sound = sgd_LoadSound("sgd://audio/fine_morning.ogg");
+	SGD_Sound sound = sgd_LoadSound("sgd://audio/slimeball.wav");
 
 	for (;;) {
 
@@ -33,9 +34,8 @@ restart:
 
 		if (mask & SGD_EVENT_MASK_CLOSE_CLICKED) break;
 
-		if (mask & SGD_EVENT_MASK_SUSPENDED) puts("### App suspended");
-
-		if (mask & SGD_EVENT_MASK_RESUMED) puts("### App resumed");
+//		if (mask & SGD_EVENT_MASK_SUSPENDED) puts("### App suspended");
+//		if (mask & SGD_EVENT_MASK_RESUMED) puts("### App resumed");
 
 		fflush(stdout);
 
@@ -73,7 +73,12 @@ restart:
 		// model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", 1);
 		//		}
 
-		if (sgd_KeyHit(SGD_KEY_SPACE)) sgd_PlaySound(sound);
+		if (sgd_KeyHit(SGD_KEY_SPACE)) {
+			sgd_PlaySound(sound);
+//			int audio = sgd_CueSound(sound);
+//			sgd_SetAudioPan(audio, ((float)rand() / RAND_MAX) * 2 -1);
+//			sgd_SetAudioPaused(audio, SGD_FALSE);
+		}
 
 		char buf[80];
 		sprintf(buf, "FPS:%f", sgd_FPS());

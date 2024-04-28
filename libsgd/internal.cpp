@@ -55,7 +55,7 @@ SGD_Handle createHandle(HandleTypeInfo* type, Shared* shared) {
 	auto handle = ++g_nextHandle;
 	auto& map = g_handleMaps[(int)type->handleType];
 	SGD_ASSERT(map.find(handle) == map.end());
-//	log() << "### SGDX Inserting handle:" << handle<<"for shared:"<<shared;
+	// SGD_LOG << "SGDX Inserting handle:" << handle<<"for shared:"<<shared;
 	map.insert(std::make_pair(handle, shared));
 	g_reverseMaps[(int)type->handleType].insert(std::make_pair(shared, handle));
 	return handle;
@@ -66,7 +66,7 @@ SGD_Handle getOrCreateHandle(HandleTypeInfo* type, Shared* shared) {
 	auto it = rmap.find(shared);
 	if (it != rmap.end()) return it->second;
 	auto handle = ++g_nextHandle;
-//	log() << "### SGDX Inserting handle:" << handle<<"for shared:"<<shared;
+	// SGD_LOG << "SGDX Inserting handle:" << handle<<"for shared:"<<shared;
 	g_handleMaps[(int)type->handleType].insert(std::make_pair(handle, shared));
 	rmap.insert(std::make_pair(shared, handle));
 	return handle;
@@ -85,7 +85,7 @@ void destroyHandle(HandleTypeInfo* type, SGD_Handle handle) {
 	auto& map = g_handleMaps[(int)type->handleType];
 	auto it = map.find(handle);
 	if (it == map.end()) error("Invalid handle");
-//	log() << "### SGDX Removing handle:" << (int)handle << "shared:" << it->second;
+	// SGD_LOG << "SGDX Removing handle:" << (int)handle << "shared:" << it->second;
 	g_reverseMaps[(int)type->handleType].erase(it->second);
 	map.erase(it);
 }
@@ -94,7 +94,7 @@ bool destroyHandle(HandleTypeInfo* type, Shared* shared) {
 	auto& rmap = g_reverseMaps[(int)type->handleType];
 	auto rit = rmap.find(shared);
 	if (rit == rmap.end()) return false;
-//	log() << "### SGDX Removing handle:" << (int)rit->second << "shared:" << shared;
+	// SGD_LOG << "SGDX Removing handle:" << (int)rit->second << "shared:" << shared;
 	g_handleMaps[(int)type->handleType].erase(rit->second);
 	rmap.erase(rit);
 	return true;

@@ -48,7 +48,7 @@ PROJECT_NAME           = LibSGD
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = V0.04
+PROJECT_NUMBER         = V0.05
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -61,14 +61,14 @@ PROJECT_BRIEF          =
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = sgdlogo_docs.png
+PROJECT_LOGO           = ${CMAKE_CURRENT_SOURCE_DIR}/sgdlogo_docs.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = C:/Users/marks/dev/libsgd/help
+OUTPUT_DIRECTORY       = ${CMAKE_CURRENT_BINARY_DIR}
 
 # If the CREATE_SUBDIRS tag is set to YES then doxygen will create up to 4096
 # sub-directories (in 2 levels) under the output directory of each output format
@@ -943,7 +943,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = C:/Users/marks/dev/libsgd/libsgd/include/sgd
+INPUT                  = ${CMAKE_SOURCE_DIR}/libsgd/include/sgd
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

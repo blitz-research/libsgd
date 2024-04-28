@@ -6,20 +6,6 @@
 
 namespace sgd {
 
-template <class T, class D>
-void GLTFLoader::copyBufferData(const tinygltf::Accessor& accessor, void* dst, size_t dstPitch) const {
-	int size = byteSize(accessor);
-	SGD_ASSERT(size == sizeof(T));
-	auto srcp = bufferData(accessor);
-	auto srcPitch = bufferDataPitch(accessor);
-	auto dstp = (uint8_t*)dst;
-	for (int i = 0; i < accessor.count; ++i) {
-		new (dstp) D(*(T*)srcp);
-		dstp += dstPitch;
-		srcp += srcPitch;
-	}
-}
-
 AffineMat4f GLTFLoader::nodeMatrix(const tinygltf::Node& gltfNode) {
 
 	AffineMat4f matrix;
@@ -93,9 +79,17 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 		auto baseDir = path.filePath().parent_path().u8string();
 		res = gltfLoader.LoadASCIIFromString(&gltfModel, &err, &warn, (char*)data.data(), data.size(), baseDir);
 	}
-	if (!warn.empty()) log() << ">>> Tiny gltf warning: " << warn;
-	if (!err.empty()) return FileioEx("Tiny gltf error: " + err);
-	if (!res) return FileioEx("Tiny gltf unknown error");
+	if (!warn.empty()) {
+		SGD_LOG << "Tiny gltf warning:" << warn;
+	}
+	if (!err.empty()) {
+		SGD_LOG << "Tiny gltf error:" << err;
+		return FileioEx("Tiny gltf error: " + err);
+	}
+	if (!res) {
+		SGD_LOG << "Tiny gltf unknown error";
+		return FileioEx("Tiny gltf unknown error");
+	}
 
 	cachedImages.resize(gltfModel.images.size());
 	cachedTextures.resize(gltfModel.textures.size());
@@ -226,6 +220,20 @@ int GLTFLoader::bufferDataPitch(const tinygltf::Accessor& accessor) const {
 	return accessor.ByteStride(bufferView);
 }
 
+template <class T, class D>
+void GLTFLoader::copyBufferData(const tinygltf::Accessor& accessor, void* dst, size_t dstPitch) const {
+	int size = byteSize(accessor);
+	SGD_ASSERT(size == sizeof(T));
+	auto dstp = (uint8_t*)dst;
+	auto srcp = bufferData(accessor);
+	auto srcPitch = bufferDataPitch(accessor);
+	for (int i = 0; i < accessor.count; ++i) {
+		*(D*)dstp = (D)(*(T*)srcp);
+		dstp += dstPitch;
+		srcp += srcPitch;
+	}
+}
+
 void GLTFLoader::copyBufferData(const tinygltf::Accessor& accessor, void* dst, size_t dstPitch) const {
 	auto size = byteSize(accessor);
 	auto srcp = bufferData(accessor);
@@ -247,19 +255,22 @@ void GLTFLoader::beginMesh() {
 
 Mesh* GLTFLoader::endMesh() {
 
-	Vector<Triangle> triangles;
-	Vector<Surface> surfaces;
-
-	auto flags = MeshFlags::none;
-
-	for (auto it : this->meshTriangles) {
-		auto firstTri = (uint32_t)triangles.size();
-		triangles.insert(triangles.end(), it.second.begin(), it.second.end());
-		surfaces.push_back({loadMaterial(it.first), firstTri, (uint32_t)it.second.size()});
-		if (gltfModel.materials[it.first].normalTexture.index != -1) flags |= MeshFlags::tangentsEnabled;
+	MeshFlags flags = MeshFlags::none;
+	for (auto& it : this->meshTriangles) {
+		if (gltfModel.materials[it.first].normalTexture.index == -1) continue;
+		flags |= MeshFlags::tangentsEnabled;
+		break;
 	}
 
-	auto mesh = new Mesh(meshVertices, triangles, surfaces, flags);
+	auto mesh = new Mesh(meshVertices.size(), flags);
+
+	for (auto& it : this->meshTriangles) {
+		auto& triangles = it.second;
+		auto surface = new Surface(triangles.size(), loadMaterial(it.first));
+		std::memcpy(surface->lockTriangles(0, triangles.size()), triangles.data(), triangles.size() * sizeof(Triangle));
+		surface->unlockTriangles();
+		mesh->addSurface(surface);
+	}
 
 	if (bool(flags & MeshFlags::tangentsEnabled) && !meshHasTangents) updateTangents(mesh);
 
@@ -267,8 +278,12 @@ Mesh* GLTFLoader::endMesh() {
 
 	return mesh;
 }
+
 void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
-	if (gltfPrim.mode != TINYGLTF_MODE_TRIANGLES) return;
+	if (gltfPrim.mode != TINYGLTF_MODE_TRIANGLES) {
+		SGD_LOG << "TODO: Unsupported gltf primitive mode";
+		return;
+	}
 	if (gltfPrim.material == -1) return;
 
 	// Add vertex attributes
@@ -326,7 +341,7 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 			}
 #endif
 		} else {
-			log() << String("### TODO: Unrecognized Gltf attribute \"") + attrib.first + "\"";
+			SGD_LOG << "TODO: Unrecognized Gltf attribute \"" << attrib.first << "\"";
 		}
 	}
 
@@ -339,7 +354,7 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 	SGD_ASSERT(triCount * 3 == accessor.count);
 
 	triangles.resize(firstTri + triCount);
-	auto tp = triangles.data() + firstTri;
+	auto tp = (uint32_t*)triangles.data() + firstTri;
 
 	switch (accessor.componentType) {
 	case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
@@ -352,17 +367,9 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 		copyBufferData<uint8_t, uint32_t>(accessor, tp, sizeof(uint32_t));
 		break;
 	default:
+		SGD_LOG << "TODO: Unsupported gltf component type for triangle indices";
 		SGD_ABORT();
 	}
-
-#if 0	// CullMode was wrong?
-	for (int i = 0; i < triCount; ++i) {
-		std::swap(tp[i].indices[1], tp[i].indices[2]);
-		tp[i].indices[0] += firstVertex;
-		tp[i].indices[1] += firstVertex;
-		tp[i].indices[2] += firstVertex;
-	}
-#endif
 }
 
 void GLTFLoader::updateMesh(const tinygltf::Mesh& gltfMesh) {
@@ -405,7 +412,6 @@ void GLTFLoader::loadAnimations() {
 			SGD_ASSERT(count == value_accessor.count);
 
 			if (chan.target_path == "translation") {
-				// log() << "### translation keys:" << count;
 				SGD_ASSERT(value_accessor.type == TINYGLTF_TYPE_VEC3 && //
 						   value_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
 				seq->positionKeys.resize(count);
@@ -413,7 +419,6 @@ void GLTFLoader::loadAnimations() {
 				copyBufferData(value_accessor, &seq->positionKeys[0].value, sizeof(seq->positionKeys[0]));
 				for (auto& key : seq->positionKeys) key.value.z = -key.value.z;
 			} else if (chan.target_path == "rotation") {
-				// log() << "### rotation keys:" << count;
 				SGD_ASSERT(value_accessor.type == TINYGLTF_TYPE_VEC4 && //
 						   value_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
 				seq->rotationKeys.resize(count);
@@ -421,13 +426,13 @@ void GLTFLoader::loadAnimations() {
 				copyBufferData(value_accessor, &seq->rotationKeys[0].value, sizeof(seq->rotationKeys[0]));
 				for (auto& key : seq->rotationKeys) key.value = {{-key.value.v.x, -key.value.v.y, key.value.v.z}, -key.value.w};
 			} else if (chan.target_path == "scale") {
-				// log() << "### scale keys:" << count;
 				SGD_ASSERT(value_accessor.type == TINYGLTF_TYPE_VEC3 && //
 						   value_accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
 				seq->scaleKeys.resize(count);
 				copyBufferData(time_accessor, &seq->scaleKeys[0].time, sizeof(seq->scaleKeys[0]));
 				copyBufferData(value_accessor, &seq->scaleKeys[0].value, sizeof(seq->scaleKeys[0]));
 			} else {
+				SGD_LOG << "Unrecognized gltf animation channel target_path";
 				SGD_ABORT();
 			}
 		}

@@ -4,10 +4,8 @@
 
 SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags) {
 	sgdx::started();
-
-	auto texture = sgdx::loadTexture(sgdx::Path(path), (sgdx::TextureFormat)format, (sgdx::TextureFlags)flags);
+	auto texture = sgd::loadTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
 	if (!texture) sgdx::error("Failed to load texture", texture.error());
-
 	return sgdx::createHandle(texture.result());
 }
 
@@ -15,102 +13,70 @@ SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags) {
 
 SGD_Material SGD_DECL sgd_CreatePBRMaterial() {
 	sgdx::started();
-
 	auto material = sgd::createPBRMaterial();
-
 	return sgdx::createHandle(material);
 }
 
 SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path) {
 	sgdx::started();
-
-	auto material = sgdx::loadPBRMaterial(sgdx::Path(path));
+	auto material = sgd::loadPBRMaterial(sgd::Path(path));
 	if (!material) sgdx::error("Failed to load material", material.error());
-
 	return sgdx::createHandle(material.result());
 }
 
 SGD_Material SGD_DECL sgd_CreatePrelitMaterial() {
 	sgdx::started();
-
 	auto material = sgd::createPrelitMaterial();
-
 	return sgdx::createHandle(material);
 }
 
 SGD_Material SGD_DECL sgd_LoadPrelitMaterial(SGD_String path) {
 	sgdx::started();
-
-	auto material = sgdx::loadPrelitMaterial(sgdx::Path(path));
+	auto material = sgd::loadPrelitMaterial(sgd::Path(path));
 	if (!material) sgdx::error("Failed to load material", material.error());
-
 	return sgdx::createHandle(material.result());
 }
 
 void SGD_DECL sgd_SetMaterialBlendMode(SGD_Material hmaterial, int blendMode) {
-	sgdx::started();
-
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
-	material->blendMode = (sgdx::BlendMode)blendMode;
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
+	material->blendMode = (sgd::BlendMode)blendMode;
 }
 
 void SGD_DECL sgd_SetMaterialDepthFunc(SGD_Material hmaterial, int depthFunc) {
-	sgdx::started();
-
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
-	material->depthFunc = (sgdx::DepthFunc)depthFunc;
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
+	material->depthFunc = (sgd::DepthFunc)depthFunc;
 }
 
 void SGD_DECL sgd_SetMaterialCullMode(SGD_Material hmaterial, int cullMode) {
-	sgdx::started();
-
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
-	material->cullMode = (sgdx::CullMode)cullMode;
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
+	material->cullMode = (sgd::CullMode)cullMode;
 }
 
 void SGD_DECL sgd_SetMaterialTexture(SGD_Material hmaterial, SGD_String property, SGD_Texture htexture) {
-	sgdx::started();
-
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-	auto texture = sgdx::resolveHandle<sgdx::Texture>(htexture);
-
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
+	auto texture = sgdx::resolveHandle<sgd::Texture>(htexture);
 	if (!material->setTexture(property, texture)) sgdx::error(sgd::String("Material property \"") + property + "\" not found");
 }
 
 void SGD_DECL sgd_SetMaterialVector4f(SGD_Material hmaterial, SGD_String property, float x, float y, float z, float w) {
-	sgdx::started();
-
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	if (!material->setVector4f(property, {x, y, z, w}))
 		sgdx::error(sgd::String("Material property \"") + property + "\" not found");
 }
 
 void SGD_DECL sgd_SetMaterialVector3f(SGD_Material hmaterial, SGD_String property, float x, float y, float z) {
-	sgdx::started();
-
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	if (!material->setVector3f(property, {x, y, z}))
 		sgdx::error(sgd::String("Material property \"") + property + "\" not found");
 }
 
 void SGD_DECL sgd_SetMaterialVector2f(SGD_Material hmaterial, SGD_String property, float x, float y) {
-	sgdx::started();
-
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	if (!material->setVector2f(property, {x, y})) sgdx::error(sgd::String("Material property \"") + property + "\" not found");
 }
 
 void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String property, float n) {
-	sgdx::started();
-
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	if (!material->setFloat(property, n)) sgdx::error(sgd::String("Material property \"") + property + "\" not found");
 }
 
@@ -118,44 +84,34 @@ void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String property, 
 
 SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path) {
 	sgdx::started();
-
-	auto mesh = sgdx::loadStaticMesh(sgdx::Path(path));
+	auto mesh = sgdx::loadStaticMesh(sgd::Path(path));
 	if (!mesh) sgdx::error("Failed to load mesh", mesh.error());
-
 	return sgdx::createHandle(mesh.result());
 }
 
 SGD_Mesh SGD_DECL sgd_CreateSphereMesh(float radius, int xSegs, int ySegs, SGD_Material hmaterial) {
 	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
 	auto mesh = sgd::createSphereMesh(radius, xSegs, ySegs, material);
-
 	return sgdx::createHandle(mesh);
 }
 
 SGD_Mesh SGD_DECL sgd_CreateBoxMesh(float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
 									SGD_Material hmaterial) {
 	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
 	auto mesh = sgd::createBoxMesh(sgdx::Boxf({minX, minY, minZ}, {maxX, maxY, maxZ}), material);
-
 	return sgdx::createHandle(mesh);
 }
 
 SGD_Mesh SGD_DECL sgd_CreateCylinderMesh(float height, float radius, int segs, SGD_Material hmaterial) {
 	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
 	auto mesh = sgd::createCylinderMesh(height, radius, segs, material);
-
 	return sgdx::createHandle(mesh);
 }
 
 //! Create a new cone mesh.
 SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int segs, SGD_Material hmaterial) {
 	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
 	auto mesh = sgd::createConeMesh(height, radius, segs, material);
-
 	return sgdx::createHandle(mesh);
 }
 
@@ -163,59 +119,153 @@ SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int segs, SGD_M
 SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs,
 											  SGD_Material hmaterial) {
 	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
 	auto mesh = sgd::createTorusMesh(outerRadius, innerRadius, outerSegs, innerSegs, material);
-
 	return sgdx::createHandle(mesh);
 }
 
 SGD_Mesh SGD_DECL sgd_CopyMesh(SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
-
 	return sgdx::createHandle(sgd::copy(mesh));
 }
 
 void SGD_DECL sgd_SetMeshCastsShadow(SGD_Mesh hmesh, SGD_Bool castsShadow) {
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
-
 	mesh->castsShadow = castsShadow;
 }
 
 SGD_Bool SGD_DECL sgd_MeshCastsShadow(SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
-
 	return mesh->castsShadow();
 }
 
 void SGD_DECL sgd_UpdateMeshNormals(SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
-
 	updateNormals(mesh);
 }
 
 void SGD_DECL sgd_UpdateMeshTangents(SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
-
 	updateTangents(mesh);
 }
 
 SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh hmesh, float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
 								  int uniform) {
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
-
 	fit(mesh, {{minX, minY, minZ}, {maxX, maxY, maxZ}}, uniform);
 }
 
 void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY, float offsetX, float offsetY) {
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
-
 	sgdx::transformTexCoords(mesh, sgdx::Vec2f(scaleX, scaleY), sgdx::Vec2f(offsetX, offsetY));
 }
 
 void SGD_DECL sgd_FlipMesh(SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
-
 	sgd::flip(mesh);
+}
+
+// ***** Mesh Creation *****
+
+SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, int flags) {
+	sgdx::started();
+	auto mesh = new sgd::Mesh(vertexCount, (sgd::MeshFlags)flags);
+	return sgdx::createHandle(mesh);
+}
+
+void SGD_DECL sgd_ResizeVertices(SGD_Mesh hmesh, int count) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	mesh->resizeVertices(count);
+}
+
+int SGD_DECL sgd_VertexCount(SGD_Mesh hmesh) {
+	return (int)sgdx::resolveHandle<sgd::Mesh>(hmesh)->vertexCount();
+}
+
+int SGD_DECL sgd_AddVertex(SGD_Mesh hmesh, float x, float y, float z, float nx, float ny, float nz, float s, float t) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	int i = (int)mesh->vertexCount();
+	mesh->resizeVertices(i + 1);
+	mesh->lockVertices(i, 1)[0] = {{x, y, z}, {nx, ny, nz}, {s, t}};
+	mesh->unlockVertices();
+	return i;
+}
+
+void SGD_DECL sgd_SetVertex(SGD_Mesh hmesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s,
+							float t) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	mesh->lockVertices(vertex, 1)[0] = {{x, y, z}, {nx, nz, ny}, {s, t}};
+	mesh->unlockVertices();
+}
+
+void SGD_DECL sgd_SetVertexPosition(SGD_Mesh hmesh, int vertex, float x, float y, float z) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	mesh->lockVertices(vertex, 1)->position = {x, y, z};
+	mesh->unlockVertices();
+}
+
+void SGD_DECL sgd_SetVertexNormal(SGD_Mesh hmesh, int vertex, float x, float y, float z) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	mesh->lockVertices(vertex, 1)->normal = {x, y, z};
+	mesh->unlockVertices();
+}
+
+void SGD_DECL sgd_SetVertexTangent(SGD_Mesh hmesh, int vertex, float x, float y, float z, float w) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	mesh->lockVertices(vertex, 1)->tangent = {x, y, z, w};
+	mesh->unlockVertices();
+}
+
+void SGD_DECL sgd_SetVertexTexCoords(SGD_Mesh hmesh, int vertex, float u, float v) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	mesh->lockVertices(vertex, 1)->texCoords = {u, v};
+	mesh->unlockVertices();
+}
+
+void SGD_DECL sgd_SetVertexColor(SGD_Mesh hmesh, int vertex, float r, float g, float b, float a) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	mesh->lockVertices(vertex, 1)->color = {r, g, b, a};
+	mesh->unlockVertices();
+}
+
+// ***** Surfaces *****
+
+SGD_Surface SGD_DECL sgd_CreateSurface(SGD_Mesh hmesh, int triangleCount, SGD_Material hmaterial) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
+	auto surface = new sgd::Surface(triangleCount, material);
+	mesh->addSurface(surface);
+	return sgdx::createHandle(surface);
+}
+
+void SGD_DECL sgd_ResizeTriangles(SGD_Surface hsurface, int count) {
+	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
+	surf->resizeTriangles(count);
+}
+
+int SGD_DECL sgd_AddTriangle(SGD_Surface hsurface, int v0, int v1, int v2) {
+	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
+	int i = (int)surf->triangleCount();
+	surf->resizeTriangles(i + 1);
+	surf->lockTriangles(i, 1)[0] = {(uint32_t)v0, (uint32_t)v1, (uint32_t)v2};
+	surf->unlockTriangles();
+	return i;
+}
+
+void SGD_DECL sgd_SetTriangle(SGD_Surface hsurface, int triangle, int v0, int v1, int v2) {
+	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
+	if (triangle < 0 || triangle >= surf->triangleCount()) sgdx::error("Triangle index out of range");
+	surf->lockTriangles(triangle, 1)[0] = {(uint32_t)v0, (uint32_t)v1, (uint32_t)v2};
+	surf->unlockTriangles();
+}
+
+void SGD_DECL sgd_ClearTriangles(SGD_Surface hsurface) {
+	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
+	surf->resizeTriangles(0);
+}
+
+int SGD_DECL sgd_TriangleCount(SGD_Surface hsurface) {
+	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
+	return (int)surf->triangleCount();
 }
 
 // ***** 2D Overlay *****
@@ -224,13 +274,11 @@ SGD_Font SGD_DECL sgd_Load2DFont(SGD_String path, float height) {
 	sgdx::started();
 	auto font = sgd::loadFont(sgd::Path(path), height);
 	if (!font) sgdx::error("Failed to load font:" + font.error().message());
-
 	return sgdx::createHandle(font.result());
 }
 
 float SGD_DECL sgd_Get2DFontHeight(SGD_Font hfont) {
 	auto font = sgdx::resolveHandle<sgd::Font>(hfont);
-
 	return font->height;
 }
 

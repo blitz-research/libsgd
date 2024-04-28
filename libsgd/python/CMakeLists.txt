@@ -41,16 +41,15 @@ add_custom_command(
         OUTPUT sgd_wrap.c sgd.py
         VERBATIM)
 
-if (SGD_INSTALL_DIR)
-    if(SGD_OS_WINDOWS)
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_sgd.pyd DESTINATION python/${SGD_INSTALL_DIR})
-    else()
-        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_sgd.so DESTINATION python/${SGD_INSTALL_DIR})
-    endif()
-    install(FILES
-            ${CMAKE_CURRENT_BINARY_DIR}/sgd.py
-            ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.py
-            DESTINATION python/${SGD_INSTALL_DIR})
+if(SGD_OS_WINDOWS)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_sgd.pyd DESTINATION python)
+else()
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_sgd.so DESTINATION python)
 endif()
+
+install(FILES
+		${CMAKE_CURRENT_BINARY_DIR}/sgd.py
+		${CMAKE_CURRENT_SOURCE_DIR}/helloworld.py
+		DESTINATION python)
 
 #winpty python

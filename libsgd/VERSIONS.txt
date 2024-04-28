@@ -1,4 +1,17 @@
 
+***** V0.05 *****
+
+* Add mesh building commands, see makesphere.bb, not really enough to pull apart existing meshes.
+
+* Added support for ~ at start of file paths.
+
+* Moved fetch cache to ~/.sgd/cache dir
+
+* Tidied up logging a bit, log file is now written to ~/.sgd/log.txt and echoed to stdout by default.
+
+* Added audio functions.
+
+
 ***** V0.04.1 *****
 
 * Tidied up external CMakeLists.txt

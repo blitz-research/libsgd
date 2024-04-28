@@ -2,6 +2,7 @@
 
 #include "soloud.h"
 #include "soloud_wav.h"
+#include "soloud_wavstream.h"
 
 namespace sgd {
 
@@ -10,21 +11,21 @@ namespace {
 SoLoud::Soloud* g_soloud;
 
 void init() {
-	if(g_soloud) return;
+	if (g_soloud) return;
 	g_soloud = new SoLoud::Soloud();
 	g_soloud->init();
 
 	appSuspended.connect(nullptr, [] {
-		if(g_soloud) g_soloud->setPauseAll(true);
+		if (g_soloud) g_soloud->setPauseAll(true);
 	});
 
-	appResumed.connect(nullptr, []{
-		if(g_soloud) g_soloud->setPauseAll(false);
+	appResumed.connect(nullptr, [] {
+		if (g_soloud) g_soloud->setPauseAll(false);
 	});
 }
 
 SoLoud::Soloud* soloud() {
-	if(!g_soloud) init();
+	if (!g_soloud) init();
 	return g_soloud;
 }
 
@@ -76,11 +77,11 @@ void setAudioSampleRate(uint32_t audio, float rate) {
 	soloud()->setSamplerate(audio, rate);
 }
 
-void setAudioRelativePlaySpeed(uint32_t audio, float pitch) {
-	soloud()->setRelativePlaySpeed(audio, pitch);
+void setAudioPitchScale(uint32_t audio, float scale) {
+	soloud()->setRelativePlaySpeed(audio, scale);
 }
 
-float audioRelativePlaySpeed(uint32_t audio) {
+float audioPitchScale(uint32_t audio) {
 	return soloud()->getRelativePlaySpeed(audio);
 }
 
@@ -104,8 +105,21 @@ bool audioValid(uint32_t audio) {
 	return soloud()->isValidVoiceHandle(audio);
 }
 
-void stopaudio(uint32_t audio) {
+void stopAudio(uint32_t audio) {
 	soloud()->stop(audio);
+}
+
+uint32_t playMusic(CPath path) {
+	init();
+
+	SGD_ASSERT(path.isFilePath());
+
+	auto wavStream = new SoLoud::WavStream();
+	SGD_LOG << "### loadFile:" << wavStream->load(path.filePath().u8string().c_str());
+
+	soloud()->play(*wavStream);
+
+	return 0;
 }
 
 } // namespace sgd

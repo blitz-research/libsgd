@@ -33,8 +33,14 @@ const char* enabledToggles[] = {"float32-filterable", "allow_unsafe_apis"};
 const char* errorNames[] = {"No error", "Validation", "Out of memory", "Internal", "Unknown", "Device lost"};
 
 void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
-	auto name = (uint32_t)type < std::size(errorNames) ? errorNames[(uint32_t)type] : "OOPS";
-	alert(String("Dawn Device error:\n") + name + "\n" + message);
+	auto err = (uint32_t)type < std::size(errorNames) ? errorNames[(uint32_t)type] : "OOPS";
+
+	SGD_LOG << "Dawn device error:";
+	SGD_LOG << err;
+	SGD_LOG << message;
+
+	alert(String("Dawn Device error:\n") + err + "\n" + message);
+
 	SGD_ABORT();
 }
 
@@ -43,11 +49,11 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 	wgpu::AdapterProperties props{};
 	adapter.GetProperties(&props);
 
-	log() << "### Dawn WGPU Adapter Properties:";
-	log() << "### Vender name:" << (props.vendorName ? props.vendorName : "???");
-	log() << "### Architecture:" << (props.architecture ? props.architecture : "???");
-	log() << "### Name:" << (props.name ? props.name : "???");
-	log() << "### Driver description:" << (props.driverDescription ? props.driverDescription : "???");
+	SGD_LOG << "Dawn WGPU Adapter Properties:";
+	SGD_LOG << "Vender name:" << (props.vendorName ? props.vendorName : "???");
+	SGD_LOG << "Architecture:" << (props.architecture ? props.architecture : "???");
+	SGD_LOG << "Name:" << (props.name ? props.name : "???");
+	SGD_LOG << "Driver description:" << (props.driverDescription ? props.driverDescription : "???");
 
 	Map<wgpu::AdapterType, String> adapterTypes{
 		{wgpu::AdapterType::DiscreteGPU, "DiscreteGPU"},
@@ -55,7 +61,7 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 		{wgpu::AdapterType::CPU, "CPU"},
 		{wgpu::AdapterType::Unknown, "Unknown"},
 	};
-	log() << "### Adapter type:" << adapterTypes[props.adapterType];
+	SGD_LOG << "Adapter type:" << adapterTypes[props.adapterType];
 
 	Map<wgpu::BackendType, String> backendTypes{
 		{wgpu::BackendType::Undefined, "Undefined"}, {wgpu::BackendType::D3D12, "D3D12"},
@@ -64,8 +70,8 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 		{wgpu::BackendType::OpenGL, "OpenGL"},		 {wgpu::BackendType::OpenGLES, "OpenGLES"},
 		{wgpu::BackendType::WebGPU, "WebGPU"},
 	};
-	log() << "### Backend type:" << backendTypes[props.backendType];
-	log() << "### Compatibility mode:" << props.compatibilityMode;
+	SGD_LOG << "Backend type:" << backendTypes[props.backendType];
+	SGD_LOG << "Compatibility mode:" << props.compatibilityMode;
 }
 
 } // namespace
@@ -117,7 +123,7 @@ wgpu::Device createWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions)
 		[&] {
 			requestWGPUDevice(adapterOptions, [&](const wgpu::Device& device) { //
 				result = device;
-				ready.set(true);
+				ready = true;
 			});
 		},
 		true);
@@ -154,8 +160,6 @@ wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) 
 #elif SGD_OS_EMSCRIPTEN
 			wgpu::SurfaceDescriptorFromCanvasHTMLSelector nativeDesc{};
 			nativeDesc.selector = "#canvas";
-#else
-			SGD_ABORT();
 #endif
 			wgpu::SurfaceDescriptor surfaceDesc{};
 			surfaceDesc.nextInChain = &nativeDesc;
@@ -165,7 +169,7 @@ wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) 
 			// wgpu::Surface surface = getWGPUInstance().CreateSurface(&surfaceDesc);
 
 			result = surface;
-			ready.set(true);
+			ready = true;
 		},
 		true);
 
@@ -194,7 +198,7 @@ wgpu::SwapChain createWGPUSwapChain(const wgpu::Device& device, const wgpu::Surf
 			desc.presentMode = wgpu::PresentMode::Fifo; // vsync = on
 #endif
 			result = device.CreateSwapChain(surface, &desc);
-			ready.set(true);
+			ready = true;
 		},
 		true);
 

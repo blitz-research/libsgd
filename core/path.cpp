@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <iostream>
+
 #if SGD_OS_WINDOWS
 #include <Windows.h>
 #undef min
@@ -22,6 +24,18 @@ namespace sgd {
 
 namespace {
 
+CString homeDir() {
+	static String dir;
+#if SGD_OS_WINDOWS
+	auto home = getenv("USERPROFILE");
+	if (!home) home = getenv("HOMEPATH");
+#else
+	auto home = getenv("HOME");
+#endif
+	SGD_ASSERT(home);
+	return dir = home;
+}
+
 String join(CString x, CString y) {
 	auto i0 = x.find_last_not_of('/');
 	auto i1 = y.find_first_not_of('/');
@@ -30,46 +44,46 @@ String join(CString x, CString y) {
 
 } // namespace
 
-Path::Path(String path) : m_str(std::move(path)) {
+void Path::init(CString str) {
+	m_str = replace(str, "\\", "/");
+	if (m_str.find("://") != String::npos) {
+		m_url = m_str;
+	}
 }
 
-Path::Path(std::filesystem::path& fpath) : m_str(fpath.u8string()) {
+Path::Path(CString path) {
+	init(path);
 }
 
-bool Path::isUrl() const {
-	return m_str.find("://") != String::npos;
+Path::Path(const char* path) {
+	init(path);
 }
 
-bool Path::isValidFilePath() const {
-	return !isUrl();
+Path::Path(std::filesystem::path path) {
+	init(path.u8string());
+}
+
+bool Path::isFilePath() const {
+	return !m_str.empty() && m_url.empty();
 }
 
 std::filesystem::path Path::filePath() const {
-	if (startsWith(m_str, "${")) {
-		auto i = m_str.find('}', 2);
-		if (i == String::npos) return {};
+	SGD_ASSERT(isFilePath());
+	if (!m_str.empty() && m_str.front() == '~') return homeDir() + m_str.substr(1);
+	return m_str;
+}
 
-		auto id = m_str.substr(2, i - 2);
-		++i;
+bool Path::isUrl() const {
+	return !m_url.empty();
+}
 
-		std::filesystem::path prefix;
+String Path::url() const {
+	SGD_ASSERT(isUrl());
+	return m_url;
+}
 
-		if (id == "HOME") {
-#if SGD_OS_WINDOWS
-			auto home = getenv("USERPROFILE");
-			if (!home) home = getenv("HOMEPATH");
-#else
-			auto home = getenv("HOME");
-#endif
-			if (!home) return {};
-			prefix = home;
-		}else{
-			return {};
-		}
-		while(i < m_str.size() && m_str[i] == '/' || m_str[i] == '\\') ++i;
-		return prefix / m_str.substr(i);
-	}
-	return std::filesystem::absolute(m_str).u8string();
+bool Path::empty() const {
+	return m_str.empty();
 }
 
 bool Path::exists() const {
@@ -82,6 +96,30 @@ bool Path::isFile() const {
 
 bool Path::isDir() const {
 	return std::filesystem::is_directory(filePath());
+}
+
+Path Path::parentDir() const {
+	return Path(filePath().parent_path());
+}
+
+bool Path::createFile(bool createParentDirs) const {
+	if (createParentDirs) {
+		auto pdir = parentDir();
+		if (pdir && !pdir.createDir(true)) return false;
+	}
+	std::ofstream fs(filePath(), std::ios::binary | std::ios::trunc);
+	bool ok = fs.good();
+	fs.close();
+	return ok;
+}
+
+bool Path::createDir(bool createParentDirs) const { // NOLINT (Recursive)
+	if (isDir()) return true;
+	if (createParentDirs) {
+		auto pdir = parentDir();
+		if (pdir && !pdir.createDir(true)) return false;
+	}
+	return std::filesystem::create_directory(filePath());
 }
 
 String Path::name() const {
@@ -101,6 +139,18 @@ String Path::ext() const {
 	return i == String::npos ? String{} : t.substr(i);
 }
 
+bool operator==(CPath x, CPath y) {
+	return x.str() == y.str();
+}
+
+bool operator!=(CPath x, CPath y) {
+	return x.str() != y.str();
+}
+
+bool operator<(CPath x, CPath y) {
+	return x.str() < y.str();
+}
+
 Path operator/(CPath x, CPath y) {
 	return Path(join(x.str(), y.str()));
 }
@@ -117,49 +167,8 @@ Path operator+(CPath x, CString y) {
 	return Path(x.str() + y);
 }
 
-Path appPath() {
-	static Path path;
-	if (path) return path;
-
-#if SGD_OS_WINDOWS
-
-	char buf[MAX_PATH + 1];
-	GetModuleFileName(GetModuleHandle(nullptr), buf, MAX_PATH);
-	buf[MAX_PATH] = 0;
-
-	return path = Path(replace(buf, "\\", "/"));
-
-#elif defined(SGD_OS_LINUX) || defined(SGD_OS_MACOS)
-
-	char lnk[PATH_MAX + 1];
-	char buf[PATH_MAX + 1];
-	pid_t pid = getpid();
-	sprintf(lnk, "/proc/%i/exe", pid);
-	int i = readlink(lnk, buf, PATH_MAX);
-	if (i > PATH_MAX) SGD_ABORT();
-	buf[i] = 0;
-
-	return path = Path(buf);
-
-#elif SGD_OS_EMSCRIPTEN
-
-	return path = Path("/");
-
-#else
-	SGD_ABORT();
-#endif
-}
-
-Path homeDir() {
-#if SGD_OS_WINDOWS
-	auto home = getenv("USERPROFILE");
-	SGD_ASSERT(home);
-	return Path(replace(home, "\\", "/"));
-#else
-	auto home = getenv("HOME");
-	SGD_ASSERT(home);
-	return Path(home);
-#endif
+std::ostream& operator<<(std::ostream& os, CPath path) {
+	return os << path.str();
 }
 
 } // namespace sgd

@@ -218,8 +218,6 @@ void Scene::render() {
 
 	updateCameraBindings();
 
-	//	log() << "### Eye" << std::setprecision(12) << m_eye;
-
 	updateLightingBindings();
 
 	for (Renderer* r : m_renderers) {

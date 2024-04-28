@@ -16,22 +16,24 @@ void initApp() {
 	done = true;
 
 	if (!glfwInit()) {
-		log() << "### glfwInit() failed - aborting";
+		SGD_LOG << "glfwInit() failed - aborting";
 		SGD_ABORT();
 	}
+
+	SGD_LOG << "App initialized";
 }
 
 void suspendApp() {
 	if (++g_suspended == 1) {
-		log() << "### App suspended";
 		appSuspended.emit();
+		SGD_LOG << "App suspended";
 	}
 }
 
 void resumeApp() {
 	if (--g_suspended == 0) {
-		log() << "### App resumed";
 		appResumed.emit();
+		SGD_LOG << "App resumed";
 	}
 }
 

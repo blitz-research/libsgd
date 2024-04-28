@@ -59,8 +59,6 @@ Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags
 	: m_size(size), m_depth(depth), m_format(format), m_flags(flags) {
 
 	m_data = (uint8_t*)std::malloc(SIZE(m_size));
-
-	//	log() << "### Created texture:" << this << size << depth;
 }
 
 Texture::Texture(Texture* texture, uint32_t layer)
@@ -71,8 +69,6 @@ Texture::Texture(Texture* texture, uint32_t layer)
 
 Texture::~Texture() {
 
-	//	log() << "### Deleting texture:" << this << m_size << m_depth;
-
 	std::free(m_data);
 }
 
@@ -81,7 +77,7 @@ void Texture::update(const void* src, size_t srcPitch) {
 	auto dstPitch = PITCH(m_size);
 
 	if (dstPitch != srcPitch) {
-		SGD_ABORT();
+		SGD_PANIC("TODO");
 		auto rowSize = std::min(srcPitch, dstPitch);
 		for (int y = 0; y < m_size.y * m_depth; ++y) {
 			std::memcpy(m_data + dstPitch * y, (uint8_t*)src + srcPitch * y, rowSize);

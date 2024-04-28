@@ -22,12 +22,13 @@ inline DrawListPtr g_drawList;
 inline FontPtr g_defaultFont;
 
 enum struct HandleType {
-	object,
-	texture,
-	material,
-	mesh,
+//	object,
 	font,
 	sound,
+	texture,
+	material,
+	surface,
+	mesh,
 	entity,
 };
 
@@ -106,11 +107,12 @@ inline HandleTypeInfo _sgdHandleTypeInfo_##T{T::staticType(), H}; \
 template<> inline HandleTypeInfo* handleTypeInfo<T>(){return &_sgdHandleTypeInfo_##T;}
 // clang-format on
 
-SGD_HANDLE_TYPE_INFO(Texture, HandleType::texture);
-SGD_HANDLE_TYPE_INFO(Material, HandleType::material);
-SGD_HANDLE_TYPE_INFO(Mesh, HandleType::mesh);
 SGD_HANDLE_TYPE_INFO(Font, HandleType::font);
 SGD_HANDLE_TYPE_INFO(Sound, HandleType::sound);
+SGD_HANDLE_TYPE_INFO(Texture, HandleType::texture);
+SGD_HANDLE_TYPE_INFO(Material, HandleType::material);
+SGD_HANDLE_TYPE_INFO(Surface, HandleType::surface);
+SGD_HANDLE_TYPE_INFO(Mesh, HandleType::mesh);
 SGD_HANDLE_TYPE_INFO(Entity, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Camera, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Light, HandleType::entity);

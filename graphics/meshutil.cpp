@@ -15,7 +15,7 @@ Boxf bounds(CMesh* mesh) {
 
 void transform(Mesh* mesh, CAffineMat4f matrix) {
 
-	auto vp = mesh->lockVertices(0, mesh->vertexCount());
+	auto vp = mesh->lockVertices();
 
 	auto cof = cofactor(matrix.r);
 
@@ -29,7 +29,7 @@ void transform(Mesh* mesh, CAffineMat4f matrix) {
 
 void transformTexCoords(Mesh* mesh, CVec2f scale, CVec2f offset) {
 
-	auto vp = mesh->lockVertices(0, mesh->vertexCount());
+	auto vp = mesh->lockVertices();
 
 	for (uint32_t i = 0; i < mesh->vertexCount(); ++i) {
 		vp[i].texCoords = vp[i].texCoords * scale + offset;
@@ -53,21 +53,23 @@ void fit(Mesh* mesh, CBoxf box, bool uniform) {
 
 void updateNormals(Mesh* mesh) {
 
-	auto vp = mesh->lockVertices(0, mesh->vertexCount());
-	auto tp = mesh->triangles();
+	auto vp = mesh->lockVertices();
 
 	for (uint32_t i = 0; i < mesh->vertexCount(); ++i) {
 		vp[i].normal = {};
 	}
 
-	for (uint32_t i = 0; i < mesh->triangleCount(); ++i) {
-		auto& v0 = vp[tp[i].indices[0]];
-		auto& v1 = vp[tp[i].indices[1]];
-		auto& v2 = vp[tp[i].indices[2]];
-		auto n = normalize(cross(v1.position - v0.position, v2.position - v0.position));
-		v0.normal += n;
-		v1.normal += n;
-		v2.normal += n;
+	for (Surface* surf : mesh->surfaces()) {
+		auto tp = surf->triangles();
+		for (uint32_t i = 0; i < surf->triangleCount(); ++i) {
+			auto& v0 = vp[tp[i].indices[0]];
+			auto& v1 = vp[tp[i].indices[1]];
+			auto& v2 = vp[tp[i].indices[2]];
+			auto n = normalize(cross(v1.position - v0.position, v2.position - v0.position));
+			v0.normal += n;
+			v1.normal += n;
+			v2.normal += n;
+		}
 	}
 
 	for (uint32_t i = 0; i < mesh->vertexCount(); ++i) {
@@ -79,16 +81,16 @@ void updateNormals(Mesh* mesh) {
 
 void updateTangents(Mesh* mesh) {
 
-	auto vp = mesh->lockVertices(0, mesh->vertexCount());
+	auto vp = mesh->lockVertices();
 
 	Vector<Vec3f> tan1(mesh->vertexCount());
 	Vector<Vec3f> tan2(mesh->vertexCount());
 
 	for (auto& surf : mesh->surfaces()) {
 
-		auto tp = mesh->triangles() + surf.firstTriangle;
+		auto tp = surf->triangles();
 
-		for (uint32_t i = 0; i < surf.triangleCount; ++i) {
+		for (uint32_t i = 0; i < surf->triangleCount(); ++i) {
 
 			auto& tri = tp[i];
 
@@ -140,23 +142,34 @@ void updateTangents(Mesh* mesh) {
 }
 
 Mesh* copy(CMesh* mesh) {
-	return new Mesh(mesh->vertices(), mesh->vertexCount(), //
-					mesh->triangles(), mesh->triangleCount(), //
-					mesh->surfaces().data(), mesh->surfaces().size(), mesh->flags());
+	auto newMesh = new Mesh(mesh->vertexCount(), mesh->flags());
+	std::memcpy(newMesh->lockVertices(), mesh->vertices(), mesh->vertexCount() * sizeof(Vertex));
+	newMesh->unlockVertices();
+
+	for(Surface* surf : mesh->surfaces()) {
+		auto newSurf = new Surface(surf->triangleCount(),surf->material());
+		std::memcpy(newSurf->lockTriangles(), surf->triangles(), surf->triangleCount() * sizeof(Triangle));
+		newSurf->unlockTriangles();
+		newMesh->addSurface(newSurf);
+	}
+
+	return newMesh;
 }
 
 void flip(Mesh* mesh) {
 
-	for (auto vp = mesh->lockVertices(0, mesh->vertexCount()), ep = vp + mesh->vertexCount(); vp != ep; ++vp) {
+	for (auto vp = mesh->lockVertices(), ep = vp + mesh->vertexCount(); vp != ep; ++vp) {
 		vp->normal = -vp->normal;
-		vp->tangent.w = -vp->tangent.w;	//?
+		vp->tangent.w = -vp->tangent.w; //?
 	}
 	mesh->unlockVertices();
 
-	for (auto tp = mesh->lockTriangles(0, mesh->triangleCount()), ep = tp + mesh->triangleCount(); tp != ep; ++tp) {
-		std::swap(tp->indices[1], tp->indices[2]);
+	for(auto& surf : mesh->surfaces()) { //
+		for (auto tp = surf->lockTriangles(0, surf->triangleCount()), ep = tp + surf->triangleCount(); tp != ep; ++tp) {
+			std::swap(tp->indices[1], tp->indices[2]);
+		}
+		surf->unlockTriangles();
 	}
-	mesh->unlockTriangles();
 }
 
 } // namespace sgd

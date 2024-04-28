@@ -3,11 +3,15 @@
 namespace sgd {
 
 Buffer::Buffer(BufferType type, const void* data, uint32_t size)
-	: m_type(type), m_data((uint8_t*)std::malloc(size)), m_size(size), m_dirtyBegin(m_size), m_dirtyEnd(0) {
+	: m_type(type), m_data((uint8_t*)std::malloc(size)), m_size(size), m_capacity(m_size) {
 
 	if (data) {
 		std::memcpy(m_data, data, size);
-		std::swap(m_dirtyBegin, m_dirtyEnd);
+		m_dirtyBegin = 0;
+		m_dirtyEnd = size;
+	} else {
+		m_dirtyBegin = size;
+		m_dirtyEnd = 0;
 	}
 }
 
@@ -18,42 +22,26 @@ Buffer::~Buffer() {
 void Buffer::resize(uint32_t size) {
 	if (size == m_size) return;
 
-	auto data = (uint8_t*)std::malloc(size);
-
-	std::memcpy(data, m_data, std::min(size, m_size));
-
-	std::swap(m_data, data);
-	m_size = size;
-	std::free(data);
-
-	m_dirtyBegin = std::min(m_dirtyBegin, m_size);
-	m_dirtyEnd = std::min(m_dirtyEnd, m_size);
-
-	// FIXME
-	m_wgpuBuffer = {};
-
-	invalidate(true);
-}
-
-uint8_t* Buffer::lock(uint32_t offset, uint32_t size) {
-	SGD_ASSERT(offset <= m_size && offset + size <= m_size);
-	m_dirtyBegin = std::min(m_dirtyBegin, offset);
-	m_dirtyEnd = std::max(m_dirtyEnd, offset + size);
-	return m_data + offset;
-}
-
-void Buffer::unlock() {
-	invalidate(false);
-}
-
-void Buffer::update(const void* data, uint32_t offset, uint32_t size) {
-	std::memcpy(lock(offset, size), data, size);
-	unlock();
+	if (size > m_capacity) {
+		m_capacity = std::max(std::max(m_capacity * 2, size), 10u);
+		auto data = (uint8_t*)std::malloc(m_capacity);
+		std::memcpy(data, m_data, m_size);
+		std::swap(m_data, data);
+		std::free(data);
+		m_size = size;
+		m_invalid = true;
+		invalidate(true);
+	} else {
+		m_size = size;
+		m_dirtyBegin = std::min(m_dirtyBegin, m_size);
+		m_dirtyEnd = std::min(m_dirtyEnd, m_size);
+		invalidate();
+	}
 }
 
 void Buffer::onValidate(GraphicsContext* gc) const {
 
-	if (!m_wgpuBuffer) {
+	if (m_invalid) {
 		static const Map<BufferType, wgpu::BufferUsage> usages = {
 			{BufferType::uniform, wgpu::BufferUsage::Uniform}, //
 			{BufferType::storage, wgpu::BufferUsage::Storage}, //
@@ -69,6 +57,7 @@ void Buffer::onValidate(GraphicsContext* gc) const {
 		m_wgpuBuffer = gc->wgpuDevice().CreateBuffer(&desc);
 		std::memcpy(m_wgpuBuffer.GetMappedRange(0, m_size), m_data, m_size);
 		m_wgpuBuffer.Unmap();
+		m_invalid = false;
 
 	} else if (m_dirtyEnd > m_dirtyBegin) {
 

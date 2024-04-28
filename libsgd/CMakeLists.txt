@@ -17,7 +17,6 @@ set(LIBSGD_SOURCES
 	scene.cpp
 	system.cpp
 	window.cpp
-	types.cpp
 
 	include/sgd/sgd.h
 )
@@ -28,16 +27,11 @@ target_include_directories(libsgd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(libsgd graphics audio)
 
-if (SGD_INSTALL_DIR)
-	# Headers
-	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/sgd DESTINATION include)
-	# Blitz3d demos
-	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/blitz3d DESTINATION .)
-	# Help files
-	install(DIRECTORY ${CMAKE_SOURCE_DIR}/help DESTINATION .)
-	# Text files
-	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/VERSIONS.txt ${CMAKE_CURRENT_SOURCE_DIR}/README.md DESTINATION .)
-endif ()
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/sgd DESTINATION include)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/blitz3d DESTINATION .)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/VERSIONS.txt ${CMAKE_CURRENT_SOURCE_DIR}/README.md DESTINATION .)
 
 ##### sgd_static *****
 
@@ -147,11 +141,6 @@ function(create_bundled_lib output_lib output_libname input_lib)
 
 	add_custom_target(${output_lib} ALL DEPENDS ${output_file})
 
-	# No install for static lib yet - 64 bit release is 500M!
-	# if (SGD_INSTALL_DIR)
-	#   install(FILES ${output_file} DESTINATION lib/${SGD_INSTALL_DIR})
-	# endif ()
-
 endfunction()
 
 create_bundled_lib(libsgd_static sgd_static libsgd)
@@ -172,10 +161,9 @@ if (SGD_OS_LINUX)
 	target_link_options(libsgd_dynamic PRIVATE -fPIC)
 endif ()
 
-if (SGD_INSTALL_DIR)
-	install(TARGETS libsgd_dynamic DESTINATION lib/${SGD_INSTALL_DIR})
-	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.c DESTINATION lib/${SGD_INSTALL_DIR})
-endif ()
+install(TARGETS libsgd_dynamic DESTINATION lib)
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.c DESTINATION lib)
 
 ##### More libsgds! #####
 
@@ -186,5 +174,11 @@ endif ()
 if (SGD_PYTHON_TARGET_ENABLED)
 	add_subdirectory(python)
 endif ()
+
+##### Doxygen #####
+
+add_subdirectory(doxygen)
+
+##### Tests #####
 
 add_subdirectory(tests)

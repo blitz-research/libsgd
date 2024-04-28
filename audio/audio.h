@@ -39,8 +39,8 @@ float audioPan(uint32_t audio);
 void setAudioSampleRate(uint32_t audio, float rate);
 float audioSampleRate(uint32_t audio);
 
-void setAudioRelativePlaySpeed(uint32_t audio, float speed);
-float audioRelativePlaySpeed(uint32_t audio);
+void setAudioPitchScale(uint32_t audio, float scale);
+float audioPitchScale(uint32_t audio);
 
 void setAudioLooping(uint32_t audio, bool looping);
 bool audioLooping(uint32_t audio);
@@ -50,5 +50,7 @@ bool audioPaused(uint32_t audio);
 
 bool audioValid(uint32_t audio);
 void stopAudio(uint32_t audio);
+
+uint32_t playMusic(CPath path);
 
 } // namespace sgd

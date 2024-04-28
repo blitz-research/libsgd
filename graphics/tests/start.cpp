@@ -25,7 +25,7 @@ void start(void(*entry)()) {
 		if (scene) render();
 	});
 
-	gc = new GraphicsContext(window);
+	gc = new GraphicsContext(window, wgpu::BackendType::D3D12);
 
 	scene = new Scene(gc);
 	scene->ambientLightColor = {1, 1, 1, 0};

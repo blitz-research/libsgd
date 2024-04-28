@@ -12,7 +12,7 @@ Const KEY_A = 65
 Const KEY_S = 83
 Const KEY_D = 68
 
-Const NUM_BLOCKS = 5000
+Const NUM_BLOCKS = 50000
 Const WORLD_SIZE = 100
 
 Type Camera
@@ -33,6 +33,7 @@ End Type
 
 Global camera.Camera
 Global bulletMesh
+Global slimeball
 
 CreateWindow(DesktopWidth(), DesktopHeight(), "スノー Blocks", 3)
 
@@ -45,6 +46,7 @@ LoadScene()
 While (PollEvents() And 1) <> 1
 
 	If KeyHit(KEY_ESCAPE)
+		End
 		Delete Each Camera
 		Delete Each Bullet
 		Delete Each Block
@@ -82,7 +84,9 @@ Function LoadScene()
 	Local light = CreateDirectionalLight()
 	SetLightColor light,1,1,1,.2
 	TurnEntity light,-60,0,0
-
+	
+	slimeball=LoadSound("sgd://audio/slimeball.wav")
+	
 	CreateGround()
 
 	CreateBlocks()
@@ -122,6 +126,8 @@ Function UpdateBullets()
 		SetEntityParent light,bullet\model
 		SetLightColor light,r,g,b,2
 		SetLightRange light,50
+		
+		PlaySound slimeball
 	EndIf
 
 	For bullet.Bullet = Each Bullet

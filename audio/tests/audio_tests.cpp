@@ -1,17 +1,16 @@
 
 #include "audio/exports.h"
 
-int main(){
+int main() {
 
 	sgd::initApp();
 
-	auto sound = sgd::loadSound(sgd::Path("sgd://audio/fine_morning.ogg")).result();
+//	auto path  = "sgd://audio/Back_In_Black.ogg";
+	auto path  = "~/dev/assets/Back_In_Black.ogg";
 
-	sgd::log() << "### Hello";
+	sgd::playMusic(sgd::Path(path));
 
-	sgd::playSound(sound);
-
-	sgd::log() << "### Hello again";
+	sgd::log() << "### Waiting...";
 
 	sgd::beginAppEventLoop();
 }

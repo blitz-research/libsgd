@@ -22,9 +22,6 @@ struct Renderer : GraphicsResource {
 		auto& ops = m_renderOps[(int)rc->renderPassType()];
 		if(ops.empty()) return;
 
-		if(rc->renderPassType()==RenderPassType::shadow) {
-//			log() << "### rendering shadows";
-		}
 		rc->render(ops);
 	}
 

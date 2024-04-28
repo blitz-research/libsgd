@@ -174,27 +174,9 @@ elseif (SGD_OS_EMSCRIPTEN)
 
 endif ()
 
-if (SGD_CONFIG_RELEASE AND CMAKE_SIZEOF_VOID_P EQUAL 8)
-
-    if (SGD_OS_WINDOWS)
-        set(SGD_INSTALL_OS windows)
-    elseif (SGD_OS_LINUX)
-        set(SGD_INSTALL_OS linux)
-    elseif (SGD_OS_MACOS)
-        set(SGD_INSTALL_OS macos)
-	endif ()
-
-	if(SGD_ARCH_64_BIT)
-		set(SGD_INSTALL_ARCH x64)
-	else()
-		set(SGD_INSTALL_ARCH x86)
-	endif()
-
-	set(CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/cmake-install-${SGD_INSTALL_OS}-release)
-
-	set(SGD_INSTALL_DIR ${SGD_INSTALL_OS}-${SGD_INSTALL_ARCH}-release)
-
-endif ()
+# OK, we now just install in root of binary dir
+#
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/LIBSGD_INSTALL)
 
 # Copy output exe/lib etc file to anywhere
 #
