@@ -569,8 +569,7 @@ Function demo_GetStaticCubeMesh:Int (cube_material_path:String = "sgd://material
 	
 End Function
 
-'Function CreateBulletSprite (sprite_path:String = "sgd://misc/light.png")
-Function CreateBulletSprite (sprite_path:String = "light.png")
+Function CreateBulletSprite (sprite_path:String = "sgd://misc/light.png")
 
 	Local sprite:Int = SGD.CreateSprite ()
 	Local mat:Int = SGD.LoadPrelitMaterial (sprite_path)
