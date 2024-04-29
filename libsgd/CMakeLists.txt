@@ -29,6 +29,8 @@ target_link_libraries(libsgd graphics audio)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/sgd DESTINATION include)
 
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.c DESTINATION lib)
+
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/VERSIONS.txt ${CMAKE_CURRENT_SOURCE_DIR}/README.md DESTINATION .)
 
 ##### sgd_static *****
@@ -161,9 +163,9 @@ endif ()
 
 install(TARGETS libsgd_dynamic DESTINATION lib)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.c DESTINATION lib)
-
 ##### More libsgds! #####
+
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/blitz3d/helloworld.bb DESTINATION blitz3d)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/blitz3d/examples DESTINATION blitz3d FILES_MATCHING PATTERN "*.bb")
 

@@ -16,14 +16,16 @@ endif ()
 
 message("### Configuring blitzmax target...")
 
-add_custom_target(libsgd_blitzmax ALL
-	COMMAND sgd2bmx ${CMAKE_SOURCE_DIR}/libsgd/include/sgd ${CMAKE_CURRENT_BINARY_DIR}/sgd.bmx
+set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/sgd.bmx)
+
+add_custom_command(
+	COMMAND sgd2bmx ${CMAKE_SOURCE_DIR}/libsgd/include/sgd ${OUTPUT_FILE}
 	DEPENDS libsgd_dynamic
+	OUTPUT ${OUTPUT_FILE}
 	VERBATIM)
 
-install(FILES
-	${CMAKE_CURRENT_BINARY_DIR}/sgd.bmx
-	${CMAKE_CURRENT_SOURCE_DIR}/helloworld.bmx
-	DESTINATION blitzmax)
+add_custom_target(libsgd_blitzmax ALL DEPENDS ${OUTPUT_FILE})
+
+install(FILES ${OUTPUT_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.bmx DESTINATION blitzmax)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/examples DESTINATION blitzmax FILES_MATCHING PATTERN "*.bmx")

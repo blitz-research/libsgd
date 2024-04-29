@@ -1,6 +1,6 @@
 ### Contents:
 
-``blitz3d/``: Contains Blitz3D replacement runtime.dll file and sample code. Copy runtime.dll to your existing Blitz3D 'bin' directory to install.
+``blitz3d/``: Contains Blitz3D replacement runtime.dll file and examples code. Copy runtime.dll to your existing Blitz3D 'bin' directory to install.
 
 ``blitzmax/``: Contains BlitzMax module file and examples.  
 

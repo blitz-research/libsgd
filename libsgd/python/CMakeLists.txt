@@ -31,26 +31,21 @@ add_custom_command(
 
 add_library(libsgd_python SHARED sgd_wrap.c)
 
-target_link_libraries(libsgd_python PRIVATE libsgd ${Python_LIBRARIES})
-
 target_include_directories(libsgd_python PRIVATE ${Python_INCLUDE_DIRS})
 
+target_link_libraries(libsgd_python PRIVATE libsgd ${Python_LIBRARIES})
+
 set_target_properties(libsgd_python PROPERTIES OUTPUT_NAME _sgd)
+
 set_target_properties(libsgd_python PROPERTIES PREFIX "")
 
-if (SGD_OS_WINDOWS)
-    set_target_properties(libsgd_python PROPERTIES SUFFIX .pyd)
-endif()
-
 if(SGD_OS_WINDOWS)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_sgd.pyd DESTINATION python)
+	set_target_properties(libsgd_python PROPERTIES SUFFIX .pyd)
+	set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/_sgd.pyd)
 else()
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/_sgd.so DESTINATION python)
+	set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/_sgd.so)
 endif()
 
-install(FILES
-		${CMAKE_CURRENT_BINARY_DIR}/sgd.py
-		${CMAKE_CURRENT_SOURCE_DIR}/helloworld.py
-		DESTINATION python)
+install(FILES ${OUTPUT_FILE} ${CMAKE_CURRENT_BINARY_DIR}/sgd.py ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.py DESTINATION python)
 
 #winpty python

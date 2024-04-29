@@ -1,7 +1,11 @@
 
 ***** V0.05 *****
 
-* Add mesh building commands, see makesphere.bb.
+* Added blitzmax target, thanks James for the convertor!
+
+* Re-arranged install/release layout, reflecting cmake organization better.
+
+* Added mesh building commands, see makesphere.bb. There's not really enough in there to pull apart existing meshes but it's a start.
 
 * Added support for ~ at start of file paths.
 

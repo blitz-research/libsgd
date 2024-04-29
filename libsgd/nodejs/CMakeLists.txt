@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
+# TODO: Fix weird issue where you can't just clean and build, you first need to remove nodejs cmake binary dir, then reconfigure and build.
+# Only started after changing build from MinSizeRel to Release.
+
 project(libsgd_nodejs)
 
 # 64 bit only for now
@@ -53,19 +56,16 @@ execute_process(
 	COMMAND ${CMD} npx node-gyp configure ${NODEGYP_DEBUG}
 )
 
-set(output_file ${CMAKE_CURRENT_BINARY_DIR}/build/Release/sgd.node)
+set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/build/Release/sgd.node)
 
-# node-gyp build
-add_custom_target(
+add_custom_command(
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 	COMMAND swig -c++ -javascript -napi -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
 	COMMAND npx node-gyp build ${NODEGYP_DEBUG}
 	DEPENDS libsgd_static ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
-	OUTPUT ${output_file}
+	OUTPUT ${OUTPUT_FILE}
 	VERBATIM)
 
-add_custom_target(libsgd_nodejs ALL DEPENDS ${output_file})
+add_custom_target(libsgd_nodejs ALL DEPENDS ${OUTPUT_FILE})
 
-install(FILES ${output_file} DESTINATION nodejs)
-
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.js DESTINATION nodejs)
+install(FILES ${OUTPUT_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.js DESTINATION nodejs)
