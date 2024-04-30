@@ -1,12 +1,14 @@
 #pragma once
 
-#include "mesh.h"
+#include <graphics/exports.h>
+
 #include "model.h"
 
 #include <tiny_gltf.h>
 
 namespace sgd {
 
+// TODO: Move this to .cpp
 struct GLTFLoader {
 
 private:

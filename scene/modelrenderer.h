@@ -1,6 +1,6 @@
 #pragma once
 
-#include "meshrenderer.h"
+#include <graphics/exports.h>
 
 namespace sgd {
 

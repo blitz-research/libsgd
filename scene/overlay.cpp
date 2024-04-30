@@ -2,7 +2,7 @@
 
 #include "scene.h"
 
-#include <window/window.h>
+#include <graphics/exports.h>
 
 namespace sgd {
 

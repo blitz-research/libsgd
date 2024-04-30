@@ -1,7 +1,6 @@
 #include "sprite.h"
 
 #include "spriterenderer.h"
-
 #include "scene.h"
 
 namespace sgd {

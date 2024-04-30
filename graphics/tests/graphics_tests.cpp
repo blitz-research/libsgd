@@ -1,101 +1,64 @@
 #include <graphics/exports.h>
 
-#include <graphics/shaders/uniforms.h>
+#include <thread>
 
 using namespace sgd;
 
 WindowPtr window;
 GraphicsContextPtr gc;
 SceneBindingsPtr sceneBindings;
-RenderContextPtr rc;
-
-MeshRendererPtr meshRenderer;
-
-CameraUniforms camera;
-LightingUniforms lighting;
+RenderContextPtr renderContext;
+SkyboxRendererPtr skyboxRenderer;
 
 void render() {
 
-	static float camRot;
-	camera.worldMatrix = Mat4f(AffineMat4f::TRS({0, 0, -3}));
-
-	camera.viewMatrix = inverse(camera.worldMatrix);
-	camera.projectionMatrix = Mat4f::perspective(45, (float)window->size().x / (float)window->size().y, .1, 100);
-	camera.inverseProjectionMatrix = inverse(camera.projectionMatrix);
-	camera.viewProjectionMatrix = camera.projectionMatrix * camera.viewMatrix;
-
-	sceneBindings->updateCameraUniforms(camera);
-	sceneBindings->updateLightingUniforms(lighting);
-
-	{
-		static float meshRot;
-		auto insts = meshRenderer->lockInstances(1);
-		insts[0].matrix = Mat4f(AffineMat4f::TRS({0, 0, 0}, {0, meshRot += .0002, 0}));
-		insts[0].color = {1, 1, 1, 1};
-		meshRenderer->unlockInstances();
-	}
-
 	GraphicsResource::validateAll(gc);
 
-	rc->beginRender();
+	renderContext->beginRender();
 	{
-		rc->beginRenderPass(RenderPassType::clear, gc->colorBuffer(), gc->depthBuffer(), {1,.5,0,1}, 1);
-		rc->endRenderPass();
-
-		rc->beginRenderPass(RenderPassType::opaque, gc->colorBuffer(), gc->depthBuffer(), {}, {});
-		rc->wgpuRenderPassEncoder().SetBindGroup(0, sceneBindings->bindGroup()->wgpuBindGroup());
-		meshRenderer->render(rc);
-		rc->endRenderPass();
+		renderContext->beginRenderPass(RenderPassType::clear, gc->colorBuffer(), gc->depthBuffer(), {}, 1);
+		renderContext->wgpuRenderPassEncoder().SetBindGroup(0, sceneBindings->bindGroup()->wgpuBindGroup());
+		{ //
+			skyboxRenderer->render(renderContext);
+		}
+		renderContext->endRenderPass();
 	}
-	rc->endRender();
+	renderContext->endRender();
 
 	gc->present(gc->colorBuffer());
 }
 
-void start() {
+int main() {
 
 	window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::resizable);
-	gc = new GraphicsContext(window);
-	rc = new RenderContext(gc);
+
+	window->closeClicked.connect(nullptr, [] { std::exit(0); });
+
+	window->sizeChanged.connect(nullptr, [](CVec2u) { render(); });
+
+	gc = new GraphicsContext(window, wgpu::BackendType::D3D12);
 
 	sceneBindings = new SceneBindings();
 
-	window->sizeChanged.connect(nullptr, [](CVec2u){
-		render();
-	});
+	CameraUniforms cameraUniforms;
+	cameraUniforms.projectionMatrix = Mat4f::frustum(-.1f,.1f,-.1f,.1f,.1f,100);
+	cameraUniforms.inverseProjectionMatrix = inverse(cameraUniforms.projectionMatrix);
+	cameraUniforms.viewProjectionMatrix = cameraUniforms.projectionMatrix * cameraUniforms.viewMatrix;
+	cameraUniforms.clipNear=.1f;
+	cameraUniforms.clipFar=.100;
+	sceneBindings->updateCameraUniforms(cameraUniforms);
 
-	TexturePtr envTexture =
-		loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8, TextureFlags::cube | TextureFlags::filter).result();
+	renderContext = new RenderContext(gc);
 
-	sceneBindings->setEnvTexture(envTexture);
+	auto skyTexture = loadTexture(Path("sgd://envmaps/grimmnight-cube.jpg"), TextureFormat::srgba8,
+								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
+						  .result();
 
-	lighting.pointLightCount = 1;
-	lighting.ambientLightColor = {1, 1, 1, 0};
-	lighting.pointLights[0].position = {2.5, 2.5, -2.5};
-	lighting.pointLights[0].color = {1, 1, 1, 1};
-	lighting.pointLights[0].falloff = 1;
-	lighting.pointLights[0].range = 25;
+	skyboxRenderer = new SkyboxRenderer();
+	skyboxRenderer->skyTexture = skyTexture;
 
-	MaterialPtr material = loadPBRMaterial(Path("sgd://materials/PavingStones131_1K-JPG")).result();
-	MeshPtr mesh = createSphereMesh(1, 64, 32, material);
-	transformTexCoords(mesh, {4,2}, {0,0});
-
-	meshRenderer = new MeshRenderer(mesh);
-	auto insts = meshRenderer->lockInstances(1);
-	insts[0].matrix = {};
-	insts[0].color = {1, 1, 1, 1};
-	meshRenderer->unlockInstances();
-
-	for(;;){
+	for (;;) {
 		pollEvents();
-		requestRender(render);
+		render();
 	}
-}
-
-int main() {
-
-	start();
-
-//	std::thread(&start).detach();
-//	beginAppEventLoop();
 }

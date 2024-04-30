@@ -1,9 +1,5 @@
 #include "gltfloader.h"
 
-#include "meshutil.h"
-#include "pbrmaterial.h"
-#include "textureutil.h"
-
 namespace sgd {
 
 AffineMat4f GLTFLoader::nodeMatrix(const tinygltf::Node& gltfNode) {

@@ -2,9 +2,6 @@
 #include "camera.h"
 #include "entity.h"
 #include "light.h"
-#include "rendercontext.h"
-#include "renderer.h"
-#include "scenebindings.h"
 
 #include <window/exports.h>
 

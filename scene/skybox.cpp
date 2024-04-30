@@ -2,6 +2,8 @@
 
 #include "scene.h"
 
+#include <graphics/exports.h>
+
 namespace sgd {
 
 void Skybox::init() {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "skinnedmeshrenderer.h"
+#include <graphics/exports.h>
 
 namespace sgd {
 

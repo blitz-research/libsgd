@@ -1,7 +1,6 @@
 #pragma once
 
-#include "rendercontext.h"
-#include <geom/exports.h>
+#include <graphics/exports.h>
 
 namespace sgd {
 
@@ -10,10 +9,6 @@ SGD_SHARED(Texture);
 SGD_SHARED(Entity);
 SGD_SHARED(Camera);
 SGD_SHARED(Light);
-SGD_SHARED(Renderer)
-SGD_SHARED(GraphicsContext);
-SGD_SHARED(SceneBindings);
-SGD_SHARED(RenderContext);
 SGD_SHARED(Scene);
 
 enum struct RendererType {

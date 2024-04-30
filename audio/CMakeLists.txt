@@ -11,6 +11,6 @@ add_library(audio
 	exports.h
 )
 
-target_link_libraries(audio app soloud stb)
+target_link_libraries(audio app soloud)
 
 add_subdirectory(tests)

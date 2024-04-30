@@ -2,10 +2,10 @@
 
 #include "entity.h"
 
-#include "skyboxrenderer.h"
-
 namespace sgd {
 
+SGD_SHARED(SkyboxRenderer);
+SGD_SHARED(Texture);
 SGD_SHARED(Skybox);
 
 struct Skybox : Entity {

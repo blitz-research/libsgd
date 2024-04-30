@@ -2,8 +2,6 @@
 
 #include "model.h"
 
-#include "shaders/uniforms.h"
-
 namespace sgd {
 
 SkinnedModelRenderer::SkinnedModelRenderer() {

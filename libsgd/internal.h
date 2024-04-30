@@ -1,6 +1,6 @@
 #pragma once
 
-#include <graphics/exports.h>
+#include <scene/exports.h>
 #include <audio/exports.h>
 
 #include <sgd/sgd.h>

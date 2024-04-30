@@ -1,10 +1,10 @@
 #pragma once
 
 #include "entity.h"
-#include "material.h"
 
 namespace sgd {
 
+SGD_SHARED(Material);
 SGD_SHARED(Sprite);
 
 struct Sprite : Entity {

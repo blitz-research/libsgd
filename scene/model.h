@@ -2,10 +2,10 @@
 
 #include "animation.h"
 #include "entity.h"
-#include "mesh.h"
 
 namespace sgd {
 
+SGD_SHARED(Mesh);
 SGD_SHARED(Model);
 
 struct Joint {

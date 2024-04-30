@@ -1,16 +1,13 @@
 #include "spriterenderer.h"
 
-#include "renderpipeline.h"
 #include "sprite.h"
-
-#include "shaders/uniforms.h"
 
 namespace sgd {
 
 namespace {
 
 auto shaderSource{
-#include "shaders/spriterenderer.wgsl"
+#include <graphics/shaders/spriterenderer.wgsl>
 };
 
 BindGroupDescriptor bindGroupDescriptor( //

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "drawlist.h"
 #include "entity.h"
 
 namespace sgd {
 
+SGD_SHARED(DrawList);
 SGD_SHARED(Overlay);
 
 struct Overlay : Entity {

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "renderer.h"
+#include <graphics/exports.h>
 
 namespace sgd {
 
-SGD_SHARED(Material);
 SGD_SHARED(Sprite);
 
+// TODO: Move this to graphics module
 struct SpriteRenderer : Renderer {
 	SGD_OBJECT_TYPE(SpriteRenderer, Renderer);
 

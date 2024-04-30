@@ -2,11 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(libsgd)
 
-# Laters gators!
-if (SGD_OS_EMSCRIPTEN)
-	return()
-endif ()
-
 ##### libsgd #####
 
 set(LIBSGD_SOURCES
@@ -25,7 +20,7 @@ add_library(libsgd ${LIBSGD_SOURCES})
 
 target_include_directories(libsgd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-target_link_libraries(libsgd graphics audio)
+target_link_libraries(libsgd scene audio)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/sgd DESTINATION include)
 
@@ -155,7 +150,7 @@ target_include_directories(libsgd_dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
 
 target_compile_definitions(libsgd_dynamic PUBLIC SGD_DYNAMIC=1 SGD_EXPORT=1)
 
-target_link_libraries(libsgd_dynamic graphics audio imgui-backends)
+target_link_libraries(libsgd_dynamic scene audio imgui-backends)
 
 if (SGD_OS_LINUX)
 	target_link_options(libsgd_dynamic PRIVATE -fPIC)

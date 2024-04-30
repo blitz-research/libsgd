@@ -176,58 +176,18 @@ elseif (SGD_OS_EMSCRIPTEN)
 
 endif ()
 
-# OK, we now just install in root of binary dir
+# OK, we now just install to root of cmake output binary dir
 #
 set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/LIBSGD_INSTALL)
 
-# Copy output exe/lib etc file to anywhere
-#
-function(copy_output_file target dst_dir)
-
-    set(SRC $<TARGET_FILE:${target}>)
-    set(DST ${dst_dir}/$<TARGET_FILE_BASE_NAME:${target}>$<TARGET_FILE_SUFFIX:${target}>)
-
-    add_custom_command(TARGET ${target} POST_BUILD VERBATIM
-            COMMAND ${CMAKE_COMMAND} -E echo "Copying ${target} output file \"${SRC}\" to \"${DST}\""
-            COMMAND ${CMAKE_COMMAND} -E copy ${SRC} ${DST})
-endfunction()
-
-# Copy assets dir to output binary dir
-#
-function(copy_assets_to_binary_dir target)
-
-    get_target_property(SRC_DIR ${target} SOURCE_DIR)
-    set(SRC ${SRC_DIR}/assets)
-
-    if (NOT EXISTS ${SRC})
-        message(WARNING "Target assets dir ${SRC} does not exist.")
-        return()
-    endif ()
-
-    if (SGD_OS_EMSCRIPTEN)
-        target_link_options(${target} PUBLIC --preload-file "${SRC}@/assets")
-        return()
-    endif ()
-
-    get_target_property(DST_DIR ${target} BINARY_DIR)
-    set(DST ${DST_DIR}/assets)
-
-    add_custom_command(TARGET ${target} POST_BUILD VERBATIM
-            COMMAND ${CMAKE_COMMAND} -E echo "Copying assets dir \"${SRC}\" to \"${DST}\"."
-            COMMAND ${CMAKE_COMMAND} -E copy_directory ${SRC} ${DST})
-
-endfunction()
-
 add_subdirectory(external EXCLUDE_FROM_ALL)
 
-add_subdirectory(core)          #
+add_subdirectory(core)          # [libcurl json11]
 add_subdirectory(geom)          # core
 add_subdirectory(app)           # geom [glfw]
-
-add_subdirectory(dawn)          # app
+add_subdirectory(dawn)          # app [lib-dawn]
 add_subdirectory(window)        # app
-add_subdirectory(audio)         # app
-add_subdirectory(graphics)      # window dawn
-add_subdirectory(libsgd)        # graphics audio
-
-#add_subdirectory(emgdb)
+add_subdirectory(audio)         # app [soloud]
+add_subdirectory(graphics)      # window dawn [tinygltf stb]
+add_subdirectory(scene)			# graphics
+add_subdirectory(libsgd)        # scene audio

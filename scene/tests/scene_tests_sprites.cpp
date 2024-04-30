@@ -3,7 +3,7 @@
 void entry() {
 
 	CameraPtr camera= new Camera();
- scene->add(camera);
+ 	scene->add(camera);
 
 	TexturePtr texture =
 		loadTexture(Path("sgd://misc/grass1.png"), TextureFormat::srgba8, TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clampU | TextureFlags::clampV)
@@ -13,7 +13,7 @@ void entry() {
 	material->setTexture("albedoTexture", texture);
 	material->blendMode = BlendMode::alpha;
 
-	for (int i = 0; i < 10000; ++i) {
+	for (int i = 0; i < 60000; ++i) {
 
 		SpritePtr sprite = new Sprite();
 		sprite->material = material;
@@ -26,6 +26,7 @@ void entry() {
 
 	for(;;){
 		pollEvents();
+		turn(camera,{0,1,0});
 		render();
 	}
 }
