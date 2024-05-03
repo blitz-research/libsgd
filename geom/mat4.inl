@@ -60,6 +60,14 @@ template <class T> Mat4<T> Mat4<T>::perspective(T fovyInDegrees, T aspectRatio, 
 	return frustum(-xmax, xmax, -ymax, ymax, near, far);
 }
 
+template<class T> Mat4<T> Mat4<T>::orthographic(T fovyInDegrees, T aspectRatio, T near, T far) {
+
+	T ymax = near * std::tan(fovyInDegrees * pi / 360.0);
+	T xmax = ymax * aspectRatio;
+
+	return ortho(-xmax, xmax, -ymax, ymax, near, far);
+}
+
 template <class T> Mat4<T>& Mat4<T>::operator*=(CMat4<T> m) {
 	return *this = *this * m;
 }

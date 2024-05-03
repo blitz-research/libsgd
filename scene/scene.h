@@ -10,6 +10,7 @@ SGD_SHARED(Entity);
 SGD_SHARED(Camera);
 SGD_SHARED(Light);
 SGD_SHARED(Scene);
+SGD_SHARED(CollisionSpace);
 
 enum struct RendererType {
 	skybox,
@@ -46,10 +47,15 @@ struct Scene : Shared {
 	void add(Entity* entity);
 	void remove(Entity* entity);
 
+	void validate();
+	void render();
+
 	void setRenderer(RendererType type, Renderer* renderer);
 	Renderer* getRenderer(RendererType type);
 
-	void render();
+	CollisionSpace* collisionSpace()const {
+		return m_collisionSpace;
+	}
 
 private:
 	friend class Entity;
@@ -62,9 +68,15 @@ private:
 	Array<SceneBindingsPtr, 6> m_shadowBindings;
 
 	Vector<EntityPtr> m_entities;
-	Vector<CameraPtr> m_cameras;
-	Vector<LightPtr> m_lights;
+
+	Vector<Camera*> m_cameras;
+	Vector<Light*> m_lights;
+
+	Vector<Entity*> m_invalid;
+
 	Array<RendererPtr, 8> m_renderers;
+
+	CollisionSpacePtr m_collisionSpace;
 
 	Vec3r m_eye;
 

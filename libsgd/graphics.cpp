@@ -277,6 +277,11 @@ SGD_Font SGD_DECL sgd_Load2DFont(SGD_String path, float height) {
 	return sgdx::createHandle(font.result());
 }
 
+float SGD_DECL sgd_Get2DFontTextWidth(SGD_Font hfont, SGD_String text) {
+	auto font = sgdx::resolveHandle<sgd::Font>(hfont);
+	return font->textWidth(text);
+}
+
 float SGD_DECL sgd_Get2DFontHeight(SGD_Font hfont) {
 	auto font = sgdx::resolveHandle<sgd::Font>(hfont);
 	return font->height;

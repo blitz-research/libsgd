@@ -23,9 +23,8 @@ template <class T> struct Plane {
 
 	Plane() = default;
 	Plane(CVec3<T> n, T d);
-
-	static Plane pointNormal(CVec3<T> v, CVec3<T> n);
-	static Plane triangle(CVec3<T> v0, CVec3<T> v1, CVec3<T> v2);
+	Plane(CVec3<T> p, CVec3<T> n);				  // Point, normal
+	Plane(CVec3<T> v0, CVec3<T> v1, CVec3<T> v2); // vertices
 };
 
 template <class T> bool operator==(CPlane<T> p, CPlane<T> q);

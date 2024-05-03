@@ -9,14 +9,26 @@ add_library(scene
 	animation.h
 	camera.cpp
 	camera.h
+	collider.cpp
+	collider.h
+	collisionspace.cpp
+	collisionspace.h
+	contact.cpp
+	contact.h
 	entity.cpp
 	entity.h
 	entityutil.cpp
 	entityutil.h
 	gltfloader.cpp
 	gltfloader.h
+	intersect.cpp
+	intersect.h
 	light.cpp
 	light.h
+	meshcollider.cpp
+	meshcollider.h
+	meshcolliderdata.cpp
+	meshcolliderdata.h
 	model.cpp
 	model.h
 	modelrenderer.cpp
@@ -29,6 +41,8 @@ add_library(scene
 	skinnedmodelrenderer.h
 	skybox.cpp
 	skybox.h
+	spherecollider.cpp
+	spherecollider.h
 	sprite.cpp
 	sprite.h
 	spriterenderer.cpp

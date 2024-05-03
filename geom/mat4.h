@@ -32,6 +32,7 @@ template <class T> struct Mat4 {
 	static Mat4 ortho(T left, T right, T bottom, T top, T near, T far);
 	static Mat4 frustum(T left, T right, T bottom, T top, T near, T far);
 	static Mat4 perspective(T fovyInDegrees, T aspectRatio, T near, T far);
+	static Mat4 orthographic(T fovyInDegrees, T aspectRatio, T near, T far);
 
 	Mat4& operator*=(CMat4<T> m);
 

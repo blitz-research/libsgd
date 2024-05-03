@@ -30,14 +30,12 @@ public:
 	float const ascent;
 	float const descent;
 	float const lineGap;
-	float const baseline;
 
-	Font(CMaterial* atlas, Vector<Glyph> glyphs, float height, float ascent, float descent, float lineGap, float baseline)
-		: atlas(atlas), glyphs(std::move(glyphs)), height(height), ascent(ascent), descent(descent), lineGap(lineGap),
-		  baseline(baseline) {
+	Font(CMaterial* atlas, Vector<Glyph> glyphs, float height, float ascent, float descent, float lineGap)
+		: atlas(atlas), glyphs(std::move(glyphs)), height(height), ascent(ascent), descent(descent), lineGap(lineGap) {
 	}
 
-	float textWidth(CString text);
+	float textWidth(CString text) const;
 };
 
 Expected<Font*, FileioEx> loadFont(CPath path, float height);

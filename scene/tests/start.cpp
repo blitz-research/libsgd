@@ -19,6 +19,10 @@ void start(void(*entry)()) {
 
 	window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::resizable);
 
+//	window = new Window({768,768}, "Hello world!", sgd::WindowFlags::none);//resizable);
+
+	SGD_LOG << "Window size"<<window->size();
+
 	window->closeClicked.connect(nullptr, [] { std::exit(0); });
 
 	window->sizeChanged.connect(nullptr, [](CVec2u) {
@@ -30,7 +34,7 @@ void start(void(*entry)()) {
 	scene = new Scene(gc);
 	scene->ambientLightColor = {1, 1, 1, 0};
 
-	auto skyTexture = loadTexture(Path("sgd://envmaps/grimmnight-cube.jpg"), TextureFormat::srgba8,
+	auto skyTexture = loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8,
 								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
 						  .result();
 
@@ -41,7 +45,7 @@ void start(void(*entry)()) {
 	scene->add(skybox);
 
 	LightPtr light = new Light(LightType::directional);
-	turn(light, {-halfPi / 2, 0, 0});
+	turn(light, {-halfPi, 0, 0});
 	scene->add(light);
 
 	entry();

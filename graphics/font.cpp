@@ -37,14 +37,14 @@ const MaterialDescriptor fontMaterialDescriptor( //
 	{
 		{"atlasTexture", {1, whiteTexture()}},
 	});
+
 } // namespace
 
-float Font::textWidth(CString text) {
-
+float Font::textWidth(CString text) const {
 	float w = 0;
 	for (uint8_t ch : text) {
-		if (ch < firstChar || ch >= glyphs.size()) ch = firstChar;
-		w += glyphs[ch - firstChar].advance;
+		if ((ch -= firstChar) >= glyphs.size()) ch = 0;
+		w += glyphs[ch].advance;
 	}
 	return w;
 }
@@ -62,7 +62,6 @@ Expected<Font*, FileioEx> loadFont(CPath path, float height) {
 	int ascent, descent, lineGap;
 	stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
 	float fscale = height / (float)(ascent - descent);
-	float baseline=0;
 
 	Data atlasData(Font::atlasSize.x * Font::atlasSize.y);
 
@@ -76,7 +75,7 @@ Expected<Font*, FileioEx> loadFont(CPath path, float height) {
 
 		stbtt_PackSetOversampling(&packer, 1, 1);
 
-		stbtt_PackFontRange(&packer, data.result().data(), 0, height * 2, Font::firstChar, Font::charCount, charData.data());
+		stbtt_PackFontRange(&packer, data.result().data(), 0, height, Font::firstChar, Font::charCount, charData.data());
 
 		stbtt_PackEnd(&packer);
 
@@ -85,8 +84,6 @@ Expected<Font*, FileioEx> loadFont(CPath path, float height) {
 		for (int i = 0; i < Font::charCount; ++i) {
 
 			auto& ch = charData[i];
-
-			baseline = std::max(baseline, -ch.yoff);
 
 			Rectf srcRect = {Vec2f(ch.x0, ch.y0) * texScale, Vec2f(ch.x1, ch.y1) * texScale};
 			Rectf dstRect = {Vec2f(ch.xoff, ch.yoff), Vec2f(ch.xoff2, ch.yoff2)};
@@ -104,8 +101,7 @@ Expected<Font*, FileioEx> loadFont(CPath path, float height) {
 	atlas->depthFunc = DepthFunc::always;
 	atlas->cullMode = CullMode::none;
 
-	return new Font(atlas, std::move(glyphs), height, (float)ascent * fscale, (float)descent * fscale, (float)lineGap * fscale,
-					baseline);
+	return new Font{atlas, std::move(glyphs), height, (float)ascent * fscale, (float)descent * fscale, (float)lineGap * fscale};
 }
 
 } // namespace sgd

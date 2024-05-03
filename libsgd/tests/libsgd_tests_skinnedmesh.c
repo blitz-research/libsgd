@@ -14,7 +14,7 @@ restart:
 	sgd_MoveEntity(light, 0, 3, -3);
 	sgd_SetLightRange(light, 10);
 
-	SGD_Model model = sgd_LoadBonedModel("sgd://models/cesiumman.glb", SGD_TRUE);
+	SGD_Model model = sgd_LoadBonedModel("sgd://models/larry_walk.glb", SGD_TRUE);
 	//	sgd_SetMeshCastsShadow(sgd_ModelMesh(model), SGD_TRUE);
 
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/PavingStones065_1K-JPG");
@@ -60,7 +60,7 @@ restart:
 		}
 
 		static float time;
-		sgd_AnimateModel(model, 0, time += .03f, SGD_ANIMATION_MODE_LOOP);
+		sgd_AnimateModel(model, 0, time += .017f, SGD_ANIMATION_MODE_LOOP);
 
 		sgd_RenderScene();
 		sgd_Present();

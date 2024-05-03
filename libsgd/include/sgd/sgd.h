@@ -479,7 +479,7 @@ SGD_API SGD_Surface SGD_DECL sgd_CreateSurface(SGD_Mesh mesh, int triangleCount,
 SGD_API void SGD_DECL sgd_ResizeTriangles(SGD_Surface surface, int count);
 
 //! Add triangle to surface, returning index of new triangle.
-SGD_API int SGD_DECL sgd_AddTriangle(SGD_Surface surfacem, int v0, int v1, int v2);
+SGD_API int SGD_DECL sgd_AddTriangle(SGD_Surface surface, int v0, int v1, int v2);
 
 //! Update existing triangle vertices in surface.
 SGD_API void SGD_DECL sgd_SetTriangle(SGD_Surface surface, int triangle, int v0, int v1, int v2);
@@ -494,6 +494,12 @@ SGD_API int SGD_DECL sgd_TriangleCount(SGD_Surface surface);
 
 //! Load a new font
 SGD_API SGD_Font SGD_DECL sgd_Load2DFont(SGD_String path, float height);
+
+//! Get width 2d text.
+SGD_API float SGD_DECL sgd_Get2DFontTextWidth(SGD_Font font, SGD_String text);
+
+//! Get height of 2d font.
+SGD_API float SGD_DECL sgd_Get2DFontHeight(SGD_Font font);
 
 //! Get font height
 SGD_API float SGD_DECL sgd_Get2DFontHeight(SGD_Font font);
@@ -527,6 +533,7 @@ SGD_API void SGD_DECL sgd_Set2DFont(SGD_Font font);
 
 //! Set current text color.
 SGD_API void SGD_DECL sgd_Set2DTextColor(float red, float green, float blue, float alpha);
+
 
 //! Clear the current 2d overlay.
 SGD_API void SGD_DECL sgd_Clear2D();

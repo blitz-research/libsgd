@@ -50,12 +50,12 @@ template <class T> Vec3<T> operator*(CAffineMat4<T> m, CVec3<T> v) {
 
 template <class T> Box<T> operator*(CAffineMat4<T> m, CBox<T> b) {
 	Box<T> r;
-	for (int i = 0; i < 8; ++i) r |= m * b.corner(i);
+	for (int i = 0; i < 8; ++i) r |= m * corner(b, i);
 	return r;
 }
 
 template <class T> Line<T> operator*(CAffineMat4<T> m, CLine<T> l) {
-	return {m * l.o, m * l.d};
+	return {m * l.o, m.r * l.d};
 }
 
 template <class T> Plane<T> operator*(CAffineMat4<T> m, CPlane<T> p) {

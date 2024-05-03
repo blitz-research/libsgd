@@ -89,7 +89,10 @@ start:
 			sgd_TurnEntity(camera, 0, -3, 0);
 		}
 
-		for (int i = 0; i < 5; ++i) sgd_TurnEntity(models[i], i / 10.0f, i / 5.0f + .1f, 0);
+		for (int i = 0; i < 5; ++i) {
+			sgd_TurnEntity(models[i], i / 10.0f, i / 5.0f + .1f, 0);
+			printf("### x=%f",sgd_EntityX(models[i]));
+		}
 
 		{
 			char buf[80];

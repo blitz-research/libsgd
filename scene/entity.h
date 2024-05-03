@@ -5,13 +5,53 @@
 namespace sgd {
 
 SGD_SHARED(Scene);
-
+SGD_SHARED(Collider);
 SGD_SHARED(Entity);
 
 struct Entity : Shared {
 	SGD_OBJECT_TYPE(Entity, Shared);
 
-	Entity() = default;
+	Entity();
+
+	Property<bool> isEnabled{true};
+	Property<bool> isVisible{true};
+
+	Signal<bool> enabledChanged;
+	Signal<bool> visibleChanged;
+
+	Signal<> invalidated;
+
+	bool enabled() const { // NOLINT (recursive)
+		return isEnabled() && (!m_parent || m_parent->enabled());
+	}
+
+	bool visible() const { // NOLINT (recursive)
+		return isVisible() && (!m_parent || m_parent->visible());
+	}
+
+	void setParent(Entity* parent);
+
+	Entity* parent() const {
+		return m_parent;
+	}
+
+	CVector<EntityPtr> children() const {
+		return m_children;
+	}
+
+	void setCollider(Collider* collider);
+
+	Collider* collider() const {
+		return m_collider;
+	}
+
+	Scene* scene() const {
+		return m_scene;
+	}
+
+	Entity* copy() const {
+		return onCopy();
+	}
 
 	void setWorldPosition(CVec3r position) { // NOLINT (recursive)
 		setLocalPosition(m_parent ? inverse(m_parent->worldMatrix()) * position : position);
@@ -72,34 +112,14 @@ struct Entity : Shared {
 
 	CAffineMat4r localMatrix() const;
 
-	void setParent(Entity* parent);
-
-	Entity* parent() const {
-		return m_parent;
+	template <class FuncTy> void visitChildren(FuncTy func) {
+		for (Entity* child : m_children) visitChild(func);
 	}
 
-	CVector<EntityPtr> children() const {
-		return m_children;
-	}
-
-	void setEnabled(bool enabled);
-
-	bool enabled() const {
-		return m_enabled;
-	}
-
-	void setVisible(bool visible);
-
-	bool visible() const {
-		return m_visible;
-	}
-
-	Scene* scene() const {
-		return m_scene;
-	}
-
-	Entity* copy() const {
-		return onCopy();
+	template <class FuncTy> bool visitChild(FuncTy func) {
+		if (!func(this)) return false;
+		for (Entity* child : m_children) visitChild(func);
+		return true;
 	}
 
 protected:
@@ -111,11 +131,14 @@ protected:
 	virtual void onHide(){};
 	virtual void onDisable(){};
 	virtual void onDestroy(){};
+	virtual void onValidate(){};
 
 	virtual Entity* onCopy() const = 0;
 
+	void invalidate();
+
 private:
-	friend struct Scene;
+	friend class Scene;
 
 	enum struct Dirty { none = 0, localMatrix = 1, worldMatrix = 2 };
 
@@ -125,16 +148,20 @@ private:
 	mutable Vec3r m_localScale{1};
 	mutable Dirty m_dirty{Dirty::none};
 
+	Scene* m_scene{};
+	bool m_invalid{};
+
 	Entity* m_parent{};
 	Vector<EntityPtr> m_children;
 
-	bool m_enabled{true};
-	bool m_visible{true};
+	ColliderPtr m_collider;
 
-	Scene* m_scene{};
-
-	void invalidateWorldMatrix() const;
-	void invalidateLocalMatrix() const;
+	void invalidateWorldMatrix();
+	void invalidateLocalMatrix();
+	void init();
+	void create(Scene* scene);
+	void destroy();
+	void validate();
 };
 
 } // namespace sgd

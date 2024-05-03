@@ -12,3 +12,9 @@ target_link_libraries(scene_tests_overlay scene)
 
 add_executable(scene_tests_sprites scene_tests_sprites.cpp)
 target_link_libraries(scene_tests_sprites scene)
+
+add_executable(scene_tests_rayhit scene_tests_rayhit.cpp)
+target_link_libraries(scene_tests_rayhit scene)
+
+add_executable(scene_tests_collisions scene_tests_collisions.cpp)
+target_link_libraries(scene_tests_collisions scene)

@@ -44,9 +44,9 @@ DrawList::DrawList()
 	m_bindGroup->setBuffer(0, m_uniformBuffer);
 
 	auto cmaterial = new Material(&prelitMaterialDescriptor);
-	cmaterial->blendMode = BlendMode::alpha;
-	cmaterial->depthFunc = DepthFunc::always;
-	cmaterial->cullMode = CullMode::none;
+	//	cmaterial->blendMode = BlendMode::alpha;
+	//	cmaterial->depthFunc = DepthFunc::always;
+	//	cmaterial->cullMode = CullMode::none;
 	m_defaultMaterial = cmaterial;
 
 	projectionMatrix.changed.connect(this, [=](CMat4f matrix) { //
@@ -70,7 +70,7 @@ DrawList::DrawList()
 	m_pmTextColor = textColor();
 
 	clear();
-} // ,
+}
 
 DrawList::Vertex* DrawList::allocTriangles(uint32_t count) {
 	if (fillMaterial() != m_drawOp.material) {
@@ -261,13 +261,13 @@ void DrawList::addText(CString text, CVec2f v) {
 
 	Vertex* vp = allocTriangles(text.size() * 2);
 
-	Vec2f pos(v.x, v.y + font()->baseline);
+	Vec2f pos(v.x, v.y + font()->ascent);
 
 	for (uint8_t ch : text) {
 
-		if (ch < Font::firstChar || ch >= Font::firstChar + font()->glyphs.size()) ch = Font::firstChar;
+		if ((ch -= font()->firstChar) >= font()->glyphs.size()) ch = 0;
 
-		CGlyph glyph = font()->glyphs[ch - Font::firstChar];
+		CGlyph glyph = font()->glyphs[ch];
 
 		CRectf src = glyph.srcRect;
 		Rectf dst = glyph.dstRect + pos;

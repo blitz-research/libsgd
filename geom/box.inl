@@ -13,6 +13,9 @@ template <class T> constexpr Box<T>::Box(CVec3<T> min, CVec3<T> max) : min(min),
 template <class T> constexpr Box<T>::Box(float min, float max) : min(min), max(max) {
 }
 
+template <class T> template <class C> constexpr Box<T>::Box(CBox<C>& b) : min(b.min), max(b.max) {
+}
+
 template <class T> Box<T>& Box<T>::operator&=(CBox<T> b) {
 	return *this = *this & b;
 }
@@ -40,15 +43,15 @@ template <class T> Box<T>& Box<T>::operator-=(CVec3<T> v) {
 // ***** Non-member operatorss *****
 
 template <class T> Box<T> operator&(CBox<T> b, CBox<T> c) {
-	return {b.min.max(c.min), b.max.min(c.max)};
-}
-
-template <class T> Box<T> operator|(CBox<T> b, CBox<T> c) {
-	return {b.min.min(c.min), b.max.max(c.max)};
+	return {sgd::max(b.min, c.min), sgd::min(b.max, c.max)};
 }
 
 template <class T> Box<T> operator&(CBox<T> b, CVec3<T> v) {
 	return {sgd::max(b.min, v), sgd::min(b.max, v)};
+}
+
+template <class T> Box<T> operator|(CBox<T> b, CBox<T> c) {
+	return {sgd::min(b.min, c.min), sgd::max(b.max, c.max)};
 }
 
 template <class T> Box<T> operator|(CBox<T> b, CVec3<T> v) {
@@ -83,20 +86,25 @@ template <class T> std::ostream& operator<<(std::ostream& os, CBox<T> b) {
 
 // ***** Non-member functions *****
 
-template<class T> bool empty(CBox<T> b){
-	return b.max.x <= b.min.x || b.max.y <= b.min.y || b.max.z <= b.min.z;
+template <class T> bool empty(CBox<T> b) {
+//	return b.max.x <= b.min.x || b.max.y <= b.min.y || b.max.z <= b.min.z;
+	return b.max.x < b.min.x || b.max.y < b.min.y || b.max.z < b.min.z;
 }
 
-template<class T> Vec3<T> size(CBox<T> b){
-	return b.max-b.min;
+template <class T> Vec3<T> size(CBox<T> b) {
+	return b.max - b.min;
 }
 
-template<class T> Vec3<T> center(CBox<T> b){
+template <class T> Vec3<T> center(CBox<T> b) {
 	return (b.max - b.min) / T(2) + b.min;
 }
 
-template<class T> Vec3<T> corner(CBox<T> b,int index){
+template <class T> Vec3<T> corner(CBox<T> b, int index) {
 	return {(index & 1) ? b.max.x : b.min.x, (index & 2) ? b.max.y : b.min.y, (index & 4) ? b.max.z : b.min.z};
+}
+
+template <class T> bool intersects(CBox<T>& b, CBox<T>& c) {
+	return !empty(b & c);
 }
 
 } // namespace sgd

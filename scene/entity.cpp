@@ -4,19 +4,57 @@
 
 namespace sgd {
 
+Entity::Entity() {
+	init();
+}
+
 Entity::Entity(const Entity* that)
-	: m_enabled(that->m_enabled), //
-	  m_visible(that->m_visible) {
+	: isEnabled(that->isEnabled()), //
+	  isVisible(that->isVisible()) {
+	init();
 	for (Entity* child : that->m_children) child->copy()->setParent(this);
 }
 
-void Entity::invalidateWorldMatrix() const { // NOLINT (recursive)
+void Entity::setParent(Entity* parent) {
+
+	if (m_parent) {
+		SGD_ASSERT(sgd::contains(m_parent->m_children, this));
+		sgd::rremove(m_parent->m_children, this);
+	}
+
+	if (parent) {
+		m_parent = parent;
+		SGD_ASSERT(!sgd::contains(m_parent->m_children, this));
+		m_parent->m_children.emplace_back(this);
+		invalidateWorldMatrix();
+		invalidate();
+		return;
+	}
+
+	auto matrix = worldMatrix();
+	m_parent = nullptr;
+	setWorldMatrix(matrix);
+}
+
+void Entity::setCollider(Collider* collider) {
+	m_collider = collider;
+}
+
+void Entity::invalidate() {
+	if(m_invalid || !m_scene) return;
+	m_invalid = true;
+	m_scene->m_invalid.push_back(this);
+	invalidated.emit();
+}
+
+void Entity::invalidateWorldMatrix() { // NOLINT (recursive)
 	if (bool(m_dirty & Dirty::worldMatrix)) return;
 	m_dirty |= Dirty::worldMatrix;
 	for (Entity* child : m_children) child->invalidateWorldMatrix();
+	invalidate();
 }
 
-void Entity::invalidateLocalMatrix() const { // NOLINT (recursive)
+void Entity::invalidateLocalMatrix() { // NOLINT (recursive)
 	m_dirty |= Dirty::localMatrix;
 	invalidateWorldMatrix();
 }
@@ -49,40 +87,71 @@ CAffineMat4r Entity::localMatrix() const { // NOLINT (recursive)
 	return m_localMatrix;
 }
 
-void Entity::setParent(Entity* parent) {
-
-	if (m_parent) {
-		SGD_ASSERT(sgd::contains(m_parent->m_children, this));
-		sgd::rremove(m_parent->m_children, this);
-	}
-
-	if(parent) {
-		m_parent = parent;
-		SGD_ASSERT(!sgd::contains(m_parent->m_children, this));
-		m_parent->m_children.emplace_back(this);
-		invalidateWorldMatrix();
-		return;
-	}
-
-	auto matrix = worldMatrix();
-	m_parent = nullptr;
-	setWorldMatrix(matrix);
+void Entity::init() {
+	isEnabled.changed.connect(nullptr, [=](bool e) {
+		if (m_parent && !m_parent->enabled()) return;
+		if (e) {
+			onEnable();
+			enabledChanged.emit(true);
+			visitChildren([=](Entity* child) {
+				if (!child->isEnabled()) return false;
+				child->onEnable();
+				enabledChanged.emit(true);
+				return true;
+			});
+		} else {
+			onDisable();
+			enabledChanged.emit(false);
+			visitChildren([=](Entity* child) {
+				if (!child->isEnabled()) return false;
+				child->onDisable();
+				enabledChanged.emit(false);
+				return true;
+			});
+		}
+	});
+	isVisible.changed.connect(nullptr, [=](bool v) {
+		if (m_parent && !m_parent->visible()) return;
+		if (v) {
+			onShow();
+			visibleChanged.emit(true);
+			visitChildren([=](Entity* child) {
+				if (!child->isVisible()) return false;
+				child->onShow();
+				visibleChanged.emit(true);
+				return true;
+			});
+		} else {
+			onHide();
+			visibleChanged.emit(false);
+			visitChildren([=](Entity* child) {
+				if (!child->isVisible()) return false;
+				child->onHide();
+				visibleChanged.emit(false);
+				return true;
+			});
+		}
+	});
 }
 
-void Entity::setEnabled(bool enabled) {
-	if (enabled == m_enabled) return;
-
-	m_enabled = enabled;
-
-	if (m_scene) m_enabled ? onEnable() : onDisable();
+void Entity::create(Scene* scene) {
+	m_scene = scene;
+	onCreate();
+	if(enabled()) onEnable();
+	if(visible()) onShow();
 }
 
-void Entity::setVisible(bool visible) {
-	if (visible == m_visible) return;
+void Entity::destroy() {
+	isVisible = false;
+	isEnabled = false;
+	onDestroy();
+	m_scene = nullptr;
+}
 
-	m_visible = visible;
-
-	if (m_scene) m_visible ? onShow() : onHide();
+void Entity::validate() {
+	SGD_ASSERT(m_invalid);
+	onValidate();
+	m_invalid = false;
 }
 
 } // namespace sgd

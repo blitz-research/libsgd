@@ -25,6 +25,7 @@ template <class T> struct Box {
 	constexpr explicit Box(CVec3<T> v);
 	constexpr Box(float min, float max);
 	constexpr Box(CVec3<T> min, CVec3<T> max);
+	template <class C> constexpr Box(CBox<C>& b); // NOLINT (non-explicit ctor)
 
 	Box& operator|=(CBox<T> b);
 	Box& operator&=(CBox<T> b);
@@ -35,10 +36,11 @@ template <class T> struct Box {
 };
 
 template <class T> Box<T> operator&(CBox<T> b, CBox<T> c);
-template <class T> Box<T> operator|(CBox<T> b, CBox<T> c);
-
 template <class T> Box<T> operator&(CBox<T> b, CVec3<T> v);
+
+template <class T> Box<T> operator|(CBox<T> b, CBox<T> c);
 template <class T> Box<T> operator|(CBox<T> b, CVec3<T> v);
+
 template <class T> Box<T> operator+(CBox<T> b, CVec3<T> v);
 template <class T> Box<T> operator-(CBox<T> b, CVec3<T> v);
 
@@ -52,6 +54,8 @@ template<class T> bool empty(CBox<T> b);
 template<class T> Vec3<T> size(CBox<T> b);
 template<class T> Vec3<T> center(CBox<T> b);
 template<class T> Vec3<T> corner(CBox<T> b,int index);
+
+template<class T> bool intersects(CBox<T>& b, CBox<T>& c);
 
 } // namespace sgd
 

@@ -1,7 +1,9 @@
 #include "scene.h"
+
 #include "camera.h"
 #include "entity.h"
 #include "light.h"
+#include "collisionspace.h"
 
 #include <window/exports.h>
 
@@ -37,12 +39,14 @@ Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
 	m_renderContext = new RenderContext(m_gc);
 
 	m_viewportSize = m_gc->window()->size();
-	m_gc->window()->sizeChanged1.connect(this, [=](CVec2u size){
-		if(!m_gc->canRender()) return;
+	m_gc->window()->sizeChanged1.connect(this, [=](CVec2u size) {
+		if (!m_gc->canRender()) return;
 		SGD_ASSERT(size == m_gc->colorBuffer()->size());
 		m_viewportSize = size;
 		viewportSizeChanged.emit(size);
 	});
+
+	m_collisionSpace = new CollisionSpace();
 }
 
 void Scene::clear() {
@@ -66,15 +70,18 @@ void Scene::add(Entity* entity) { // NOLINT (recursive)
 	m_entities.emplace_back(entity);
 
 	if (entity->is<Camera>()) {
-		m_cameras.emplace_back(entity->as<Camera>());
+		auto camera = entity->as<Camera>();
+		viewportSizeChanged.connect(camera, [=](CVec2u size){	//
+			camera->aspect = (float)size.x / (float)size.y;
+		});
+		camera->aspect = (float)viewportSize().x / (float)viewportSize().y;
+		m_cameras.emplace_back(camera);
 	} else if (entity->is<Light>()) {
-		m_lights.emplace_back(entity->as<Light>());
+		auto light = entity->as<Light>();
+		m_lights.emplace_back(light);
 	}
 
-	entity->m_scene = this;
-	entity->onCreate();
-	if (entity->enabled()) entity->onEnable();
-	if (entity->visible()) entity->onShow();
+	entity->create(this);
 
 	for (Entity* child : entity->children()) add(child);
 }
@@ -88,19 +95,25 @@ void Scene::remove(Entity* entity) { // NOLINT (recursive)
 	}
 
 	entity->setParent(nullptr);
-	entity->setVisible(false);
-	entity->setEnabled(false);
-	entity->onDestroy();
-	entity->m_scene = nullptr;
+	entity->destroy();
+
+	if(entity->m_invalid) sgd::remove(m_invalid, entity);
 
 	if (entity->is<Camera>()) {
-		sgd::remove(m_cameras, entity->as<Camera>());
+		auto camera = entity->as<Camera>();
+		viewportSizeChanged.disconnect(camera);
+		sgd::remove(m_cameras, camera);
 	} else if (entity->is<Light>()) {
 		sgd::remove(m_lights, entity->as<Light>());
 	}
 
-	// Careful, this could delete entity
+	// Careful, this could be last reference and could delete entity
 	if (!sgd::rremove(m_entities, entity)) SGD_PANIC("Failed to remove entity from scene");
+}
+
+void Scene::validate() {
+	for (auto entity : m_invalid) entity->validate();
+	m_invalid.clear();
 }
 
 void Scene::setRenderer(RendererType type, Renderer* renderer) {
@@ -112,19 +125,18 @@ Renderer* Scene::getRenderer(RendererType type) {
 }
 
 void Scene::updateCameraBindings() {
-
 	CameraUniforms uniforms;
-	auto aspect = (float)m_viewportSize.x / (float)m_viewportSize.y;
 	if (m_cameras.empty()) {
-		auto curs = m_gc->window()->mouse()->position() / Vec2f(m_gc->window()->size());
-		curs = curs * Vec2f(twoPi, pi) - Vec2f(pi, halfPi);
-		auto matrix = AffineMat4r::rotation({-curs.y, -curs.x, 0});
-		setCameraUniforms(uniforms, matrix, Mat4f::perspective(45, aspect, .1, 100));
+		// Quick mouselook hack for no camera
+		auto mouse = m_gc->window()->mouse()->position() / Vec2f(m_gc->window()->size()) * 2.0f - 1.0f;
+		auto matrix = AffineMat4r::rotation({-mouse.y * halfPi, -mouse.x * pi, 0});
+		auto aspect = (float)m_viewportSize.x / (float)m_viewportSize.y;
+		auto proj = Mat4f::perspective(45, aspect, .1, 100);
+		setCameraUniforms(uniforms, matrix, proj);
 		m_eye = {};
 	} else {
 		auto camera = m_cameras.front();
-		setCameraUniforms(uniforms, camera->worldMatrix(),
-						  Mat4f::perspective(camera->fov(), aspect, camera->near(), camera->far()));
+		setCameraUniforms(uniforms, camera->worldMatrix(), camera->projectionMatrix());
 		m_eye = camera->worldPosition();
 	}
 	m_sceneBindings->updateCameraUniforms(uniforms);

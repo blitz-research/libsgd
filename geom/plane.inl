@@ -10,13 +10,11 @@ template <class T> Plane<T>::Plane(CVec3<T> n, T d) : n(n), d(d) {
 	SGD_ASSERT(approxOne(length(n)));
 }
 
-template <class T> Plane<T> Plane<T>::pointNormal(CVec3<T> v, CVec3<T> n) {
-	return {n, -dot(n, v)};
+template <class T> Plane<T>::Plane(CVec3<T> p0, CVec3<T> n) : n(n), d(-dot(p0, n)) {
 }
 
-template <class T> Plane<T> Plane<T>::triangle(CVec3<T> v0, CVec3<T> v1, CVec3<T> v2) {
-	auto n = normalize(cross(v1 - v0, v2 - v0));
-	return {n, -dot(n, v0)};
+template <class T>
+Plane<T>::Plane(CVec3<T> v0, CVec3<T> v1, CVec3<T> v2) : n(normalize(cross(v1 - v0, v2 - v0))), d(-dot(v0, n)) {
 }
 
 // ***** Non-member operators ****
@@ -34,7 +32,7 @@ template <class T> std::ostream& operator<<(std::ostream& os, CPlane<T> p) {
 }
 
 template <class T> T distance(CPlane<T> p, CVec3<T> v) {
-	return p.n.dot(v) + p.d;
+	return dot(p.n, v) + p.d;
 }
 
 template <class T> Vec3<T> nearest(CPlane<T> p, CVec3<T> v) {
