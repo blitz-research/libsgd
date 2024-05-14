@@ -14,11 +14,29 @@ template <class T> constexpr Vec4<T>::Vec4(T x, T y, T z, T w) : x(x), y(y), z(z
 template <class T> constexpr Vec4<T>::Vec4(const Vec3<T>& v, T w) : x(v.x), y(v.y), z(v.z), w(w) {
 }
 
+template <class T> constexpr Vec4<T>::Vec4(const Vec2<T>& v, T z, T w) : x(v.x), y(v.y), z(z), w(w) {
+}
+
 template <class T> Vec4<T> Vec4<T>::rgba(uint32_t rgba) {
 	constexpr T sc = T(1) / T(255);
 	return {T(rgba & 255) * sc, T((rgba >> 8) & 255) * sc, T((rgba >> 16) & 255) * sc, T(rgba >> 24) * sc};
 }
 
+template<class T> Vec2<T>& Vec4<T>::xy() {
+	return (Vec2<T>&)(*this);
+}
+
+template<class T> CVec2<T> Vec4<T>::xy() const {
+	return (CVec2<T>)(*this);
+}
+
+template<class T> Vec3<T>& Vec4<T>::xyz() {
+	return (Vec3<T>&)(*this);
+}
+
+template<class T> CVec3<T> Vec4<T>::xyz() const {
+	return (CVec3<T>)(*this);
+}
 
 template<class T> Vec4<T>::operator Vec3<T>() const {
 	return {x,y,z};

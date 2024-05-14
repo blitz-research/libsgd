@@ -13,7 +13,7 @@ void entry() {
 	scene->add(model);
 
 	auto data = new MeshColliderData(mesh);
-	MeshColliderPtr collider = new MeshCollider(model, 0, 0, data);
+	MeshColliderPtr collider = new MeshCollider(model, 0, data);
 
 	model->mesh = mesh;
 	move(model, {0, 0, 5});
@@ -30,7 +30,7 @@ void entry() {
 		overlay->drawList()->clear();
 		{
 			// Mouselook hack
-			auto mouse = window->mouse()->position() / Vec2f(scene->viewportSize()) * 2.0f - 1.0f;
+			auto mouse = window->mouse()->position().xy() / Vec2f(scene->viewportSize()) * 2.0f - 1.0f;
 			camera->setLocalBasis(Mat3r::rotation({-mouse.y * halfPi, -mouse.x * pi, 0}));
 
 			auto invProj = camera->inverseProjectionMatrix();

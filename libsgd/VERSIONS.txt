@@ -1,4 +1,27 @@
 
+***** v0.06 *****
+
+* Added Texture param to CreateSkybox, use 0 for no texture.
+
+* Added Mesh param to CreateModel, use 0 for no mesh.
+
+* Added WINDOW_FLAGS_CENTERED.
+
+* Added MouseZ(), MouseVZ(), removed MouseScroll().
+
+* Added SetEntityEnabled(), EntityEnabled(), SetEntityVisible(), EntityVisible().
+
+* Added Push2DLayer(), Pop2DLayer().
+
+* Added CreateImage(), SetImageRect(), ImageWidth(), ImageHeight(),  Draw2DImage().
+
+* Added FontTextWidth(), FontHeight(), Font2DTextWidth() and Font2DHeight().
+
+* Renamed Load2DFont -> LoadFont.
+
+* Fixed swapped normal y, z coords in SetVertex.
+
+
 ***** V0.05 *****
 
 * Added blitzmax target, thanks James for the convertor!

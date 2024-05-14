@@ -193,7 +193,7 @@ int SGD_DECL sgd_AddVertex(SGD_Mesh hmesh, float x, float y, float z, float nx, 
 void SGD_DECL sgd_SetVertex(SGD_Mesh hmesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s,
 							float t) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	mesh->lockVertices(vertex, 1)[0] = {{x, y, z}, {nx, nz, ny}, {s, t}};
+	mesh->lockVertices(vertex, 1)[0] = {{x, y, z}, {nx, ny, nz}, {s, t}};
 	mesh->unlockVertices();
 }
 
@@ -217,7 +217,7 @@ void SGD_DECL sgd_SetVertexTangent(SGD_Mesh hmesh, int vertex, float x, float y,
 
 void SGD_DECL sgd_SetVertexTexCoords(SGD_Mesh hmesh, int vertex, float u, float v) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	mesh->lockVertices(vertex, 1)->texCoords = {u, v};
+	mesh->lockVertices(vertex, 1)->texCoords = {u, v, 0};
 	mesh->unlockVertices();
 }
 
@@ -268,24 +268,59 @@ int SGD_DECL sgd_TriangleCount(SGD_Surface hsurface) {
 	return (int)surf->triangleCount();
 }
 
-// ***** 2D Overlay *****
+// ***** Font *****
 
-SGD_Font SGD_DECL sgd_Load2DFont(SGD_String path, float height) {
+SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height) {
 	sgdx::started();
 	auto font = sgd::loadFont(sgd::Path(path), height);
 	if (!font) sgdx::error("Failed to load font:" + font.error().message());
 	return sgdx::createHandle(font.result());
 }
 
-float SGD_DECL sgd_Get2DFontTextWidth(SGD_Font hfont, SGD_String text) {
-	auto font = sgdx::resolveHandle<sgd::Font>(hfont);
-	return font->textWidth(text);
+//! Get width of text.
+float SGD_DECL sgd_FontTextWidth(SGD_Font hfont, SGD_String text) {
+	return sgdx::resolveHandle<sgd::Font>(hfont)->textWidth(text);
 }
 
-float SGD_DECL sgd_Get2DFontHeight(SGD_Font hfont) {
-	auto font = sgdx::resolveHandle<sgd::Font>(hfont);
-	return font->height;
+//! get height of font.
+float SGD_DECL sgd_FontHeight(SGD_Font hfont) {
+	return sgdx::resolveHandle<sgd::Font>(hfont)->height;
 }
+
+// ***** Image *****
+
+SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int textureFormat, int textureFlags, int frames) {
+	sgdx::started();
+	auto image = sgd::loadImage(sgd::Path(path), (sgd::TextureFormat)textureFormat, (sgd::TextureFlags)textureFlags, frames);
+	if (!image) sgdx::error("Failed to load image:" + image.error().message());
+	return sgdx::createHandle(image.result());
+}
+
+void SGD_DECL sgd_SetImageSpriteViewMode(SGD_Image himage, int spriteViewMode) {
+	sgdx::resolveHandle<sgd::Image>(himage)->spriteViewMode = (sgd::SpriteViewMode)spriteViewMode;
+}
+
+void SGD_DECL sgd_SetImageSpriteRect(SGD_Image himage, float minX, float minY, float maxX, float maxY) {
+	sgdx::resolveHandle<sgd::Image>(himage)->spriteRect = {minX, minY, maxX, maxY};
+}
+
+void SGD_DECL sgd_SetImageDraw2DHandle(SGD_Image himage, float x, float y) {
+	sgdx::resolveHandle<sgd::Image>(himage)->drawHandle = {x, y};
+}
+
+int SGD_DECL sgd_ImageWidth(SGD_Image himage) {
+	return (int)sgdx::resolveHandle<sgd::Image>(himage)->frames()->size().x;
+}
+
+int SGD_DECL sgd_ImageHeight(SGD_Image himage) {
+	return (int)sgdx::resolveHandle<sgd::Image>(himage)->frames()->size().y;
+}
+
+int SGD_DECL sgd_ImageFrameCount(SGD_Image himage) {
+	return (int)sgdx::resolveHandle<sgd::Image>(himage)->frames()->depth();
+}
+
+// ***** 2D Overlay *****
 
 void SGD_DECL sgd_Set2DFillColor(float red, float green, float blue, float alpha) {
 	sgdx::drawList()->fillColor = {red, green, blue, alpha};
@@ -327,8 +362,24 @@ void SGD_DECL sgd_Set2DTextColor(float red, float green, float blue, float alpha
 	sgdx::drawList()->textColor = {red, green, blue, alpha};
 }
 
+float SGD_DECL sgd_Get2DTextWidth(SGD_String text) {
+	return sgdx::drawList()->font()->textWidth(text);
+}
+
+float SGD_DECL sgd_Get2DFontHeight() {
+	return sgdx::drawList()->font()->height;
+}
+
 void SGD_DECL sgd_Clear2D() {
 	sgdx::drawList()->clear();
+}
+
+void SGD_DECL sgd_Push2DLayer() {
+	sgdx::drawList()->pushLayer();
+}
+
+void SGD_DECL sgd_Pop2DLayer() {
+	sgdx::drawList()->popLayer();
 }
 
 void SGD_DECL sgd_Draw2DPoint(float x, float y) {
@@ -345,6 +396,11 @@ void SGD_DECL sgd_Draw2DRect(float minX, float minY, float maxX, float maxY) {
 
 void SGD_DECL sgd_Draw2DOval(float minX, float minY, float maxX, float maxY) {
 	sgdx::drawList()->addOval({minX, minY, maxX, maxY});
+}
+
+void SGD_DECL sgd_Draw2DImage(SGD_Image himage, float x, float y, float frame) {
+	auto image = sgdx::resolveHandle<sgd::Image>(himage);
+	sgdx::drawList()->addImage(image, {x, y}, frame);
 }
 
 void SGD_DECL sgd_Draw2DText(SGD_String text, float x, float y) {

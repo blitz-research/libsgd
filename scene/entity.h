@@ -5,28 +5,34 @@
 namespace sgd {
 
 SGD_SHARED(Scene);
-SGD_SHARED(Collider);
+SGD_SHARED(EntityListener);
 SGD_SHARED(Entity);
 
 struct Entity : Shared {
 	SGD_OBJECT_TYPE(Entity, Shared);
 
-	Entity();
+	Entity() = default;
 
-	Property<bool> isEnabled{true};
-	Property<bool> isVisible{true};
+	void reset();
 
-	Signal<bool> enabledChanged;
-	Signal<bool> visibleChanged;
+	void setIsEnabled(bool isEnabled);
 
-	Signal<> invalidated;
+	bool isEnabled() const {
+		return m_isEnabled;
+	}
 
 	bool enabled() const { // NOLINT (recursive)
-		return isEnabled() && (!m_parent || m_parent->enabled());
+		return isEnabled() && (!m_parent || m_parent->enabled()) && m_scene;
+	}
+
+	void setIsVisible(bool isVisible);
+
+	bool isVisible() const {
+		return m_isVisible;
 	}
 
 	bool visible() const { // NOLINT (recursive)
-		return isVisible() && (!m_parent || m_parent->visible());
+		return isVisible() && (!m_parent || m_parent->visible()) && m_scene;
 	}
 
 	void setParent(Entity* parent);
@@ -39,10 +45,10 @@ struct Entity : Shared {
 		return m_children;
 	}
 
-	void setCollider(Collider* collider);
+	void addListener(EntityListener* el);
 
-	Collider* collider() const {
-		return m_collider;
+	CVector<EntityListenerPtr> listeners() const {
+		return m_listeners;
 	}
 
 	Scene* scene() const {
@@ -126,16 +132,16 @@ protected:
 	explicit Entity(const Entity* that);
 
 	virtual void onCreate(){};
+	virtual void onDestroy(){};
 	virtual void onEnable(){};
+	virtual void onDisable(){};
 	virtual void onShow(){};
 	virtual void onHide(){};
-	virtual void onDisable(){};
-	virtual void onDestroy(){};
+	virtual void onInvalidate(){};
 	virtual void onValidate(){};
+	virtual void onReset(){};
 
 	virtual Entity* onCopy() const = 0;
-
-	void invalidate();
 
 private:
 	friend class Scene;
@@ -149,19 +155,49 @@ private:
 	mutable Dirty m_dirty{Dirty::none};
 
 	Scene* m_scene{};
+	bool m_isEnabled{true};
+	bool m_isVisible{true};
 	bool m_invalid{};
 
 	Entity* m_parent{};
 	Vector<EntityPtr> m_children;
 
-	ColliderPtr m_collider;
+	Vector<EntityListenerPtr> m_listeners;
 
 	void invalidateWorldMatrix();
 	void invalidateLocalMatrix();
-	void init();
+
 	void create(Scene* scene);
 	void destroy();
+	void enable();
+	void disable();
+	void show();
+	void hide();
+	void invalidate();
 	void validate();
+};
+
+struct EntityListener : Shared {
+	SGD_OBJECT_TYPE(EntityListener, Shared);
+
+	virtual void onCreate(Entity* entity) {
+	}
+	virtual void onDestroy(Entity* entity) {
+	}
+	virtual void onEnable(Entity* entity) {
+	}
+	virtual void onDisable(Entity* entity) {
+	}
+	virtual void onShow(Entity* entity) {
+	}
+	virtual void onHide(Entity* entity) {
+	}
+	virtual void onInvalidate(Entity* entity) {
+	}
+	virtual void onValidate(Entity* entity) {
+	}
+	virtual void onReset(Entity* entity) {
+	}
 };
 
 } // namespace sgd

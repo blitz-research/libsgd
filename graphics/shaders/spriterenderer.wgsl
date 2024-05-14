@@ -3,11 +3,12 @@ R"(
 struct SpriteInstance {
     matrix: mat4x4f,
     color: vec4f,
-    rect: vec4f,
+    frame: f32,
 }
+
 @group(2) @binding(0) var<storage> spriteInstances: array<SpriteInstance>;
 
-struct VertexOut {
+struct Varying {
     @builtin(position) clipPosition : vec4f,
     @location(0) position: vec3f,
     @location(1) normal: vec3f,
@@ -15,37 +16,63 @@ struct VertexOut {
     @location(3) color: vec4f,
 }
 
-@vertex fn vertexMain(@builtin(vertex_index) vertexId : u32) -> VertexOut {
+@vertex fn vertexMain(@builtin(vertex_index) vertexId : u32) -> Varying {
 
     const vertices = array<vec2f, 6>(vec2f(0, 1), vec2f(1, 0), vec2f(1, 1), vec2f(0, 1), vec2f(0, 0), vec2f(1, 0));
 
     let instance = spriteInstances[vertexId / 6];
     let vcoords = vertices[vertexId % 6];
 
-    var vertex = vec3f(
-        (instance.rect.z - instance.rect.x) * vcoords.x + instance.rect.x,
-        (instance.rect.w - instance.rect.y) * vcoords.y + instance.rect.y, 0);
+    // Very cheeky! Will only with imagematerial...
+    let rect = material_uniforms.rect;
 
-    vertex = (camera_uniforms.worldMatrix * vec4f(vertex, 0)).xyz;
+    let vertex = vec3f(rect.zw * vcoords + rect.xy, 0);
 
-    var out: VertexOut;
+    var position:vec3f;
 
-    out.position = instance.matrix[3].xyz + vertex;
-    out.normal = camera_uniforms.worldMatrix[3].xyz - instance.matrix[3].xyz;
+    if material_uniforms.spriteViewMode == 1 {  // fixed, locked to camera
+
+        position = (camera_uniforms.worldMatrix * vec4f(vertex, 0)).xyz + instance.matrix[3].xyz;
+
+    } else if material_uniforms.spriteViewMode == 2 {   // free, billboard style
+
+        position = (instance.matrix * vec4f(vertex, 1)).xyz;
+
+    } else if material_uniforms.spriteViewMode == 3 {   // upright, tree style
+
+        var matrix: mat4x4f;
+        let j = instance.matrix[1].xyz;
+        let i = normalize(cross(camera_uniforms.worldMatrix[3].xyz - instance.matrix[3].xyz, j));
+        let k = normalize(cross(i, j));
+
+        matrix[0] = vec4f(i, 0);
+        matrix[1] = vec4f(j, 0);
+        matrix[2] = vec4f(k, 0);
+        matrix[3] = instance.matrix[3];
+
+        position = (matrix * vec4f(rect.zw * vcoords + rect.xy, 0, 1)).xyz;
+
+    } else {    // default to billboard style
+
+        position = (instance.matrix * vec4f(vertex, 1)).xyz;
+    }
+
+    var out: Varying;
+
+    out.clipPosition = camera_uniforms.viewProjectionMatrix * vec4(position, 1);
+    out.position = position;
     out.texCoords = 1 - vcoords;
     out.color = instance.color;
-
-    out.clipPosition = camera_uniforms.viewProjectionMatrix * vec4(out.position, 1);
 
     return out;
 }
 
-@fragment fn fragmentMain(in: VertexOut) -> @location(0) vec4f {
+@fragment fn fragmentMain(in: Varying) -> @location(0) vec4f {
 
     var tanMatrix: mat3x3f;
     tanMatrix[2] = normalize(in.normal);
 
-    return evaluateMaterial(in.position, tanMatrix, in.texCoords, in.color);
+    return evaluateMaterial(in.position, tanMatrix, vec3f(in.texCoords, 0), in.color);
 }
 
 )"

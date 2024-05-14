@@ -144,10 +144,10 @@ struct alignas(16) FontMaterialUniforms {
 
 // ***** SpriteRenderer *****
 
-struct SpriteInstance {
+struct alignas(16) SpriteInstance {
 	Mat4f matrix;
 	Vec4f color;
-	Rectf rect;
+	float frame{};
 };
 // @group(2) @binding(0) var<storage> spriteInstances: array<SpriteInstance>;
 
@@ -155,6 +155,13 @@ struct SpriteInstance {
 
 struct DrawListUniforms {
 	Mat4f matrix;
+};
+
+// ***** ImageUniforms *****
+
+struct alignas(16) ImageMaterialUniforms {
+	Rectf rect;
+	uint32_t spriteViewMode;
 };
 
 } // namespace sgd

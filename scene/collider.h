@@ -8,44 +8,68 @@ namespace sgd {
 constexpr uint32_t maxCollisionType = 31;
 
 struct CollisionNode;
+SGD_SHARED(CollisionSpace);
+SGD_SHARED(Collider);
 
-struct Collider : Shared {
-	SGD_OBJECT_TYPE(Collider, Shared);
+struct Collision {
+	Liner ray;
+	Contact contact;
+	CCollider* collider;
 
-	Collider(Entity* entity, uint32_t collisionType, uint32_t collisionMask);
+	Collision(CLiner ray, CContact contact, CCollider* collider):ray(ray),contact(contact),collider(collider){}
+};
+
+enum struct CollisionResponse {
+	ignore = 0,
+	stop,
+	slide
+};
+
+struct Collider : EntityListener {
+	SGD_OBJECT_TYPE(Collider, EntityListener);
+
+	Collider(Entity* entity, uint32_t colliderType);
 
 	Entity* entity() const {
 		return m_entity;
 	}
 
-	uint32_t collisionType() const {
-		return m_collisionType;
-	}
-
-	uint32_t collisionMask() const {
-		return m_collisionMask;
+	uint32_t colliderType() const {
+		return m_colliderType;
 	}
 
 	CBoxf localBounds() const {
 		return m_localBounds;
 	}
 
-	CBoxr worldBounds() const {
-		return m_worldBounds;
+	CBoxr worldBounds() const;
+
+	void update(uint32_t colliderMask, CollisionResponse response);
+
+	virtual Collider* intersectRay(CLiner ray, real rayRadius, Contact& contact) = 0;
+
+	CVector<Collision> collisions()const {
+		return m_collisions;
 	}
 
-	virtual const Collider* intersectRay(CLiner ray, real rayRadius, Contact& contact) const = 0;
-
 protected:
+
+	virtual void onUpdate(const CollisionSpace* space, uint32_t colliderMask, CollisionResponse response, Vector<Collision>& collisions) = 0;
+
 	void setLocalBounds(CBoxf bounds);
 
 private:
 	Entity* m_entity;
-	uint32_t m_collisionType;
-	uint32_t m_collisionMask;
+	uint32_t m_colliderType;
 	Boxf m_localBounds;
-	Boxr m_worldBounds;
+	mutable Boxr m_worldBounds;
+	mutable bool m_worldBoundsValid{};
 	CollisionNode* m_collisionNode{};
+	Vector<Collision> m_collisions;
+
+	void onEnable(Entity* entity) override;
+	void onDisable(Entity* entity) override;
+	void onInvalidate(Entity* entity) override;
 };
 
 }; // namespace sgd

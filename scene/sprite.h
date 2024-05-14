@@ -1,10 +1,10 @@
 #pragma once
 
 #include "entity.h"
+#include <graphics/exports.h>
 
 namespace sgd {
 
-SGD_SHARED(Material);
 SGD_SHARED(Sprite);
 
 struct Sprite : Entity {
@@ -14,9 +14,11 @@ struct Sprite : Entity {
 
 	explicit Sprite(const Sprite* that);
 
-	Property<MaterialPtr> material;
+	Property<ImagePtr> image;
+
 	Property<Vec4f> color{Vec4f(1)};
-	Property<Rectf> rect{Rectf(-.5f, .5f)};
+
+	Property<float> frame;
 
 private:
 	void onCreate() override;

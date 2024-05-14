@@ -41,12 +41,10 @@ struct Material : GraphicsResource {
 	Property<CullMode> cullMode{CullMode::back};
 
 	bool setVector4f(CString name, CVec4f value);
-
 	bool setVector3f(CString name, CVec3f value);
-
 	bool setVector2f(CString name, CVec2f value);
-
 	bool setFloat(CString name, float value);
+	bool setInt(CString name, int value);
 
 	bool setTexture(CString name, CTexture* value);
 

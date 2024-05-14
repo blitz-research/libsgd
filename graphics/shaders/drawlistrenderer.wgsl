@@ -9,14 +9,14 @@ struct DrawListUniforms {
 
 struct Vertex {
 	@location(0) position: vec3f,
-	@location(1) texCoords: vec2f,
+	@location(1) texCoords: vec3f,
 	@location(2) color: vec4f,
 };
 
 struct Varying {
 	@builtin(position) clipPosition: vec4f,
 	@location(0) position: vec3f,
-	@location(1) texCoords: vec2f,
+	@location(1) texCoords: vec3f,
 	@location(2) color: vec4f,
 };
 

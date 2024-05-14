@@ -8,8 +8,7 @@ void entry() {
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/Bricks076C_1K-JPG");
 	SGD_Mesh mesh = sgd_CreateSphereMesh(1, 64, 32, material);
 	sgd_TransformMeshTexCoords(mesh, 2, 2, 0, 0);
-	SGD_Model model = sgd_CreateModel();
-	sgd_SetModelMesh(model, mesh);
+	SGD_Model model = sgd_CreateModel(mesh);
 
 	// Pointing rightwards
 	SGD_Light light0 = sgd_CreateDirectionalLight();

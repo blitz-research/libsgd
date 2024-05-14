@@ -95,4 +95,14 @@ bool Material::setFloat(CString name, float value) {
 	return true;
 }
 
+bool Material::setInt(CString name, int value) {
+	SGD_ASSERT(endsWith(name, "1i"));
+
+	auto it = m_desc->uniformDescs.find(name);
+	if (it == m_desc->uniformDescs.end() || it->second.type != 1) return false;
+
+	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
+	return true;
+}
+
 } // namespace sgd

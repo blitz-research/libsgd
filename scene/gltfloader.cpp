@@ -99,6 +99,8 @@ Texture* GLTFLoader::loadTexture(int id, bool srgb) {
 
 	auto& gltfTex = gltfModel.textures[id];
 
+//	SGD_LOG << "Texture"<<id<<":"<<gltfTex.name;
+
 	auto& gltfImage = gltfModel.images[gltfTex.source];
 
 	if (gltfImage.bits != 8) SGD_PANIC("gltfImage.bits: " + std::to_string(gltfImage.bits));
@@ -123,7 +125,8 @@ Texture* GLTFLoader::loadTexture(int id, bool srgb) {
 		case TINYGLTF_TEXTURE_FILTER_LINEAR:
 			texFlags |= TextureFlags::filter;
 			break;
-		default:;
+		default: {
+		}
 		}
 		switch (gltfSampler.minFilter) {
 		case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST:
@@ -132,7 +135,8 @@ Texture* GLTFLoader::loadTexture(int id, bool srgb) {
 		case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR:
 			texFlags |= TextureFlags::mipmap;
 			break;
-		default:;
+		default: {
+		}
 		}
 	} else {
 		texFlags = TextureFlags::none;
@@ -150,6 +154,8 @@ Material* GLTFLoader::loadMaterial(int id) {
 
 	auto& gltfMat = gltfModel.materials[id];
 	auto material = cachedMaterials[id] = new Material(&pbrMaterialDescriptor);
+
+//	SGD_LOG << "Material" << id << ":" << gltfMat.name;
 
 	material->blendMode = gltfMat.alphaMode == "BLEND" ? BlendMode::alpha : BlendMode::opaque;
 	material->cullMode = gltfMat.doubleSided ? CullMode::none : CullMode::back;
@@ -259,13 +265,13 @@ Mesh* GLTFLoader::endMesh() {
 	}
 
 	auto mesh = new Mesh(meshVertices.size(), flags);
-	std::memcpy(mesh->lockVertices(), meshVertices.data(), meshVertices.size() * sizeof(Vertex));
+	sgd::copy(mesh->lockVertices(), meshVertices.data(), meshVertices.size());
 	mesh->unlockVertices();
 
 	for (auto& it : this->meshTriangles) {
 		auto& triangles = it.second;
 		auto surface = new Surface(triangles.size(), loadMaterial(it.first));
-		std::memcpy(surface->lockTriangles(), triangles.data(), triangles.size() * sizeof(Triangle));
+		sgd::copy(surface->lockTriangles(), triangles.data(), triangles.size());
 		surface->unlockTriangles();
 		mesh->addSurface(surface);
 	}
@@ -352,7 +358,7 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 	SGD_ASSERT(triCount * 3 == accessor.count);
 
 	triangles.resize(firstTri + triCount);
-	auto tp = (uint32_t*)triangles.data() + firstTri;
+	auto tp = (uint32_t*)(triangles.data() + firstTri);
 
 	switch (accessor.componentType) {
 	case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:
@@ -368,7 +374,10 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 		SGD_LOG << "TODO: Unsupported gltf component type for triangle indices";
 		SGD_ABORT();
 	}
-	for (int i = 0; i < accessor.count; ++i) tp[i] += firstVertex;
+	for (int i = 0; i < accessor.count; ++i) {
+		SGD_ASSERT(tp[i] < vertexCount);
+		tp[i] += firstVertex;
+	}
 }
 
 void GLTFLoader::updateMesh(const tinygltf::Mesh& gltfMesh) {
@@ -431,7 +440,7 @@ void GLTFLoader::loadAnimations() {
 				copyBufferData(time_accessor, &seq->scaleKeys[0].time, sizeof(seq->scaleKeys[0]));
 				copyBufferData(value_accessor, &seq->scaleKeys[0].value, sizeof(seq->scaleKeys[0]));
 			} else {
-				SGD_LOG << "Unrecognized gltf animation channel target_path";
+				SGD_LOG << "TODO: Unsupported gltf animation channel target_path \"" << chan.target_path << "\"";
 				SGD_ABORT();
 			}
 		}
@@ -512,7 +521,11 @@ void GLTFLoader::loadJoints() {
 
 Expected<Mesh*, FileioEx> GLTFLoader::loadStaticMesh() {
 
+	SGD_LOG << "Loading bones";
+
 	loadBones();
+
+	SGD_LOG << "Loading meshes";
 
 	beginMesh();
 	for (int i = 0; i < bones.size(); ++i) {
@@ -521,12 +534,14 @@ Expected<Mesh*, FileioEx> GLTFLoader::loadStaticMesh() {
 
 		auto firstVertex = meshVertices.size();
 		updateMesh(gltfModel.meshes[mesh]);
+
 		const auto& worldMatrix = bones[i] ? bones[i]->worldMatrix() : AffineMat4r{};
 		auto cof = cofactor(worldMatrix.r);
+
 		for (auto vp = meshVertices.begin() + firstVertex; vp != meshVertices.end(); ++vp) {
 			vp->position = worldMatrix * Vec3r(vp->position);
 			vp->normal = normalize(cof * Vec3r(vp->normal));
-			vp->tangent = Vec4f(normalize(cof * Vec3r(Vec3f(vp->tangent))), vp->tangent.w);
+			vp->tangent.xyz() = cof * Vec3r(vp->tangent.xyz());
 		}
 	}
 	return endMesh();

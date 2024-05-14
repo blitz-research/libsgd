@@ -11,16 +11,14 @@ void entry() {
 
 	SGD_Mesh mesh = sgd_CreateBoxMesh(-10, -10, -10, 10, 10, 10, material);
 	sgd_FlipMesh(mesh);
-	SGD_Model model = sgd_CreateModel();
-	sgd_SetModelMesh(model, mesh);
+	SGD_Model model = sgd_CreateModel(mesh);
 
 	SGD_Mesh mesh2 = sgd_CreateSphereMesh(1, 24, 12, material);
 	sgd_SetMeshCastsShadow(mesh2, 1);
-	SGD_Model model2 = sgd_CreateModel();
-	sgd_SetModelMesh(model2, mesh2);
+	SGD_Model model2 = sgd_CreateModel(mesh2);
 	sgd_MoveEntity(model2, 0, 0, 0);
 
-	SGD_Model pivot = sgd_CreateModel();
+	SGD_Model pivot = sgd_CreateModel(0);
 	sgd_MoveEntity(pivot, 0, 3, 0);
 
 	// Red, left

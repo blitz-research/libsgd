@@ -5,31 +5,46 @@
 
 namespace sgd {
 
-Collider::Collider(Entity* entity, uint32_t collisionType, uint32_t collisionMask)
-	: m_entity(entity), m_collisionType(collisionType), m_collisionMask(collisionMask) {
-	SGD_ASSERT(collisionType<maxCollisionType);
+Collider::Collider(Entity* entity, uint32_t colliderType)
+	: m_entity(entity), m_colliderType(colliderType) {
 
-	m_entity->enabledChanged.connect(this, [=](bool e) {
-		if (e) {
-			m_collisionNode = m_entity->scene()->collisionSpace()->insert(this);
-		} else {
-			m_entity->scene()->collisionSpace()->remove(m_collisionNode);
-			m_collisionNode = nullptr;
-		}
-	});
-
-	m_entity->invalidated.connect(this, [=]{
-		if(m_collisionNode) m_collisionNode->invalidate();
-	});
+	SGD_ASSERT(colliderType<32);
 
 	if (m_entity->enabled()) m_collisionNode = m_entity->scene()->collisionSpace()->insert(this);
+
+	m_entity->addListener(this);
 }
 
 void Collider::setLocalBounds(CBoxf bounds) {
 	m_localBounds = bounds;
-	m_worldBounds = m_entity ? m_entity->worldMatrix() * Boxr(m_localBounds) : Boxr(m_localBounds);
+	m_worldBoundsValid = false;
+}
 
-	if(m_collisionNode) m_collisionNode->invalidate();
+CBoxr Collider::worldBounds() const {
+	if(m_worldBoundsValid) return m_worldBounds;
+	m_worldBoundsValid = true;
+	return m_worldBounds = m_entity ? m_entity->worldMatrix() * Boxr(m_localBounds) : Boxr(m_localBounds);
+}
+
+void Collider::update(uint32_t colliderMask, CollisionResponse response) {
+	SGD_ASSERT(m_collisionNode);
+	m_collisions.clear();
+	onUpdate(m_collisionNode->space(), colliderMask, response, m_collisions);
+}
+
+void Collider::onEnable(Entity* entity) {
+	m_collisionNode = m_entity->scene()->collisionSpace()->insert(this);
+}
+
+void Collider::onDisable(Entity* entity) {
+	if(!m_collisionNode) return;
+
+	m_entity->scene()->collisionSpace()->remove(m_collisionNode);
+	m_collisionNode = nullptr;
+}
+
+void Collider::onInvalidate(Entity* entity) {
+	m_worldBoundsValid = false;
 }
 
 } // namespace sgd

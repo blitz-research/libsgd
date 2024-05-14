@@ -61,7 +61,7 @@ set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/build/Release/sgd.node)
 add_custom_command(
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 	COMMAND swig -c++ -javascript -napi -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
-	COMMAND npx node-gyp build ${NODEGYP_DEBUG}
+	COMMAND npx node-gyp --silent build ${NODEGYP_DEBUG}
 	DEPENDS libsgd_static ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
 	OUTPUT ${OUTPUT_FILE}
 	VERBATIM)

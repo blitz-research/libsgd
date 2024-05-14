@@ -18,9 +18,9 @@ inline const Texture* flatNormalTexture() {
 	return rgbaTexture(0xffff8080);
 }
 
-Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags);
+Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags, uint32_t depth=0);
 
-Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, TextureFlags flags);
+Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, TextureFlags flags, uint32_t depth=0);
 
 void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pitch);
 

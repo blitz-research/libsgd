@@ -35,7 +35,7 @@ MeshColliderData::MeshColliderData(CMesh* mesh) {
 	Vector<Triangle> triangles(triCount);
 	auto dstp = triangles.data();
 	for (Surface* surf : mesh->surfaces()) {
-		std::memcpy(dstp, surf->triangles(), surf->triangleCount() * sizeof(Triangle));
+		sgd::copy((sgd::Triangle*)dstp, surf->triangles(), surf->triangleCount());
 		dstp += surf->triangleCount();
 	}
 
@@ -125,6 +125,24 @@ bool MeshColliderData::Node::intersectRay(CLiner ray, CBoxr rayBounds, real radi
 		collision |= intersectRayTriangle(ray, radius, v0, v1, v2, contact);
 	}
 	return collision;
+}
+
+MeshColliderData* getOrCreateMeshColliderData(CMesh* mesh) {
+	static Map<CMesh*, MeshColliderDataPtr> g_datas;
+
+	auto it = g_datas.find(mesh);
+
+	if (it != g_datas.end()) return it->second;
+
+	auto data = new MeshColliderData(mesh);
+	g_datas.insert(std::make_pair(mesh, data));
+	mesh->deleted.connect(nullptr, [=] {
+//		auto it = g_datas.find(mesh);
+//		SGD_ASSERT(it !=g_datas.end());
+//		g_datas.erase(it);
+	});
+
+	return data;
 }
 
 } // namespace sgd

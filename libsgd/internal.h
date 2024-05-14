@@ -27,9 +27,11 @@ enum struct HandleType {
 	sound,
 	texture,
 	material,
+	image,
 	surface,
 	mesh,
 	entity,
+	collider,
 };
 
 struct HandleTypeInfo {
@@ -46,6 +48,7 @@ void postEvent(SGD_Event event);
 void getEventQueue(Deque<SGD_Event>& queue);
 
 SGD_Handle createHandle(HandleTypeInfo* type, Shared* shared);
+SGD_Handle getHandle(HandleTypeInfo* type, Shared* shared);
 SGD_Handle getOrCreateHandle(HandleTypeInfo* type, Shared* shared);
 Shared* resolveHandle(HandleTypeInfo* type, SGD_Handle handle);
 void destroyHandle(HandleTypeInfo* type, SGD_Handle handle);
@@ -57,6 +60,10 @@ template<class T> HandleTypeInfo* handleTypeInfo();
 
 template<class T> SGD_Handle createHandle(T* shared) {
 	return createHandle(handleTypeInfo<T>(), shared);
+}
+
+template<class T> SGD_Handle getHandle(T* shared) {
+	return getHandle(handleTypeInfo<T>(), shared);
 }
 
 template<class T> SGD_Handle getOrCreateHandle(T* shared) {
@@ -111,6 +118,7 @@ SGD_HANDLE_TYPE_INFO(Font, HandleType::font);
 SGD_HANDLE_TYPE_INFO(Sound, HandleType::sound);
 SGD_HANDLE_TYPE_INFO(Texture, HandleType::texture);
 SGD_HANDLE_TYPE_INFO(Material, HandleType::material);
+SGD_HANDLE_TYPE_INFO(Image, HandleType::image);
 SGD_HANDLE_TYPE_INFO(Surface, HandleType::surface);
 SGD_HANDLE_TYPE_INFO(Mesh, HandleType::mesh);
 SGD_HANDLE_TYPE_INFO(Entity, HandleType::entity);
@@ -119,5 +127,8 @@ SGD_HANDLE_TYPE_INFO(Light, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Model, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Sprite, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Skybox, HandleType::entity);
+SGD_HANDLE_TYPE_INFO(Collider, HandleType::collider);
+SGD_HANDLE_TYPE_INFO(SphereCollider, HandleType::collider);
+SGD_HANDLE_TYPE_INFO(MeshCollider, HandleType::collider);
 
 }

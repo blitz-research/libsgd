@@ -15,6 +15,10 @@ add_library(graphics
 	font.h
 	graphics.cpp
 	graphics.h
+	image.cpp
+	image.h
+	imageutil.cpp
+	imageutil.h
 	material.cpp
 	material.h
 	materialutil.cpp

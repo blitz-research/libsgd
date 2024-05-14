@@ -13,11 +13,11 @@ Mesh* createMesh(CVector<Vertex> vertices, CVector<Triangle> triangles, Material
 	MeshFlags flags = material->hasNormalTexture() ? MeshFlags::tangentsEnabled : MeshFlags::none;
 
 	auto mesh = new Mesh(vertices.size(), flags);
-	std::memcpy(mesh->lockVertices(), vertices.data(), vertices.size() * sizeof(Vertex));
+	sgd::copy(mesh->lockVertices(), vertices.data(), vertices.size());
 	mesh->unlockVertices();
 
 	auto surface = new Surface(triangles.size(), material);
-	std::memcpy(surface->lockTriangles(), triangles.data(), triangles.size() * sizeof(Triangle));
+	sgd::copy(surface->lockTriangles(), triangles.data(), triangles.size());
 	surface->unlockTriangles();
 
 	mesh->addSurface(surface);

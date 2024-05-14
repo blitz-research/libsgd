@@ -19,9 +19,9 @@ void createOverlay() {
 	sgdx::g_drawList->font = sgdx::g_defaultFont;
 }
 
-}
+} // namespace
 
-SGD_API void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend) {
+void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend) {
 	if (sgdx::g_mainScene) sgdx::error("Backend type must be selected before scene is created");
 
 	sgdx::Map<sgdx::String, wgpu::BackendType> types{
@@ -85,6 +85,22 @@ float SGD_DECL sgd_FPS() {
 }
 
 // ***** Entity *****
+
+void SGD_DECL sgd_SetEntityEnabled(SGD_Entity hentity, SGD_Bool enabled) {
+	sgdx::resolveHandle<sgd::Entity>(hentity)->setIsEnabled(enabled);
+}
+
+SGD_Bool SGD_DECL sgd_EntityEnabled(SGD_Entity hentity) {
+	return sgdx::resolveHandle<sgd::Entity>(hentity)->enabled();
+}
+
+void SGD_DECL sgd_SetEntityVisible(SGD_Entity hentity, SGD_Bool visible) {
+	sgdx::resolveHandle<sgd::Entity>(hentity)->setIsVisible(visible);
+}
+
+SGD_Bool SGD_DECL sgd_EntityVisible(SGD_Entity hentity) {
+	return sgdx::resolveHandle<sgd::Entity>(hentity)->visible();
+}
 
 void SGD_DECL sgd_DestroyEntity(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
@@ -374,12 +390,11 @@ void SGD_DECL sgd_AnimateModel(SGD_Model hmodel, int animation, float time, int 
 	model->animate(animation, time, (sgdx::AnimationMode)mode);
 }
 
-SGD_Model SGD_DECL sgd_CreateModel() {
-
+SGD_Model SGD_DECL sgd_CreateModel(SGD_Mesh hmesh) {
+	auto mesh = hmesh ? sgdx::resolveHandle<sgdx::Mesh>(hmesh) : nullptr;
 	auto model = new sgdx::Model();
-
 	sgdx::mainScene()->add(model);
-
+	if (mesh) model->mesh = mesh;
 	return sgdx::createHandle(model);
 }
 
@@ -407,19 +422,14 @@ void SGD_DECL sgd_SetModelColor(SGD_Model hmodel, float red, float green, float 
 // ***** Sprite *****
 
 SGD_Sprite SGD_DECL sgd_CreateSprite() {
-
 	auto sprite = new sgdx::Sprite();
-
 	sgdx::mainScene()->add(sprite);
-
 	return sgdx::createHandle<sgdx::Sprite>(sprite);
 }
 
-void SGD_DECL sgd_SetSpriteMaterial(SGD_Sprite hsprite, SGD_Material hmaterial) {
-	auto sprite = sgdx::resolveHandle<sgdx::Sprite>(hsprite);
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-
-	sprite->material = material;
+void SGD_DECL sgd_SetSpriteImage(SGD_Sprite hsprite, SGD_Image himage) {
+	sgdx::resolveHandle<sgdx::Sprite>(hsprite)->image = //
+		sgdx::resolveHandle<sgdx::Image>(himage);
 }
 
 void SGD_DECL sgd_SetSpriteColor(SGD_Sprite hsprite, float red, float green, float blue, float alpha) {
@@ -428,10 +438,8 @@ void SGD_DECL sgd_SetSpriteColor(SGD_Sprite hsprite, float red, float green, flo
 	sprite->color = sgdx::Vec4f(red, green, blue, alpha);
 }
 
-void SGD_DECL sgd_SetSpriteRect(SGD_Sprite hsprite, float minX, float minY, float maxX, float maxY) {
-	auto sprite = sgdx::resolveHandle<sgdx::Sprite>(hsprite);
-
-	sprite->rect = sgdx::Rectf(minX, minY, maxX, maxY);
+void SGD_DECL sgd_SetSpriteFrame(SGD_Sprite hsprite, float frame) {
+	sgdx::resolveHandle<sgdx::Sprite>(hsprite)->frame = frame;
 }
 
 // ***** Skybox *****
@@ -451,25 +459,85 @@ SGD_Skybox SGD_DECL sgd_LoadSkybox(SGD_String path, float roughness) {
 	return sgdx::createHandle(skybox);
 }
 
-SGD_Skybox SGD_DECL sgd_CreateSkybox() {
-
+SGD_Skybox SGD_DECL sgd_CreateSkybox(SGD_Texture htexture) {
+	auto texture = htexture ? sgdx::resolveHandle<sgdx::Texture>(htexture) : nullptr;
 	auto skybox = new sgdx::Skybox();
-
 	sgdx::mainScene()->add(skybox);
-
+	if (texture) skybox->skyTexture = texture;
 	return sgdx::createHandle(skybox);
 }
 
 void SGD_DECL sgd_SetSkyboxTexture(SGD_Skybox hskybox, SGD_Texture htexture) {
 	auto skybox = sgdx::resolveHandle<sgdx::Skybox>(hskybox);
 	auto texture = sgdx::resolveHandle<sgdx::Texture>(htexture);
-
 	skybox->skyTexture = texture;
 }
 
 void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness) {
 	auto skybox = sgdx::resolveHandle<sgdx::Skybox>(hskybox);
 	if (roughness < -1 || roughness > 1) sgdx::error("Skybox roughness outside of range -1 to 1");
-
 	skybox->roughness = roughness;
+}
+
+// ***** Collisions *****
+
+SGD_Collider SGD_DECL sgd_CreateSphereCollider(SGD_Entity hentity, int collisionType, float radius) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	auto collider = new sgd::SphereCollider(entity, (uint32_t)collisionType, 1);
+	return sgdx::createHandle(collider);
+}
+
+SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity hentity, int collisionType, SGD_Mesh hmesh) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	auto mesh = hmesh ? sgdx::resolveHandle<sgd::Mesh>(hmesh) : nullptr;
+
+	if (!mesh) {
+		if (!entity->is<sgd::Model>()) sgdx::error("Entity must be a model");
+		mesh = entity->as<sgd::Model>()->mesh();
+		if (!mesh) sgdx::error("Model must have a valid mesh");
+	}
+
+	auto data = sgd::getOrCreateMeshColliderData(mesh);
+	auto collider = new sgd::MeshCollider(entity, (uint32_t)collisionType, data);
+	return sgdx::createHandle(collider);
+}
+
+SGD_Entity SGD_DECL sgd_ColliderEntity(SGD_Collider hcollider) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	return sgdx::getOrCreateHandle(collider->entity());
+}
+
+void SGD_DECL sgd_SetColliderRadius(SGD_Collider hcollider, float radius) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	if (!collider->is<sgd::SphereCollider>()) sgdx::error("Collider is not a sphere collider");
+	collider->as<sgd::SphereCollider>()->radius = radius;
+}
+
+void SGD_DECL sgd_EnableCollisions(int srcColliderType, int dstColliderType, int collisionRepsonse) {
+	sgdx::mainScene()->collisionSpace()->enableCollisions(srcColliderType, dstColliderType,
+														  (sgd::CollisionResponse)collisionRepsonse);
+}
+
+void SGD_DECL sgd_UpdateColliders() {
+	sgdx::mainScene()->collisionSpace()->updateColliders();
+}
+
+SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera hcamera, float windowX, float windowY, int colliderMask) {
+	auto camera = sgdx::resolveHandle<sgd::Camera>(hcamera);
+	sgd::Contact contact;
+	auto collider = sgd::intersectRay(camera, {windowX, windowY}, colliderMask, contact);
+	return collider ? sgdx::getOrCreateHandle(collider) : 0;
+}
+
+SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Real x1, SGD_Real y1, SGD_Real z1,
+								   SGD_Real radius, int colliderMask) {
+	sgd::Vec3r src(x0, y0, z0);
+	sgd::Vec3r dst(x1, y1, z1);
+	auto dir = dst - src;
+	auto d = sgd::length(dir);
+	if (d == 0) return false;
+	sgd::Liner ray(src, dir / d);
+	sgd::Contact contact(d);
+	auto collider = sgdx::mainScene()->collisionSpace()->intersectRay(ray, radius, colliderMask, contact);
+	return collider ? sgdx::getOrCreateHandle(collider) : 0;
 }

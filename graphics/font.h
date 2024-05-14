@@ -22,7 +22,7 @@ public:
 
 	static constexpr uint32_t firstChar = 32;
 	static constexpr uint32_t charCount = 96;
-	static constexpr Vec2u atlasSize = {512, 512};
+	static constexpr Vec2u atlasSize = {1024,1024};
 
 	CMaterialPtr const atlas;
 	Vector<Glyph> const glyphs;
@@ -33,6 +33,11 @@ public:
 
 	Font(CMaterial* atlas, Vector<Glyph> glyphs, float height, float ascent, float descent, float lineGap)
 		: atlas(atlas), glyphs(std::move(glyphs)), height(height), ascent(ascent), descent(descent), lineGap(lineGap) {
+	}
+
+	const Glyph& glyph(uint32_t chr) const {
+		chr-=firstChar;
+		return chr<glyphs.size() ? glyphs[chr] : glyphs[0];
 	}
 
 	float textWidth(CString text) const;

@@ -32,7 +32,7 @@ void transformTexCoords(Mesh* mesh, CVec2f scale, CVec2f offset) {
 	auto vp = mesh->lockVertices();
 
 	for (uint32_t i = 0; i < mesh->vertexCount(); ++i) {
-		vp[i].texCoords = vp[i].texCoords * scale + offset;
+		vp[i].texCoords.xy() = vp[i].texCoords.xy() * scale + offset;
 	}
 
 	mesh->unlockVertices();
@@ -143,12 +143,12 @@ void updateTangents(Mesh* mesh) {
 
 Mesh* copy(CMesh* mesh) {
 	auto newMesh = new Mesh(mesh->vertexCount(), mesh->flags());
-	std::memcpy(newMesh->lockVertices(), mesh->vertices(), mesh->vertexCount() * sizeof(Vertex));
+	sgd::copy(newMesh->lockVertices(), mesh->vertices(), mesh->vertexCount());
 	newMesh->unlockVertices();
 
 	for (Surface* surf : mesh->surfaces()) {
 		auto newSurf = new Surface(surf->triangleCount(), surf->material());
-		std::memcpy(newSurf->lockTriangles(), surf->triangles(), surf->triangleCount() * sizeof(Triangle));
+		sgd::copy(newSurf->lockTriangles(), surf->triangles(), surf->triangleCount());
 		newSurf->unlockTriangles();
 		newMesh->addSurface(newSurf);
 	}

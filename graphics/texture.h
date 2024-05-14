@@ -37,7 +37,9 @@ enum struct TextureFlags {
 	renderTarget = 0x80,
 	layerView = 0x100,
 
-	envCube = cube | mipmap | filter
+	envmapDefault = 0x38,
+	materialDefault = 0x18,
+	imageDefault = 0x1f,
 };
 
 SGD_SHARED(Texture);

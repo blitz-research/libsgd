@@ -29,7 +29,6 @@ Entity* Camera::onCopy() const {
 Mat4f Camera::projectionMatrix() const {
 	if (!m_projDirty) return m_projMatrix;
 	m_projDirty = false;
-	SGD_LOG << "projMatrix";
 	switch (m_type) {
 	case CameraType::undefined:
 	case CameraType::perspective:

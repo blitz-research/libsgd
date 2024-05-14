@@ -1,6 +1,7 @@
 #pragma once
 
 #include "uidevice.h"
+#include "keycodes.h"
 
 struct GLFWwindow;
 
@@ -16,8 +17,8 @@ public:
 		return m_charQueue;
 	}
 
-	Button& key(uint32_t index) const {
-		return button(index);
+	Button& key(KeyCode keyCode) const {
+		return button((uint32_t)keyCode);
 	}
 
 private:

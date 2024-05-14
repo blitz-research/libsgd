@@ -13,6 +13,8 @@ add_library(scene
 	collider.h
 	collisionspace.cpp
 	collisionspace.h
+	collisionutil.cpp
+	collisionutil.h
 	contact.cpp
 	contact.h
 	entity.cpp

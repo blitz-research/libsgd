@@ -56,7 +56,7 @@ void SpriteRenderer::onUpdate(CVec3r eye) {
 		inst->matrix.k = {worldMatrix.r.k, 0};
 		inst->matrix.t = {worldMatrix.t - eye, 1};
 		inst->color = (*it)->color();
-		inst->rect = (*it)->rect();
+		inst->frame = (*it)->frame();
 		++inst;
 	}
 	m_instanceBuffer->unlock();
@@ -66,7 +66,8 @@ void SpriteRenderer::onUpdate(CVec3r eye) {
 
 void SpriteRenderer::onValidate(GraphicsContext* gc) const {
 
-	auto addOp = [&](Material* material, uint32_t count) {
+	auto addOp = [&](Image* image, uint32_t count) {
+		auto material=image->material();
 		auto pipeline = getOrCreateRenderPipeline(gc, material, m_bindGroup, DrawMode::triangleList);
 		auto& ops = m_renderOps[(int)renderPassType(material->blendMode())];
 		auto first = ops.empty() ? 0 : ops.back().firstElement + ops.back().elementCount;
@@ -75,18 +76,19 @@ void SpriteRenderer::onValidate(GraphicsContext* gc) const {
 
 	m_renderOps = {};
 
-	Material* material = nullptr;
-	uint32_t count = 0;
+	Image* image{};
+	uint32_t count{};
 
 	for (Sprite* sprite : m_instances) {
-		if (sprite->material() != material) {
-			if (count) addOp(material, count);
-			material = sprite->material();
-			count = 0;
+		if (sprite->image() != image) {
+			if (count) addOp(image, count);
+			image=sprite->image();
+			count = 1;
+		}else {
+			++count;
 		}
-		++count;
 	}
-	if (count) addOp(material, count);
+	if (count) addOp(image, count);
 }
 
 } // namespace sgd

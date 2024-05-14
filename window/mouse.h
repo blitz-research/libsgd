@@ -16,23 +16,20 @@ public:
 
 	Property<CursorMode> cursorMode;
 
-	Vec2f position() const {
+	Vec3f position() const {
 		return m_position;
 	}
 
-	Vec2f velocity() const {
+	Vec3f velocity() const {
 		return m_velocity;
 	}
 
-	Vec2f scroll() const {
-		return m_scroll;
-	}
+	void setPositionZ(float z);
 
 private:
 	GLFWwindow* m_window;
-	Vec2f m_position;
-	Vec2f m_velocity;
-	Vec2f m_scroll;
+	Vec3f m_position;
+	Vec3f m_velocity;
 };
 
 } // namespace sgd

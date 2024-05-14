@@ -61,6 +61,7 @@ typedef SGD_Handle SGD_Font;
 typedef SGD_Handle SGD_Sound;
 typedef SGD_Handle SGD_Texture;
 typedef SGD_Handle SGD_Material;
+typedef SGD_Handle SGD_Image;
 typedef SGD_Handle SGD_Surface;
 typedef SGD_Handle SGD_Mesh;
 typedef SGD_Handle SGD_Entity;
@@ -69,6 +70,7 @@ typedef SGD_Handle SGD_Light;
 typedef SGD_Handle SGD_Model;
 typedef SGD_Handle SGD_Sprite;
 typedef SGD_Handle SGD_Skybox;
+typedef SGD_Handle SGD_Collider;
 
 #if UINTPTR_MAX == 0xffffffffffffffff
 typedef double SGD_Real;
@@ -140,6 +142,7 @@ SGD_API void SGD_DECL sgd_DebugMemory();
 //! @cond Window flags for use with CreateWindow.
 #define SGD_WINDOW_FLAGS_FULLSCREEN 1
 #define SGD_WINDOW_FLAGS_RESIZABLE 2
+#define SGD_WINDOW_FLAGS_CENTERED 4
 #define SGD_WINDOW_FLAGS_RGBA8_60HZ 256
 //! @endcond
 
@@ -151,6 +154,7 @@ SGD_API void SGD_DECL sgd_DebugMemory();
 //! ----------------------------|---------------|------------
 //! SGD_WINDOW_FLAGS_FULLSCREEN | 1             | Create a fullscreen window.
 //! SGD_WINDOW_FLAGS_RESIZABLE  | 2             | Create a resizable window.
+//! SGD_WINDOW_FLAGS_CENTERED   | 4             | Open window centered on desktop.
 //! SGD_WINDOW_FLAGS_RGBA8_60HZ | 256           | Create an exclusive mode fullscreen window.
 SGD_API void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flags);
 
@@ -183,17 +187,20 @@ SGD_API float SGD_DECL sgd_MouseX();
 //! Mouse Y position in window coordinates.
 SGD_API float SGD_DECL sgd_MouseY();
 
-//! Mouse X velocity in window coordinates.
+//! Mouse Z (scrollwheel) position.
+SGD_API float SGD_DECL sgd_MouseZ();
+
+//! Mouse X velocity.
 SGD_API float SGD_DECL sgd_MouseVX();
 
-//! Mouse Y velocity in window coordinates.
+//! Mouse Y velocity.
 SGD_API float SGD_DECL sgd_MouseVY();
 
-//! Mouse X scroll value.
-SGD_API float SGD_DECL sgd_MouseScrollX();
+//! Mouse Z (scrollwheel) velocity.
+SGD_API float SGD_DECL sgd_MouseVZ();
 
-//! Mouse Y scroll value.
-SGD_API float SGD_DECL sgd_MouseScrollY();
+//! Set Mouse Z (scrollwheel) position.
+SGD_API void SGD_DECL sgd_SetMouseZ(float z);
 
 //! @cond Cursor modes for use with SetMouseCursorMode.
 #define SGD_MOUSE_CURSOR_MODE_NORMAL 1
@@ -204,7 +211,7 @@ SGD_API float SGD_DECL sgd_MouseScrollY();
 
 //! Set mouse cursor mode.
 //!
-//! @cursorMode should be one or more of the following bit mask values:
+//! `cursorMode` should be one or more of the following bit mask values:
 //!
 //! Cursor mode                    | Integer value | Description
 //! -------------------------------|---------------|------------
@@ -255,8 +262,10 @@ SGD_API float SGD_DECL sgd_GamepadAxis(int gamepad, int axis);
 #define SGD_TEXTURE_FLAGS_FILTER 0x08
 #define SGD_TEXTURE_FLAGS_MIPMAP 0x10
 #define SGD_TEXTURE_FLAGS_CUBE 0x20
-#define SGD_TEXTURE_FLAGS_CUBE_MIPMAP 0x38
-#define SGD_TEXTURE_FLAGS_RENDER_TARGET 0x40
+//
+#define SGD_TEXTURE_FLAGS_CUBEMAP_DEFAULT  0x38
+#define SGD_TEXTURE_FLAGS_MATERIAL_DEFAULT 0x18
+#define SGD_TEXTURE_FLAGS_IMAGE_DEFAULT    0x1f
 //! @endcond
 
 //! Load a new texture.
@@ -265,28 +274,36 @@ SGD_API float SGD_DECL sgd_GamepadAxis(int gamepad, int axis);
 //!
 //! @param `format` should be one of the following:
 //!
-//! Texture format             | Integer value | Bytes per texel | Description
-//! ---------------------------|---------------|-----------------|------------
-//! SGD_TEXTURE_FORMAT_RGBA8   | 1             | 4               | Unsigned byte per component linear red/green/blue/alpha
-//! SGD_TEXTURE_FORMAT_SRGBA8  | 2             | 4               | Unsigned byte per component standard red/green/blue/alpha
-//! SGD_TEXTURE_FORMAT_RGBA16F | 3             | 8               | 16 bit float per component linear red/green/blue/alpha
-//! SGD_TEXTURE_FORMAT_DEPTH32F | 4            | 4               | 32 bit float per component depth
+//! Texture format              | Integer value | Bytes per texel | Description
+//! ----------------------------|---------------|-----------------|------------
+//! SGD_TEXTURE_FORMAT_R8       | 1             | 1               | Unsigned byte per component linear red.
+//! SGD_TEXTURE_FORMAT_RG8      | 2             | 2               | Unsigned byte per component linear red/green.
+//! SGD_TEXTURE_FORMAT_RGBA8    | 3             | 4               | Unsigned byte per component linear red/green/blue/alpha
+//! SGD_TEXTURE_FORMAT_SRGBA8   | 4             | 4               | Unsigned byte per component standard red/green/blue/alpha
+//! SGD_TEXTURE_FORMAT_RGBA16F  | 5             | 8               | 16 bit float per component linear red/green/blue/alpha
+//! SGD_TEXTURE_FORMAT_DEPTH32F | 6             | 4               | 32 bit float per component depth
 //!
 //! Note that you should generally use the 'standard' formats when dealing with WYSIWG images,
 //! 'linear' when dealing with algorithmically generated data.
 //!
 //! @param `flags` should be one or more of the following bitmasks:
 //!
-//! Texture flags             | Integer value | Description
-//! --------------------------|---------------|------------
-//! SGD_TEXTURE_FLAGS_NONE    | 0             | No texture flags.
-//! SGD_TEXTURE_FLAGS_CLAMP_U | 1             | Clamp texture U coordinate.
-//! SGD_TEXTURE_FLAGS_CLAMP_V | 2             | Clamp texture V coordinate.
-//! SGD_TEXTURE_FLAGS_CLAMP_W | 4             | Clamp texture W coordinate.
-//! SGD_TEXTURE_FLAGS_FILTER  | 8             | Filter magnified texels.
-//! SGD_TEXTURE_FLAGS_MIPMAP  | 16            | Mipmap minified texels.
-//! SGD_TEXTURE_FLAGS_CUBE    | 32            | Create a cube texture.
-//! SGD_TEXTURE_RENDER_TARGET | 64            | Create a texture that can be rendered to.
+//! Texture flags               | Integer value | Description
+//! ----------------------------|---------------|------------
+//! SGD_TEXTURE_FLAGS_NONE      | 0             | No texture flags.
+//! SGD_TEXTURE_FLAGS_CLAMP_U   | 0x01          | Clamp texture U coordinate.
+//! SGD_TEXTURE_FLAGS_CLAMP_V   | 0x02          | Clamp texture V coordinate.
+//! SGD_TEXTURE_FLAGS_CLAMP_W   | 0x04          | Clamp texture W coordinate.
+//! SGD_TEXTURE_FLAGS_CLAMP     | 0x07          | Clamp texture U, V, W coordinates.
+//! SGD_TEXTURE_FLAGS_FILTER    | 0x08          | Filter magnified texels.
+//! SGD_TEXTURE_FLAGS_MIPMAP    | 0x10          | Mipmap minified texels.
+//! SGD_TEXTURE_FLAGS_CUBE      | 0x20          | Create a cube texture.
+//!
+//! Some convenient default combinations of texture flags are also defined:
+//!
+//! SGD_TEXTURE_FLAGS_CUBEMAP_DEFAULT  0x38
+//! SGD_TEXTURE_FLAGS_MATERIAL_DEFAULT 0x18
+//! SGD_TEXTURE_FLAGS_IMAGE_DEFAULT    0x1f
 SGD_API SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags);
 
 //! @}
@@ -489,20 +506,62 @@ SGD_API int SGD_DECL sgd_TriangleCount(SGD_Surface surface);
 
 //! @}
 
-//! @name 2D Overlay
+//! @name Font
 //! @{
 
 //! Load a new font
-SGD_API SGD_Font SGD_DECL sgd_Load2DFont(SGD_String path, float height);
+SGD_API SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height);
 
-//! Get width 2d text.
-SGD_API float SGD_DECL sgd_Get2DFontTextWidth(SGD_Font font, SGD_String text);
+//! Get width of text.
+SGD_API float SGD_DECL sgd_FontTextWidth(SGD_Font font, SGD_String text);
 
-//! Get height of 2d font.
-SGD_API float SGD_DECL sgd_Get2DFontHeight(SGD_Font font);
+//! get height of font.
+SGD_API float SGD_DECL sgd_FontHeight(SGD_Font font);
 
-//! Get font height
-SGD_API float SGD_DECL sgd_Get2DFontHeight(SGD_Font font);
+//! @}
+
+//! @name Image
+//! @{
+
+//! Load an image for using with Draw2DImage or with 3D Sprites.
+SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int textureFormat, int textureFlags, int frames);
+
+//! @cond
+#define SGD_SPRITE_VIEW_MODE_FIXED 1
+#define SGD_SPRITE_VIEW_MODE_FREE 2
+#define SGD_SPRITE_VIEW_MODE_UPRIGHT 3
+//! @endcond
+
+//! Set image sprite view mode.
+//!
+//! `spriteViewMode` shuold be one of the following values:
+//!
+//! Sprite view mode             | Integer value | Description
+//!------------------------------|---------------|------------
+//! SGD_SPRITE_VIEW_MODE_FIXED   | 1             | Sprite is rotated to face camera when rendered.
+//! SGD_SPRITE_VIEW_MODE_FREE    | 2             | Sprite is rendered without taking camera position into account.
+//! SGD_SPRITE_VIEW_MODE_UPRIGHT | 3             | Sprite is rotated around local Y axis to face camera, useful for tree like sprites.
+SGD_API void SGD_DECL sgd_SetImageSpriteViewMode(SGD_Image, int spriteViewMode);
+
+//! Set image rect for use with Sprites.
+SGD_API void SGD_DECL sgd_SetImageSpriteRect(SGD_Image image, float minX, float minY, float maxX, float maxY);
+
+//! Set image 2D handle. This offset will be be applied when Draw2DImage is used to draw image.
+SGD_API void SGD_DECL sgd_SetImageDraw2DHandle(SGD_Image image, float x, float y);
+
+//! Get width of image.
+SGD_API int SGD_DECL sgd_ImageWidth(SGD_Image image);
+
+//! Get height of image.
+SGD_API int SGD_DECL sgd_ImageHeight(SGD_Image image);
+
+//! Get number of animation frames in image.
+SGD_API int SGD_DECL sgd_ImageFrameCount(SGD_Image image);
+
+//! @}
+
+//! @name 2D Overlay
+//! @{
 
 //! Set current fill color for drawing shapes.
 SGD_API void SGD_DECL sgd_Set2DFillColor(float red, float green, float blue, float alpha);
@@ -534,9 +593,20 @@ SGD_API void SGD_DECL sgd_Set2DFont(SGD_Font font);
 //! Set current text color.
 SGD_API void SGD_DECL sgd_Set2DTextColor(float red, float green, float blue, float alpha);
 
+//! Get width of 2d text in the current 2D font.
+SGD_API float SGD_DECL sgd_Get2DTextWidth(SGD_String text);
+
+//! Get height of current 2d font.
+SGD_API float SGD_DECL sgd_Get2DFontHeight();
 
 //! Clear the current 2d overlay.
 SGD_API void SGD_DECL sgd_Clear2D();
+
+//! Push current draw list to layer stack, effectively 'freezing' it as a background layer until popped.
+SGD_API void SGD_DECL sgd_Push2DLayer();
+
+//! Pop layer stack.
+SGD_API void SGD_DECL sgd_Pop2DLayer();
 
 //! Draw point using current fill and outline colors.
 SGD_API void SGD_DECL sgd_Draw2DPoint(float x0, float y0);
@@ -546,6 +616,9 @@ SGD_API void SGD_DECL sgd_Draw2DLine(float x0, float y0, float x1, float y1);
 
 //! Draw rect using current fill and outline colors.
 SGD_API void SGD_DECL sgd_Draw2DRect(float minX, float minY, float maxX, float maxY);
+
+//! Draw image using current fill color.
+SGD_API void SGD_DECL sgd_Draw2DImage(SGD_Image image, float x, float y, float frame);
 
 //! Draw oval using current fill and outline colors.
 SGD_API void SGD_DECL sgd_Draw2DOval(float minX, float minY, float maxX, float maxY);
@@ -624,6 +697,18 @@ SGD_API float SGD_DECL sgd_FPS();
 
 //! @name Entity
 //! @{
+
+//! Enable or diasable entity.
+SGD_API void SGD_DECL sgd_SetEntityEnabled(SGD_Entity entity, SGD_Bool enabled);
+
+//! Get entity enabled state. An entity is only enabled in the scene if both it and all its ancestors are enabled.
+SGD_API SGD_Bool SGD_DECL sgd_EntityEnabled(SGD_Entity entity);
+
+//! Show or hide entity.
+SGD_API void SGD_DECL sgd_SetEntityVisible(SGD_Entity entity, SGD_Bool visible);
+
+//! Get entity visible state. An entity is only visible in the scene if both it and all its ancestors are visible.
+SGD_API SGD_Bool SGD_DECL sgd_EntityVisible(SGD_Entity entity);
 
 //! Destroy entity and children recursively.
 SGD_API void SGD_DECL sgd_DestroyEntity(SGD_Entity entity);
@@ -748,7 +833,7 @@ SGD_API SGD_Bool SGD_DECL sgd_LightCastsShadow(SGD_Light light);
 //! @name Model
 //! @{
 
-//! @cond Animation ode constants used by sgd_AnimateModel
+//! @cond Animation mode constants used by sgd_AnimateModel
 #define SGD_ANIMATION_MODE_ONE_SHOT 1
 #define SGD_ANIMATION_MODE_LOOP 2
 #define SGD_ANIMATION_MODE_PING_PONG 3
@@ -761,7 +846,7 @@ SGD_API SGD_Model SGD_DECL sgd_LoadModel(SGD_String path);
 SGD_API SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path, SGD_Bool skinned);
 
 //! Create a new model.
-SGD_API SGD_Model SGD_DECL sgd_CreateModel();
+SGD_API SGD_Model SGD_DECL sgd_CreateModel(SGD_Mesh mesh);
 
 //! Set model mesh.
 SGD_API void SGD_DECL sgd_SetModelMesh(SGD_Model model, SGD_Mesh mesh);
@@ -774,7 +859,7 @@ SGD_API void SGD_DECL sgd_SetModelColor(SGD_Model model, float red, float green,
 
 //! Animate a model.
 //!
-//! @mode should be one of the following:
+//! `mode` should be one of the following:
 //!
 //! Animation mode              | Integer value | meaning
 //! ----------------------------|---------------|--------
@@ -792,7 +877,7 @@ SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float tim
 SGD_API SGD_Skybox SGD_DECL sgd_LoadSkybox(SGD_String path, float roughness);
 
 //! Create a new skybox.
-SGD_API SGD_Skybox SGD_DECL sgd_CreateSkybox();
+SGD_API SGD_Skybox SGD_DECL sgd_CreateSkybox(SGD_Texture texture);
 
 //! Set skybox texture.
 SGD_API void SGD_DECL sgd_SetSkyboxTexture(SGD_Skybox skybox, SGD_Texture texture);
@@ -809,13 +894,54 @@ SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox skybox, float roughness)
 SGD_API SGD_Sprite SGD_DECL sgd_CreateSprite();
 
 //! Set sprite material.
-SGD_API void SGD_DECL sgd_SetSpriteMaterial(SGD_Sprite sprite, SGD_Material material);
+SGD_API void SGD_DECL sgd_SetSpriteImage(SGD_Sprite sprite, SGD_Image image);
 
 //! Set sprite color.
 SGD_API void SGD_DECL sgd_SetSpriteColor(SGD_Sprite sprite, float red, float green, float blue, float alpha);
 
-//! Set sprite rect, defaults to -.5, -.5, .5, .5.
-SGD_API void SGD_DECL sgd_SetSpriteRect(SGD_Sprite sprite, float minX, float minY, float maxX, float maxY);
+//! Set sprite animation frame.
+SGD_API void SGD_DECL sgd_SetSpriteFrame(SGD_Sprite sprite, float frame);
+
+//! @}
+
+//! @name Collisions
+//! @{
+
+//! @cond
+#define SGD_COLLISION_RESPONSE_STOP 1
+#define SGD_COLLISION_RESPONSE_SLIDE 2
+//! @endcond
+
+//! Create a new sphere collider and attach it to entity.
+SGD_API SGD_Collider SGD_DECL sgd_CreateSphereCollider(SGD_Entity entity, int colliderType, float radius);
+
+//! Create a new mesh collider and attach it to entity.
+SGD_API SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity entity, int colliderType, SGD_Mesh mesh);
+
+//! Return entity a collider is attached to.
+SGD_API SGD_Entity SGD_DECL sgd_ColliderEntity(SGD_Collider collider);
+
+//! Set sphere collider radius.
+SGD_API void SGD_DECL sgd_SetColliderRadius(SGD_Collider collider, float radius);
+
+//! Enable collisons between 2 collider types.
+//!
+//! `response` should be one of the following:
+//!
+//! Response                     | Integer value | Description
+//! -----------------------------|---------------|------------
+//! SGD_COLLISION_RESPONSE_STOP  | 1             | Source collider should stop when it collisides with destination collider.
+//! SGD_COLLISION_RESPONSE_SLIDE | 2             | Source collider should slide along geometry when it collides with distantion collider.
+SGD_API void SGD_DECL sgd_EnableCollisions(int srcColliderType, int dstColliderType, int response);
+
+//! Update enabled colliders.
+SGD_API void SGD_DECL sgd_UpdateColliders();
+
+//! Pick first collider along ray passing from camera eye through window coordinates.
+SGD_API SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera camera, float windowX, float windowY, int colliderMask);
+
+//! Pick first collider along line.
+SGD_API SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Real x1, SGD_Real y1, SGD_Real z1, SGD_Real radius, int colliderMask);
 
 //! @}
 

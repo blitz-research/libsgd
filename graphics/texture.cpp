@@ -34,21 +34,21 @@ TextureFormat getFormat(wgpu::TextureFormat format) {
 	return formats.find(format)->second;
 }
 
-wgpu::Sampler createWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
+wgpu::Sampler getOrCreateWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
 
 	static Map<TextureFlags, wgpu::Sampler> cache;
 
-	auto& sampler = cache[flags & (TextureFlags::clamp | TextureFlags::mipmap)];
+	auto& sampler = cache[flags & (TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clamp)];
 	if (sampler) return sampler;
 
 	wgpu::SamplerDescriptor desc{};
 	desc.addressModeU = bool(flags & TextureFlags::clampU) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.addressModeV = bool(flags & TextureFlags::clampV) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.addressModeW = bool(flags & TextureFlags::clampW) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
-	desc.magFilter = bool((flags & TextureFlags::filter) | (flags & TextureFlags::mipmap)) ? wgpu::FilterMode::Linear
-																						   : wgpu::FilterMode::Nearest;
+
+	desc.magFilter = bool(flags & TextureFlags::filter) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
 	desc.minFilter = wgpu::FilterMode::Linear;
-	desc.mipmapFilter = bool(flags & TextureFlags::mipmap) ? wgpu::MipmapFilterMode::Linear : wgpu::MipmapFilterMode::Nearest;
+	desc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
 
 	return sampler = gc->wgpuDevice().CreateSampler(&desc);
 }
@@ -64,6 +64,7 @@ Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags
 Texture::Texture(Texture* texture, uint32_t layer)
 	: m_size(texture->m_size), m_depth(1), m_format(texture->m_format), m_flags(TextureFlags::layerView), //
 	  m_texture(texture), m_layer(layer), m_data(nullptr) {
+
 	addDependency(m_texture);
 }
 
@@ -120,22 +121,24 @@ void Texture::onValidate(GraphicsContext* gc) const {
 		}
 		m_wgpuTexture = gc->wgpuDevice().CreateTexture(&desc);
 
-		m_wgpuSampler = createWGPUSampler(gc, m_flags);
+		m_wgpuSampler = getOrCreateWGPUSampler(gc, m_flags);
 
 		wgpu::TextureViewDescriptor tvDesc{};
+		tvDesc.arrayLayerCount = m_depth;
 		tvDesc.format = m_wgpuTexture.GetFormat();
-		if (bool(m_flags & TextureFlags::cube)) {
-			if (bool(m_flags & TextureFlags::array)) {
+
+		if (bool(m_flags & TextureFlags::array)) {
+			if (bool(m_flags & TextureFlags::cube)) {
 				tvDesc.dimension = wgpu::TextureViewDimension::CubeArray;
-				tvDesc.arrayLayerCount = m_depth;
 			} else {
-				tvDesc.dimension = wgpu::TextureViewDimension::Cube;
-				tvDesc.arrayLayerCount = m_depth;
+				tvDesc.dimension = wgpu::TextureViewDimension::e2DArray;
 			}
+		} else if (bool(m_flags & TextureFlags::cube)) {
+			tvDesc.dimension = wgpu::TextureViewDimension::Cube;
 		} else {
 			tvDesc.dimension = wgpu::TextureViewDimension::e2D;
-			tvDesc.arrayLayerCount = 1;
 		}
+
 		m_wgpuTextureView = m_wgpuTexture.CreateView(&tvDesc);
 	}
 

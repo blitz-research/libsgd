@@ -17,7 +17,7 @@ start:
 	SGD_Material material = sgd_CreatePBRMaterial();
 	sgd_SetMaterialVector4f(material, "albedoColor4f", 1, .5f, 0, 1);
 
-	SGD_Model ground = sgd_CreateModel();
+	SGD_Model ground = sgd_CreateModel(0);
 	sgd_SetModelMesh(ground, sgd_CreateBoxMesh(-10, -1, -20, 10, 0, 20, material));
 
 	material = sgd_LoadPBRMaterial("sgd://misc/test-texture.png");
@@ -30,36 +30,35 @@ start:
 
 	SGD_Mesh mesh0 = sgd_CreateSphereMesh(r, 96, 48, material);
 	sgd_SetMeshCastsShadow(mesh0, SGD_TRUE);
-	models[0] = sgd_CreateModel();
-	sgd_SetModelMesh(models[0], mesh0);
+	models[0] = sgd_CreateModel(mesh0);
 	sgd_MoveEntity(models[0], -2.5f, y, tz);
 
 	float r2 = r * .7071f;
 	SGD_Mesh mesh1 = sgd_CreateBoxMesh(-r2, -r2, -r2, r2, r2, r2, material);
 	sgd_SetMeshCastsShadow(mesh1, SGD_TRUE);
-	models[1] = sgd_CreateModel();
-	sgd_SetModelMesh(models[1], mesh1);
+	models[1] = sgd_CreateModel(mesh1);
 	sgd_MoveEntity(models[1], -1.25f, y, tz);
 
 	SGD_Mesh mesh2 = sgd_CreateCylinderMesh(r * 2, r / 2, 96, material);
 	sgd_SetMeshCastsShadow(mesh2, SGD_TRUE);
-	models[2] = sgd_CreateModel();
-	sgd_SetModelMesh(models[2], mesh2);
+	models[2] = sgd_CreateModel(mesh2);
 	sgd_MoveEntity(models[2], 0, y, tz);
 
 	SGD_Mesh mesh3 = sgd_CreateConeMesh(r * 2, r / 2, 96, material);
 	sgd_SetMeshCastsShadow(mesh3, SGD_TRUE);
-	models[3] = sgd_CreateModel();
-	sgd_SetModelMesh(models[3], mesh3);
+	models[3] = sgd_CreateModel(mesh3);
 	sgd_MoveEntity(models[3], 1.25f, y, tz);
 
 	SGD_Mesh mesh4 = sgd_CreateTorusMesh(r * .75f, r * .25f, 96, 48, material);
 	sgd_SetMeshCastsShadow(mesh4, SGD_TRUE);
-	models[4] = sgd_CreateModel();
-	sgd_SetModelMesh(models[4], mesh4);
+	models[4] = sgd_CreateModel(mesh4);
 	sgd_MoveEntity(models[4], 2.5f, y, tz);
 
-	while(!(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)) {
+	for (int i = 0; i < 5; ++i) {
+		sgd_CreateMeshCollider(models[i], 0, 0);
+	}
+
+	while (!(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)) {
 
 		if (sgd_KeyHit(SGD_KEY_ESCAPE)) {
 			SGD_Real dz = 1ll << 33;
@@ -84,14 +83,19 @@ start:
 		fflush(stdout);
 
 		if (sgd_KeyDown(SGD_KEY_LEFT)) {
-			sgd_TurnEntity(camera, 0, 3, 0);
+			sgd_RotateEntity(camera, 0, 1, 0);
 		} else if (sgd_KeyDown(SGD_KEY_RIGHT)) {
-			sgd_TurnEntity(camera, 0, -3, 0);
+			sgd_RotateEntity(camera, 0, -1, 0);
+		}
+
+		if (sgd_KeyDown(SGD_KEY_UP)) {
+			sgd_TurnEntity(camera, -1, 0, 0);
+		} else if (sgd_KeyDown(SGD_KEY_DOWN)) {
+			sgd_TurnEntity(camera, 1, 0, 0);
 		}
 
 		for (int i = 0; i < 5; ++i) {
 			sgd_TurnEntity(models[i], i / 10.0f, i / 5.0f + .1f, 0);
-			printf("### x=%f",sgd_EntityX(models[i]));
 		}
 
 		{
@@ -99,6 +103,11 @@ start:
 			sprintf(buf, "FPS: %f", sgd_FPS());
 			sgd_Clear2D();
 			sgd_Draw2DText(buf, 2, 2);
+		}
+
+//		sgd_Clear2D();
+		if (sgd_CameraPick(camera, sgd_MouseX(), sgd_MouseY(), ~0)) {
+			sgd_Draw2DText("Picked!", 0, 20);
 		}
 
 		sgd_RenderScene();

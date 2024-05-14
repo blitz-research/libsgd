@@ -62,8 +62,7 @@ void entry() {
 
 	SGD_Mesh mesh = createSphereMesh(1, 96, 48, material);
 
-	SGD_Model model = sgd_CreateModel();
-	sgd_SetModelMesh(model, mesh);
+	SGD_Model model = sgd_CreateModel(mesh);
 
 	while (!(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)) {
 

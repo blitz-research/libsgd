@@ -145,6 +145,18 @@ template <class T> T* as(Any* value) {
 	return std::any_cast<T>(value);
 }
 
+template <class T> void clear(T* dst, size_t count) {
+	std::memset(dst, 0, count * sizeof(T));
+}
+
+template <class T> void copy(T* dst, const T* src, size_t count) {
+	std::memcpy(dst, src, count * sizeof(T));
+}
+
+template <class T> void fill(T* dst, const T& val, size_t count) {
+	while (count--) *dst++ = val;
+}
+
 int64_t millis();
 int64_t micros();
 int64_t nanos();

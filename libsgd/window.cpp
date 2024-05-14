@@ -45,13 +45,13 @@ int SGD_DECL sgd_WindowHeight() {
 SGD_Bool SGD_DECL sgd_KeyDown(int keyCode) {
 	if ((uint32_t)keyCode > SGD_KEY_LAST) sgd_Error("Key code out of range");
 
-	return sgdx::mainWindow()->keyboard()->key(keyCode).down();
+	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)keyCode).down();
 }
 
 SGD_Bool SGD_DECL sgd_KeyHit(int keyCode) {
 	if ((uint32_t)keyCode > SGD_KEY_LAST) sgd_Error("Key code out of range");
 
-	return sgdx::mainWindow()->keyboard()->key(keyCode).hit();
+	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)keyCode).hit();
 }
 
 int SGD_DECL sgd_GetChar() {
@@ -71,6 +71,10 @@ float SGD_DECL sgd_MouseY() {
 	return sgdx::mainWindow()->mouse()->position().y;
 }
 
+float SGD_DECL sgd_MouseZ() {
+	return sgdx::mainWindow()->mouse()->position().z;
+}
+
 float SGD_DECL sgd_MouseVX() {
 	return sgdx::mainWindow()->mouse()->velocity().x;
 }
@@ -79,12 +83,12 @@ float SGD_DECL sgd_MouseVY() {
 	return sgdx::mainWindow()->mouse()->velocity().y;
 }
 
-float SGD_DECL sgd_MouseScrollX() {
-	return sgdx::mainWindow()->mouse()->scroll().x;
+float SGD_DECL sgd_MouseVZ() {
+	return sgdx::mainWindow()->mouse()->velocity().z;
 }
 
-float SGD_DECL sgd_MouseScrollY() {
-	return sgdx::mainWindow()->mouse()->scroll().y;
+void SGD_DECL sgd_SetMouseZ(float z) {
+	sgdx::mainWindow()->mouse()->setPositionZ(z);
 }
 
 void SGD_DECL sgd_SetMouseCursorMode(int cursorMode) {

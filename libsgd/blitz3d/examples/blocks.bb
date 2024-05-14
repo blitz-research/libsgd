@@ -1,16 +1,5 @@
 
-Const KEY_ESCAPE = 256
-Const KEY_SPACE = 32
-					
-Const KEY_RIGHT = 262
-Const KEY_LEFT = 263
-Const KEY_DOWN = 264
-Const KEY_UP = 265
-
-Const KEY_W = 87
-Const KEY_A = 65
-Const KEY_S = 83
-Const KEY_D = 68
+Include "start.bb"
 
 Const NUM_BLOCKS = 10000
 Const WORLD_SIZE = 100
@@ -31,13 +20,11 @@ Type Bullet
 	Field vz#
 End Type
 
-Global camera.Camera
+Global actor.Actor
 Global bulletMesh
 Global slimeball
 
 CreateWindow(DesktopWidth(), DesktopHeight(), "スノー Blocks", 3)
-
-SetWebGPUBackend "D3D11"
 
 CreateScene()
 
@@ -47,14 +34,14 @@ While (PollEvents() And 1) <> 1
 
 	If KeyHit(KEY_ESCAPE)
 		End
-		Delete Each Camera
+		Delete Each Actor
 		Delete Each Bullet
 		Delete Each Block
 		ClearScene()
 		LoadScene()
 	EndIf
-
-	UpdateCamera()
+	
+	fly(actor)
 	
 	UpdateBullets()
 	
@@ -85,14 +72,24 @@ Function LoadScene()
 	SetLightColor light,1,1,1,.2
 	TurnEntity light,-60,0,0
 	
+	Local camera = CreatePerspectiveCamera()
+	SetCameraNear camera, .1
+	SetCameraFar camera, 1000
+	MoveEntity camera, 0,50,-100
+	
+	light = CreateSpotLight()
+	SetLightColor light,1,1,1,1
+	SetLightRange light,50
+	SetEntityParent light,camera
+	
+	actor = CreateActor(camera)
+	
 	slimeball=LoadSound("sgd://audio/slimeball.wav")
 	
 	CreateGround()
 
 	CreateBlocks()
-
-	CreateCamera()
-
+	
 End Function
 
 Function UpdateBlocks()
@@ -114,11 +111,11 @@ Function UpdateBullets()
 		SetModelMesh bullet\model, bulletMesh
 		SetModelColor bullet\model,r,g,b,1
 		
-		SetEntityParent bullet\model,camera\entity
+		SetEntityParent bullet\model,actor\entity
 		SetEntityParent bullet\model,0
 		
 		bullet\timeout = 180
-		bullet\vz = camera\vz + 1
+		bullet\vz = actor\vz + 1
 		If bullet\vz<1 bullet\vz=1
 		
 		Local light=CreatePointLight()
@@ -172,60 +169,5 @@ Function CreateBlocks()
 		block\xr = Rnd(3)
 		block\yr = Rnd(3)
 	Next
-	
-End Function
-
-Function CreateCamera()
-
-	camera = New Camera
-	camera\entity = CreatePerspectiveCamera()
-	SetCameraNear camera\entity, .1
-	SetCameraFar camera\entity, 1000
-	MoveEntity camera\entity, 0,50,-100
-	
-	Local light = CreateSpotLight()
-	SetLightColor light,1,1,1,1
-	SetLightRange light,50
-	SetEntityParent light,camera\entity
-	
-End Function
-
-Function UpdateCamera()
-	
-	If KeyDown(KEY_LEFT)
-		camera\yr = camera\yr + (1.5-camera\yr) * .3
-	Else If KeyDown(KEY_RIGHT)
-		camera\yr = camera\yr + (-1.5-camera\yr) * .3
-	Else
-		camera\yr = camera\yr * .9
-	EndIf
-	RotateEntity camera\entity,0,camera\yr,0
-	
-	If KeyDown(KEY_UP)
-		camera\xr = camera\xr + (-1.5-camera\xr) * .3
-	ElseIf KeyDown(KEY_DOWN)
-		camera\xr = camera\xr + (1.5-camera\xr) * .3
-	Else 
-		camera\xr = camera\xr * .9
-	EndIf
-	TurnEntity camera\entity,camera\xr,0,0
-
-	If KeyDown(KEY_W)
-		camera\vz = camera\vz + (.5-camera\vz) * .3
-	Else If KeyDown(KEY_S)
-		camera\vz = camera\vz + (-.5 - camera\vz) * .3
-	Else
-		camera\vz = camera\vz * .9
-	EndIf
-	MoveEntity camera\entity,0,0,camera\vz
-
-	If KeyDown(KEY_A)
-		camera\vx = camera\vx + (-.5-camera\vx) * .3
-	Else If KeyDown(KEY_D)
-		camera\vx = camera\vx + (.5-camera\vx) * .3
-	Else
-		camera\vx = camera\vx * .9
-	EndIf
-	MoveEntity camera\entity,camera\vx,0,0
 	
 End Function

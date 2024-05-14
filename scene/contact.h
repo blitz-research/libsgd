@@ -14,5 +14,6 @@ struct Contact {
 	Contact(real time) : time(time) {
 	}
 };
+using CContact = const Contact&;
 
 } // namespace sgd

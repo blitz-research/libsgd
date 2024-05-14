@@ -18,7 +18,7 @@ struct Camera : Entity {
 	Property<float> fov {45};
 	Property<float> aspect{1};
 	Property<float> near{.1};
-	Property<float> far{100};
+	Property<float> far{1000};
 
 	Mat4f projectionMatrix() const;
 	Mat4f inverseProjectionMatrix() const;

@@ -66,7 +66,12 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 				glfwWindowHint(GLFW_BLUE_BITS, 8);
 				glfwWindowHint(GLFW_REFRESH_RATE, 60);
 #endif
+			}else if(bool(flags & WindowFlags::centered)) {
+				auto pos = (Vec2i(desktopSize()) - Vec2i(w,h)) / 2;
+				glfwWindowHint(GLFW_POSITION_X, pos.x);
+				glfwWindowHint(GLFW_POSITION_Y, pos.y);
 			}
+
 			m_glfwWindow = glfwCreateWindow(w, h, title.c_str(), monitor, nullptr);
 
 			glfwSetWindowUserPointer(m_glfwWindow, this);

@@ -6,10 +6,10 @@
 namespace sgd {
 
 Sprite::Sprite(const Sprite* that)
-	: Entity(that),				  //
-	  material(that->material()), //
-	  color(that->color()),		  //
-	  rect(that->rect()) {
+	: Entity(that),
+	  image(that->image()),
+	  color(that->color()),
+	  frame(that->frame()) {
 }
 
 Entity* Sprite::onCopy() const {

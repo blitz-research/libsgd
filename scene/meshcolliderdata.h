@@ -37,4 +37,6 @@ private:
 	Node* createNode(Vector<Triangle> triangles);
 };
 
+MeshColliderData* getOrCreateMeshColliderData(CMesh* mesh);
+
 } // namespace sgd

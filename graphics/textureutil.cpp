@@ -19,58 +19,87 @@ const Texture* rgbaTexture(uint32_t rgba) {
 	return texture;
 }
 
-Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags) {
+Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags, uint32_t depth) {
+
 	if (format != TextureFormat::rgba8 && format != TextureFormat::srgba8) {
-		return FileioEx("Unvalid texture format");
+		return FileioEx("Invalid texture format");
+	}
+
+	if (bool(flags & TextureFlags::array) && bool(flags & TextureFlags::cube)) {
+		return FileioEx("Invalid combination of texture flags");
+	}
+
+	if (bool(flags & TextureFlags::array)) {
+		if (!depth) return FileioEx("Texture array depth must be greater than 0");
+	} else if (bool(flags & TextureFlags::cube)) {
+		if (!depth) depth = 6;
+		if (depth != 6) return FileioEx("Cube texture depth must be equal to 6");
+	} else {
+		if (!depth) depth = 1;
+		if (depth != 1) return FileioEx("Texture Depth must be 1");
 	}
 
 	auto bpp = bytesPerTexel(format);
 
 	Vec2u size;
 	uint32_t n;
-
 	auto img = stbi_load_from_memory(data.data(), data.size(), (int*)&size.x, (int*)&size.y, (int*)&n, (int)bpp);
+	auto free = &stbi_image_free;
+
 	if (!img) return FileioEx("STB error decoding image data");
 
-	uint32_t depth = 1;
+	if (bool(flags & TextureFlags::array)) {
 
-	if (bool(flags & TextureFlags::cube) && size.y != size.x * 6) {
-
-		// 4 x 3 cell layout?
-		if (size.x * 3 == size.y * 4) {
-
-			auto sqsize = size.x / 4;
-
-			auto srcPitch = size.x * bpp;
-			auto dstPitch = sqsize * bpp;
-			auto dstImg = (uint8_t*)malloc(dstPitch * sqsize * 6);
-
-			for (int i = 0; i < 6; ++i) {
-				static constexpr Vec2u orgs[]{
-					//	static Array<Vec2u, 6> orgs{	// Can't init std::array like this?
-					{2, 1}, //+x
-					{0, 1}, //-x
-					{1, 0}, //+y
-					{1, 2}, //-y
-					{1, 1}, //+z
-					{3, 1}, //-z
-				};
-				auto src = img + orgs[i].y * sqsize * srcPitch + orgs[i].x * sqsize * bpp;
-				auto dst = dstImg + i * sqsize * dstPitch;
-				for (int y = 0; y < sqsize; ++y) {
-					std::memcpy(dst, src, sqsize * bpp);
-					src += srcPitch;
-					dst += dstPitch;
-				}
-			}
-			stbi_image_free(img);
-			img = dstImg;
-			size = {sqsize, sqsize};
-			depth = 6;
-		} else {
-			stbi_image_free(img);
-			return FileioEx("Invalid cube texture dimensions");
+		if (size.y % depth != 0) {
+			free(img);
+			return FileioEx("Texture array image height must be a multiple of depth");
 		}
+
+		size.y /= depth;
+
+	} else if (bool(flags & TextureFlags::cube) && size.y != size.x * 6) {
+
+		const Vec2u* orgs;
+		uint32_t sz;
+
+		if (size.x * 3 == size.y * 4) {
+			//    +y
+			// -x +z +x -z
+			//    -y
+			static constexpr Vec2u _orgs[]{
+				//	static Array<Vec2u, 6> orgs{	// Can't init std::array like this?
+				{2, 1}, //+x
+				{0, 1}, //-x
+				{1, 0}, //+y
+				{1, 2}, //-y
+				{1, 1}, //+z
+				{3, 1}, //-z
+			};
+			orgs = _orgs;
+			sz = size.x / 4;
+		} else {
+			free(img);
+			return FileioEx("Invalid cube texture image layout");
+		}
+
+		auto srcPitch = size.x * bpp;
+		auto dstPitch = sz * bpp;
+		auto dst = (uint8_t*)std::malloc(dstPitch * sz * 6);
+
+		auto dstp = dst;
+		for (int i = 0; i < 6; ++i) {
+			auto srcp = img + orgs[i].y * sz * srcPitch + orgs[i].x * sz * bpp;
+
+			for (int y = 0; y < sz; ++y) {
+				std::memcpy(dstp, srcp, dstPitch);
+				srcp += srcPitch;
+				dstp += dstPitch;
+			}
+		}
+		free(img);
+		img = dst;
+		free = &std::free;
+		size = {sz, sz};
 	}
 
 	premultiplyAlpha(img, format, size, size.x * bpp);
@@ -79,17 +108,17 @@ Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, Textu
 
 	texture->update(img, size.x * bpp);
 
-	stbi_image_free(img);
+	free(img);
 
 	return texture;
 }
 
-Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, TextureFlags flags) {
+Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, TextureFlags flags, uint32_t depth) {
 
 	auto data = loadData(path);
 	if (!data) return data.error();
 
-	return loadTexture(data.result(), format, flags);
+	return loadTexture(data.result(), format, flags, depth);
 }
 
 void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pitch) {

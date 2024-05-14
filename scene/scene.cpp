@@ -128,7 +128,7 @@ void Scene::updateCameraBindings() {
 	CameraUniforms uniforms;
 	if (m_cameras.empty()) {
 		// Quick mouselook hack for no camera
-		auto mouse = m_gc->window()->mouse()->position() / Vec2f(m_gc->window()->size()) * 2.0f - 1.0f;
+		auto mouse = m_gc->window()->mouse()->position().xy() / Vec2f(m_gc->window()->size()) * 2.0f - 1.0f;
 		auto matrix = AffineMat4r::rotation({-mouse.y * halfPi, -mouse.x * pi, 0});
 		auto aspect = (float)m_viewportSize.x / (float)m_viewportSize.y;
 		auto proj = Mat4f::perspective(45, aspect, .1, 100);

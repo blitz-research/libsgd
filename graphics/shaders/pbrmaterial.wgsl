@@ -23,14 +23,16 @@ struct MaterialUniforms {
 @group(1) @binding(11) var material_normalTexture: texture_2d<f32>;
 @group(1) @binding(12) var material_normalSampler: sampler;
 
-fn evaluateMaterial(position: vec3f, tanMatrix: mat3x3f, texCoords: vec2f, color: vec4f) -> vec4f {
+fn evaluateMaterial(position: vec3f, tanMatrix: mat3x3f, texCoords: vec3f, color: vec4f) -> vec4f {
 
-	let albedo = textureSample(material_albedoTexture, material_albedoSampler, texCoords) * material_uniforms.albedoColor * color;
-	let emissive = textureSample(material_emissiveTexture, material_emissiveSampler, texCoords).rgb * material_uniforms.emissiveColor;
-	let metallic = textureSample(material_metallicTexture, material_metallicSampler, texCoords).b * material_uniforms.metallicFactor;
-	let roughness = textureSample(material_roughnessTexture, material_roughnessSampler, texCoords).g * material_uniforms.roughnessFactor;
-	let occlusion = textureSample(material_occlusionTexture, material_occlusionSampler, texCoords).r;
-   	let normal = textureSample(material_normalTexture, material_normalSampler, texCoords).rgb * 2 - 1;
+    let texCoords2d = texCoords.xy;
+
+	let albedo = textureSample(material_albedoTexture, material_albedoSampler, texCoords2d) * material_uniforms.albedoColor * color;
+	let emissive = textureSample(material_emissiveTexture, material_emissiveSampler, texCoords2d).rgb * material_uniforms.emissiveColor;
+	let metallic = textureSample(material_metallicTexture, material_metallicSampler, texCoords2d).b * material_uniforms.metallicFactor;
+	let roughness = textureSample(material_roughnessTexture, material_roughnessSampler, texCoords2d).g * material_uniforms.roughnessFactor;
+	let occlusion = textureSample(material_occlusionTexture, material_occlusionSampler, texCoords2d).r;
+   	let normal = textureSample(material_normalTexture, material_normalSampler, texCoords2d).rgb * 2 - 1;
 
    	let litColor = evaluateLighting(position, normalize(tanMatrix * normal), albedo.rgb, metallic, roughness, occlusion);
 

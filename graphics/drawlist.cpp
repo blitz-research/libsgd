@@ -12,10 +12,11 @@ auto shaderSource{
 
 wgpu::VertexAttribute vertexBufferAttribs[]{
 	{wgpu::VertexFormat::Float32x3, 0, 0},	// Vec3f position
-	{wgpu::VertexFormat::Float32x2, 12, 1}, // Vec3f texCoords0
-	{wgpu::VertexFormat::Float32x4, 20, 2}, // Vec4f color
+	{wgpu::VertexFormat::Float32x3, 12, 1}, // Vec3f texCoords0
+	{wgpu::VertexFormat::Float32x4, 24, 2}, // Vec4f color
 };
-static_assert(sizeof(DrawList::Vertex) == 36);
+
+static_assert(sizeof(DrawList::Vertex) == 40);
 
 wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(DrawList::Vertex), wgpu::VertexStepMode::Vertex,
 												  std::size(vertexBufferAttribs), vertexBufferAttribs};
@@ -44,10 +45,12 @@ DrawList::DrawList()
 	m_bindGroup->setBuffer(0, m_uniformBuffer);
 
 	auto cmaterial = new Material(&prelitMaterialDescriptor);
-	//	cmaterial->blendMode = BlendMode::alpha;
+	cmaterial->blendMode = BlendMode::alpha;
 	//	cmaterial->depthFunc = DepthFunc::always;
-	//	cmaterial->cullMode = CullMode::none;
-	m_defaultMaterial = cmaterial;
+	cmaterial->cullMode = CullMode::none;
+	m_whiteMaterial = cmaterial;
+
+	fillMaterial = m_whiteMaterial;
 
 	projectionMatrix.changed.connect(this, [=](CMat4f matrix) { //
 		m_uniformBuffer->update(&matrix, offsetof(DrawListUniforms, matrix), sizeof(matrix));
@@ -69,13 +72,17 @@ DrawList::DrawList()
 	});
 	m_pmTextColor = textColor();
 
+	m_drawOpCounts.push_back(0);
+	m_vertexCounts.push_back(0);
+
 	clear();
 }
 
-DrawList::Vertex* DrawList::allocTriangles(uint32_t count) {
-	if (fillMaterial() != m_drawOp.material) {
+DrawList::Vertex* DrawList::allocTriangles(uint32_t count, CMaterial* material) {
+	SGD_ASSERT(material);
+	if (material != m_drawOp.material) {
 		if (m_drawOp.triangleCount) m_drawOps.push_back(m_drawOp);
-		m_drawOp.material = fillMaterial();
+		m_drawOp.material = material;
 		m_drawOp.triangleCount = count;
 	} else {
 		m_drawOp.triangleCount += count;
@@ -91,10 +98,10 @@ DrawList::Vertex* DrawList::allocTriangles(uint32_t count) {
 }
 
 void DrawList::clear() {
-	m_drawOps.clear();
+	m_drawOps.resize(m_drawOpCounts.back());
+	m_vertexCount = m_vertexCounts.back();
 	m_drawOp.material = {};
 	m_drawOp.triangleCount = 0;
-	m_vertexCount = 0;
 	invalidate();
 }
 
@@ -107,6 +114,19 @@ void DrawList::flush() {
 	m_drawOp.triangleCount = 0;
 }
 
+void DrawList::pushLayer() {
+	flush();
+	m_drawOpCounts.push_back(m_drawOps.size());
+	m_vertexCounts.push_back(m_vertexCount);
+}
+
+void DrawList::popLayer() {
+	if (m_drawOpCounts.size() == 1) SGD_PANIC("DrawList layer stack underflow");
+	clear();
+	m_drawOpCounts.pop_back();
+	m_vertexCounts.pop_back();
+}
+
 void DrawList::addPoint(CVec2f v) {
 	float hsz = pointSize() * .5f;
 	addOval({v - hsz, v + hsz});
@@ -114,15 +134,34 @@ void DrawList::addPoint(CVec2f v) {
 
 void DrawList::addRect(CRectf r) {
 	if (fillEnabled()) {
-		auto vp = allocTriangles(2);
-		vp[0] = {{topLeft(r), depth()}, {0, 0}, m_pmFillColor};
-		vp[1] = {{topRight(r), depth()}, {1, 0}, m_pmFillColor};
-		vp[2] = {{bottomRight(r), depth()}, {1, 1}, m_pmFillColor};
+		auto vp = allocTriangles(2, fillMaterial());
+		vp[0] = {{topLeft(r), depth()}, {0, 0, 0}, m_pmFillColor};
+		vp[1] = {{topRight(r), depth()}, {1, 0, 0}, m_pmFillColor};
+		vp[2] = {{bottomRight(r), depth()}, {1, 1, 0}, m_pmFillColor};
 		vp[3] = vp[0];
 		vp[4] = vp[2];
-		vp[5] = {{bottomLeft(r), depth()}, {0, 1}, m_pmFillColor};
+		vp[5] = {{bottomLeft(r), depth()}, {0, 1, 0}, m_pmFillColor};
 		m_vertexBuffer->unlock();
 	}
+	if (outlineEnabled()) {
+		addOutline(topLeft(r), topRight(r));
+		addOutline(topRight(r), bottomRight(r));
+		addOutline(bottomRight(r), bottomLeft(r));
+		addOutline(bottomLeft(r), topLeft(r));
+	}
+}
+
+void DrawList::addImage(CImage* image, CVec2f v, float frame) {
+	auto r = image->drawRect() + v;
+	Vec4f color(1);
+	auto vp = allocTriangles(2, image->material());
+	vp[0] = {{topLeft(r), depth()}, {0, 0, frame}, color};
+	vp[1] = {{topRight(r), depth()}, {1, 0, frame}, color};
+	vp[2] = {{bottomRight(r), depth()}, {1, 1, frame}, color};
+	vp[3] = vp[0];
+	vp[4] = vp[2];
+	vp[5] = {{bottomLeft(r), depth()}, {0, 1, frame}, color};
+	m_vertexBuffer->unlock();
 	if (outlineEnabled()) {
 		addOutline(topLeft(r), topRight(r));
 		addOutline(topRight(r), bottomRight(r));
@@ -143,19 +182,14 @@ void DrawList::addOutline(CVec2f v0, CVec2f v1) {
 	// Vec3f tv{v0.y - v1.y, v1.x - v0.x, 0};
 	// tv = normalize(tv) * (outlineWidth() * 0.5f);
 
-	auto pmaterial = fillMaterial();
-	fillMaterial = m_defaultMaterial;
-
-	auto vp = allocTriangles(2);
-	vp[0] = {p0 + tv, {0, 0}, m_pmOutlineColor};
-	vp[1] = {p0 - tv, {0, 0}, m_pmOutlineColor};
-	vp[2] = {p1 - tv, {0, 0}, m_pmOutlineColor};
+	auto vp = allocTriangles(2, m_whiteMaterial);
+	vp[0] = {p0 + tv, {0, 0, 0}, m_pmOutlineColor};
+	vp[1] = {p0 - tv, {0, 0, 0}, m_pmOutlineColor};
+	vp[2] = {p1 - tv, {0, 0, 0}, m_pmOutlineColor};
 	vp[3] = vp[0];
 	vp[4] = vp[2];
-	vp[5] = {p1 + tv, {0, 0}, m_pmOutlineColor};
+	vp[5] = {p1 + tv, {0, 0, 0}, m_pmOutlineColor};
 	m_vertexBuffer->unlock();
-
-	fillMaterial = pmaterial;
 }
 
 void DrawList::addLine(CVec2f v0, CVec2f v1) {
@@ -165,37 +199,32 @@ void DrawList::addLine(CVec2f v0, CVec2f v1) {
 	Vec3f p1{v1 + dv, depth()};
 	Vec3f tv{-dv.y, dv.x, 0};
 
-	// Vec3f p0{v0, depth()};
-	// Vec3f p1{v1, depth()};
-	// Vec3f tv{v0.y - v1.y, v1.x - v0.x, 0};
-	// tv = normalize(tv) * (lineWidth() * 0.5f);
-
 	if (fillEnabled()) {
 		if (lineSmoothing()) {
 			Vec4f blk(0);
-			auto vp = allocTriangles(4);
-			vp[0] = {p0, {0, 0}, m_pmFillColor};
-			vp[1] = {p1, {0, 0}, m_pmFillColor};
-			vp[2] = {p1 + tv, {0, 0}, blk};
+			auto vp = allocTriangles(4, fillMaterial());
+			vp[0] = {p0, {0, 0, 0}, m_pmFillColor};
+			vp[1] = {p1, {0, 0, 0}, m_pmFillColor};
+			vp[2] = {p1 + tv, {0, 0, 0}, blk};
 			vp[3] = vp[0];
 			vp[4] = vp[2];
-			vp[5] = {p0 + tv, {0, 0}, blk};
+			vp[5] = {p0 + tv, {0, 0, 0}, blk};
 			//
-			vp[6] = {p0 - tv, {0, 0}, blk};
-			vp[7] = {p1 - tv, {0, 0}, blk};
-			vp[8] = {p1, {0, 0}, m_pmFillColor};
+			vp[6] = {p0 - tv, {0, 0, 0}, blk};
+			vp[7] = {p1 - tv, {0, 0, 0}, blk};
+			vp[8] = {p1, {0, 0, 0}, m_pmFillColor};
 			vp[9] = vp[6];
 			vp[10] = vp[8];
-			vp[11] = {p0, {0, 0}, m_pmFillColor};
+			vp[11] = {p0, {0, 0, 0}, m_pmFillColor};
 			m_vertexBuffer->unlock();
 		} else {
-			auto vp = allocTriangles(2);
-			vp[0] = {p0 + tv, {0, 0}, m_pmFillColor};
-			vp[1] = {p0 - tv, {0, 0}, m_pmFillColor};
-			vp[2] = {p1 - tv, {0, 0}, m_pmFillColor};
+			auto vp = allocTriangles(2, fillMaterial());
+			vp[0] = {p0 + tv, {0, 0, 0}, m_pmFillColor};
+			vp[1] = {p0 - tv, {0, 0, 0}, m_pmFillColor};
+			vp[2] = {p1 - tv, {0, 0, 0}, m_pmFillColor};
 			vp[3] = vp[0];
 			vp[4] = vp[2];
-			vp[5] = {p1 + tv, {0, 0}, m_pmFillColor};
+			vp[5] = {p1 + tv, {0, 0, 0}, m_pmFillColor};
 			m_vertexBuffer->unlock();
 		}
 	}
@@ -220,7 +249,7 @@ void DrawList::addOval(CRectf rect) {
 
 	if (fillEnabled()) {
 
-		auto vp = allocTriangles(n);
+		auto vp = allocTriangles(n, fillMaterial());
 
 		float th0 = (off)*twoPi / n;
 		Vec2f v0{v.x + std::cos(th0) * r.x, v.y + std::sin(th0) * r.y};
@@ -229,9 +258,9 @@ void DrawList::addOval(CRectf rect) {
 			float th1 = (i + 1 + off) * twoPi / n;
 			Vec2f v1{v.x + std::cos(th1) * r.x, v.y + std::sin(th1) * r.y};
 
-			vp[0] = {{v0, depth()}, {0, 0}, m_pmFillColor};
-			vp[1] = {{v1, depth()}, {0, 0}, m_pmFillColor};
-			vp[2] = {{v, depth()}, {0, 0}, m_pmFillColor};
+			vp[0] = {{v0, depth()}, {0, 0, 0}, m_pmFillColor};
+			vp[1] = {{v1, depth()}, {0, 0, 0}, m_pmFillColor};
+			vp[2] = {{v, depth()}, {0, 0, 0}, m_pmFillColor};
 
 			v0 = v1;
 			vp += 3;
@@ -256,36 +285,29 @@ void DrawList::addOval(CRectf rect) {
 
 void DrawList::addText(CString text, CVec2f v) {
 
-	auto pmaterial = fillMaterial();
-	fillMaterial = font()->atlas;
-
-	Vertex* vp = allocTriangles(text.size() * 2);
+	Vertex* vp = allocTriangles(text.size() * 2, font()->atlas);
 
 	Vec2f pos(v.x, v.y + font()->ascent);
 
 	for (uint8_t ch : text) {
 
-		if ((ch -= font()->firstChar) >= font()->glyphs.size()) ch = 0;
-
-		CGlyph glyph = font()->glyphs[ch];
+		CGlyph glyph = font()->glyph(ch);
 
 		CRectf src = glyph.srcRect;
 		Rectf dst = glyph.dstRect + pos;
 
-		pos.x += glyph.advance;
-
-		vp[0] = {{dst.min.x, dst.min.y, depth()}, {src.min.x, src.min.y}, m_pmTextColor};
-		vp[1] = {{dst.max.x, dst.min.y, depth()}, {src.max.x, src.min.y}, m_pmTextColor};
-		vp[2] = {{dst.max.x, dst.max.y, depth()}, {src.max.x, src.max.y}, m_pmTextColor};
+		vp[0] = {{dst.min.x, dst.min.y, depth()}, {src.min.x, src.min.y, 0}, m_pmTextColor};
+		vp[1] = {{dst.max.x, dst.min.y, depth()}, {src.max.x, src.min.y, 0}, m_pmTextColor};
+		vp[2] = {{dst.max.x, dst.max.y, depth()}, {src.max.x, src.max.y, 0}, m_pmTextColor};
 		vp[3] = vp[0];
 		vp[4] = vp[2];
-		vp[5] = {{dst.min.x, dst.max.y, depth()}, {src.min.x, src.max.y}, m_pmTextColor};
+		vp[5] = {{dst.min.x, dst.max.y, depth()}, {src.min.x, src.max.y, 0}, m_pmTextColor};
 
 		vp += 6;
+
+		pos.x += glyph.advance;
 	}
 	m_vertexBuffer->unlock();
-
-	fillMaterial = pmaterial;
 }
 
 void DrawList::onValidate(GraphicsContext* gc) const {
@@ -297,8 +319,10 @@ void DrawList::onValidate(GraphicsContext* gc) const {
 	renderOp.rendererBindings = m_bindGroup->wgpuBindGroup();
 	renderOp.vertexBuffer = m_vertexBuffer->wgpuBuffer();
 	renderOp.instanceCount = 1;
+
+	// TODO: only need to build new layers here...
 	for (auto& drawOp : m_drawOps) {
-		auto cmaterial = drawOp.material ? drawOp.material : m_defaultMaterial;
+		auto cmaterial = drawOp.material ? drawOp.material : m_whiteMaterial;
 		cmaterial->validate(gc);
 		renderOp.pipeline = getOrCreateRenderPipeline(gc, cmaterial, m_bindGroup, DrawMode::triangleList);
 		renderOp.materialBindings = cmaterial->bindGroup()->wgpuBindGroup();

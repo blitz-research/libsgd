@@ -12,7 +12,7 @@ struct CollisionNode : Object {
 
 	CollisionNode(Collider* collider, CollisionSpace* space);
 
-	const Collider* collider() const {
+	Collider* collider() const {
 		return m_collider;
 	}
 
@@ -20,32 +20,39 @@ struct CollisionNode : Object {
 		return m_space;
 	}
 
-	void invalidate();
-
 private:
 	friend class CollisionSpace;
 
 	ColliderPtr m_collider;
 	CollisionSpace* m_space;
-	bool m_invalid{};
 };
 
 struct CollisionSpace : Shared {
 	SGD_OBJECT_TYPE(CollisionSpace, Shared);
 
+	void enableCollisions(uint32_t srcColliderType, uint32_t dstColliderType, CollisionResponse response);
+
 	CollisionNode* insert(Collider* collider);
 
 	void remove(CollisionNode* node);
 
-	void validate();
+	Collider* intersectRay(const Liner& ray, real rradius, uint32_t colliderMask, Contact& contact) const;
 
-	const Collider* intersectRay(const Liner& ray, real rradius, uint32_t collisionMask, Contact& contact);
+	void updateColliders();
 
 private:
 	friend class CollisionNode;
 
-	Vector<CollisionNode*> m_nodes[32];
-	Vector<CollisionNode*> m_invalid;
+	struct EnabledCollision {
+		uint32_t srcType;
+		uint32_t dstType;
+		CollisionResponse response;
+	};
+
+	Vector<EnabledCollision> m_enabledCollisions[32];
+	uint32_t m_colliderMasks[32];
+
+	Vector<CollisionNode*> m_collisionNodes[32];
 };
 
 } // namespace sgd

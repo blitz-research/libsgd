@@ -3,6 +3,7 @@
 #include "renderer.h"
 
 #include "font.h"
+#include "image.h"
 
 namespace sgd {
 
@@ -13,18 +14,18 @@ struct DrawList : public Renderer {
 
 	struct Vertex {
 		Vec3f position;
-		Vec2f texCoords;
+		Vec3f texCoords;
 		Vec4f color;
 	};
 	using CVertex = const Vertex&;
 
 	Property<Mat4f> projectionMatrix;
 
-	Property<Vec4f> fillColor{Vec4f(0, 0, 0, 1)};
+	Property<Vec4f> fillColor{Vec4f(1, 1, 1, 1)};
 	Property<CMaterialPtr> fillMaterial{};
 	Property<bool> fillEnabled{true};
 
-	Property<Vec4f> outlineColor{Vec4f(1)};
+	Property<Vec4f> outlineColor{Vec4f(0, 0, 0, 1)};
 	Property<float> outlineWidth{1};
 	Property<bool> outlineEnabled{false};
 
@@ -49,6 +50,10 @@ struct DrawList : public Renderer {
 	void addOval(CRectf rect);
 	void addPoint(CVec2f p);
 	void addText(CString text, CVec2f v);
+	void addImage(CImage* image, CVec2f v, float frame);
+
+	void pushLayer();
+	void popLayer();
 
 private:
 	struct DrawOp {
@@ -69,9 +74,13 @@ private:
 	Vector<DrawOp> m_drawOps;
 	DrawOp m_drawOp;
 
-	CMaterialPtr m_defaultMaterial;
+	// Layers...
+	Vector<uint32_t> m_drawOpCounts;
+	Vector<uint32_t> m_vertexCounts;
 
-	Vertex* allocTriangles(uint32_t count);
+	CMaterialPtr m_whiteMaterial;
+
+	Vertex* allocTriangles(uint32_t count, CMaterial* material);
 
 #if 0
 	struct DrawOp {

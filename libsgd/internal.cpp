@@ -61,6 +61,13 @@ SGD_Handle createHandle(HandleTypeInfo* type, Shared* shared) {
 	return handle;
 }
 
+SGD_Handle getHandle(HandleTypeInfo* type, Shared* shared) {
+	auto& rmap = g_reverseMaps[(int)type->handleType];
+	auto it = rmap.find(shared);
+	SGD_ASSERT(it!=rmap.end());
+	return it->second;
+}
+
 SGD_Handle getOrCreateHandle(HandleTypeInfo* type, Shared* shared) {
 	auto& rmap = g_reverseMaps[(int)type->handleType];
 	auto it = rmap.find(shared);

@@ -8,6 +8,8 @@
 #include "drawlist.h"
 #include "font.h"
 #include "graphics.h"
+#include "image.h"
+#include "imageutil.h"
 #include "material.h"
 #include "materialutil.h"
 #include "mesh.h"
