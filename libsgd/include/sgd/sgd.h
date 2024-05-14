@@ -541,7 +541,7 @@ SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int textureFormat, int
 //! SGD_SPRITE_VIEW_MODE_FIXED   | 1             | Sprite is rotated to face camera when rendered.
 //! SGD_SPRITE_VIEW_MODE_FREE    | 2             | Sprite is rendered without taking camera position into account.
 //! SGD_SPRITE_VIEW_MODE_UPRIGHT | 3             | Sprite is rotated around local Y axis to face camera, useful for tree like sprites.
-SGD_API void SGD_DECL sgd_SetImageSpriteViewMode(SGD_Image, int spriteViewMode);
+SGD_API void SGD_DECL sgd_SetImageSpriteViewMode(SGD_Image image, int spriteViewMode);
 
 //! Set image rect for use with Sprites.
 SGD_API void SGD_DECL sgd_SetImageSpriteRect(SGD_Image image, float minX, float minY, float maxX, float maxY);

@@ -722,7 +722,9 @@ Function BlitzParams:String (params:String)
 					"SGD_Skybox",..
 					"SGD_Sprite",..
 					"SGD_Font",..
-					"SGD_Sound"
+					"SGD_Sound",..
+					"SGD_Image",..
+					"SGD_Collider"
 				
 				p[0] = ":Int"
 
