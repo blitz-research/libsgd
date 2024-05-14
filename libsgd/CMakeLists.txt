@@ -160,12 +160,13 @@ install(TARGETS libsgd_dynamic DESTINATION lib)
 
 ##### More libsgds! #####
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/blitz3d/helloworld.bb DESTINATION blitz3d)
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/blitz3d/examples DESTINATION blitz3d FILES_MATCHING PATTERN "*.bb")
+if (SGD_BLITZ3D_TARGET_ENABLED)
+	install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/blitz3d/helloworld.bb DESTINATION blitz3d)
+	install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/blitz3d/examples DESTINATION blitz3d FILES_MATCHING PATTERN "*.bb")
+endif ()
 
 if (SGD_BLITZMAX_TARGET_ENABLED)
-    add_subdirectory(blitzmax)
+	add_subdirectory(blitzmax)
 endif ()
 
 if (SGD_NODEJS_TARGET_ENABLED)
@@ -176,9 +177,9 @@ if (SGD_PYTHON_TARGET_ENABLED)
 	add_subdirectory(python)
 endif ()
 
-##### Doxygen #####
-
-add_subdirectory(doxygen)
+if (SGD_DOXYGEN_TARGET_ENABLED)
+	add_subdirectory(doxygen)
+endif ()
 
 ##### Tests #####
 

@@ -139,10 +139,11 @@ if (SGD_OS_WINDOWS)
 	)
 	set(WITH_BACKENDS WITH_XAUDIO2=1 WITH_WINMM=1)
 elseif (SGD_OS_LINUX)
-	set(SRC ${SRCS}
+	set(SRCS ${SRCS}
 		${BACKEND}/alsa/soloud_alsa.cpp
 		${BACKEND}/oss/soloud_oss.cpp
 	)
+	set(LIBS ${LIBS} -lasound)
 	set(WITH_BACKENDS WITH_ALSA=1 WITH_OSS=1)
 elseif (SGD_OS_MACOS)
 	set(SRCS ${SRCS}
@@ -161,6 +162,8 @@ add_library(soloud ${SRCS})
 target_compile_definitions(soloud PUBLIC ${WITH_BACKENDS})
 
 target_include_directories(soloud PUBLIC ${soloud_SOURCE_DIR}/include)
+
+target_link_libraries(soloud ${LIBS})
 
 ##### json11 #####
 

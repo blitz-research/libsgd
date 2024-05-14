@@ -15,14 +15,20 @@ set(CMAKE_POLICY_DEFAULT_CMP0097 NEW)
 
 
 # Options
+option(SGD_BLITZ3D_TARGET_ENABLED "Blitz3D target enabled" OFF)
 option(SGD_BLITZMAX_TARGET_ENABLED "BlitzMax target enabled" OFF)
 option(SGD_NODEJS_TARGET_ENABLED "Nodejs target enabled" OFF)
 option(SGD_PYTHON_TARGET_ENABLED "Python target enabled" OFF)
+option(SGD_DOXYGEN_TARGET_ENABED "Doxygen target enabled" OFF)
 
 message("### Configuring LibSGD:")
+#
+message("### SGD_BLITZ3D_TARGET_ENABLED  ${SGD_BLITZ3D_TARGET_ENABLED}")
 message("### SGD_BLITZMAX_TARGET_ENABLED ${SGD_BLITZMAX_TARGET_ENABLED}")
 message("### SGD_NODEJS_TARGET_ENABLED   ${SGD_NODEJS_TARGET_ENABLED}")
 message("### SGD_PYTHON_TARGET_ENABLED   ${SGD_PYTHON_TARGET_ENABLED}")
+message("### SGD_DOXYGEN_TARGET_ENABLED  ${SGD_DOXYGEN_TARGET_ENABLED}")
+#
 message("### CMAKE_SYSTEM_NAME           ${CMAKE_SYSTEM_NAME}")
 message("### CMAKE_BUILD_TYPE            ${CMAKE_BUILD_TYPE}")
 message("### CMAKE_CXX_COMPILER_ID       ${CMAKE_CXX_COMPILER_ID}")

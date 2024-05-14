@@ -8,8 +8,11 @@ wgpu::BackendType g_backendType{wgpu::BackendType::Undefined};
 
 void createOverlay() {
 	if (!sgdx::g_defaultFont) {
-#if _WIN32
+#if SGD_OS_WINDOWS
 		auto font = sgd::loadFont(sgd::Path("C:/windows/fonts/consola.ttf"), 16);
+		if (font) sgdx::g_defaultFont = font.result();
+#elif SGD_OS_LINUX
+		auto font = sgd::loadFont(sgd::Path("/usr/share/fonts/TTF/Inconsolata-Medium.ttf"), 16);
 		if (font) sgdx::g_defaultFont = font.result();
 #endif
 	}
