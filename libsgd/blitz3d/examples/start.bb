@@ -12,59 +12,100 @@ Const KEY_A = 65
 Const KEY_S = 83
 Const KEY_D = 68
 
-Type Actor
-	Field entity
-	Field xr#,yr#,vz#,vx#
-End Type
+Const KEY_LEFT_SHIFT = 340
+Const KEY_LEFT_CONTROL = 341
+Const KEY_LEFT_ALT = 342
+Const KEY_LEFT_SUPER = 343
+Const KEY_RIGHT_SHIFT = 344
+Const KEY_RIGHT_CONTROL = 345
+Const KEY_RIGHT_ALT = 346
+Const KEY_RIGHT_SUPER = 347
 
-Function CreateActor.Actor(entity) 
 
-	Local actor.Actor=New Actor
+Global player
+Global player_rvx#,player_rvy#
+Global player_vx#,player_vy#,player_vz#
+
+Global camera
+
+Function CreatePlayer(mesh)
+
+	player = CreateModel(mesh)
 	
-	actor\entity = entity
-	
-	Return actor
-	
+	camera=CreatePerspectiveCamera()
+	SetCameraNear camera, .1
+	SetCameraFar camera, 1000
+	SetEntityParent camera,player
 End Function
 
-Function FlyActor(actor.Actor)
+Function PlayerWalk(speed#)
 
 	If KeyDown(KEY_LEFT)
-		actor\yr = actor\yr + (1.5-actor\yr) * .1
+		player_rvy = player_rvy + (1.5-player_rvy) * .1
 	Else If KeyDown(KEY_RIGHT)
-		actor\yr = actor\yr + (-1.5-actor\yr) * .1
+		player_rvy = player_rvy + (-1.5-player_rvy) * .1
 	Else
-		actor\yr = actor\yr * .9
+		player_rvy = player_rvy * .9
 	EndIf
-	RotateEntity actor\entity,0,actor\yr,0
+	RotateEntity player,0,player_rvy,0
 	
-	If KeyDown(KEY_UP)
-		actor\xr = actor\xr + (-1.5-actor\xr) * .1
-	ElseIf KeyDown(KEY_DOWN)
-		actor\xr = actor\xr + (1.5-actor\xr) * .1
-	Else 
-		actor\xr = actor\xr * .9
-	EndIf
-	TurnEntity actor\entity,actor\xr,0,0
-
 	If KeyDown(KEY_W)
-		actor\vz = actor\vz + (.5-actor\vz) * .1
+		player_vz = player_vz + (speed-player_vz) * .1
 	Else If KeyDown(KEY_S)
-		actor\vz = actor\vz + (-.5 - actor\vz) * .1
+		player_vz = player_vz + (-speed-player_vz) * .1
 	Else
-		actor\vz = actor\vz * .9
+		player_vz = player_vz * .9
 	EndIf
-	MoveEntity actor\entity,0,0,actor\vz
-
+	
 	If KeyDown(KEY_A)
-		actor\vx = actor\vx + (-.5-actor\vx) * .1
+		player_vx = player_vx + (-speed-player_vx) * .1
 	Else If KeyDown(KEY_D)
-		actor\vx = actor\vx + (.5-actor\vx) * .1
+		player_vx = player_vx + (speed-player_vx) * .1
 	Else
-		actor\vx = actor\vx * .9
+		player_vx = player_vx * .9
 	EndIf
-	MoveEntity actor\entity,actor\vx,0,0
-
+	
+	MoveEntity player,player_vx,0,player_vz
+	
 End Function
 
+Function PlayerFly(speed#)
 
+	If KeyDown(KEY_LEFT)
+		player_rvy = player_rvy + (1.5-player_rvy) * .1
+	Else If KeyDown(KEY_RIGHT)
+		player_rvy = player_rvy + (-1.5-player_rvy) * .1
+	Else
+		player_rvy = player_rvy * .9
+	EndIf
+	RotateEntity player,0,player_rvy,0
+	SetEntityRotation camera,0,0,player_rvy*-15
+	
+	If KeyDown(KEY_UP)
+		player_rvx = player_rvx + (-1.5-player_rvx) * .1
+	ElseIf KeyDown(KEY_DOWN)
+		player_rvx = player_rvx + (1.5-player_rvx) * .1
+	Else 
+		player_rvx = player_rvx * .9
+	EndIf
+	TurnEntity player,player_rvx,0,0
+
+	If KeyDown(KEY_W)
+		player_vz = player_vz + (speed-player_vz) * .1
+	Else If KeyDown(KEY_S)
+		player_vz = player_vz + (-speed-player_vz) * .1
+	Else
+		player_vz = player_vz * .9
+	EndIf
+	MoveEntity player,0,0,player_vz
+
+	If KeyDown(KEY_A)
+		player_vx = player_vx + (-speed-player_vx) * .1
+	Else If KeyDown(KEY_D)
+		player_vx = player_vx + (speed-player_vx) * .1
+	Else
+		player_vx = player_vx * .9
+	EndIf
+	MoveEntity player,player_vx,0,0
+
+End Function

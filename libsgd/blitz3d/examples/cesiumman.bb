@@ -34,8 +34,7 @@ Function LoadScene()
 	Local env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
 	SetSceneEnvTexture env
 
-	Local skybox = CreateSkybox()
-	SetSkyboxTexture skybox,env
+	Local skybox = CreateSkybox(env)
 	SetSkyboxRoughness skybox,.3
 
 	Local light = CreateDirectionalLight()
@@ -47,8 +46,7 @@ Function LoadScene()
 	Local material = LoadPBRMaterial("sgd://materials/PavingStones065_1K-JPG")
 	Local mesh = CreateBoxMesh(-10, -1, -10, 10, 0, 10, material)
 	TransformMeshTexCoords mesh, 4,4,0,0
-	Local ground = CreateModel()
-	SetModelMesh ground, mesh
+	Local ground = CreateModel(mesh)
 	
 	model = LoadBonedModel("sgd://models/cesiumman.glb", True)
 

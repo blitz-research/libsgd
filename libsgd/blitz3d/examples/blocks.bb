@@ -4,11 +4,6 @@ Include "start.bb"
 Const NUM_BLOCKS = 10000
 Const WORLD_SIZE = 100
 
-Type Camera
-	Field entity
-	Field xr#,yr#,vz#,vx#
-End Type
-
 Type Block
 	Field model
 	Field xr#,yr#
@@ -20,11 +15,10 @@ Type Bullet
 	Field vz#
 End Type
 
-Global actor.Actor
 Global bulletMesh
 Global slimeball
 
-CreateWindow(DesktopWidth(), DesktopHeight(), "スノー Blocks", 3)
+CreateWindow(DesktopWidth(), DesktopHeight(), "スノー Blocks", 1)
 
 CreateScene()
 
@@ -34,14 +28,13 @@ While (PollEvents() And 1) <> 1
 
 	If KeyHit(KEY_ESCAPE)
 		End
-		Delete Each Actor
 		Delete Each Bullet
 		Delete Each Block
 		ClearScene()
 		LoadScene()
 	EndIf
 	
-	fly(actor)
+	PlayerFly(1)
 	
 	UpdateBullets()
 	
@@ -61,8 +54,7 @@ Function LoadScene()
 	Local env =  LoadTexture("sgd://envmaps/stormy-cube.jpg", 4, 56)
 	SetSceneEnvTexture env
 	
-	Local skybox = CreateSkybox()
-	SetSkyboxTexture skybox,env
+	Local skybox = CreateSkybox(env)
 	
 	Local material = CreatePrelitMaterial()
 	bulletMesh = CreateSphereMesh(.5,24,12,material)
@@ -72,17 +64,13 @@ Function LoadScene()
 	SetLightColor light,1,1,1,.2
 	TurnEntity light,-60,0,0
 	
-	Local camera = CreatePerspectiveCamera()
-	SetCameraNear camera, .1
-	SetCameraFar camera, 1000
-	MoveEntity camera, 0,50,-100
+	CreatePlayer(0)
+	MoveEntity player, 0,50,-100
 	
 	light = CreateSpotLight()
+	SetEntityParent light,player
 	SetLightColor light,1,1,1,1
 	SetLightRange light,50
-	SetEntityParent light,camera
-	
-	actor = CreateActor(camera)
 	
 	slimeball=LoadSound("sgd://audio/slimeball.wav")
 	
@@ -105,17 +93,23 @@ Function UpdateBullets()
 	If KeyHit(KEY_SPACE)
 		Local r#=Rnd(1), g# = Rnd(1), b#=Rnd(1)
 		
+		;Fake some NEON baby!
+		Select(Rand(3))
+		Case 1 r=1
+		Case 2 g=1
+		Case 3 b=1
+		End Select
+		
 		Local bullet.Bullet = New Bullet
 		
-		bullet\model = CreateModel()
-		SetModelMesh bullet\model, bulletMesh
+		bullet\model = CreateModel(bulletMesh)
 		SetModelColor bullet\model,r,g,b,1
 		
-		SetEntityParent bullet\model,actor\entity
+		SetEntityParent bullet\model,player
 		SetEntityParent bullet\model,0
 		
 		bullet\timeout = 180
-		bullet\vz = actor\vz + 1
+		bullet\vz = player_vz + 1
 		If bullet\vz<1 bullet\vz=1
 		
 		Local light=CreatePointLight()
@@ -147,8 +141,7 @@ Function CreateGround()
 	Local mesh = CreateBoxMesh(-WORLD_SIZE * 2,-1,-WORLD_SIZE*2,WORLD_SIZE*2,0,WORLD_SIZE*2,material)
 	TransformMeshTexCoords(mesh,100,100,0,0)
 
-	Local model = CreateModel()
-	SetModelMesh model, mesh
+	Local model = CreateModel(mesh)
 	
 End Function
 
@@ -161,8 +154,7 @@ Function CreateBlocks()
 	
 	For i=1 To NUM_BLOCKS
 		block.Block = New Block
-		block\model = CreateModel()
-		SetModelMesh block\model, mesh
+		block\model = CreateModel(mesh)
 		SetModelColor block\model, Rnd(1), Rnd(1), Rnd(1), 1
 		SetEntityPosition block\model, Rnd(-WORLD_SIZE,WORLD_SIZE), Rnd(1,WORLD_SIZE), Rnd(-WORLD_SIZE,WORLD_SIZE)
 		TurnEntity block\model, Rnd(360), Rnd(360), 0

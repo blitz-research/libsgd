@@ -44,20 +44,17 @@ int SGD_DECL sgd_WindowHeight() {
 
 SGD_Bool SGD_DECL sgd_KeyDown(int keyCode) {
 	if ((uint32_t)keyCode > SGD_KEY_LAST) sgd_Error("Key code out of range");
-
 	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)keyCode).down();
 }
 
 SGD_Bool SGD_DECL sgd_KeyHit(int keyCode) {
 	if ((uint32_t)keyCode > SGD_KEY_LAST) sgd_Error("Key code out of range");
-
 	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)keyCode).hit();
 }
 
 int SGD_DECL sgd_GetChar() {
 	auto& queue = sgdx::mainWindow()->keyboard()->charQueue();
 	if (queue.empty()) return 0;
-
 	auto chr = queue.front();
 	queue.pop_front();
 	return (int)chr;

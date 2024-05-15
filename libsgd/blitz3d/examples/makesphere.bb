@@ -55,19 +55,17 @@ env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
 
 SetSceneEnvTexture env
 
-skybox = CreateSkybox()
-SetSkyboxTexture skybox,env
+skybox = CreateSkybox(env)
 SetSkyboxRoughness skybox, .3
 
 light = CreateDirectionalLight()
-TurnEntity light,-45,0,0	; Tilt light down 45 degrees 
+;TurnEntity light,-45,0,0	; Tilt light down 45 degrees 
 
 material = LoadPBRMaterial("sgd://misc/test-texture.png")
 SetMaterialFloat material, "roughnessFactor1f", .5
 
 mesh = CreateSphereMesh(1,96,48,material)
-model=CreateModel()
-SetModelMesh model,mesh
+model=CreateModel(mesh)
 MoveEntity model,0,0,3
 
 While Not PollEvents()

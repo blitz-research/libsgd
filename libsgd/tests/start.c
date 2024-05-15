@@ -8,7 +8,7 @@ void reset() {
 
 	sgd_ClearScene();
 
-	SGD_Texture skyTexture = sgd_LoadTexture("sgd://envmaps/sunnysky-cube.png", SGD_TEXTURE_FORMAT_SRGBA8, SGD_TEXTURE_FLAGS_CUBEMAP_DEFAULT);
+	SGD_Texture skyTexture = sgd_LoadTexture("sgd://envmaps/sunnysky-cube.png", SGD_TEXTURE_FORMAT_SRGBA8, SGD_TEXTURE_FLAGS_ENVMAP_DEFAULT);
 	sgd_SetSceneEnvTexture(skyTexture);
 
 	SGD_Skybox skybox = sgd_CreateSkybox(skyTexture);

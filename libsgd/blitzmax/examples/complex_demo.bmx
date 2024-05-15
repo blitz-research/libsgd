@@ -443,9 +443,7 @@ End Function
 
 Function demo_CreateCube:Int (size:Float)
 
-	Local box:Int = SGD.CreateModel ()
-	
-	SGD.SetModelMesh box, demo_GetStaticCubeMesh ()
+	Local box:Int = SGD.CreateModel (demo_GetStaticCubeMesh ())
 	
 	Return box
 	
@@ -453,9 +451,7 @@ End Function
 
 Function demo_CreateBullet:Int (size:Float)
 
-	Local box:Int = SGD.CreateModel ()
-	
-	SGD.SetModelMesh box, demo_GetStaticBulletMesh ()
+	Local box:Int = SGD.CreateModel (demo_GetStaticBulletMesh ())
 	
 	Return box
 	
@@ -481,17 +477,14 @@ Function demo_CreateCamera:Int ()
 	
 End Function
 
-Function demo_CreateSkyBox:Int (texture:String, format:Int = SGD.TEXTURE_FORMAT_SRGBA8, flags:Int = SGD.TEXTURE_FLAGS_CUBE_MIPMAP | SGD.TEXTURE_FLAGS_FILTER)
+Function demo_CreateSkyBox:Int (texture:String, format:Int = SGD.TEXTURE_FORMAT_SRGBA8, flags:Int = SGD.TEXTURE_FLAGS_ENVMAP_DEFAULT)
 
 	Local sky_texture:Int = SGD.LoadTexture (texture, format, flags)
 
+	SGD.SetSceneEnvTexture sky_texture
 
-		SGD.SetSceneEnvTexture sky_texture
-
-	Local skybox:Int = SGD.CreateSkybox ()
-
-		SGD.SetSkyboxTexture skybox, sky_texture
-		SGD.SetSkyboxRoughness skybox, 0.3
+	Local skybox:Int = SGD.CreateSkybox (sky_texture)
+	SGD.SetSkyboxRoughness skybox, 0.3
 
 	Return skybox
 	
@@ -533,10 +526,8 @@ Function demo_CreateScene (num_cubes:Int = 10000, ground_scale:Float = 1.0, grou
 	Local ground_size:Float = 250.0
 
 	Local ground_material:Int	= SGD.LoadPBRMaterial (ground_material_path)
-	Local ground:Int			= SGD.CreateModel ()
 	Local ground_mesh:Int		= SGD.CreateBoxMesh (-ground_size * 0.5, -0.5, -ground_size * 0.5, ground_size * 0.5, 0.5, ground_size * 0.5, ground_material)
-
-	SGD.SetModelMesh ground, ground_mesh
+	Local ground:Int			= SGD.CreateModel (ground_mesh)
 
 	' Scale texture...
 	
@@ -572,12 +563,11 @@ End Function
 Function CreateBulletSprite (sprite_path:String = "sgd://misc/light.png")
 
 	Local sprite:Int = SGD.CreateSprite ()
-	Local mat:Int = SGD.LoadPrelitMaterial (sprite_path)
+	Local img:Int = SGD.LoadImage (sprite_path, SGD.TEXTURE_FORMAT_SRGBA8, SGD.TEXTURE_FLAGS_IMAGE_DEFAULT, 1)
 '	If Not mat RuntimeError "Hi"
 	
-	SGD.SetMaterialBlendMode mat, SGD.BLEND_MODE_ALPHA
-	SGD.SetSpriteMaterial sprite, mat
-	
+	SGD.SetSpriteImage sprite, img
+		
 	' No HideEntity yet!
 	SGD.MoveEntity sprite, 0, -50, 0
 	

@@ -5,10 +5,7 @@ CreateScene()
 
 env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
 
-SetSceneEnvTexture env
-
-skybox = CreateSkybox()
-SetSkyboxTexture skybox,env
+skybox = CreateSkybox(env)
 SetSkyboxRoughness skybox, .3
 
 light = CreateDirectionalLight()
@@ -17,12 +14,10 @@ TurnEntity light,-45,0,0	; Tilt light down 45 degrees
 material = LoadPBRMaterial("sgd://materials/Tiles019_1K-JPG")
 mesh = CreateBoxMesh(-10,-3,-10,10,-2,10,material)
 TransformMeshTexCoords mesh,3,3,0,0
-ground = CreateModel()
-SetModelMesh ground,mesh
+ground = CreateModel(mesh)
 
 mesh = LoadMesh("sgd://models/helmet.glb")
-model=CreateModel()
-SetModelMesh model,mesh
+model=CreateModel(mesh)
 MoveEntity model,0,0,3
 
 While Not PollEvents()

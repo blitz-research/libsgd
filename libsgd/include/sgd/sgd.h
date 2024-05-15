@@ -263,7 +263,7 @@ SGD_API float SGD_DECL sgd_GamepadAxis(int gamepad, int axis);
 #define SGD_TEXTURE_FLAGS_MIPMAP 0x10
 #define SGD_TEXTURE_FLAGS_CUBE 0x20
 //
-#define SGD_TEXTURE_FLAGS_CUBEMAP_DEFAULT  0x38
+#define SGD_TEXTURE_FLAGS_ENVMAP_DEFAULT   0x38
 #define SGD_TEXTURE_FLAGS_MATERIAL_DEFAULT 0x18
 #define SGD_TEXTURE_FLAGS_IMAGE_DEFAULT    0x1f
 //! @endcond
@@ -290,7 +290,7 @@ SGD_API float SGD_DECL sgd_GamepadAxis(int gamepad, int axis);
 //!
 //! Texture flags               | Integer value | Description
 //! ----------------------------|---------------|------------
-//! SGD_TEXTURE_FLAGS_NONE      | 0             | No texture flags.
+//! SGD_TEXTURE_FLAGS_NONE      | 0x00          | No texture flags.
 //! SGD_TEXTURE_FLAGS_CLAMP_U   | 0x01          | Clamp texture U coordinate.
 //! SGD_TEXTURE_FLAGS_CLAMP_V   | 0x02          | Clamp texture V coordinate.
 //! SGD_TEXTURE_FLAGS_CLAMP_W   | 0x04          | Clamp texture W coordinate.
@@ -301,7 +301,7 @@ SGD_API float SGD_DECL sgd_GamepadAxis(int gamepad, int axis);
 //!
 //! Some convenient default combinations of texture flags are also defined:
 //!
-//! SGD_TEXTURE_FLAGS_CUBEMAP_DEFAULT  0x38
+//! SGD_TEXTURE_FLAGS_ENVMAP_DEFAULT   0x38
 //! SGD_TEXTURE_FLAGS_MATERIAL_DEFAULT 0x18
 //! SGD_TEXTURE_FLAGS_IMAGE_DEFAULT    0x1f
 SGD_API SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags);

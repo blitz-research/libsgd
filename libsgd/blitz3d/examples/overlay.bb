@@ -6,8 +6,7 @@ env = LoadTexture("sgd://envmaps/sunnysky-cube.png",4,56)
 
 SetSceneEnvTexture env
 
-skybox = CreateSkybox()
-SetSkyboxTexture skybox,env
+skybox = CreateSkybox(env)
 SetSkyboxRoughness skybox, .3
 
 Clear2D

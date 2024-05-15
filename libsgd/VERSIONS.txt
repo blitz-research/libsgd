@@ -1,23 +1,31 @@
 
 ***** v0.06 *****
 
-* Added Texture param to CreateSkybox, use 0 for no texture.
+* Added CameraPick, LinePick.
 
-* Added Mesh param to CreateModel, use 0 for no mesh.
+* Added CreateSphereCollider, CreateMeshCollider, EnableCollisions, UpdateColliders. 
+
+* (BREAKING) CreateSkybox now takes a texture paramter, use 0 for 'no texture' to get existing behaviour.
+
+* (BREAKING) CreateModel now takes a mesh paramter, use 0 for 'no mesh' to get existing behaviour.
 
 * Added WINDOW_FLAGS_CENTERED.
 
-* Added MouseZ(), MouseVZ(), removed MouseScroll().
+* (BREAKING) Added MouseZ, MouseVZ, SetMouseZ, removed MouseScroll.
 
-* Added SetEntityEnabled(), EntityEnabled(), SetEntityVisible(), EntityVisible().
+* Added SetEntityEnabled, EntityEnabled, SetEntityVisible, EntityVisible.
 
-* Added Push2DLayer(), Pop2DLayer().
+* Added Push2DLayer, Pop2DLayer.
 
-* Added CreateImage(), SetImageRect(), ImageWidth(), ImageHeight(),  Draw2DImage().
+* (BREAKING) SetSpriteMaterial replace by SetSpriteImage.
 
-* Added FontTextWidth(), FontHeight(), Font2DTextWidth() and Font2DHeight().
+* Added SetImageSpriteRect and SetImageSpriteViewMode.
 
-* Renamed Load2DFont -> LoadFont.
+* Added CreateImage, SetImageRect, ImageWidth, ImageHeight,  Draw2DImage.
+
+* Added FontTextWidth, FontHeight, Font2DTextWidth and Font2DHeight.
+
+* (BREAKING) Renamed Load2DFont -> LoadFont.
 
 * Fixed swapped normal y, z coords in SetVertex.
 

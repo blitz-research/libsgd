@@ -70,13 +70,11 @@ SGD.SetSceneAmbientLightColor 0, 0, 0, 1'0.025, 0.05, 0.0375, 1.0
 ' SKYBOX:
 ' --------
  
-Local sky_texture:Int = SGD.LoadTexture (sky_map_path, SGD.TEXTURE_FORMAT_SRGBA8, SGD.TEXTURE_FLAGS_CUBE_MIPMAP | SGD.TEXTURE_FLAGS_FILTER)
+Local sky_texture:Int = SGD.LoadTexture (sky_map_path, SGD.TEXTURE_FORMAT_SRGBA8, SGD.TEXTURE_FLAGS_ENVMAP_DEFAULT)
 
 SGD.SetSceneEnvTexture sky_texture
 
-Local skybox:Int = SGD.CreateSkybox ()
-
-SGD.SetSkyboxTexture skybox, sky_texture
+Local skybox:Int = SGD.CreateSkybox (sky_texture)
 SGD.SetSkyboxRoughness skybox, 0.3
 
 ' -------
@@ -106,10 +104,8 @@ Local ground_size:Float = 250.0
 Local ground_thickness:Float = 0.1
 
 Local ground_material:Int	= SGD.LoadPBRMaterial (ground_material_path)
-Local ground:Int			= SGD.CreateModel ()
 Local ground_mesh:Int		= SGD.CreateBoxMesh (-ground_size * 0.5, -ground_thickness * 0.5, -ground_size * 0.5, ground_size * 0.5, ground_thickness * 0.5, ground_size * 0.5, ground_material)
-
-SGD.SetModelMesh ground, ground_mesh
+Local ground:Int			= SGD.CreateModel (ground_mesh)
 
 ' Scale texture...
 
@@ -121,7 +117,7 @@ SGD.TransformMeshTexCoords (ground_mesh, ground_scale, ground_scale, 0.0, 0.0)
 ' CUBE:
 ' ------
 
-Local cube:Int			= SGD.CreateModel ()
+Local cube:Int			= SGD.CreateModel (0)
 Local cube_material:Int	= SGD.CreatePBRMaterial ()
 Local cube_size:Float	= 1.0
 Local cube_mesh			= SGD.CreateBoxMesh (-cube_size * 0.5, -cube_size * 0.5, -cube_size * 0.5, cube_size * 0.5, cube_size * 0.5, cube_size * 0.5, cube_material)
