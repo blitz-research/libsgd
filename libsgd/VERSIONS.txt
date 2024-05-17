@@ -1,4 +1,9 @@
 
+***** V0.06.1 *****
+
+Fixed CopyEntity crash when copying models.
+
+
 ***** v0.06 *****
 
 * Bumped max point lights to 32, max spot lights to 16.

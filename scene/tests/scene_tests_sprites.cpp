@@ -20,7 +20,6 @@ void entry() {
 		scene->add(sprite);
 
 		turn(sprite, {0, rnd(360), 0});
-
 		move(sprite, {0, -1.5, rnd(100)});
 	}
 

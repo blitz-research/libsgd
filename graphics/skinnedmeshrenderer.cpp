@@ -43,8 +43,9 @@ BindGroupDescriptor bindGroupDescriptor //
 namespace sgd {
 
 SkinnedMeshRenderer::SkinnedMeshRenderer(CMesh* mesh)
-	: m_mesh(mesh), //
-	  m_bindGroup(new BindGroup(&bindGroupDescriptor)),
+	: m_mesh(mesh),										//
+	  m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
+	  m_instanceCapacity(8),							//
 	  m_instanceBuffer(new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(SkinnedMeshInstance))) {
 
 	MeshUniforms meshUniforms;
@@ -71,7 +72,7 @@ SkinnedMeshRenderer::SkinnedMeshRenderer(CMesh* mesh)
 SkinnedMeshInstance* SkinnedMeshRenderer::lockInstances(uint32_t count) {
 	if (count > m_instanceCapacity) {
 		m_instanceCapacity = count;
-		m_instanceBuffer = new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(SkinnedMeshInstance));
+		m_instanceBuffer->resize(m_instanceCapacity * sizeof(SkinnedMeshInstance));
 	}
 	if (count != m_instanceCount) {
 		m_instanceCount = count;
@@ -97,13 +98,13 @@ void SkinnedMeshRenderer::onValidate(GraphicsContext* gc) const {
 
 			auto pipeline = getOrCreateRenderPipeline(gc, surf->material(), m_bindGroup, DrawMode::triangleList);
 
-			m_renderOps[rpass].emplace_back( //
-				m_mesh->vertexBuffer(),		 //
-				nullptr,					 //
-				surf->triangleBuffer(),		 //
-				surf->material()->bindGroup(),	 //
-				m_bindGroup,				 //
-				pipeline,					 //
+			m_renderOps[rpass].emplace_back(   //
+				m_mesh->vertexBuffer(),		   //
+				nullptr,					   //
+				surf->triangleBuffer(),		   //
+				surf->material()->bindGroup(), //
+				m_bindGroup,				   //
+				pipeline,					   //
 				surf->triangleCount() * 3, m_instanceCount, 0);
 
 			if (surf->material()->blendMode() == BlendMode::opaque) {

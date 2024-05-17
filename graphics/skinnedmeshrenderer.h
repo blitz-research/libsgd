@@ -20,9 +20,10 @@ struct SkinnedMeshRenderer : Renderer{
 private:
 	CMeshPtr m_mesh;
 	BindGroupPtr m_bindGroup;
-	uint32_t m_instanceCount{};
-	uint32_t m_instanceCapacity{10};
+	uint32_t m_instanceCapacity;
 	BufferPtr m_instanceBuffer;
+
+	uint32_t m_instanceCount{};
 
 	mutable bool m_rebuildRenderOps{true};
 	mutable bool m_updateInstanceCounts{true};

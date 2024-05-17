@@ -51,6 +51,12 @@ Local collider2=CreateMeshCollider(model2,0,0)
 Local collider3=CreateMeshCollider(model3,0,0)
 Local collider4=CreateMeshCollider(model4,0,0)
 
+SetEntityVisible model0, False
+SetEntityVisible model1, False
+SetEntityVisible model2, False
+SetEntityVisible model3, False
+SetEntityVisible model4, False
+
 Set2DTextColor 0,0,0,1
 
 While (PollEvents() And 1) <> 1
@@ -60,6 +66,12 @@ While (PollEvents() And 1) <> 1
 	TurnEntity model2, .3, .4, .5
 	TurnEntity model3, .3, .4, .5
 	TurnEntity model4, .3, .4, .5
+	
+	If KeyHit(49) SetEntityVisible model0,1-EntityVisible(model0)
+	If KeyHit(50) SetEntityVisible model1,1-EntityVisible(model1)
+	If KeyHit(51) SetEntityVisible model2,1-EntityVisible(model2)
+	If KeyHit(52) SetEntityVisible model3,1-EntityVisible(model3)
+	If KeyHit(53) SetEntityVisible model4,1-EntityVisible(model4)
 	
 	PlayerFly(.05)
 	

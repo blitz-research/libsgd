@@ -10,7 +10,7 @@ Type Block
 End Type
 
 Type Bullet
-	Field model
+	Field entity
 	Field timeout
 	Field vz#
 End Type
@@ -23,6 +23,10 @@ CreateWindow(DesktopWidth(), DesktopHeight(), "スノー Blocks", 1)
 CreateScene()
 
 LoadScene()
+
+;tSprite = CreateSprite(LoadImage("sgd://misc/light.png", 1))
+Global bulletSprite = CreateSprite(LoadImage("sgd://misc/light.png", 1))
+SetEntityVisible bulletSprite, 0
 
 While (PollEvents() And 1) <> 1
 
@@ -102,11 +106,15 @@ Function UpdateBullets()
 		
 		Local bullet.Bullet = New Bullet
 		
-		bullet\model = CreateModel(bulletMesh)
-		SetModelColor bullet\model,r,g,b,1
+;		bullet\entity = CreateModel(bulletMesh)
+;		SetModelColor bullet\entity,r,g,b,1
+
+		bullet\entity = CopyEntity(bulletSprite)
+		SetEntityVisible bullet\entity, True
+		SetSpriteColor bullet\entity,r,g,b,1
 		
-		SetEntityParent bullet\model,player
-		SetEntityParent bullet\model,0
+		SetEntityParent bullet\entity,player
+		SetEntityParent bullet\entity,0
 		
 		bullet\timeout = 180
 		bullet\vz = player_vz + 1
@@ -114,7 +122,7 @@ Function UpdateBullets()
 		
 		Local light=CreatePointLight()
 		SetLightCastsShadow light,True
-		SetEntityParent light,bullet\model
+		SetEntityParent light,bullet\entity
 		SetLightColor light,r,g,b,2
 		SetLightRange light,50
 		
@@ -124,10 +132,10 @@ Function UpdateBullets()
 	For bullet.Bullet = Each Bullet
 		bullet\timeout = bullet\timeout - 1
 		If bullet\timeout = 0
-			DestroyEntity bullet\model
+			DestroyEntity bullet\entity
 			Delete bullet
 		Else
-			MoveEntity bullet\model,0,0,bullet\vz
+			MoveEntity bullet\entity,0,0,bullet\vz
 		EndIf
 	Next
 

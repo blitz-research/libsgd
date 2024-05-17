@@ -56,7 +56,7 @@ void Entity::invalidate() {
 void Entity::validate() {
 	SGD_ASSERT(m_invalid);
 	m_invalid = false;
-	for(EntityListener* listener : m_listeners) listener->onInvalidate(this);
+	for(EntityListener* listener : m_listeners) listener->onValidate(this);
 	onValidate();
 }
 

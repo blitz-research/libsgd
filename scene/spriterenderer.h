@@ -17,13 +17,12 @@ struct SpriteRenderer : Renderer {
 	void remove(Sprite* sprite);
 
 private:
-	BindGroupPtr m_bindGroup;
-
 	Vector<Sprite*> m_instances;
-
 	uint32_t m_instanceCount{};
+
+	BindGroupPtr m_bindGroup;
+	uint32_t m_instanceCapacity;
 	BufferPtr m_instanceBuffer;
-	uint32_t m_instanceCapacity{};
 
 	void onUpdate(CVec3r eye) override;
 

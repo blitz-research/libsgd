@@ -21,7 +21,13 @@ BindGroupDescriptor bindGroupDescriptor( //
 
 } // namespace
 
-SpriteRenderer::SpriteRenderer() : m_bindGroup(new BindGroup(&bindGroupDescriptor)) {
+SpriteRenderer::SpriteRenderer()
+	: m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
+	  m_instanceCapacity(32),							//
+	  m_instanceBuffer(new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(SpriteInstance))) {
+
+	m_bindGroup->setBuffer(0, m_instanceBuffer);
+
 	addDependency(m_bindGroup);
 }
 
@@ -34,6 +40,8 @@ void SpriteRenderer::remove(Sprite* sprite) {
 }
 
 void SpriteRenderer::onUpdate(CVec3r eye) {
+	m_instanceCount = m_instances.size();
+	if (!m_instanceCount) return;
 
 	// Sort sprites
 	auto cmp = [=](const Sprite* lhs, const Sprite* rhs) {
@@ -41,16 +49,14 @@ void SpriteRenderer::onUpdate(CVec3r eye) {
 	};
 	std::sort(m_instances.begin(), m_instances.end(), cmp);
 
-	m_instanceCount = m_instances.size();
 	if (m_instanceCount > m_instanceCapacity) {
 		m_instanceCapacity = m_instanceCount;
-		m_instanceBuffer = new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(SpriteInstance));
-		m_bindGroup->setBuffer(0, m_instanceBuffer);
+		m_instanceBuffer->resize(m_instanceCapacity * sizeof(SpriteInstance));
 	}
 
 	auto inst = (SpriteInstance*)m_instanceBuffer->lock(0, m_instanceCount * sizeof(SpriteInstance));
 	for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
-		auto& worldMatrix =(*it)->worldMatrix();
+		auto& worldMatrix = (*it)->worldMatrix();
 		inst->matrix.i = {worldMatrix.r.i, 0};
 		inst->matrix.j = {worldMatrix.r.j, 0};
 		inst->matrix.k = {worldMatrix.r.k, 0};
@@ -65,16 +71,16 @@ void SpriteRenderer::onUpdate(CVec3r eye) {
 }
 
 void SpriteRenderer::onValidate(GraphicsContext* gc) const {
+	m_renderOps = {};
+	if (!m_instanceCount) return;
 
 	auto addOp = [&](Image* image, uint32_t count) {
-		auto material=image->material();
+		auto material = image->material();
 		auto pipeline = getOrCreateRenderPipeline(gc, material, m_bindGroup, DrawMode::triangleList);
 		auto& ops = m_renderOps[(int)renderPassType(material->blendMode())];
 		auto first = ops.empty() ? 0 : ops.back().firstElement + ops.back().elementCount;
 		ops.emplace_back(nullptr, nullptr, nullptr, material->bindGroup(), m_bindGroup, pipeline, count * 6, 1, first);
 	};
-
-	m_renderOps = {};
 
 	Image* image{};
 	uint32_t count{};
@@ -82,9 +88,9 @@ void SpriteRenderer::onValidate(GraphicsContext* gc) const {
 	for (Sprite* sprite : m_instances) {
 		if (sprite->image() != image) {
 			if (count) addOp(image, count);
-			image=sprite->image();
+			image = sprite->image();
 			count = 1;
-		}else {
+		} else {
 			++count;
 		}
 	}

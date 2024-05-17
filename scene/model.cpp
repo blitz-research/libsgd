@@ -13,7 +13,7 @@ Model::Model(const Model* that)
 	  m_bones(that->m_bones),		   //
 	  m_animations(that->m_animations) // We need an AnimationSet
 {
-	SGD_PANIC("TODO");
+	if(!m_bones.size()) return;
 
 	// This is currently a bit crusty, we need to remap bone entities to their copies, assumes they've been copied by Entity
 	// ctor 'in order'. We need a nicer way to do this ultimately.

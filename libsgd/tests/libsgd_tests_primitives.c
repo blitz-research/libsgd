@@ -55,7 +55,8 @@ start:
 	sgd_MoveEntity(models[4], 2.5f, y, tz);
 
 	for (int i = 0; i < 5; ++i) {
-		sgd_CreateMeshCollider(models[i], 0, 0);
+//		sgd_CreateMeshCollider(models[i], 0, 0);
+		sgd_SetEntityVisible(models[i], 0);
 	}
 
 	while (!(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)) {
@@ -111,6 +112,13 @@ start:
 //		sgd_Clear2D();
 		if (sgd_CameraPick(camera, sgd_MouseX(), sgd_MouseY(), ~0)) {
 			sgd_Draw2DText("Picked!", 0, 20);
+		}
+
+		for(int i =0;i<5;++i) {
+			if(!sgd_KeyHit(SGD_KEY_1+i)) continue;
+			int copy = sgd_CopyEntity(models[i]);
+			sgd_SetEntityVisible(copy,1);
+
 		}
 
 		sgd_RenderScene();

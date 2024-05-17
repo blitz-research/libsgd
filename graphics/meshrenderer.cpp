@@ -7,9 +7,9 @@ namespace sgd {
 
 namespace {
 
-auto shaderSource{
+auto shaderSource =
 #include "shaders/meshrenderer.wgsl"
-};
+;
 
 wgpu::VertexAttribute vertexBufferAttribs[]{
 	{wgpu::VertexFormat::Float32x3, 0, 0},	// Vec3f position
@@ -51,6 +51,7 @@ BindGroupDescriptor bindGroupDescriptor //
 MeshRenderer::MeshRenderer(CMesh* mesh)					//
 	: m_mesh(mesh),										//
 	  m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
+	  m_instanceCapacity(8),							//
 	  m_instanceBuffer(new Buffer(BufferType::instance, nullptr, m_instanceCapacity * sizeof(MeshInstance))) {
 
 	MeshUniforms meshUniforms;
