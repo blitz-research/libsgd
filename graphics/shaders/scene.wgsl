@@ -21,8 +21,8 @@ struct CameraUniforms {
 // ***** Lighting *****
 
 const maxDirectionalLights: u32 = 4;
-const maxPointLights: u32 = 8;
-const maxSpotLights: u32 = 8;
+const maxPointLights: u32 = 32;
+const maxSpotLights: u32 = 16;
 
 struct DirectionalLight {
     direction: vec3f,

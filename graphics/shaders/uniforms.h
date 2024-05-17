@@ -19,8 +19,8 @@ struct alignas(16) CameraUniforms {
 struct alignas(16) LightingUniforms {
 
 	static constexpr int maxDirectionalLights = 4;
-	static constexpr int maxPointLights = 8;
-	static constexpr int maxSpotLights = 8;
+	static constexpr int maxPointLights = 32;
+	static constexpr int maxSpotLights = 16;
 
 	struct alignas(16) DirectionalLight {
 		alignas(16) Vec3f direction{0, 0, -1}; // -forward

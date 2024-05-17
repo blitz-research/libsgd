@@ -36,14 +36,18 @@ const MaterialDescriptor imageMaterialDescriptor(								   //
 
 Image::Image() : m_material(new Material(&imageMaterialDescriptor)) {
 
-	m_material->blendMode = BlendMode::alpha;
-	m_material->cullMode = CullMode::none;
-
 	frames.changed.connect(nullptr, [=](Texture* t) { //
 		m_material->setTexture("frames", t);
 		m_drawRect = {-drawHandle(), Vec2f(frames()->size()) - drawHandle()};
 	});
 	frames = g_defaultTexture;
+
+	blendMode.changed.connect(nullptr, [=](BlendMode mode) {
+		m_material->blendMode = mode;
+	});
+	blendMode = BlendMode::alpha;
+
+	m_material->cullMode = CullMode::none;
 
 	spriteRect.changed.connect(nullptr, [=](CRectf r) { //
 		m_material->setVector4f("rect4f", Vec4f(r.min.x, r.min.y, r.max.x - r.min.x, r.max.y - r.min.y));

@@ -1,9 +1,13 @@
 
 ***** v0.06 *****
 
-* Added CameraPick, LinePick.
+* Bumped max point lights to 32, max spot lights to 16.
 
-* Added CreateSphereCollider, CreateMeshCollider, EnableCollisions, UpdateColliders. 
+* Added CameraProject.
+
+* Added CameraPick, LinePick, PickedX, PickedY, PickedZ, PickedNX, PickedNY, PickedNZ.
+
+* Added CreateSphereCollider, CreateMeshCollider, EnableCollisions, UpdateColliders. See collide.bb
 
 * (BREAKING) CreateSkybox now takes a texture paramter, use 0 for 'no texture' to get existing behaviour.
 

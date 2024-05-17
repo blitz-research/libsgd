@@ -17,14 +17,13 @@ SetSkyboxRoughness skybox,.3
 light = CreateDirectionalLight()
 TurnEntity light,-45,0,0	; Tilt light down 45 degrees 
 
-grassImage = LoadImage("sgd://misc/grass1.png", 4, 31, 1)
+grassImage = LoadImage("sgd://misc/grass1.png", 1)
 SetImageSpriteRect grassImage,-1,0,1,1
 
 Const n=20000
 
 For i=0 To n
-	sprite = CreateSprite()
-	SetSpriteImage(sprite, grassImage)
+	sprite = CreateSprite(grassImage)
 	TurnEntity(sprite,0,Rnd(360),0)
 	MoveEntity(sprite,0,-1.5,Rnd(100))
 	Local sc#=Rnd(1,2)

@@ -289,11 +289,15 @@ float SGD_DECL sgd_FontHeight(SGD_Font hfont) {
 
 // ***** Image *****
 
-SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int textureFormat, int textureFlags, int frames) {
+SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int frames) {
 	sgdx::started();
-	auto image = sgd::loadImage(sgd::Path(path), (sgd::TextureFormat)textureFormat, (sgd::TextureFlags)textureFlags, frames);
+	auto image = sgd::loadImage(sgd::Path(path), frames);
 	if (!image) sgdx::error("Failed to load image:" + image.error().message());
 	return sgdx::createHandle(image.result());
+}
+
+void SGD_DECL sgd_SetImageBlendMode(SGD_Image himage, int blendMode) {
+	sgdx::resolveHandle<sgd::Image>(himage)->blendMode = (sgd::BlendMode)blendMode;
 }
 
 void SGD_DECL sgd_SetImageSpriteViewMode(SGD_Image himage, int spriteViewMode) {

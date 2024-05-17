@@ -94,11 +94,11 @@ Collider* intersectRay(Camera* camera, CVec2f windowCoords, int colliderMask, Co
 
 	auto viewPos = clipCoords.xyz() / clipCoords.w;
 
+	auto worldPos = camera->worldMatrix() * Vec3r(viewPos);
+
 	auto r = camera->far() - camera->near();
 	auto d = std::sqrt(viewPos.x * viewPos.x + viewPos.y * viewPos.y + r * r);
 	Contact contact(d);
-
-	auto worldPos = camera->worldMatrix() * Vec3r(viewPos);
 
 	Liner ray(worldPos, normalize(worldPos - camera->worldPosition()));
 

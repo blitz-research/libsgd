@@ -15,7 +15,7 @@ struct Camera : Entity {
 
 	explicit Camera(const Camera* that);
 
-	Property<float> fov {45};
+	Property<float> fov{45};
 	Property<float> aspect{1};
 	Property<float> near{.1};
 	Property<float> far{1000};
@@ -35,5 +35,7 @@ private:
 
 	Entity* onCopy() const override;
 };
+
+Expected<Vec2f, bool> project(Camera* camera, CVec3r p);
 
 } // namespace sgd

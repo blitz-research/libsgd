@@ -66,6 +66,7 @@ While (PollEvents() And 1) <> 1
 	Local collider = CameraPick(camera,MouseX(),MouseY(),1)
 	
 	Clear2D()
+	
 	Draw2DText "Picked collider:" + collider,0,0
 	
 	RenderScene()

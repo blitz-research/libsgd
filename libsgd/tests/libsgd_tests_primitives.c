@@ -94,14 +94,17 @@ start:
 			sgd_TurnEntity(camera, 1, 0, 0);
 		}
 
+		sgd_Clear2D();
 		for (int i = 0; i < 5; ++i) {
 			sgd_TurnEntity(models[i], i / 10.0f, i / 5.0f + .1f, 0);
+			if(sgd_CameraProject(camera, sgd_EntityX(models[i]), sgd_EntityY(models[i]), sgd_EntityZ(models[i]))) {
+				sgd_Draw2DText("MODEL!", sgd_ProjectedX(), sgd_ProjectedY());
+			}
 		}
 
 		{
 			char buf[80];
 			sprintf(buf, "FPS: %f", sgd_FPS());
-			sgd_Clear2D();
 			sgd_Draw2DText(buf, 2, 2);
 		}
 

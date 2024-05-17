@@ -22,6 +22,9 @@ void createOverlay() {
 	sgdx::g_drawList->font = sgdx::g_defaultFont;
 }
 
+sgd::Contact g_pickContact;
+sgd::Vec2f g_projected;
+
 } // namespace
 
 void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend) {
@@ -196,93 +199,88 @@ void SGD_DECL sgd_ScaleEntity(SGD_Entity hentity, SGD_Real sx, SGD_Real sy, SGD_
 
 SGD_Real SGD_DECL sgd_EntityX(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
-	return entity->worldMatrix().t.x;
+	return entity->worldPosition().x;
 }
 
 SGD_Real SGD_DECL sgd_EntityY(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
-	return entity->worldMatrix().t.y;
+	return entity->worldPosition().y;
 }
 
 SGD_Real SGD_DECL sgd_EntityZ(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
-	return entity->worldMatrix().t.z;
+	return entity->worldPosition().z;
 }
 
 SGD_Real SGD_DECL sgd_EntityRX(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
-	return sgdx::pitch(entity->worldMatrix().r) * sgdx::radiansToDegrees;
+	return sgdx::pitch(entity->worldBasis()) * sgdx::radiansToDegrees;
 }
 
 SGD_Real SGD_DECL sgd_EntityRY(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
-	return sgdx::yaw(entity->worldMatrix().r) * sgdx::radiansToDegrees;
+	return sgdx::yaw(entity->worldBasis()) * sgdx::radiansToDegrees;
 }
 
 SGD_Real SGD_DECL sgd_EntityRZ(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
-	return sgdx::roll(entity->worldMatrix().r) * sgdx::radiansToDegrees;
+	return sgdx::roll(entity->worldBasis()) * sgdx::radiansToDegrees;
 }
 
 SGD_Real SGD_DECL sgd_EntitySX(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	return entity->worldScale().x;
 }
 
 SGD_Real SGD_DECL sgd_EntitySY(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	return entity->worldScale().y;
 }
 
 SGD_Real SGD_DECL sgd_EntitySZ(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	return entity->worldScale().z;
 }
 
 // ***** Camera *****
 
 SGD_Camera SGD_DECL sgd_CreatePerspectiveCamera() {
-
 	auto camera = new sgdx::Camera(sgdx::CameraType::perspective);
-
 	sgdx::mainScene()->add(camera);
-
 	return sgdx::createHandle(camera);
 }
 
 SGD_Camera SGD_DECL sgd_CreateOrthographicCamera() {
 	auto camera = new sgdx::Camera(sgdx::CameraType::orthographic);
-
 	sgdx::mainScene()->add(camera);
-
 	return sgdx::createHandle(camera);
 }
 
 void SGD_DECL sgd_SetCameraFOV(SGD_Camera hcamera, float fov) {
-	auto camera = sgdx::resolveHandle<sgdx::Camera>(hcamera);
-
-	camera->fov = fov;
+	sgdx::resolveHandle<sgdx::Camera>(hcamera)->fov = fov;
 }
 
 void SGD_DECL sgd_SetCameraNear(SGD_Camera hcamera, float near) {
-	auto camera = sgdx::resolveHandle<sgdx::Camera>(hcamera);
-
-	camera->near = near;
+	sgdx::resolveHandle<sgdx::Camera>(hcamera)->near = near;
 }
 
 void SGD_DECL sgd_SetCameraFar(SGD_Camera hcamera, float far) {
-	auto camera = sgdx::resolveHandle<sgdx::Camera>(hcamera);
+	sgdx::resolveHandle<sgdx::Camera>(hcamera)->far = far;
+}
 
-	camera->far = far;
+SGD_Bool SGD_DECL sgd_CameraProject(SGD_Camera hcamera, SGD_Real x, SGD_Real y, SGD_Real z) {
+	auto camera = sgdx::resolveHandle<sgdx::Camera>(hcamera);
+	auto r = sgd::project(camera, {x,y,z});
+	if(r) g_projected = r.result();
+	return r;
+}
+
+SGD_API float SGD_DECL sgd_ProjectedX() {
+	return g_projected.x;
+}
+
+SGD_API float SGD_DECL sgd_ProjectedY() {
+	return g_projected.y;
 }
 
 // ***** Light *****
@@ -424,21 +422,20 @@ void SGD_DECL sgd_SetModelColor(SGD_Model hmodel, float red, float green, float 
 
 // ***** Sprite *****
 
-SGD_Sprite SGD_DECL sgd_CreateSprite() {
+SGD_Sprite SGD_DECL sgd_CreateSprite(SGD_Image himage) {
+	auto image = himage ? 	sgdx::resolveHandle<sgdx::Image>(himage) : nullptr;
 	auto sprite = new sgdx::Sprite();
 	sgdx::mainScene()->add(sprite);
+	sprite->image=image;
 	return sgdx::createHandle<sgdx::Sprite>(sprite);
 }
 
 void SGD_DECL sgd_SetSpriteImage(SGD_Sprite hsprite, SGD_Image himage) {
-	sgdx::resolveHandle<sgdx::Sprite>(hsprite)->image = //
-		sgdx::resolveHandle<sgdx::Image>(himage);
+	sgdx::resolveHandle<sgdx::Sprite>(hsprite)->image =	sgdx::resolveHandle<sgdx::Image>(himage);
 }
 
 void SGD_DECL sgd_SetSpriteColor(SGD_Sprite hsprite, float red, float green, float blue, float alpha) {
-	auto sprite = sgdx::resolveHandle<sgdx::Sprite>(hsprite);
-
-	sprite->color = sgdx::Vec4f(red, green, blue, alpha);
+	sgdx::resolveHandle<sgdx::Sprite>(hsprite)->color = {red, green, blue, alpha};
 }
 
 void SGD_DECL sgd_SetSpriteFrame(SGD_Sprite hsprite, float frame) {
@@ -529,6 +526,7 @@ SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera hcamera, float windowX, float wi
 	auto camera = sgdx::resolveHandle<sgd::Camera>(hcamera);
 	sgd::Contact contact;
 	auto collider = sgd::intersectRay(camera, {windowX, windowY}, colliderMask, contact);
+	if(collider) g_pickContact=contact;
 	return collider ? sgdx::getOrCreateHandle(collider) : 0;
 }
 
@@ -542,5 +540,30 @@ SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Re
 	sgd::Liner ray(src, dir / d);
 	sgd::Contact contact(d);
 	auto collider = sgdx::mainScene()->collisionSpace()->intersectRay(ray, radius, colliderMask, contact);
+	if(collider) g_pickContact=contact;
 	return collider ? sgdx::getOrCreateHandle(collider) : 0;
+}
+
+SGD_Real SGD_DECL sgd_PickedX() {
+	return g_pickContact.point.x;
+}
+
+SGD_Real SGD_DECL sgd_PickedY() {
+	return g_pickContact.point.y;
+}
+
+SGD_Real SGD_DECL sgd_PickedZ() {
+	return g_pickContact.point.z;
+}
+
+SGD_Real SGD_DECL sgd_PickedNX() {
+	return g_pickContact.normal.x;
+}
+
+SGD_Real SGD_DECL sgd_PickedNY() {
+	return g_pickContact.normal.y;
+}
+
+SGD_Real SGD_DECL sgd_PickedNZ() {
+	return g_pickContact.normal.z;
 }

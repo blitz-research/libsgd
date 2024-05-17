@@ -21,6 +21,8 @@ struct Image : Shared {
 
 	Property<Texture*> frames;
 
+	Property<BlendMode> blendMode;
+
 	Property<Rectf> spriteRect{Rectf(-.5f, .5f)};
 
 	Property<SpriteViewMode> spriteViewMode{SpriteViewMode::fixed};

@@ -10,7 +10,7 @@ void entry() {
 	float fh = 24;
 	FontPtr font = loadFont(Path("sgd://fonts/FiraCode-Medium.ttf"), fh).result();
 	dc->font = font;
-	ImagePtr image = loadImage(Path("sgd://misc/explode64_vstrip.png"), TextureFormat::srgba8, TextureFlags::mipmap | TextureFlags::filter, 16).result();
+	ImagePtr image = loadImage(Path("sgd://misc/explode64_vstrip.png"), 16).result();
 
 	auto w = (float)window->size().x;
 	auto h = (float)window->size().y;

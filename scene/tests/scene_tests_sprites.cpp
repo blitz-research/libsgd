@@ -9,7 +9,7 @@ void entry() {
 	camera->setParent(pivot);
 	scene->add(camera);
 
-	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), TextureFormat::srgba8, TextureFlags::imageDefault, 1).result();
+	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), 1).result();
 	image->spriteViewMode = SpriteViewMode::upright;
 	image->spriteRect = Rectf{-1, 0, 1, 1};
 

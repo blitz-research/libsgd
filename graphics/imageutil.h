@@ -4,6 +4,6 @@
 
 namespace sgd {
 
-Expected<Image*, FileioEx> loadImage(CPath path, TextureFormat format, TextureFlags flags, uint32_t frames);
+Expected<Image*, FileioEx> loadImage(CPath path, uint32_t frames);
 
 }

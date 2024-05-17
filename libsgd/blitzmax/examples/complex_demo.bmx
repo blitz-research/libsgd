@@ -562,13 +562,9 @@ End Function
 
 Function CreateBulletSprite (sprite_path:String = "sgd://misc/light.png")
 
-	Local sprite:Int = SGD.CreateSprite ()
-	Local img:Int = SGD.LoadImage (sprite_path, SGD.TEXTURE_FORMAT_SRGBA8, SGD.TEXTURE_FLAGS_IMAGE_DEFAULT, 1)
-'	If Not mat RuntimeError "Hi"
-	
-	SGD.SetSpriteImage sprite, img
-		
-	' No HideEntity yet!
+	Local img:Int = SGD.LoadImage (sprite_path, 1)
+	Local sprite:Int = SGD.CreateSprite (img)
+
 	SGD.MoveEntity sprite, 0, -50, 0
 	
 	Return sprite

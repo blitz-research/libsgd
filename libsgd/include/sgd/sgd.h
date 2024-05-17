@@ -270,7 +270,7 @@ SGD_API float SGD_DECL sgd_GamepadAxis(int gamepad, int axis);
 
 //! Load a new texture.
 //!
-//! @param `path` is the file path of the texture image to load.
+//! @param `path` is the file path of the texture to load.
 //!
 //! @param `format` should be one of the following:
 //!
@@ -524,7 +524,10 @@ SGD_API float SGD_DECL sgd_FontHeight(SGD_Font font);
 //! @{
 
 //! Load an image for using with Draw2DImage or with 3D Sprites.
-SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int textureFormat, int textureFlags, int frames);
+SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int frames);
+
+//! Set image blend mode. See sgd_SetMaterialBlendMode for valid blend modes.
+SGD_API void SGD_DECL sgd_SetImageBlendMode(SGD_Image image, int blendMode);
 
 //! @cond
 #define SGD_SPRITE_VIEW_MODE_FIXED 1
@@ -793,6 +796,15 @@ SGD_API void SGD_DECL sgd_SetCameraNear(SGD_Camera camera, float near);
 //! Set camera far clipping plane.
 SGD_API void SGD_DECL sgd_SetCameraFar(SGD_Camera camera, float far);
 
+//! Project 3d point in world space to window coordinates.
+SGD_API SGD_Bool SGD_DECL sgd_CameraProject(SGD_Camera camera, SGD_Real x, SGD_Real y, SGD_Real z);
+
+//! X coordinate of projected point in window coordinates.
+SGD_API float SGD_DECL sgd_ProjectedX();
+
+//! Y coordinate of projected point in window coordinates.
+SGD_API float SGD_DECL sgd_ProjectedY();
+
 //! @}
 
 //! @name Light
@@ -891,7 +903,7 @@ SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox skybox, float roughness)
 //! @{
 
 //! Create a new sprite.
-SGD_API SGD_Sprite SGD_DECL sgd_CreateSprite();
+SGD_API SGD_Sprite SGD_DECL sgd_CreateSprite(SGD_Image image);
 
 //! Set sprite material.
 SGD_API void SGD_DECL sgd_SetSpriteImage(SGD_Sprite sprite, SGD_Image image);
@@ -942,6 +954,24 @@ SGD_API SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera camera, float windowX, f
 
 //! Pick first collider along line.
 SGD_API SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Real x1, SGD_Real y1, SGD_Real z1, SGD_Real radius, int colliderMask);
+
+//! X coordinate of pick contact point in world space.
+SGD_API SGD_Real SGD_DECL sgd_PickedX();
+
+//! Y coordinate of pick contact point in world space.
+SGD_API SGD_Real SGD_DECL sgd_PickedY();
+
+//! Z coordinate of pick contact point in world space.
+SGD_API SGD_Real SGD_DECL sgd_PickedZ();
+
+//! X compnent of pick contact normal in world space.
+SGD_API SGD_Real SGD_DECL sgd_PickedNX();
+
+//! Y component of pick contact normal in world space.
+SGD_API SGD_Real SGD_DECL sgd_PickedNY();
+
+//! Z component of pick contact normal in world space.
+SGD_API SGD_Real SGD_DECL sgd_PickedNZ();
 
 //! @}
 
