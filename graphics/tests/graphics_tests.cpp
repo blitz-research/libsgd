@@ -36,7 +36,7 @@ int main() {
 
 	window->sizeChanged.connect(nullptr, [](CVec2u) { render(); });
 
-	gc = new GraphicsContext(window, wgpu::BackendType::D3D12);
+	gc = new GraphicsContext(window, wgpu::BackendType::Undefined);
 
 	sceneBindings = new SceneBindings();
 

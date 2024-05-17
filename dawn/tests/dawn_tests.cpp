@@ -1,5 +1,7 @@
 #include <dawn/exports.h>
 
+#include <cassert>
+
 #include <GLFW/glfw3.h>
 
 #if SGD_OS_WINDOWS
@@ -24,14 +26,13 @@ GLFWwindow* window;
 
 wgpu::Device device;
 wgpu::Surface surface;
-wgpu::SwapChain swapChain;
 
 void render() {
-	drawHelloTriangle(device, swapChain.GetCurrentTexture());
-
-#if !SGD_OS_EMSCRIPTEN
-	swapChain.Present();
-#endif
+	struct wgpu::SurfaceTexture surfaceTexture {};
+	surface.GetCurrentTexture(&surfaceTexture);
+	assert(surfaceTexture.status == wgpu::SurfaceGetCurrentTextureStatus::Success);
+	drawHelloTriangle(device, surfaceTexture.texture);
+	surface.Present();
 }
 
 int main() {
@@ -45,15 +46,30 @@ int main() {
 	glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
 #endif
 
-	window = glfwCreateWindow(width, height, "Dawn test", nullptr, nullptr);
+	window = glfwCreateWindow((int)width, (int)height, "Dawn test", nullptr, nullptr);
 
 	device = createWGPUDevice({});
 	surface = createWGPUSurface(device, window);
-	swapChain = createWGPUSwapChain(device, surface, {width, height}, preferredWGPUSwapChainFormat(device));
+
+	static auto configureSurface = [=](CVec2u size) {
+		wgpu::SurfaceConfiguration config{};
+		config.device = device;
+		config.width = width;
+		config.height = height;
+		config.format = surface.GetPreferredFormat(device.GetAdapter());
+		config.usage = wgpu::TextureUsage::RenderAttachment;
+		config.presentMode = wgpu::PresentMode::Fifo;
+		config.viewFormatCount = 0;
+		config.viewFormats = nullptr;
+		config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
+		surface.Configure(&config);
+	};
 
 	glfwSetWindowSizeCallback(window, [](GLFWwindow*, int x, int y) {
-		swapChain = createWGPUSwapChain(device, surface, {(uint32_t)x, (uint32_t)y}, preferredWGPUSwapChainFormat(device));
+		configureSurface(Vec2u(x,y));
 	});
+
+	configureSurface(Vec2u(width,height));
 
 	for (;;) {
 		glfwPollEvents();

@@ -133,11 +133,6 @@ wgpu::Device createWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions)
 	return result;
 }
 
-wgpu::TextureFormat preferredWGPUSwapChainFormat(const wgpu::Device& device) {
-
-	return wgpu::TextureFormat::BGRA8Unorm;
-}
-
 wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) {
 
 	wgpu::Surface result;
@@ -178,35 +173,6 @@ wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) 
 	return result;
 }
 
-wgpu::SwapChain createWGPUSwapChain(const wgpu::Device& device, const wgpu::Surface& surface, CVec2u size,
-									wgpu::TextureFormat format) {
-	wgpu::SwapChain result;
-	CondVar<bool> ready;
-
-	runOnMainThread(
-		[&] {
-			wgpu::SwapChainDescriptor desc;
-			desc.usage = wgpu::TextureUsage::RenderAttachment;
-			desc.format = format;
-			desc.width = size.x;
-			desc.height = size.y;
-#if SGD_OS_EMSCRIPTEN
-			desc.presentMode = wgpu::PresentMode::Fifo;
-#else
-			// desc.presentMode = wgpu::PresentMode::Immediate;	// ?!?
-			// desc.presentMode = wgpu::PresentMode::Mailbox;	// vsync = off
-			desc.presentMode = wgpu::PresentMode::Fifo; // vsync = on
-#endif
-			result = device.CreateSwapChain(surface, &desc);
-			ready = true;
-		},
-		true);
-
-	ready.waiteq(true);
-	SGD_ASSERT(result);
-	return result;
-}
-
 #if SGD_OS_EMSCRIPTEN
 
 EM_CALLBACK void sgd_requestAnimationFrameOK(Function<void()>* func) {
@@ -220,7 +186,6 @@ EM_JS(void, sgd_requestAnimationFrame, (Function<void()>* func), {
 		_sgd_requestAnimationFrameOK(func);
 	});
 });
-
 // clang-format on
 
 void requestRender(CFunction<void()> renderFunc) {

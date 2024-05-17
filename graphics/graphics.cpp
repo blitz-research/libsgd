@@ -1,5 +1,4 @@
 #include "graphics.h"
-#include "scenebindings.h"
 #include "texture.h"
 
 #include "shaders/uniforms.h"
@@ -9,13 +8,9 @@
 #include <thread>
 
 #if SGD_OS_WINDOWS
-// clang-format off
+#define WIN32_MEAN_AND_LEAN
 #include <Windows.h>
-#include <VersionHelpers.h>
-// clang-format on
 #endif
-
-#define USE_DEPRECATED_SWAPCHAIN 1
 
 namespace sgd {
 
@@ -54,39 +49,17 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 				m_wgpuDevice = device;
 				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
 
-#if USE_DEPRECATED_SWAPCHAIN
-				auto createSwapChain = [=](CVec2u size) {
+				auto configureSurface = [=](CVec2u size) {
 					m_canRender = size.x && size.y;
 					if (!m_canRender) {
-						m_wgpuSwapChain = {};
-						m_colorBuffer = {};
-						m_depthBuffer = {};
+						m_colorBuffer = m_depthBuffer = {};
 						return;
 					}
-
-					m_wgpuSwapChain =
-						createWGPUSwapChain(m_wgpuDevice, m_wgpuSurface, size, preferredWGPUSwapChainFormat(m_wgpuDevice));
-
-					m_colorBuffer =
-						new Texture(size, 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
-					m_colorBuffer->validate(this);
-
-					m_depthBuffer =
-						new Texture(size, 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
-					m_depthBuffer->validate(this);
-				};
-				m_window->sizeChanged0.connect(this, [=](CVec2u size) { //
-					createSwapChain(size);
-				});
-				createSwapChain(m_window->size());
-#else
-				auto configureSurface = [=](CVec2u size) {
 					wgpu::SurfaceConfiguration config{};
 					config.device = m_wgpuDevice;
 					config.width = size.x;
 					config.height = size.y;
-					config.format = preferredWGPUSwapChainFormat(m_wgpuDevice);
-//						m_wgpuSurface.GetPreferredFormat(m_wgpuDevice.GetAdapter());
+					config.format = m_wgpuSurface.GetPreferredFormat(m_wgpuDevice.GetAdapter());
 					config.usage = wgpu::TextureUsage::RenderAttachment;
 					config.presentMode = wgpu::PresentMode::Fifo;
 					config.viewFormatCount = 0;
@@ -96,17 +69,18 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 
 					m_colorBuffer =
 						new Texture(size, 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
-					m_colorBuffer->validate(this);
-
 					m_depthBuffer =
 						new Texture(size, 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
+
+					m_colorBuffer->validate(this);
 					m_depthBuffer->validate(this);
 				};
+
 				m_window->sizeChanged0.connect(this, [=](CVec2u size) { //
 					configureSurface(size);
 				});
 				configureSurface(m_window->size());
-#endif
+
 				ready = true;
 			});
 		},
@@ -131,22 +105,15 @@ void GraphicsContext::present(Texture* texture) {
 	auto& wgpuTexture = texture->wgpuTexture();
 
 	requestRender([=] {
-#if USE_DEPRECATED_SWAPCHAIN
-		copyTexture(m_wgpuDevice, wgpuTexture, m_wgpuSwapChain.GetCurrentTexture());
-#if !SGD_OS_EMSCRIPTEN
-		m_wgpuSwapChain.Present();
-#endif
-#else
 		struct wgpu::SurfaceTexture surfaceTexture {};
 		m_wgpuSurface.GetCurrentTexture(&surfaceTexture);
 		if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::Success) {
-			SGD_LOG << "OOPS";
+			SGD_LOG << "wgpu::Surface::GetCurrentTexture() failed.";
 			return;
 		}
 		copyTexture(m_wgpuDevice, wgpuTexture, surfaceTexture.texture);
 #if !SGD_OS_EMSCRIPTEN
 		m_wgpuSurface.Present();
-#endif
 #endif
 	});
 }
