@@ -10,7 +10,7 @@ Currently supported languages include C/C++, python and nodejs. Support for more
 
 LibSGD is licensed under the Zlib/PNG license.
 
-Joins the LibSFD discussion at https://skirmish-dev.net/fourm
+Joins the LibSFD discussion at https://skirmish-dev.net/forum
 
 Help support LibSGD at https://patreon.com/libsgd
 
