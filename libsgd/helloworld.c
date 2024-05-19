@@ -14,6 +14,7 @@ int main() {
     sgd_SetSceneClearColor(1,.5,0,1);
     
     while(!sgd_PollEvents()) {
+		if(sgd_KeyHit(SGD_KEY_ESCAPE)) break;
         sgd_RenderScene();
         sgd_Present();
     }

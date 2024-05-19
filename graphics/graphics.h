@@ -82,6 +82,10 @@ protected:
 
 	virtual void onValidate(GraphicsContext* gc) const {};
 
+	bool valid() const {
+		return !m_invalid;
+	}
+
 private:
 	inline static Vector<CGraphicsResource*> g_invalidQueue;
 

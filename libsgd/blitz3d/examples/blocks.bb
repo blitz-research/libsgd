@@ -15,7 +15,7 @@ Type Bullet
 	Field vz#
 End Type
 
-Global bulletMesh
+Global bulletImage
 Global slimeball
 
 CreateWindow(DesktopWidth(), DesktopHeight(), "スノー Blocks", 1)
@@ -23,10 +23,6 @@ CreateWindow(DesktopWidth(), DesktopHeight(), "スノー Blocks", 1)
 CreateScene()
 
 LoadScene()
-
-;tSprite = CreateSprite(LoadImage("sgd://misc/light.png", 1))
-Global bulletSprite = CreateSprite(LoadImage("sgd://misc/light.png", 1))
-SetEntityVisible bulletSprite, 0
 
 While (PollEvents() And 1) <> 1
 
@@ -60,9 +56,7 @@ Function LoadScene()
 	
 	Local skybox = CreateSkybox(env)
 	
-	Local material = CreatePrelitMaterial()
-	bulletMesh = CreateSphereMesh(.5,24,12,material)
-	SetMeshCastsShadow bulletMesh,0
+	bulletImage = LoadImage("sgd://misc/light.png", 1)
 
 	Local light = CreateDirectionalLight()
 	SetLightColor light,1,1,1,.2
@@ -106,11 +100,7 @@ Function UpdateBullets()
 		
 		Local bullet.Bullet = New Bullet
 		
-;		bullet\entity = CreateModel(bulletMesh)
-;		SetModelColor bullet\entity,r,g,b,1
-
-		bullet\entity = CopyEntity(bulletSprite)
-		SetEntityVisible bullet\entity, True
+		bullet\entity = CreateSprite(bulletImage)
 		SetSpriteColor bullet\entity,r,g,b,1
 		
 		SetEntityParent bullet\entity,player

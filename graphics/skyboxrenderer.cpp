@@ -11,6 +11,7 @@ auto shaderSource{
 };
 
 BindGroupDescriptor bindGroupDescriptor( //
+	"skyboxRenderer",
 	3,
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform), // SkyboxUniforms
@@ -57,7 +58,7 @@ void SkyboxRenderer::onValidate(GraphicsContext* gc) const {
 												  m_bindGroup, DrawMode::triangleStrip);
 		auto& ops = m_renderOps[(int)RenderPassType::clear];
 		ops.clear();
-		ops.emplace_back(nullptr, nullptr, nullptr, nullptr, m_bindGroup, pipeline, 4, 1, 0);
+		ops.emplace_back(nullptr, nullptr, nullptr, emptyBindGroup(1), m_bindGroup, pipeline, 4, 1, 0);
 		m_rebuildRenderOps = false;
 	}
 

@@ -55,6 +55,7 @@ struct Buffer : GraphicsResource {
 	void resize(uint32_t size);
 
 	const wgpu::Buffer& wgpuBuffer() const {
+		SGD_ASSERT(valid());
 		return m_wgpuBuffer;
 	}
 

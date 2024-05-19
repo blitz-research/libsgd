@@ -1,7 +1,21 @@
 
 ***** V0.06.1 *****
 
-Fixed CopyEntity crash when copying models.
+* Add quad primite to primitives.bb via createBox.
+
+* Added SetLightPriority - test please James!
+
+* Added hit ESCAPE to exit to helloworlds.
+
+* Added key codes to SWIG targets.
+
+* Added TransformMesh.
+
+* Fixed sprite image->material dependency crash.
+
+* Fixed SpriteRenderer crash with 0 sprites.
+
+* Fixed CopyEntity crash when copying models.
 
 
 ***** v0.06 *****

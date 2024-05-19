@@ -411,12 +411,12 @@ SGD_API void SGD_DECL sgd_SetMaterialTexture(SGD_Material material, SGD_String p
 //! Load a new mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path);
 
-//! Create a new sphere mesh.
-SGD_API SGD_Mesh SGD_DECL sgd_CreateSphereMesh(float radius, int xSegs, int ySegs, SGD_Material material);
-
 //! Create a new box mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_CreateBoxMesh(float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
 											SGD_Material material);
+
+//! Create a new sphere mesh.
+SGD_API SGD_Mesh SGD_DECL sgd_CreateSphereMesh(float radius, int xSegs, int ySegs, SGD_Material material);
 
 //! Create a new cylinder mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_CreateCylinderMesh(float height, float radius, int segs, SGD_Material material);
@@ -445,6 +445,9 @@ SGD_API void SGD_DECL sgd_UpdateMeshTangents(SGD_Mesh mesh);
 //! Fit mesh to a bounding box.
 SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh mesh, float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
 								  SGD_Bool uniform);
+
+//! Transform mesh by translation, rotation, scale.
+SGD_API void SGD_DECL sgd_TransformMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz);
 
 //! Transform mesh texture coordinates.
 SGD_API void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
@@ -839,6 +842,9 @@ SGD_API void SGD_DECL sgd_SetLightCastsShadow(SGD_Light light, SGD_Bool castShad
 
 //! Get light castsShadow flag.
 SGD_API SGD_Bool SGD_DECL sgd_LightCastsShadow(SGD_Light light);
+
+//! Set light priority.
+SGD_API void SGD_DECL sgd_SetLightPriority(SGD_Light light, int priority);
 
 //! @}
 

@@ -12,6 +12,7 @@ auto shaderSource{
 };
 
 BindGroupDescriptor bindGroupDescriptor( //
+	"shadowMaterial",
 	1,									 // material
 	{},									 //
 	{},									 //

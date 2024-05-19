@@ -114,6 +114,7 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
 	wgpu::PipelineLayoutDescriptor pipelineLayoutDesc{};
 	pipelineLayoutDesc.bindGroupLayoutCount = std::size(bindGroupLayouts);
 	pipelineLayoutDesc.bindGroupLayouts = bindGroupLayouts;
+	pipelineLayoutDesc.label = renderer->descriptor()->label;
 
 	pipelineDescriptor.layout = gc->wgpuDevice().CreatePipelineLayout(&pipelineLayoutDesc);
 

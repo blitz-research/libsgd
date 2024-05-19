@@ -11,6 +11,7 @@ auto shaderSource{
 };
 
 BindGroupDescriptor bindGroupDescriptor( //
+	"spriteRenderer",
 	2,
 	{
 		bufferBindGroupLayoutEntry( //
@@ -55,14 +56,14 @@ void SpriteRenderer::onUpdate(CVec3r eye) {
 	}
 
 	auto inst = (SpriteInstance*)m_instanceBuffer->lock(0, m_instanceCount * sizeof(SpriteInstance));
-	for (auto it = m_instances.begin(); it != m_instances.end(); ++it) {
-		auto& worldMatrix = (*it)->worldMatrix();
+	for(auto sprite : m_instances) {
+		auto& worldMatrix = sprite->worldMatrix();
 		inst->matrix.i = {worldMatrix.r.i, 0};
 		inst->matrix.j = {worldMatrix.r.j, 0};
 		inst->matrix.k = {worldMatrix.r.k, 0};
 		inst->matrix.t = {worldMatrix.t - eye, 1};
-		inst->color = (*it)->color();
-		inst->frame = (*it)->frame();
+		inst->color = sprite->color();
+		inst->frame = sprite->frame();
 		++inst;
 	}
 	m_instanceBuffer->unlock();
@@ -74,8 +75,9 @@ void SpriteRenderer::onValidate(GraphicsContext* gc) const {
 	m_renderOps = {};
 	if (!m_instanceCount) return;
 
-	auto addOp = [&](Image* image, uint32_t count) {
+	auto add = [&](Image* image, uint32_t count) {
 		auto material = image->material();
+		material->validate(gc);
 		auto pipeline = getOrCreateRenderPipeline(gc, material, m_bindGroup, DrawMode::triangleList);
 		auto& ops = m_renderOps[(int)renderPassType(material->blendMode())];
 		auto first = ops.empty() ? 0 : ops.back().firstElement + ops.back().elementCount;
@@ -87,14 +89,14 @@ void SpriteRenderer::onValidate(GraphicsContext* gc) const {
 
 	for (Sprite* sprite : m_instances) {
 		if (sprite->image() != image) {
-			if (count) addOp(image, count);
+			if (count) add(image, count);
 			image = sprite->image();
 			count = 1;
 		} else {
 			++count;
 		}
 	}
-	if (count) addOp(image, count);
+	if (count) add(image, count);
 }
 
 } // namespace sgd

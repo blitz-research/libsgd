@@ -13,6 +13,7 @@ auto shaderSource{
 TexturePtr g_defaultTexture = new Texture({1, 1}, 1, TextureFormat::r8, TextureFlags::array | TextureFlags::clamp);
 
 BindGroupDescriptor bindGroupDescriptor( //
+	"imageMaterial",
 	1,
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform),		   //
@@ -21,9 +22,7 @@ BindGroupDescriptor bindGroupDescriptor( //
 	},
 	{}, shaderSource);
 
-} // namespace
-
-const MaterialDescriptor imageMaterialDescriptor(								   //
+const MaterialDescriptor materialDescriptor(									   //
 	"image",																	   //
 	&bindGroupDescriptor,														   //
 	sizeof(ImageMaterialUniforms),												   //
@@ -34,7 +33,9 @@ const MaterialDescriptor imageMaterialDescriptor(								   //
 		{"frames", {1, nullptr}},
 	});
 
-Image::Image() : m_material(new Material(&imageMaterialDescriptor)) {
+} // namespace
+
+Image::Image() : m_material(new Material(&materialDescriptor)) {
 
 	frames.changed.connect(nullptr, [=](Texture* t) { //
 		m_material->setTexture("frames", t);
@@ -42,9 +43,7 @@ Image::Image() : m_material(new Material(&imageMaterialDescriptor)) {
 	});
 	frames = g_defaultTexture;
 
-	blendMode.changed.connect(nullptr, [=](BlendMode mode) {
-		m_material->blendMode = mode;
-	});
+	blendMode.changed.connect(nullptr, [=](BlendMode mode) { m_material->blendMode = mode; });
 	blendMode = BlendMode::alpha;
 
 	m_material->cullMode = CullMode::none;
@@ -54,7 +53,9 @@ Image::Image() : m_material(new Material(&imageMaterialDescriptor)) {
 	});
 	spriteRect.changed.emit(spriteRect());
 
-	spriteViewMode.changed.connect(nullptr, [=](SpriteViewMode mode) { m_material->setInt("spriteViewMode1i", (int)mode); });
+	spriteViewMode.changed.connect(nullptr, [=](SpriteViewMode mode) { //
+		m_material->setInt("spriteViewMode1i", (int)mode);
+	});
 	spriteViewMode.changed.emit(spriteViewMode());
 
 	drawHandle.changed.connect(nullptr, [=](CVec2f v) { //

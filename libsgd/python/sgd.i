@@ -15,3 +15,4 @@
 %rename("%(regex:/(sgd_|SGD_)(.*)/\\2/)s") "";
 
 %include <sgd/sgd.h>
+%include <sgd/keycodes.h>

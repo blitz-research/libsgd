@@ -12,6 +12,7 @@ auto shaderSource{
 };
 
 BindGroupDescriptor bindGroupDescriptor( //
+	"prelitMaterial",
 	1,
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform), // PrelitMaterialUniforms

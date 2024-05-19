@@ -13,14 +13,15 @@ uint32_t nextHash(uint32_t bindGroupIndex) {
 } // namespace
 
 BindGroupDescriptor::BindGroupDescriptor(
-	uint32_t bindGroupIndex,									//
-	CVector<wgpu::BindGroupLayoutEntry> bindGroupLayoutEntries, //
-	CVector<wgpu::VertexBufferLayout> vertexBufferLayouts,		// Only for geometry shaders right now...
-	CString shaderSource)										//
-	: wgpuBindGroupIndex(bindGroupIndex),						//
-	  wgpuBindGroupLayoutEntries(bindGroupLayoutEntries),		//
-	  wgpuVertexBufferLayouts(vertexBufferLayouts),				//
-	  wgpuShaderSource(shaderSource),							//
+	const char* label,												 //
+	uint32_t bindGroupIndex,										 //
+	Vector<wgpu::BindGroupLayoutEntry> bindGroupLayoutEntries,		 //
+	Vector<wgpu::VertexBufferLayout> vertexBufferLayouts,			 // Only for geometry shaders right now...
+	String shaderSource)											 //
+	: label(label), wgpuBindGroupIndex(bindGroupIndex),				 //
+	  wgpuBindGroupLayoutEntries(std::move(bindGroupLayoutEntries)), //
+	  wgpuVertexBufferLayouts(std::move(vertexBufferLayouts)),		 //
+	  wgpuShaderSource(std::move(shaderSource)),					 //
 	  hash(nextHash(bindGroupIndex)) {
 }
 
@@ -36,6 +37,7 @@ wgpu::BindGroupLayout BindGroupDescriptor::wgpuBindGroupLayout(GraphicsContext* 
 	wgpu::BindGroupLayoutDescriptor desc{};
 	desc.entryCount = wgpuBindGroupLayoutEntries.size();
 	desc.entries = wgpuBindGroupLayoutEntries.data();
+	desc.label = label;
 
 	return layout = gc->wgpuDevice().CreateBindGroupLayout(&desc);
 }
@@ -52,21 +54,21 @@ void BindGroup::setResource(uint32_t index, CGraphicsResource* resource) {
 	invalidate(true);
 }
 
-void BindGroup::setBuffer(uint32_t index, const Buffer* buffer) {
+void BindGroup::setBuffer(uint32_t index, CBuffer* buffer) {
 	SGD_ASSERT(index < m_desc->wgpuBindGroupLayoutEntries.size());
 	SGD_ASSERT(m_desc->wgpuBindGroupLayoutEntries[index].buffer.type != wgpu::BufferBindingType::Undefined);
 
 	setResource(index, buffer);
 }
 
-const Buffer* BindGroup::getBuffer(uint32_t index) const {
+CBuffer* BindGroup::getBuffer(uint32_t index) const {
 	SGD_ASSERT(index < m_desc->wgpuBindGroupLayoutEntries.size());
 	SGD_ASSERT(m_desc->wgpuBindGroupLayoutEntries[index].buffer.type != wgpu::BufferBindingType::Undefined);
 
 	return m_resources[index] ? m_resources[index]->as<const Buffer>() : nullptr;
 }
 
-void BindGroup::setTexture(uint32_t index, const Texture* texture) {
+void BindGroup::setTexture(uint32_t index, CTexture* texture) {
 	SGD_ASSERT(index < m_desc->wgpuBindGroupLayoutEntries.size());
 	SGD_ASSERT(m_desc->wgpuBindGroupLayoutEntries[index].texture.sampleType != wgpu::TextureSampleType::Undefined);
 
@@ -77,7 +79,7 @@ void BindGroup::setTexture(uint32_t index, const Texture* texture) {
 	}
 }
 
-const Texture* BindGroup::getTexture(uint32_t index) const {
+CTexture* BindGroup::getTexture(uint32_t index) const {
 	SGD_ASSERT(index < m_desc->wgpuBindGroupLayoutEntries.size());
 	SGD_ASSERT(m_desc->wgpuBindGroupLayoutEntries[index].texture.sampleType != wgpu::TextureSampleType::Undefined);
 
@@ -85,7 +87,6 @@ const Texture* BindGroup::getTexture(uint32_t index) const {
 }
 
 void BindGroup::onValidate(GraphicsContext* gc) const {
-
 	auto& bglEntries = m_desc->wgpuBindGroupLayoutEntries;
 
 	Vector<wgpu::BindGroupEntry> entries(bglEntries.size());
@@ -107,6 +108,7 @@ void BindGroup::onValidate(GraphicsContext* gc) const {
 	desc.layout = m_desc->wgpuBindGroupLayout(gc);
 	desc.entryCount = entries.size();
 	desc.entries = entries.data();
+	desc.label = m_desc->label;
 	m_bindGroup = gc->wgpuDevice().CreateBindGroup(&desc);
 }
 
@@ -116,12 +118,13 @@ BindGroup* emptyBindGroup(uint32_t index) {
 
 	if (bindGroups[index]) return bindGroups[index];
 
-	static const BindGroupDescriptor descs[]{				  //
-											 {0, {}, {}, {}}, //
-											 {1, {}, {}, {}}, //
-											 {2, {}, {}, {}}};
+	static const BindGroupDescriptor descs[]{{"emptyBindGroup0", 0, {}, {}, {}}, //
+											 {"emptyBindGroup1", 1, {}, {}, {}}, //
+											 {"emptyBindGroup2", 2, {}, {}, {}}};
 
-	return bindGroups[index] = new BindGroup(&descs[index]);
+	bindGroups[index] = new BindGroup(&descs[index]);
+
+	return bindGroups[index];
 }
 
 } // namespace sgd

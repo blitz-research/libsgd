@@ -33,6 +33,7 @@ struct Light : Entity {
 	Property<float> innerConeAngle{0};
 	Property<float> outerConeAngle{45};
 	Property<bool> castsShadow{false};
+	Property<int> priority{0};
 
 private:
 	LightType m_type{LightType::directional};

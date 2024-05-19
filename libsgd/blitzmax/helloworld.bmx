@@ -9,6 +9,7 @@ SGD.CreateScene()
 SGD.SetSceneClearColor(1,.5,0,1)
 
 While (SGD.PollEvents() & sgd.EVENT_MASK_CLOSE_CLICKED) = 0
+    If SGD.KeyHit(SGD.KEY_ESCAPE) Exit
     SGD.RenderScene()
     SGD.Present()
 Wend

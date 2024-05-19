@@ -68,6 +68,7 @@ template <class T> Vec3<T> min(CVec3<T> p, CVec3<T> q);
 template <class T> Vec3<T> max(CVec3<T> p, CVec3<T> q);
 
 template <class T> T length(CVec3<T> v);
+template <class T> T lengthsq(CVec3<T> v);
 template <class T> T yaw(CVec3<T> v);
 template <class T> T pitch(CVec3<T> v);
 

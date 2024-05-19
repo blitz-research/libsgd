@@ -12,6 +12,7 @@ auto shaderSource{
 };
 
 BindGroupDescriptor bindGroupDescriptor( //
+	"pbrMaterial",
 	1,
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform), // PBRMaterialUniforms

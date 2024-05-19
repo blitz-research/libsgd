@@ -286,90 +286,71 @@ SGD_API float SGD_DECL sgd_ProjectedY() {
 // ***** Light *****
 
 SGD_Light SGD_DECL sgd_CreateDirectionalLight() {
+	sgdx::started();
 	auto light = new sgdx::Light(sgdx::LightType::directional);
-
 	sgdx::mainScene()->add(light);
-
 	return sgdx::createHandle(light);
 }
 
 SGD_Light SGD_DECL sgd_CreatePointLight() {
+	sgdx::started();
 	auto light = new sgdx::Light(sgdx::LightType::point);
-
 	sgdx::mainScene()->add(light);
-
 	return sgdx::createHandle(light);
 }
 
 SGD_Light SGD_DECL sgd_CreateSpotLight() {
+	sgdx::started();
 	auto light = new sgdx::Light(sgdx::LightType::spot);
-
 	sgdx::mainScene()->add(light);
-
 	return sgdx::createHandle(light);
 }
 
 void SGD_DECL sgd_SetLightColor(SGD_Light hlight, float red, float green, float blue, float alpha) {
-	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-
-	light->color = sgdx::Vec4f(red, green, blue, alpha);
+	sgdx::resolveHandle<sgdx::Light>(hlight)->color = sgdx::Vec4f(red, green, blue, alpha);
 }
 
 void SGD_DECL sgd_SetLightRange(SGD_Light hlight, float range) {
-	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-
-	light->range = range;
+	sgdx::resolveHandle<sgdx::Light>(hlight)->range = range;
 }
 
 void SGD_DECL sgd_SetLightFalloff(SGD_Light hlight, float falloff) {
-	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-
-	light->falloff = falloff;
+	sgdx::resolveHandle<sgdx::Light>(hlight)->falloff = falloff;
 }
 
 void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light hlight, float angle) {
-	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-
-	light->innerConeAngle = angle;
+	sgdx::resolveHandle<sgdx::Light>(hlight)->innerConeAngle = angle;
 }
 
 void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light hlight, float angle) {
-	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-
-	light->outerConeAngle = angle;
+	sgdx::resolveHandle<sgdx::Light>(hlight)->outerConeAngle = angle;
 }
 
 void SGD_DECL sgd_SetLightCastsShadow(SGD_Light hlight, SGD_Bool castsShadow) {
-	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-
-	light->castsShadow = castsShadow;
+	sgdx::resolveHandle<sgdx::Light>(hlight)->castsShadow = castsShadow;
 }
 
 SGD_Bool SGD_DECL sgd_LightCastsShadow(SGD_Light hlight) {
-	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
+	return sgdx::resolveHandle<sgdx::Light>(hlight)->castsShadow();
+}
 
-	return light->castsShadow();
+void SGD_DECL sgd_SetLightPriority(SGD_Light hlight, int priority) {
+	sgdx::resolveHandle<sgdx::Light>(hlight)->priority = priority;
 }
 
 // ***** Model *****
 
 SGD_Model SGD_DECL sgd_LoadModel(SGD_String path) {
-
 	auto mesh = sgdx::loadStaticMesh(sgdx::Path(path));
 	if (!mesh) sgdx::error("Failed to load mesh", mesh.error());
-
-	auto model = new sgdx::Model();
+	auto model = new sgd::Model();
 	model->mesh = mesh.result();
-
 	sgdx::mainScene()->add(model);
-
 	return sgdx::createHandle(model);
 }
 
 SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path, SGD_Bool skinned) {
-
-	sgdx::Model* model;
-
+	sgd::Model* model;
 	if (skinned) {
 		auto r = sgdx::loadSkinnedModel(sgdx::Path(path));
 		if (!r) sgdx::error("Failed to load model", r.error());
@@ -379,35 +360,32 @@ SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path, SGD_Bool skinned) {
 		if (!r) sgdx::error("Failed to load model", r.error());
 		model = r.result();
 	}
-
 	sgdx::mainScene()->add(model);
-
 	return sgdx::createHandle(model);
 }
 
 void SGD_DECL sgd_AnimateModel(SGD_Model hmodel, int animation, float time, int mode) {
-	auto model = sgdx::resolveHandle<sgdx::Model>(hmodel);
-
+	auto model = sgdx::resolveHandle<sgd::Model>(hmodel);
 	model->animate(animation, time, (sgdx::AnimationMode)mode);
 }
 
 SGD_Model SGD_DECL sgd_CreateModel(SGD_Mesh hmesh) {
 	auto mesh = hmesh ? sgdx::resolveHandle<sgdx::Mesh>(hmesh) : nullptr;
-	auto model = new sgdx::Model();
+	auto model = new sgd::Model();
 	sgdx::mainScene()->add(model);
 	if (mesh) model->mesh = mesh;
 	return sgdx::createHandle(model);
 }
 
 void SGD_DECL sgd_SetModelMesh(SGD_Model hmodel, SGD_Mesh hmesh) {
-	auto model = sgdx::resolveHandle<sgdx::Model>(hmodel);
+	auto model = sgdx::resolveHandle<sgd::Model>(hmodel);
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
 
 	model->mesh = mesh;
 }
 
 SGD_Mesh SGD_DECL sgd_ModelMesh(SGD_Model hmodel) {
-	auto model = sgdx::resolveHandle<sgdx::Model>(hmodel);
+	auto model = sgdx::resolveHandle<sgd::Model>(hmodel);
 
 	auto mesh = model->mesh().get();
 
@@ -415,7 +393,7 @@ SGD_Mesh SGD_DECL sgd_ModelMesh(SGD_Model hmodel) {
 }
 
 void SGD_DECL sgd_SetModelColor(SGD_Model hmodel, float red, float green, float blue, float alpha) {
-	auto model = sgdx::resolveHandle<sgdx::Model>(hmodel);
+	auto model = sgdx::resolveHandle<sgd::Model>(hmodel);
 
 	model->color = sgdx::Vec4f(red, green, blue, alpha);
 }

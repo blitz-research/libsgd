@@ -26,16 +26,17 @@ static_assert(sizeof(Vertex) == 88);
 wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(Vertex), wgpu::VertexStepMode::Vertex, std::size(vertexBufferAttribs),
 												  vertexBufferAttribs};
 
-BindGroupDescriptor bindGroupDescriptor //
-	(2,
-	 {
-		 bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
-									wgpu::BufferBindingType::Uniform),
-		 bufferBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
-									wgpu::BufferBindingType::ReadOnlyStorage),
-	 },
-	 {vertexBufferLayout}, //
-	 shaderSource);
+BindGroupDescriptor bindGroupDescriptor( //
+	"skinnedMeshRenderer",				 //
+	2,
+	{
+		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
+								   wgpu::BufferBindingType::Uniform),
+		bufferBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
+								   wgpu::BufferBindingType::ReadOnlyStorage),
+	},
+	{vertexBufferLayout}, //
+	shaderSource);
 
 } // namespace
 

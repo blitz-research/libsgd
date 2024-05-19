@@ -184,7 +184,9 @@ void Scene::updateLightingBindings() {
 
 	// sort point lights
 	auto cmp = [=](const Light* lhs, const Light* rhs) {
-		return length(rhs->worldMatrix().t - m_eye) > length(lhs->worldMatrix().t - m_eye);
+		// return true if lhs higher priority than rhs
+		if(lhs->priority()!=rhs->priority()) return lhs->priority() > rhs->priority();
+		return lengthsq(lhs->worldMatrix().t - m_eye) < lengthsq(rhs->worldMatrix().t - m_eye);
 	};
 	std::sort(pointLights.begin(), pointLights.end(), cmp);
 

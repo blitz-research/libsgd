@@ -38,46 +38,51 @@ SGD_Material SGD_DECL sgd_LoadPrelitMaterial(SGD_String path) {
 }
 
 void SGD_DECL sgd_SetMaterialBlendMode(SGD_Material hmaterial, int blendMode) {
-	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	material->blendMode = (sgd::BlendMode)blendMode;
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->blendMode = (sgd::BlendMode)blendMode;
 }
 
 void SGD_DECL sgd_SetMaterialDepthFunc(SGD_Material hmaterial, int depthFunc) {
-	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	material->depthFunc = (sgd::DepthFunc)depthFunc;
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->depthFunc = (sgd::DepthFunc)depthFunc;
 }
 
 void SGD_DECL sgd_SetMaterialCullMode(SGD_Material hmaterial, int cullMode) {
-	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	material->cullMode = (sgd::CullMode)cullMode;
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->cullMode = (sgd::CullMode)cullMode;
 }
 
 void SGD_DECL sgd_SetMaterialTexture(SGD_Material hmaterial, SGD_String property, SGD_Texture htexture) {
 	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	auto texture = sgdx::resolveHandle<sgd::Texture>(htexture);
-	if (!material->setTexture(property, texture)) sgdx::error(sgd::String("Material property \"") + property + "\" not found");
+	if (!material->setTexture(property, texture)) {
+		sgdx::error(sgd::String("Material property \"") + property + "\" not found");
+	}
 }
 
 void SGD_DECL sgd_SetMaterialVector4f(SGD_Material hmaterial, SGD_String property, float x, float y, float z, float w) {
 	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	if (!material->setVector4f(property, {x, y, z, w}))
+	if (!material->setVector4f(property, {x, y, z, w})) {
 		sgdx::error(sgd::String("Material property \"") + property + "\" not found");
+	}
 }
 
 void SGD_DECL sgd_SetMaterialVector3f(SGD_Material hmaterial, SGD_String property, float x, float y, float z) {
 	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	if (!material->setVector3f(property, {x, y, z}))
+	if (!material->setVector3f(property, {x, y, z})) {
 		sgdx::error(sgd::String("Material property \"") + property + "\" not found");
+	}
 }
 
 void SGD_DECL sgd_SetMaterialVector2f(SGD_Material hmaterial, SGD_String property, float x, float y) {
 	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	if (!material->setVector2f(property, {x, y})) sgdx::error(sgd::String("Material property \"") + property + "\" not found");
+	if (!material->setVector2f(property, {x, y})) {
+		sgdx::error(sgd::String("Material property \"") + property + "\" not found");
+	}
 }
 
 void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String property, float n) {
 	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	if (!material->setFloat(property, n)) sgdx::error(sgd::String("Material property \"") + property + "\" not found");
+	if (!material->setFloat(property, n)) {
+		sgdx::error(sgd::String("Material property \"") + property + "\" not found");
+	}
 }
 
 // ***** Mesh *****
@@ -90,27 +95,27 @@ SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path) {
 }
 
 SGD_Mesh SGD_DECL sgd_CreateSphereMesh(float radius, int xSegs, int ySegs, SGD_Material hmaterial) {
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	auto mesh = sgd::createSphereMesh(radius, xSegs, ySegs, material);
 	return sgdx::createHandle(mesh);
 }
 
 SGD_Mesh SGD_DECL sgd_CreateBoxMesh(float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
 									SGD_Material hmaterial) {
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
-	auto mesh = sgd::createBoxMesh(sgdx::Boxf({minX, minY, minZ}, {maxX, maxY, maxZ}), material);
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
+	auto mesh = sgd::createBoxMesh(sgd::Boxf({minX, minY, minZ}, {maxX, maxY, maxZ}), material);
 	return sgdx::createHandle(mesh);
 }
 
 SGD_Mesh SGD_DECL sgd_CreateCylinderMesh(float height, float radius, int segs, SGD_Material hmaterial) {
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	auto mesh = sgd::createCylinderMesh(height, radius, segs, material);
 	return sgdx::createHandle(mesh);
 }
 
 //! Create a new cone mesh.
 SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int segs, SGD_Material hmaterial) {
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	auto mesh = sgd::createConeMesh(height, radius, segs, material);
 	return sgdx::createHandle(mesh);
 }
@@ -118,49 +123,54 @@ SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int segs, SGD_M
 //! Create a new torus mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs,
 											  SGD_Material hmaterial) {
-	auto material = sgdx::resolveHandle<sgdx::Material>(hmaterial);
+	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	auto mesh = sgd::createTorusMesh(outerRadius, innerRadius, outerSegs, innerSegs, material);
 	return sgdx::createHandle(mesh);
 }
 
 SGD_Mesh SGD_DECL sgd_CopyMesh(SGD_Mesh hmesh) {
-	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	return sgdx::createHandle(sgd::copy(mesh));
 }
 
 void SGD_DECL sgd_SetMeshCastsShadow(SGD_Mesh hmesh, SGD_Bool castsShadow) {
-	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	mesh->castsShadow = castsShadow;
 }
 
 SGD_Bool SGD_DECL sgd_MeshCastsShadow(SGD_Mesh hmesh) {
-	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	return mesh->castsShadow();
 }
 
 void SGD_DECL sgd_UpdateMeshNormals(SGD_Mesh hmesh) {
-	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	updateNormals(mesh);
 }
 
 void SGD_DECL sgd_UpdateMeshTangents(SGD_Mesh hmesh) {
-	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	updateTangents(mesh);
 }
 
 SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh hmesh, float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
 								  int uniform) {
-	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	fit(mesh, {{minX, minY, minZ}, {maxX, maxY, maxZ}}, uniform);
 }
 
+void SGD_DECL sgd_TransformMesh(SGD_Mesh hmesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	sgdx::transform(mesh, sgd::AffineMat4f::TRS({tx,ty,tz},{rx,ry,rz},{sx,sy,sz}));
+}
+
 void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY, float offsetX, float offsetY) {
-	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
-	sgdx::transformTexCoords(mesh, sgdx::Vec2f(scaleX, scaleY), sgdx::Vec2f(offsetX, offsetY));
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	sgdx::transformTexCoords(mesh, sgd::Vec2f(scaleX, scaleY), sgdx::Vec2f(offsetX, offsetY));
 }
 
 void SGD_DECL sgd_FlipMesh(SGD_Mesh hmesh) {
-	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	sgd::flip(mesh);
 }
 

@@ -4,8 +4,6 @@
 
 namespace sgd {
 
-extern const MaterialDescriptor imageMaterialDescriptor;
-
 enum struct SpriteViewMode {
 	fixed = 1,	 // locked to camera, 2d style
 	free = 2,	 // free of camera, billboard style

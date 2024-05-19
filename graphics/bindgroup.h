@@ -8,17 +8,18 @@ namespace sgd {
 SGD_SHARED(BindGroup);
 
 struct BindGroupDescriptor {
-
+	const char * const label;
 	uint32_t const wgpuBindGroupIndex;
 	Vector<wgpu::BindGroupLayoutEntry> const wgpuBindGroupLayoutEntries;
 	Vector<wgpu::VertexBufferLayout> const wgpuVertexBufferLayouts;
 	String const wgpuShaderSource;
 	uint32_t const hash;
 
-	BindGroupDescriptor(uint32_t bindGroupIndex,									//
-						CVector<wgpu::BindGroupLayoutEntry> bindGroupLayoutEntries, //
-						CVector<wgpu::VertexBufferLayout> vertexBufferLayouts,		// Only for geometry shaders right now
-						CString wgpuShaderSource);									// Shader source code for bind group
+	BindGroupDescriptor(const char* label,											//
+						uint32_t bindGroupIndex,								   //
+						Vector<wgpu::BindGroupLayoutEntry> bindGroupLayoutEntries, //
+						Vector<wgpu::VertexBufferLayout> vertexBufferLayouts,	   // Only for geometry shaders right now
+						String wgpuShaderSource);								   // Shader source code for bind group
 
 	wgpu::BindGroupLayout wgpuBindGroupLayout(GraphicsContext* gc) const;
 };
@@ -33,12 +34,13 @@ struct BindGroup : GraphicsResource {
 	}
 
 	void setBuffer(uint32_t index, CBuffer* buffer);
-	const Buffer* getBuffer(uint32_t index) const;
+	CBuffer* getBuffer(uint32_t index) const;
 
 	void setTexture(uint32_t index, CTexture* texture);
-	const Texture* getTexture(uint32_t index) const;
+	CTexture* getTexture(uint32_t index) const;
 
 	wgpu::BindGroup wgpuBindGroup() const {
+		SGD_ASSERT(valid());
 		return m_bindGroup;
 	}
 

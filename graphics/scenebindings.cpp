@@ -13,6 +13,7 @@ auto shaderSource{
 } // namespace
 
 const BindGroupDescriptor sceneBindingsDescriptor( //
+	"scneBindings",								   //
 	0,											   //
 	{bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 								wgpu::BufferBindingType::Uniform),		// binding(0) camera uniforms
@@ -40,7 +41,8 @@ SceneBindings::SceneBindings() {
 	uint32_t data[6]{0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000};
 	envTexture->update(data, sizeof(uint32_t));
 
-	auto psTexture = new Texture({1, 1}, 6, TextureFormat::depth32f, TextureFlags::cube | TextureFlags::array | TextureFlags::renderTarget);
+	auto psTexture =
+		new Texture({1, 1}, 6, TextureFormat::depth32f, TextureFlags::cube | TextureFlags::array | TextureFlags::renderTarget);
 
 	m_bindGroup = new BindGroup(&sceneBindingsDescriptor);
 

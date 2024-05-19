@@ -21,8 +21,9 @@ static_assert(sizeof(DrawList::Vertex) == 40);
 wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(DrawList::Vertex), wgpu::VertexStepMode::Vertex,
 												  std::size(vertexBufferAttribs), vertexBufferAttribs};
 
-BindGroupDescriptor bindGroupDescriptor //
-	(2,
+BindGroupDescriptor bindGroupDescriptor(//
+	"drawListRenderer",
+	2,
 	 {
 		 bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 									wgpu::BufferBindingType::Uniform),

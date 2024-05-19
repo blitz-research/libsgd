@@ -69,18 +69,18 @@ struct Texture : GraphicsResource {
 
 	void update(const void* data, size_t pitch);
 
-	//! @private
 	const wgpu::Texture& wgpuTexture() const {
+		SGD_ASSERT(valid());
 		return m_wgpuTexture;
 	};
 
-	//! @private
 	const wgpu::Sampler& wgpuSampler() const {
+		SGD_ASSERT(valid());
 		return m_wgpuSampler;
 	};
 
-	//! @private
 	const wgpu::TextureView& wgpuTextureView() const {
+		SGD_ASSERT(valid());
 		return m_wgpuTextureView;
 	};
 

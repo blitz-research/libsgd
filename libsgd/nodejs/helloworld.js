@@ -7,6 +7,7 @@ sgd.CreateScene();
 sgd.SetSceneClearColor(1,.5,0,1);
 
 while(!sgd.PollEvents()) {
+    if(sgd.KeyHit(sgd.KEY_ESCAPE)) break;
     sgd.RenderScene();
     sgd.Present();
 }

@@ -9,7 +9,7 @@ namespace {
 
 auto shaderSource =
 #include "shaders/meshrenderer.wgsl"
-;
+	;
 
 wgpu::VertexAttribute vertexBufferAttribs[]{
 	{wgpu::VertexFormat::Float32x3, 0, 0},	// Vec3f position
@@ -37,14 +37,15 @@ static_assert(sizeof(MeshInstance) == 80);
 wgpu::VertexBufferLayout const instanceBufferLayout{sizeof(MeshInstance), wgpu::VertexStepMode::Instance,
 													std::size(instanceBufferAttribs), instanceBufferAttribs};
 
-BindGroupDescriptor bindGroupDescriptor //
-	(2,
-	 {
-		 bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
-									wgpu::BufferBindingType::Uniform),
-	 },
-	 {vertexBufferLayout, instanceBufferLayout}, //
-	 shaderSource);
+BindGroupDescriptor bindGroupDescriptor( //
+	"meshRenderer",						 //
+	2,
+	{
+		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
+								   wgpu::BufferBindingType::Uniform),
+	},
+	{vertexBufferLayout, instanceBufferLayout}, //
+	shaderSource);
 
 } // namespace
 

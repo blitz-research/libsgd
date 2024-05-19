@@ -23,7 +23,8 @@ void RenderContext::endRender() {
 	m_wgpuCommandEncoder = {};
 }
 
-void RenderContext::beginRenderPass(RenderPassType type, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor, float clearDepth) {
+void RenderContext::beginRenderPass(RenderPassType type, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
+									float clearDepth) {
 	SGD_ASSERT(isMainThread() && m_wgpuCommandEncoder && !m_wgpuRenderPassEncoder);
 
 	m_renderPassType = type;
@@ -66,12 +67,7 @@ void RenderContext::beginRenderPass(RenderPassType type, Texture* colorBuffer, T
 
 	m_wgpuRenderPassEncoder = m_wgpuCommandEncoder.BeginRenderPass(&renderPassDescriptor);
 
-	m_wgpuRenderPassEncoder.SetBindGroup(1, emptyBindGroup(1)->wgpuBindGroup());
-	m_rop={};
-
-	// Default?
-//	auto size = (colorBuffer ? colorBuffer : depthBuffer)->size();
-//	m_wgpuRenderPassEncoder.SetViewport(0, 0, (float)size.x, (float)size.y, 0, 1);
+	m_rop = {};
 }
 
 void RenderContext::render(CVector<RenderOp> ops) {
@@ -80,20 +76,16 @@ void RenderContext::render(CVector<RenderOp> ops) {
 
 	for (auto& op : ops) {
 		if (op.vertexBuffer.Get() != m_rop.vertexBuffer.Get()) {
-			if ((m_rop.vertexBuffer = op.vertexBuffer)) encoder.SetVertexBuffer(0, m_rop.vertexBuffer);
+			encoder.SetVertexBuffer(0, m_rop.vertexBuffer = op.vertexBuffer);
 		}
 		if (op.instanceBuffer.Get() != m_rop.instanceBuffer.Get()) {
-			if ((m_rop.instanceBuffer = op.instanceBuffer)) encoder.SetVertexBuffer(1, m_rop.instanceBuffer);
+			encoder.SetVertexBuffer(1, m_rop.instanceBuffer = op.instanceBuffer);
 		}
 		if (op.indexBuffer.Get() != m_rop.indexBuffer.Get()) {
-			if ((m_rop.indexBuffer = op.indexBuffer)) encoder.SetIndexBuffer(m_rop.indexBuffer, wgpu::IndexFormat::Uint32);
+			if((m_rop.indexBuffer = op.indexBuffer)) encoder.SetIndexBuffer(m_rop.indexBuffer = op.indexBuffer, wgpu::IndexFormat::Uint32);
 		}
 		if (op.materialBindings.Get() != m_rop.materialBindings.Get()) {
-			if ((m_rop.materialBindings = op.materialBindings)) {
-				encoder.SetBindGroup(1, m_rop.materialBindings);
-			} else {
-				encoder.SetBindGroup(1, emptyBindGroup(1)->wgpuBindGroup());
-			}
+			encoder.SetBindGroup(1, m_rop.materialBindings = op.materialBindings);
 		}
 		if (op.rendererBindings.Get() != m_rop.rendererBindings.Get()) {
 			encoder.SetBindGroup(2, m_rop.rendererBindings = op.rendererBindings);
@@ -101,7 +93,6 @@ void RenderContext::render(CVector<RenderOp> ops) {
 		if (op.pipeline.Get() != m_rop.pipeline.Get()) {
 			encoder.SetPipeline(m_rop.pipeline = op.pipeline);
 		}
-
 		if (m_rop.indexBuffer) {
 			encoder.DrawIndexed(op.elementCount, op.instanceCount, op.firstElement);
 		} else {

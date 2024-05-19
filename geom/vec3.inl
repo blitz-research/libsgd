@@ -148,6 +148,10 @@ template <class T> T length(CVec3<T> v) {
 	return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
 }
 
+template <class T> T lengthsq(CVec3<T> v) {
+	return v.x * v.x + v.y * v.y + v.z * v.z;
+}
+
 template <class T> T yaw(CVec3<T> v) {
 	return -std::atan2(v.x, v.z);
 }
