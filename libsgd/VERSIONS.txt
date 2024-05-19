@@ -1,7 +1,7 @@
 
 ***** V0.06.1 *****
 
-* Add quad primite to primitives.bb via createBox.
+* Added quad primitive example to primitives.bb using CreateBox.
 
 * Added SetLightPriority - test please James!
 
@@ -13,7 +13,7 @@
 
 * Fixed sprite image->material dependency crash.
 
-* Fixed SpriteRenderer crash with 0 sprites.
+* Fixed sprite renderer crashing with 0 sprites.
 
 * Fixed CopyEntity crash when copying models.
 
