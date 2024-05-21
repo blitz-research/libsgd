@@ -15,9 +15,9 @@ int main() {
     
     sgd_CreateWindow(640, 480, "Hello World!", 0);
     sgd_CreateScene();
-    sgd_SetSceneClearColor(1,.5,0,1);
+    sgd_SetSceneClearColor(1, .5, 0, 1);
     
-    while(!sgd_PollEvents()) {
+    while((sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED) == 0) {
 		if(sgd_KeyHit(SGD_KEY_ESCAPE)) break;
         sgd_RenderScene();
         sgd_Present();

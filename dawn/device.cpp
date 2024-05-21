@@ -47,7 +47,12 @@ void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
 void logAdapterProps(const wgpu::Adapter& adapter) {
 
 	wgpu::AdapterProperties props{};
-	adapter.GetProperties(&props);
+
+	// Crashes on Linux sometimes!
+	//adapter.GetProperties(&props);
+
+	// Safer
+	wgpuAdapterGetProperties(adapter.Get(), reinterpret_cast<WGPUAdapterProperties*>(&props));
 
 	SGD_LOG << "Dawn WGPU Adapter Properties:";
 	SGD_LOG << "Vender name:" << (props.vendorName ? props.vendorName : "???");
@@ -90,7 +95,9 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 		&adapterOptions,
 		[](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, char const* message, void* userdata) {
 			//
-			SGD_ASSERT(status == WGPURequestAdapterStatus_Success);
+			if (status != WGPURequestAdapterStatus_Success) {
+				SGD_PANIC("Dawn RequestAdapter() failed");
+			}
 			auto adapter = wgpu::Adapter::Acquire(cAdapter);
 
 			logAdapterProps(adapter);
@@ -99,7 +106,9 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 				nullptr,
 				[](WGPURequestDeviceStatus status, WGPUDevice cDevice, const char* message, void* userdata) {
 					//
-					SGD_ASSERT(status == WGPURequestDeviceStatus_Success);
+					if (status != WGPURequestDeviceStatus_Success) {
+						SGD_PANIC("Dawn RequestDevice() failed");
+					}
 					auto device = wgpu::Device::Acquire(cDevice);
 
 					device.SetUncapturedErrorCallback(&dawnErrorCallback, nullptr);
