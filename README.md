@@ -15,7 +15,7 @@ Joins the LibSFD discussion at https://skirmish-dev.net/forum
 Help support LibSGD at https://patreon.com/libsgd
 
 
-## CMake build instuctions for 64bit Windows 10.
+## CMake build instuctions for 64bit Windows 10
 
 * Install git, cmake, python3 and MSVC (I use the free 2022 Community Edition).
 
@@ -30,13 +30,13 @@ Help support LibSGD at https://patreon.com/libsgd
 After install output files should end up in cmake-build-windows-release/LIBSGD_INSTALL dir.
 
 
-## CMake build instuctions for 64bit Linux.
+## CMake build instuctions for 64bit Linux (tested on Manjaro KDE)
 
-* You will need at least cmake, ninja and python3.
+* You will need at least git, cmake, python3, g++, binutils etc. You may also need to install dev packages for things like x11, openssl and so on.
 
 * Clone this repository, CD to checkout dir and...
 
-* Configure: ``cmake -S . -B cmake-build-linux-release -DCMAKE_BUILD_TYPE=Release -G Ninja``
+* Configure: ``cmake -S . -B cmake-build-linux-release -DCMAKE_BUILD_TYPE=Release``
 
 * Build: ``cmake --build cmake-build-linux-release``
 
@@ -44,10 +44,8 @@ After install output files should end up in cmake-build-windows-release/LIBSGD_I
 
 After install output files should end up in cmake-build-linux-release/LIBSGD_INSTALL dir.
 
-You may also need to install dev packages for things like X11 and so on.
 
-
-## CMake build instructions for MacOS Sonoma 14.4.1.
+## CMake build instructions for MacOS (tested on Sonoma 14.4.1)
 
 * Install 'XCode' from app store.
 
