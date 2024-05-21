@@ -1,7 +1,11 @@
 //
 // This can be built with something like:
 //
+// Windows:
 // gcc -I../include -L. -DSGD_DYNAMIC=1 -o helloworld helloworld.c -lsgd_dynamic
+//
+// Linux, MacOS:s
+// gcc -I../include -L. -Wl,-rpath,.  -DSGD_DYNAMIC=1 -o helloworld helloworld.c -lsgd_dynamic
 
 #include <sgd/sgd.h>
 

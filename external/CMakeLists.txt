@@ -149,6 +149,7 @@ elseif (SGD_OS_MACOS)
 	set(SRCS ${SRCS}
 		${BACKEND}/coreaudio/soloud_coreaudio.cpp
 	)
+	set(LIBS ${LIBS} "-framework AudioToolBox" "-framework CoreAudio")
 	set(WITH_BACKENDS WITH_COREAUDIO=1)
 elseif (SGD_OS_EMSCRIPTEN)
 	set(SRCS ${SRCS}

@@ -4,7 +4,8 @@ void entry() {
 
 	SGD_Real tz = 0;
 
-start:
+start:;	// Need semi-colon for Macos?!?
+
 	SGD_Camera camera = sgd_CreatePerspectiveCamera();
 	sgd_MoveEntity(camera, 0, 2, tz - 5.0);
 

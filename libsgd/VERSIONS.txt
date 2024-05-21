@@ -1,4 +1,9 @@
 
+* Fix Macos build.
+
+* Fixed alpha 0 not always fully transparent due to PBR shader generating colors.
+
+
 ***** V0.06.1 *****
 
 * Added quad primitive example to primitives.bb using CreateBox.
