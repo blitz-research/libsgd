@@ -2,29 +2,27 @@
 
 void entry() {
 
-	MeshPtr mesh = loadStaticMesh(Path("~/dev/assets/Wall_Modular.glb")).result();
+	MeshPtr mesh = loadStaticMesh(Path("~/dev/assets/palm_tree1.glb")).result();
 	fit(mesh, {-1, 1}, true);
+
 	ModelPtr model = new Model();
+	scene->add(model);
 	model->mesh = mesh;
-	scene->add(model);
-	move(model, {0,0,15});
 
-	log() << "###"<<model->worldMatrix();
+	CameraPtr camera = new Camera(CameraType::perspective);
+	scene->add(camera);
 
-#if 0
-	ModelPtr model = loadSkinnedModel(Path("~/Desktop/larry_walk.glb")).result();
-	move(model, {0, 0, 5});
-	scene->add(model);
-#endif
+	move(camera, {0, 3, 0});
+
+	turn(camera, {-90, 0, 0});
 
 	for (;;) {
-
 		pollEvents();
-		turn(model,{0,1,0});
-#if 0
-		static float time;
-		model->animate(0, time += 1.0/60.0, AnimationMode::loop);
-#endif
+
+//		turn(model, {0, 1, 0});
+
+		fly(camera);
+
 		render();
 	}
 }

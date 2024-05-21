@@ -88,13 +88,13 @@ fn evaluatePBR(normal: vec3f, diffuse: vec3f, specular: vec3f, glossiness: f32, 
     return (diffuse + fspecular) * illum;
 }
 
-fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec3f, metallic: f32, roughness: f32, occlusion: f32) -> vec3f {
+fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec3f, metallic: f32, roughness: f32, occlusion: f32) -> vec4f {
 
-	const black = vec3(0.04, 0.04, 0.04);
+	let black = vec3(0.04 * albedo.a);
 
-	let diffuse = albedo * (1.0 - metallic);
-	let specular = (albedo - black) * metallic + black;
-	let glossiness = 1.0 - roughness;
+	let diffuse = albedo.rgb * (1.0 - metallic);
+	let specular = (albedo.rgb - black) * metallic + black;
+	let glossiness = (1.0 - roughness) * albedo.a;
     let spower = pow(2.0, glossiness * 12.0);       // specular power
     let fnorm = (spower + 2.0) / 8.0;               // normalization factor
 
@@ -164,7 +164,7 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec3f, metallic: f32
 	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten * coneAtten, light.color);
 	}
 
-	return color;
+	return vec4f(color + emissive, albedo.a);
 }
 
 )"
