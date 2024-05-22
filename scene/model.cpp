@@ -13,7 +13,7 @@ Model::Model(const Model* that)
 	  m_bones(that->m_bones),		   //
 	  m_animations(that->m_animations) // We need an AnimationSet
 {
-	if(!m_bones.size()) return;
+	if (!m_bones.size()) return;
 
 	// This is currently a bit crusty, we need to remap bone entities to their copies, assumes they've been copied by Entity
 	// ctor 'in order'. We need a nicer way to do this ultimately.
@@ -70,9 +70,12 @@ void Model::onHide() {
 	}
 }
 
-void Model::animate(uint32_t index, float time, AnimationMode mode) {
+void Model::animate(uint32_t index, float time, AnimationMode mode, float weight) {
+
 	SGD_ASSERT(index < m_animations.size());
-	auto anim = m_animations[index];
+	CAnimation* anim = m_animations[index];
+
+	if(weight<=0.0f) return;
 
 	switch (mode) {
 	case AnimationMode::oneshot:
@@ -87,16 +90,33 @@ void Model::animate(uint32_t index, float time, AnimationMode mode) {
 		break;
 	}
 
-	for (auto seq : anim->sequences) {
-		auto bone = m_bones[seq->bone];
+	if(weight>=1.0f) {
+		for (CAnimationSeq* seq : anim->sequences) {
+			auto bone = m_bones[seq->bone];
+			if (!seq->positionKeys.empty()) bone->setLocalPosition(evaluate(seq->positionKeys, time));
+			if (!seq->rotationKeys.empty()) bone->setLocalBasis(Mat3f::rotation(evaluate(seq->rotationKeys, time)));
+			if (!seq->scaleKeys.empty()) bone->setLocalScale(evaluate(seq->scaleKeys, time));
+		}
+	}else{
+		for (CAnimationSeq* seq : anim->sequences) {
+			auto bone = m_bones[seq->bone];
 
-		auto pos = seq->evaluatePosition(time, bone->localMatrix().t);
-		auto rot = seq->evaluateRotation(time, Quatf::rotation(bone->localMatrix().r));
-		auto scl = seq->evaluateScale(time, scale(bone->localMatrix().r));
-
-		bone->setLocalPosition(pos);
-		bone->setLocalBasis(Mat3f::rotation(rot));
-		bone->setLocalScale(scl);
+			if (!seq->positionKeys.empty()) {
+				auto pos = Vec3f(bone->localPosition());
+				pos = sgd::blend(pos, evaluate(seq->positionKeys, time), weight);
+				bone->setLocalPosition(pos);
+			}
+			if (!seq->rotationKeys.empty()) {
+				auto rot = Quatf::rotation(bone->localBasis());
+				rot = sgd::slerp(rot, evaluate(seq->rotationKeys, time), weight);
+				bone->setLocalBasis(Mat3f::rotation(rot));
+			}
+			if (!seq->scaleKeys.empty()) {
+				auto scl = Vec3f(bone->localScale());
+				scl = sgd::blend(scl, evaluate(seq->scaleKeys, time), weight);
+				bone->setLocalScale(scl);
+			}
+		}
 	}
 
 	for (int i = 0; i < m_joints.size(); ++i) {

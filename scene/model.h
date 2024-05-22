@@ -26,7 +26,7 @@ struct Model : Entity {
 
 	Property<Vec4f> color{Vec4f{1, 1, 1, 1}};
 
-	void animate(uint32_t index, float time, AnimationMode mode);
+	void animate(uint32_t index, float time, AnimationMode mode, float weight);
 
 	CVector<AffineMat4r> jointMatrices() const {return m_jointMatrices;}
 

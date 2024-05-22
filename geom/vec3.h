@@ -76,6 +76,8 @@ template <class T> T dot(CVec3<T> p, CVec3<T> q);
 template <class T> Vec3<T> cross(CVec3<T> p, CVec3<T> q);
 template <class T> Vec3<T> normalize(CVec3<T> v);
 
+template<class T> Vec3<T> blend(CVec3<T> a, CVec3<T> b, float t);
+
 } // namespace sgd
 
 #include "vec3.inl"

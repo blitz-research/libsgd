@@ -15,9 +15,12 @@ template <class T> using CAnimationKey = AnimationKey<T>;
 using Vec3fAnimationKey = AnimationKey<Vec3f>;
 using QuatfAnimationKey = AnimationKey<Quatf>;
 
+template <class T> T evaluate(CVector<AnimationKey<T>> keys, float time);
+
 // Don't really like this name...
 SGD_SHARED(AnimationSeq);
 
+// TODO: Make immutable
 struct AnimationSeq : public Shared {
 	SGD_OBJECT_TYPE(AnimationSeq, Shared);
 
@@ -29,10 +32,6 @@ struct AnimationSeq : public Shared {
 
 	explicit AnimationSeq(int bone) : bone(bone) {
 	}
-
-	Vec3f evaluatePosition(float time, CVec3f def) const;
-	Quatf evaluateRotation(float time, CQuatf def) const;
-	Vec3f evaluateScale(float time, CVec3f def) const;
 };
 
 SGD_SHARED(Animation);
@@ -44,8 +43,30 @@ struct Animation : public Shared {
 	Vector<CAnimationSeqPtr> const sequences;
 	float const duration;
 
-	Animation(CString name, Vector<CAnimationSeqPtr> seqs, float dur) : name(name), sequences(seqs), duration(dur) {
+	Animation(String name, Vector<CAnimationSeqPtr> seqs, float dur) : name(std::move(name)), sequences(std::move(seqs)), duration(dur) {
 	}
 };
+
+// ***** Inline *****
+
+inline Vec3f blend(const Vec3fAnimationKey& pkey, const Vec3fAnimationKey& key, float time) {
+	float alpha = (time - pkey.time) / (key.time - pkey.time);
+	return blend(pkey.value, key.value, alpha);
+}
+
+inline Quatf blend(const QuatfAnimationKey& pkey, const QuatfAnimationKey& key, float time) {
+	float alpha = (time - pkey.time) / (key.time - pkey.time);
+	return slerp(pkey.value, key.value, alpha);
+}
+
+template <class T> T evaluate(CVector<AnimationKey<T>> keys, float time) {
+	if (keys.empty()) return {};
+	for (auto it = keys.begin(); it != keys.end(); ++it) {
+		if (time > it->time) continue;
+		if (it == keys.begin()) return it->value;
+		return blend(*(it - 1), *it, time);
+	}
+	return keys.back().value;
+}
 
 } // namespace sgd

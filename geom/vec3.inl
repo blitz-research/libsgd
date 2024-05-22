@@ -16,16 +16,16 @@ template <class T> constexpr Vec3<T>::Vec3(CVec2<T> v, float z) : x(v.x), y(v.y)
 template <class T> constexpr Vec3<T>::Vec3(T x, T y, T z) : x(x), y(y), z(z) {
 }
 
-template<class T> Vec2<T>& Vec3<T>::xy() {
+template <class T> Vec2<T>& Vec3<T>::xy() {
 	return (Vec2<T>&)(*this);
 }
 
-template<class T> CVec2<T> Vec3<T>::xy() const {
+template <class T> CVec2<T> Vec3<T>::xy() const {
 	return (CVec2<T>)(*this);
 }
 
-template<class T> Vec3<T>::operator Vec2<T>() const {
-	return {x,y};
+template <class T> Vec3<T>::operator Vec2<T>() const {
+	return {x, y};
 }
 
 template <class T> Vec3<T>& Vec3<T>::operator*=(CVec3<T> v) {
@@ -171,6 +171,10 @@ template <class T> Vec3<T> cross(CVec3<T> p, CVec3<T> q) {
 template <class T> Vec3<T> normalize(CVec3<T> v) {
 	T d = length(v);
 	return d ? v / d : v;
+}
+
+template <class T> Vec3<T> blend(CVec3<T> a, CVec3<T> b, float t) {
+	return (b - a) * t + a;
 }
 
 } // namespace sgd
