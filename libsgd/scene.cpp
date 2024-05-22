@@ -364,9 +364,9 @@ SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path, SGD_Bool skinned) {
 	return sgdx::createHandle(model);
 }
 
-void SGD_DECL sgd_AnimateModel(SGD_Model hmodel, int animation, float time, int mode) {
+void SGD_DECL sgd_AnimateModel(SGD_Model hmodel, int animation, float time, int mode, float weight) {
 	auto model = sgdx::resolveHandle<sgd::Model>(hmodel);
-	model->animate(animation, time, (sgdx::AnimationMode)mode);
+	model->animate(animation, time, (sgdx::AnimationMode)mode, weight);
 }
 
 SGD_Model SGD_DECL sgd_CreateModel(SGD_Mesh hmesh) {

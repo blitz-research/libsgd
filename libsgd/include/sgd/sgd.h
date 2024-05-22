@@ -884,7 +884,7 @@ SGD_API void SGD_DECL sgd_SetModelColor(SGD_Model model, float red, float green,
 //! SGD_ANIMATION_MODE_ONE_SHOT | 1             | Animation plays forward once then ends.
 //! SGD_ANIMATION_MODE_LOOP     | 2             | Animation plays forward repeatedly.
 //! SGD_ANIMATION_PING_PING     | 3             | Animation plays forward then backwards repeatedly.
-SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float time, int mode);
+SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float time, int mode, float weight);
 
 //! @}
 
