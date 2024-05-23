@@ -14,7 +14,7 @@ TexturePtr g_defaultTexture = new Texture({1, 1}, 1, TextureFormat::r8, TextureF
 
 BindGroupDescriptor bindGroupDescriptor( //
 	"imageMaterial",
-	1,
+	BindGroupType::material,
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform),		   //
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::e2DArray), //

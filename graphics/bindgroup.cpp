@@ -4,25 +4,25 @@ namespace sgd {
 
 namespace {
 
-uint32_t nextHash(uint32_t bindGroupIndex) {
+uint32_t nextHash(BindGroupType type) {
 	static uint32_t hashes[4];
-	SGD_ASSERT(bindGroupIndex < 4);
-	return hashes[bindGroupIndex]++;
+	return hashes[(int)type]++;
 }
 
 } // namespace
 
 BindGroupDescriptor::BindGroupDescriptor(
 	const char* label,												 //
-	uint32_t bindGroupIndex,										 //
+	BindGroupType bindGroupType,//
 	Vector<wgpu::BindGroupLayoutEntry> bindGroupLayoutEntries,		 //
 	Vector<wgpu::VertexBufferLayout> vertexBufferLayouts,			 // Only for geometry shaders right now...
 	String shaderSource)											 //
-	: label(label), wgpuBindGroupIndex(bindGroupIndex),				 //
+	: label(label), //
+	  bindGroupType(bindGroupType), //
 	  wgpuBindGroupLayoutEntries(std::move(bindGroupLayoutEntries)), //
 	  wgpuVertexBufferLayouts(std::move(vertexBufferLayouts)),		 //
 	  wgpuShaderSource(std::move(shaderSource)),					 //
-	  hash(nextHash(bindGroupIndex)) {
+	  hash(nextHash(bindGroupType)) {
 }
 
 wgpu::BindGroupLayout BindGroupDescriptor::wgpuBindGroupLayout(GraphicsContext* gc) const {
@@ -118,9 +118,9 @@ BindGroup* emptyBindGroup(uint32_t index) {
 
 	if (bindGroups[index]) return bindGroups[index];
 
-	static const BindGroupDescriptor descs[]{{"emptyBindGroup0", 0, {}, {}, {}}, //
-											 {"emptyBindGroup1", 1, {}, {}, {}}, //
-											 {"emptyBindGroup2", 2, {}, {}, {}}};
+	static const BindGroupDescriptor descs[]{{"emptyBindGroup0", BindGroupType::scene, {}, {}, {}}, //
+											 {"emptyBindGroup1", BindGroupType::material, {}, {}, {}}, //
+											 {"emptyBindGroup2", BindGroupType::renderer, {}, {}, {}}};
 
 	bindGroups[index] = new BindGroup(&descs[index]);
 

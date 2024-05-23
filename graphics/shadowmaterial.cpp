@@ -1,7 +1,6 @@
 #include "shadowmaterial.h"
 
 #include "shaders/uniforms.h"
-#include "textureutil.h"
 
 namespace sgd {
 
@@ -12,8 +11,8 @@ auto shaderSource{
 };
 
 BindGroupDescriptor bindGroupDescriptor( //
-	"shadowMaterial",
-	1,									 // material
+	"shadowMaterial",					 //
+	BindGroupType::material,			 //
 	{},									 //
 	{},									 //
 	shaderSource);

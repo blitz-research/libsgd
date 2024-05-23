@@ -1,9 +1,9 @@
 #include "scene.h"
 
 #include "camera.h"
+#include "collisionspace.h"
 #include "entity.h"
 #include "light.h"
-#include "collisionspace.h"
 
 #include <window/exports.h>
 
@@ -71,7 +71,7 @@ void Scene::add(Entity* entity) { // NOLINT (recursive)
 
 	if (entity->is<Camera>()) {
 		auto camera = entity->as<Camera>();
-		viewportSizeChanged.connect(camera, [=](CVec2u size){	//
+		viewportSizeChanged.connect(camera, [=](CVec2u size) { //
 			camera->aspect = (float)size.x / (float)size.y;
 		});
 		camera->aspect = (float)viewportSize().x / (float)viewportSize().y;
@@ -97,7 +97,7 @@ void Scene::remove(Entity* entity) { // NOLINT (recursive)
 	entity->setParent(nullptr);
 	entity->destroy();
 
-	if(entity->m_invalid) sgd::remove(m_invalid, entity);
+	if (entity->m_invalid) sgd::remove(m_invalid, entity);
 
 	if (entity->is<Camera>()) {
 		auto camera = entity->as<Camera>();
@@ -185,7 +185,7 @@ void Scene::updateLightingBindings() {
 	// sort point lights
 	auto cmp = [=](const Light* lhs, const Light* rhs) {
 		// return true if lhs higher priority than rhs
-		if(lhs->priority()!=rhs->priority()) return lhs->priority() > rhs->priority();
+		if (lhs->priority() != rhs->priority()) return lhs->priority() > rhs->priority();
 		return lengthsq(lhs->worldMatrix().t - m_eye) < lengthsq(rhs->worldMatrix().t - m_eye);
 	};
 	std::sort(pointLights.begin(), pointLights.end(), cmp);
@@ -293,10 +293,7 @@ void Scene::renderPointLightShadowMaps() const {
 
 			auto texture = m_pointShadowTextureFaces[i * 6 + face];
 
-			m_renderContext->beginRenderPass(RenderPassType::clear, nullptr, texture, {}, 1);
-			m_renderContext->endRenderPass();
-
-			m_renderContext->beginRenderPass(RenderPassType::shadow, nullptr, texture, {}, {});
+			m_renderContext->beginRenderPass(RenderPassType::shadow, nullptr, texture, {}, 1);
 			m_renderContext->wgpuRenderPassEncoder().SetBindGroup(0, m_shadowBindings[face]->bindGroup()->wgpuBindGroup());
 			for (Renderer* r : m_renderers) {
 				if (r && r->enabled()) r->render(m_renderContext);
@@ -322,8 +319,6 @@ void Scene::renderASync() const {
 	renderPointLightShadowMaps();
 
 	m_renderContext->beginRender();
-
-	renderGeometry(RenderPassType::clear);
 
 	renderGeometry(RenderPassType::opaque);
 

@@ -23,7 +23,7 @@ wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(DrawList::Vertex), wgpu
 
 BindGroupDescriptor bindGroupDescriptor(//
 	"drawListRenderer",
-	2,
+	BindGroupType::renderer,
 	 {
 		 bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 									wgpu::BufferBindingType::Uniform),

@@ -118,14 +118,10 @@ struct Entity : Shared {
 
 	CAffineMat4r localMatrix() const;
 
-	template <class FuncTy> void visitChildren(FuncTy func) {
-		for (Entity* child : m_children) visitChild(func);
-	}
-
-	template <class FuncTy> bool visitChild(FuncTy func) {
-		if (!func(this)) return false;
-		for (Entity* child : m_children) visitChild(func);
-		return true;
+	template <class FuncTy> void visitChildren(FuncTy boolFunc) {
+		for (Entity* child : m_children) {
+			if(boolFunc(child)) child->visitChildren(boolFunc);
+		}
 	}
 
 protected:

@@ -11,14 +11,13 @@ auto shaderSource{
 };
 
 BindGroupDescriptor bindGroupDescriptor( //
-	"spriteRenderer",
-	2,
+	"spriteRenderer",					 //
+	BindGroupType::renderer,			 //
 	{
-		bufferBindGroupLayoutEntry( //
-			0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::ReadOnlyStorage),
+		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
+								   wgpu::BufferBindingType::ReadOnlyStorage),
 	},
-	{}, //
-	shaderSource);
+	{}, shaderSource);
 
 } // namespace
 
@@ -56,7 +55,7 @@ void SpriteRenderer::onUpdate(CVec3r eye) {
 	}
 
 	auto inst = (SpriteInstance*)m_instanceBuffer->lock(0, m_instanceCount * sizeof(SpriteInstance));
-	for(auto sprite : m_instances) {
+	for (auto sprite : m_instances) {
 		auto& worldMatrix = sprite->worldMatrix();
 		inst->matrix.i = {worldMatrix.r.i, 0};
 		inst->matrix.j = {worldMatrix.r.j, 0};

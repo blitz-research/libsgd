@@ -35,7 +35,7 @@ void RenderContext::beginRenderPass(RenderPassType type, Texture* colorBuffer, T
 	if (colorBuffer) {
 		colorAttachment.view = colorBuffer->wgpuTextureView();
 		colorAttachment.clearValue = {clearColor.x, clearColor.y, clearColor.z, clearColor.w};
-		colorAttachment.loadOp = wgpu::LoadOp::Load;
+		colorAttachment.loadOp = wgpu::LoadOp::Clear;
 		colorAttachment.storeOp = wgpu::StoreOp::Store;
 		renderPassDescriptor.colorAttachments = &colorAttachment;
 		renderPassDescriptor.colorAttachmentCount = 1;
@@ -45,20 +45,17 @@ void RenderContext::beginRenderPass(RenderPassType type, Texture* colorBuffer, T
 	if (depthBuffer) {
 		depthAttachment.view = depthBuffer->wgpuTextureView();
 		depthAttachment.depthClearValue = clearDepth;
-		depthAttachment.depthLoadOp = wgpu::LoadOp::Load;
+		depthAttachment.depthLoadOp = wgpu::LoadOp::Clear;
 		depthAttachment.depthStoreOp = wgpu::StoreOp::Store;
 		renderPassDescriptor.depthStencilAttachment = &depthAttachment;
 	}
 
 	switch (m_renderPassType) {
-	case RenderPassType::clear:
-		colorAttachment.loadOp = wgpu::LoadOp::Clear;
-		depthAttachment.depthLoadOp = wgpu::LoadOp::Clear;
-		break;
 	case RenderPassType::shadow:
 	case RenderPassType::opaque:
 		break;
 	case RenderPassType::blend:
+		colorAttachment.loadOp = wgpu::LoadOp::Load;
 		depthAttachment.depthLoadOp = wgpu::LoadOp::Undefined;
 		depthAttachment.depthStoreOp = wgpu::StoreOp::Undefined;
 		depthAttachment.depthReadOnly = true;

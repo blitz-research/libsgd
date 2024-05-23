@@ -13,7 +13,7 @@ auto shaderSource{
 
 BindGroupDescriptor bindGroupDescriptor( //
 	"pbrMaterial",
-	1,
+	BindGroupType::material,
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform), // PBRMaterialUniforms
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment),								  // albedoTexture

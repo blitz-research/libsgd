@@ -16,7 +16,7 @@ void render() {
 
 	renderContext->beginRender();
 	{
-		renderContext->beginRenderPass(RenderPassType::clear, gc->colorBuffer(), gc->depthBuffer(), {}, 1);
+		renderContext->beginRenderPass(RenderPassType::opaque, gc->colorBuffer(), gc->depthBuffer(), {}, 1);
 		renderContext->wgpuRenderPassEncoder().SetBindGroup(0, sceneBindings->bindGroup()->wgpuBindGroup());
 		{ //
 			skyboxRenderer->render(renderContext);

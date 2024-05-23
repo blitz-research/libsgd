@@ -23,7 +23,7 @@ While Not PollEvents()
 	EndIf
 
 	atime = atime + .03
-	AnimateModel model,0,atime,2
+	AnimateModel model,0,atime,2,1
 	
 	RenderScene()
 	Present()

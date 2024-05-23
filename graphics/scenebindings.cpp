@@ -14,7 +14,7 @@ auto shaderSource{
 
 const BindGroupDescriptor sceneBindingsDescriptor( //
 	"scneBindings",								   //
-	0,											   //
+	BindGroupType::scene,											   //
 	{bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 								wgpu::BufferBindingType::Uniform),		// binding(0) camera uniforms
 	 bufferBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment,			// binding(1) lighting uniforms

@@ -39,7 +39,7 @@ wgpu::VertexBufferLayout const instanceBufferLayout{sizeof(MeshInstance), wgpu::
 
 BindGroupDescriptor bindGroupDescriptor( //
 	"meshRenderer",						 //
-	2,
+	BindGroupType::renderer,
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 								   wgpu::BufferBindingType::Uniform),

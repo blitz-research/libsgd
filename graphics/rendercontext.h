@@ -6,8 +6,8 @@
 
 namespace sgd {
 
-enum struct RenderPassType { clear, shadow, opaque, blend };
-constexpr int renderPassTypeCount = 4;
+enum struct RenderPassType { shadow, opaque, blend };
+constexpr int renderPassTypeCount = 3;
 
 SGD_SHARED(RenderContext);
 

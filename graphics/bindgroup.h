@@ -7,19 +7,21 @@ namespace sgd {
 
 SGD_SHARED(BindGroup);
 
+enum struct BindGroupType { scene, material, renderer };
+
 struct BindGroupDescriptor {
-	const char * const label;
-	uint32_t const wgpuBindGroupIndex;
+	const char* const label;
+	BindGroupType const bindGroupType;
 	Vector<wgpu::BindGroupLayoutEntry> const wgpuBindGroupLayoutEntries;
 	Vector<wgpu::VertexBufferLayout> const wgpuVertexBufferLayouts;
 	String const wgpuShaderSource;
 	uint32_t const hash;
 
-	BindGroupDescriptor(const char* label,											//
-						uint32_t bindGroupIndex,								   //
+	BindGroupDescriptor(const char* label,										   //
+						BindGroupType bindGroupType,							   //
 						Vector<wgpu::BindGroupLayoutEntry> bindGroupLayoutEntries, //
-						Vector<wgpu::VertexBufferLayout> vertexBufferLayouts,	   // Only for geometry shaders right now
-						String wgpuShaderSource);								   // Shader source code for bind group
+						Vector<wgpu::VertexBufferLayout> vertexBufferLayouts,	   //
+						String wgpuShaderSource);								   //
 
 	wgpu::BindGroupLayout wgpuBindGroupLayout(GraphicsContext* gc) const;
 };

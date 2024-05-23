@@ -28,7 +28,7 @@ wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(Vertex), wgpu::VertexSt
 
 BindGroupDescriptor bindGroupDescriptor( //
 	"skinnedMeshRenderer",				 //
-	2,
+	BindGroupType::renderer,
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 								   wgpu::BufferBindingType::Uniform),
