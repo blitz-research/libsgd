@@ -4,14 +4,16 @@
 
 namespace sgd {
 
-SGD_SHARED(SphereCollider);
+SGD_SHARED(EllipsoidCollider);
 
-struct SphereCollider : Collider {
-	SGD_OBJECT_TYPE(SphereCollider, Collider);
+struct EllipsoidCollider : Collider {
+	SGD_OBJECT_TYPE(EllipsoidCollider, Collider);
 
-	explicit SphereCollider(Entity* entity, uint32_t colliderType, float radius);
+	explicit EllipsoidCollider(Entity* entity, uint32_t colliderType, float radius, float height);
 
 	Property<float> radius;
+
+	Property<float> height;
 
 	Collider* intersectRay(CLiner ray, float rradius, Contact& contact) override;
 
@@ -25,4 +27,4 @@ private:
 	void onReset(Entity* entity) override;
 };
 
-} // namespace sgd
+}

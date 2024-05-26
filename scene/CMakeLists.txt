@@ -17,6 +17,8 @@ add_library(scene
 	collisionutil.h
 	contact.cpp
 	contact.h
+	ellipsoidcollider.cpp
+	ellipsoidcollider.h
 	entity.cpp
 	entity.h
 	entityutil.cpp

@@ -7,7 +7,8 @@ namespace sgd {
 
 SGD_SHARED(Camera);
 
-Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, real radius, uint32_t colliderMask,
+template <class IntersectFunc>
+Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFunc intersectFunc,
 				 CollisionResponse response, Vector<Collision>& collisions) {
 
 	static constexpr real eps = (real).0001;
@@ -27,7 +28,7 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, real radius,
 
 		Line ray(src, normalize(dst - src));
 
-		auto collider = space->intersectRay(ray, radius, colliderMask, contact);
+		auto collider = intersectFunc(ray, contact);
 		if (!collider) return dst;
 
 		SGD_ASSERT(contact.time >= 0);
@@ -84,6 +85,25 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, real radius,
 		// Never move backwards from original dir
 		if (dot(dst - src, dir) <= 0) return src;
 	}
+}
+
+Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, float radius, uint32_t colliderMask,
+				 CollisionResponse response, Vector<Collision>& collisions) {
+
+	auto intersectFunc = [=](CLiner ray, Contact& contact) -> Collider* {
+		return space->intersectRay(ray, radius, colliderMask, contact);
+	};
+
+	return collideRay(space, src, dst, intersectFunc, response, collisions);
+}
+
+Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, CVec3f radii, uint32_t colliderMask, CollisionResponse response, Vector<Collision>& collisions) {
+
+	auto intersectFunc = [=](CLiner ray, Contact& contact) -> Collider* {
+		return space->intersectRay(ray, radii, colliderMask, contact);
+	};
+
+	return collideRay(space, src, dst, intersectFunc, response, collisions);
 }
 
 Collider* intersectRay(Camera* camera, CVec2f windowCoords, int colliderMask, Contact& rcontact) {

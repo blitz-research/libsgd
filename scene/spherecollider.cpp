@@ -6,27 +6,36 @@
 
 namespace sgd {
 
-SphereCollider::SphereCollider(Entity* entity, uint32_t colliderType, float iradius)
-	: Collider(entity, colliderType), radius(iradius), m_src(entity->worldPosition()) {
+SphereCollider::SphereCollider(Entity* entity, uint32_t colliderType, float rradius)
+	: Collider(entity, colliderType), radius(rradius), m_src(entity->worldPosition()) {
 
 	this->radius.changed.connect(nullptr, [=](float r) { setLocalBounds({-r, r}); });
+
+	setLocalBounds({-rradius, rradius});
 }
 
-Collider* SphereCollider::intersectRay(CLiner ray, real rradius, Contact& contact) {
+Collider* SphereCollider::intersectRay(CLiner ray, float rradius, Contact& contact) {
 
 	if (!intersectRaySphere(ray, entity()->worldMatrix().t, rradius + radius(), contact)) return nullptr;
 
-	contact.point -= contact.normal * rradius;
+	contact.point -= contact.normal * (real)rradius;
 
 	return this;
 }
 
-void SphereCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask, CollisionResponse response, Vector<Collision>& collisions) {
-	auto dst = entity()->worldPosition();
+Collider* SphereCollider::intersectRay(CLiner ray, CVec3f radii, Contact& contact) {
+	SGD_PANIC("TODO");
 
-	dst = collideRay(space, m_src, dst, radius(), colliderMask, response, collisions);
+	return nullptr;
+}
+
+void SphereCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask, CollisionResponse response,
+							  Vector<Collision>& collisions) {
+
+	auto dst = collideRay(space, m_src, entity()->worldPosition(), radius(), colliderMask, response, collisions);
 
 	entity()->setWorldPosition(dst);
+
 	m_src = dst;
 }
 

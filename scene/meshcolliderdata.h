@@ -13,11 +13,13 @@ SGD_SHARED(MeshColliderData);
 struct MeshColliderData : Shared {
 	SGD_OBJECT_TYPE(MeshColliderData, Shared);
 
-	static constexpr real boundsPadding = .01f;
+	static constexpr real boundsPadding = (real).01;
 
 	explicit MeshColliderData(CMesh* mesh);
 
-	bool intersectRay(CLiner ray, real radius, Contact& contact) const;
+	bool intersectRay(CLiner ray, float radius, Contact& contact) const;
+
+	bool intersectRay(CLiner ray, CVec3f radii, Contact& contact) const;
 
 	Boxr bounds() const {
 		return m_bounds;

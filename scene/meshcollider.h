@@ -13,7 +13,9 @@ struct MeshCollider : Collider {
 
 	MeshCollider(Entity* entity, uint32_t colliderType, MeshColliderData* data);
 
-	Collider* intersectRay(CLiner ray, real rradius, Contact& contact) override;
+	Collider* intersectRay(CLiner ray, float rradius, Contact& contact) override;
+
+	Collider* intersectRay(CLiner ray, CVec3f radii, Contact& contact) override;
 
 private:
 	MeshColliderDataPtr m_data;

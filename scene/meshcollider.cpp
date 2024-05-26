@@ -19,11 +19,23 @@ MeshCollider::MeshCollider(Entity* entity, uint32_t colliderType, MeshColliderDa
 	setLocalBounds(m_data->bounds());
 }
 
-Collider* MeshCollider::intersectRay(CLiner ray, real rradius, Contact& contact) {
+Collider* MeshCollider::intersectRay(CLiner ray, float radius, Contact& contact) {
 
 	auto localRay = inverse(entity()->worldMatrix()) * ray;
 
-	if (!m_data->intersectRay(localRay, rradius, contact)) return nullptr;
+	if (!m_data->intersectRay(localRay, radius, contact)) return nullptr;
+
+	contact.point = entity()->worldMatrix() * contact.point;
+	contact.normal = entity()->worldBasis() * contact.normal;
+
+	return this;
+}
+
+Collider* MeshCollider::intersectRay(CLiner ray, CVec3f radii, Contact& contact) {
+
+	auto localRay = inverse(entity()->worldMatrix()) * ray;
+
+	if (!m_data->intersectRay(localRay, radii, contact)) return nullptr;
 
 	contact.point = entity()->worldMatrix() * contact.point;
 	contact.normal = entity()->worldBasis() * contact.normal;

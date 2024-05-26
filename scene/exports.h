@@ -7,6 +7,7 @@
 #include "collider.h"
 #include "collisionspace.h"
 #include "collisionutil.h"
+#include "ellipsoidcollider.h"
 #include "entity.h"
 #include "entityutil.h"
 #include "gltfloader.h"

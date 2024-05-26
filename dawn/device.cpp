@@ -50,8 +50,6 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 
 	// Crashes on Linux sometimes!
 	//adapter.GetProperties(&props);
-
-	// Safer
 	wgpuAdapterGetProperties(adapter.Get(), reinterpret_cast<WGPUAdapterProperties*>(&props));
 
 	SGD_LOG << "Dawn WGPU Adapter Properties:";

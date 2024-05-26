@@ -11,6 +11,11 @@ void entry() {
 	MeshPtr levelMesh = loadStaticMesh(Path("sgd://models/ManurewaDuplex.glb")).result();
 	fit(levelMesh, Boxf({-50, -50, -50}, {50, 50, 50}), true);
 
+
+//	MaterialPtr material = loadPBRMaterial(Path("sgd://materials/Fabric048_1K-JPG")).result();
+	//MeshPtr levelMesh = createBoxMesh({{-50,-1,-50},{50,0,50}},material);//new Material(&pbrMaterialDescriptor));
+//	transformTexCoords(levelMesh,{25,25},{0,0});
+
 	ModelPtr levelModel = new Model();
 	levelModel->mesh = levelMesh;
 	scene->add(levelModel);
@@ -22,10 +27,12 @@ void entry() {
 	playerModel->mesh = playerMesh;
 	scene->add(playerModel);
 	move(playerModel, {0, 2.5f, -30});
-	ColliderPtr playerCollider = new SphereCollider(playerModel, 1, 1);
+	ColliderPtr playerCollider = new EllipsoidCollider(playerModel, 1, .25f, 1.8f);
+//	ColliderPtr playerCollider = new SphereCollider(playerModel, 1, .5f);//, 1);
 	CameraPtr playerCamera = new Camera(CameraType::perspective);
 	scene->add(playerCamera);
 	playerCamera->setParent(playerModel);
+	move(playerCamera,{0, .8f,0 });
 
 	scene->collisionSpace()->enableCollisions(1, 0, CollisionResponse::slide);
 
@@ -63,7 +70,7 @@ void entry() {
 		vel = newVel;
 
 		dc->clear();
-		dc->addText(toString(vel), {0, 0});
+		dc->addText(toString(playerModel->worldPosition()), {0,0});
 
 		render();
 	}

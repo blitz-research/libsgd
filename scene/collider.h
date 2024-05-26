@@ -46,7 +46,9 @@ struct Collider : EntityListener {
 
 	void update(uint32_t colliderMask, CollisionResponse response);
 
-	virtual Collider* intersectRay(CLiner ray, real rayRadius, Contact& contact) = 0;
+	virtual Collider* intersectRay(CLiner ray, float radius, Contact& contact) = 0;
+
+	virtual Collider* intersectRay(CLiner ray, CVec3f radii, Contact& contact) = 0;
 
 	CVector<Collision> collisions()const {
 		return m_collisions;
