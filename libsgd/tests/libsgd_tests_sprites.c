@@ -16,7 +16,7 @@ void entry() {
 		sgd_MoveEntity(sprite, 0, -1.5f, (float)rand() * 50 / RAND_MAX);	//NOLINT
 	}
 
-	while( !(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)){
+	while(!(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)){
 		sgd_RenderScene();
 		sgd_Present();
 	}

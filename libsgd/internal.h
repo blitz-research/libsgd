@@ -1,9 +1,15 @@
 #pragma once
 
-#include <scene/exports.h>
 #include <audio/exports.h>
+#include <scene/exports.h>
 
 #include <sgd/sgd.h>
+
+// clang-format off
+#define SGDX_DEPRECATED(X) \
+	{static bool done;if (!done) { done = true; \
+	SGD_LOG << "*** Warning *** function \"" << __func__ << "\" has been deprecated, please use" << #X << "instead.";}}
+// clang-format on
 
 namespace sgdx {
 
@@ -22,7 +28,7 @@ inline DrawListPtr g_drawList;
 inline FontPtr g_defaultFont;
 
 enum struct HandleType {
-//	object,
+	//	object,
 	font,
 	sound,
 	texture,
@@ -56,53 +62,53 @@ bool destroyHandle(HandleTypeInfo* type, Shared* shared);
 void destroyHandles(HandleType type);
 void destroyAllHandles();
 
-template<class T> HandleTypeInfo* handleTypeInfo();
+template <class T> HandleTypeInfo* handleTypeInfo();
 
-template<class T> SGD_Handle createHandle(T* shared) {
+template <class T> SGD_Handle createHandle(T* shared) {
 	return createHandle(handleTypeInfo<T>(), shared);
 }
 
-template<class T> SGD_Handle getHandle(T* shared) {
+template <class T> SGD_Handle getHandle(T* shared) {
 	return getHandle(handleTypeInfo<T>(), shared);
 }
 
-template<class T> SGD_Handle getOrCreateHandle(T* shared) {
+template <class T> SGD_Handle getOrCreateHandle(T* shared) {
 	return getOrCreateHandle(handleTypeInfo<T>(), shared);
 }
 
-template<class T> T* resolveHandle(SGD_Handle handle) {
+template <class T> T* resolveHandle(SGD_Handle handle) {
 	return static_cast<T*>(resolveHandle(handleTypeInfo<T>(), handle));
 }
 
-template<class T> void destroyHandle(SGD_Handle handle) {
+template <class T> void destroyHandle(SGD_Handle handle) {
 	destroyHandle(handleTypeInfo<T>(), handle);
 }
 
-template<class T> bool destroyHandle(T* shared) {
+template <class T> bool destroyHandle(T* shared) {
 	return destroyHandle(handleTypeInfo<T>(), shared);
 }
 
 inline void started() {
-	if(!g_started) error("LibSGD has not been initialized");
+	if (!g_started) error("LibSGD has not been initialized");
 }
 
-inline Window* mainWindow(){
-	if(g_mainWindow) return g_mainWindow;
+inline Window* mainWindow() {
+	if (g_mainWindow) return g_mainWindow;
 	error("Main window has not been created");
 }
 
 inline GraphicsContext* mainGC() {
-	if(g_mainGC) return g_mainGC;
-	error( "Graphics context does not exist");
+	if (g_mainGC) return g_mainGC;
+	error("Graphics context does not exist");
 }
 
-inline Scene* mainScene(){
-	if(g_mainScene) return g_mainScene;
+inline Scene* mainScene() {
+	if (g_mainScene) return g_mainScene;
 	error("Main scene has not been created");
 }
 
 inline DrawList* drawList() {
-	if(g_drawList) return g_drawList;
+	if (g_drawList) return g_drawList;
 	error("Draw list has not been created");
 }
 
@@ -129,6 +135,7 @@ SGD_HANDLE_TYPE_INFO(Sprite, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Skybox, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Collider, HandleType::collider);
 SGD_HANDLE_TYPE_INFO(SphereCollider, HandleType::collider);
+SGD_HANDLE_TYPE_INFO(EllipsoidCollider, HandleType::collider);
 SGD_HANDLE_TYPE_INFO(MeshCollider, HandleType::collider);
 
-}
+} // namespace sgdx

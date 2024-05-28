@@ -23,6 +23,11 @@ void entry() {
 		move(sprite, {0, -1.5, rnd(100)});
 	}
 
+	auto gunMesh = createBoxMesh({{-1,-1,-1},{1,1,10}}, new Material(&pbrMaterialDescriptor));
+	auto gunModel  = new Model();
+	gunModel->mesh = gunMesh;
+	scene->add(gunModel);
+
 	OverlayPtr overlay = new Overlay();
 	scene->add(overlay);
 
@@ -33,6 +38,8 @@ void entry() {
 		pollEvents();
 
 		fly(pivot);
+
+		aim(gunModel, pivot->worldPosition(), 0);
 
 		static float zr;
 		if (window->keyboard()->key(KeyCode::LEFT).down()) {

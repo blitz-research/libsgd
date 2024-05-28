@@ -1,4 +1,25 @@
 
+***** V0.07 *****
+
+* Added FlushChars.
+
+* Fixed bug in FlipMesh.
+
+* Added AimEntityAtEntity, AimEntityAtPoint.
+
+* Added deprecation system - you should now get a runtime warning when using a deprecated function.
+
+* Deprecated TransformMesh, TransformMeshtexCoords to TFormMesh, TFormMeshTexCoords for consitency.
+
+* Added TFormPoint, TFormVector, TFormNormal, TFormedX, TFormedY, TFormedZ.
+
+* Added CreateEllipsoidCollider, SetColliderHeight.
+
+
+***** V0.06.2 *****
+
+* Added 'weight' float param to AnimateModel for simple animation blending - see animblend.bb
+
 * Fix Macos build.
 
 * Fixed alpha 0 not always fully transparent due to PBR shader generating colors.

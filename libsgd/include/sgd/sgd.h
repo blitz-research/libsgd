@@ -175,11 +175,14 @@ SGD_API int SGD_DECL sgd_WindowHeight();
 //! True if key currently held down.
 SGD_API SGD_Bool SGD_DECL sgd_KeyDown(int keyCode);
 
-//! True if key pressed since last call to sgd_PollEvents().
+//! True if key pressed since last call to sgd_PollEvents.
 SGD_API SGD_Bool SGD_DECL sgd_KeyHit(int keyCode);
 
-//! Get next unicode character in key queue
+//! Get next unicode character from keyboard input queue.
 SGD_API int SGD_DECL sgd_GetChar();
+
+//! Clear keyboard input queue.
+SGD_API void SGD_DECL sgd_FlushChars();
 
 //! Mouse X position in window coordinates.
 SGD_API float SGD_DECL sgd_MouseX();
@@ -447,9 +450,15 @@ SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh mesh, float minX, float minY, float m
 								  SGD_Bool uniform);
 
 //! Transform mesh by translation, rotation, scale.
-SGD_API void SGD_DECL sgd_TransformMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz);
+SGD_API void SGD_DECL sgd_TFormMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz);
 
 //! Transform mesh texture coordinates.
+SGD_API void SGD_DECL sgd_TFormMeshTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
+
+//! @deprecated Use sgd_TFormMesh.
+SGD_API void SGD_DECL sgd_TransformMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz);
+
+//! @deprecated Use sgd_TFormMeshTexCoords.
 SGD_API void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
 
 //! Flip mesh.
@@ -779,6 +788,30 @@ SGD_API SGD_Real SGD_DECL sgd_EntitySY(SGD_Entity entity);
 //! Get the Z rotation component (ie: 'roll') of an entity's orientation in world space.
 SGD_API SGD_Real SGD_DECL sgd_EntitySZ(SGD_Entity entity);
 
+//! Aim entity at entity.
+SGD_API void SGD_DECL sgd_AimEntityAtEntity(SGD_Entity entity, SGD_Entity target, float roll);
+
+//! Aim entity at point in world space.
+SGD_API void SGD_DECL sgd_AimEntityAtPoint(SGD_Entity entity, SGD_Real x, SGD_Real y, SGD_Real z, float roll);
+
+//! Transform 3d point from one entity coordinate space to another.
+SGD_API void SGD_DECL sgd_TFormPoint(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity srcEntity, SGD_Entity dstEntity);
+
+//! Transform 3d vector from one entity coordinate space to another.
+SGD_API void SGD_DECL sgd_TFormVector(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity srcEntity, SGD_Entity dstEntity);
+
+//! Transform 3d normal from one entity coordinate space to another.
+SGD_API void SGD_DECL sgd_TFormNormal(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity srcEntity, SGD_Entity dstEntity);
+
+//! X component of most recent sgd_TransfromPoint result.
+SGD_API SGD_Real SGD_DECL sgd_TFormedX();
+
+//! Y component of most recent sgd_TransfromPoint result.
+SGD_API SGD_Real SGD_DECL sgd_TFormedY();
+
+//! Z component of most recent sgd_TransfromPoint result.
+SGD_API SGD_Real SGD_DECL sgd_TFormedZ();
+
 //! @}
 
 //! @name Camera
@@ -932,6 +965,9 @@ SGD_API void SGD_DECL sgd_SetSpriteFrame(SGD_Sprite sprite, float frame);
 
 //! Create a new sphere collider and attach it to entity.
 SGD_API SGD_Collider SGD_DECL sgd_CreateSphereCollider(SGD_Entity entity, int colliderType, float radius);
+
+//! Create a new ellipsoid collider and attach it to entity.
+SGD_API SGD_Collider SGD_DECL sgd_CreateEllipsoidCollider(SGD_Entity entity, int colliderType, float radius, float height);
 
 //! Create a new mesh collider and attach it to entity.
 SGD_API SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity entity, int colliderType, SGD_Mesh mesh);

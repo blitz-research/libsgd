@@ -5,7 +5,7 @@
 #include <cstdio>
 #include <sstream>
 
-#define SGD_LOG log(__FILE__, __FUNCTION__, __LINE__)
+#define SGD_LOG sgd::log(__FILE__, __FUNCTION__, __LINE__)
 
 namespace sgd {
 

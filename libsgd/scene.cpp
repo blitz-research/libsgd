@@ -22,8 +22,9 @@ void createOverlay() {
 	sgdx::g_drawList->font = sgdx::g_defaultFont;
 }
 
-sgd::Contact g_pickContact;
+sgd::Contact g_picked;
 sgd::Vec2f g_projected;
+sgd::Vec3r g_tformed;
 
 } // namespace
 
@@ -54,13 +55,11 @@ void SGD_DECL sgd_CreateScene() {
 
 void SGD_DECL sgd_ClearScene() {
 	sgdx::mainScene()->clear();
-
 	createOverlay();
-
 	sgdx::destroyAllHandles();
 }
 
-void SGD_DECL sgd_SetSceneAmbientLightColor(float red, float green, float blue, float alpha) {
+SGD_API void SGD_DECL sgd_SetSceneAmbientLightColor(float red, float green, float blue, float alpha) {
 	sgdx::mainScene()->ambientLightColor = sgdx::Vec4f(red, green, blue, alpha);
 }
 
@@ -74,7 +73,6 @@ void SGD_DECL sgd_SetSceneClearDepth(float depth) {
 
 void SGD_DECL sgd_SetSceneEnvTexture(SGD_Texture htexture) {
 	auto texture = sgdx::resolveHandle<sgdx::Texture>(htexture);
-
 	sgdx::mainScene()->envTexture = texture;
 }
 
@@ -119,7 +117,6 @@ void SGD_DECL sgd_DestroyEntity(SGD_Entity hentity) {
 		}
 		if (!sgdx::destroyHandle(entity)) {} // sgd::log() << "!!! SGDX Failed to destroy handle for entity:" << entity;
 	};
-
 	destroyHandles(entity);
 
 	sgdx::mainScene()->remove(entity);
@@ -127,73 +124,60 @@ void SGD_DECL sgd_DestroyEntity(SGD_Entity hentity) {
 
 SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	auto copy = entity->copy();
-
 	sgdx::mainScene()->add(copy);
-
 	return sgdx::createHandle(copy);
 }
 
 void SGD_DECL sgd_SetEntityParent(SGD_Entity hentity, SGD_Entity hparent) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	auto parent = hparent ? sgdx::resolveHandle<sgd::Entity>(hparent) : nullptr;
-
 	entity->setParent(parent);
 }
 
 SGD_Entity SGD_DECL sgd_EntityParent(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	auto parent = entity->parent();
-
 	return parent ? sgdx::getOrCreateHandle(parent) : 0;
 }
 
 void SGD_DECL sgd_SetEntityPosition(SGD_Entity hentity, SGD_Real tx, SGD_Real ty, SGD_Real tz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	setPosition(entity, {tx, ty, tz});
 }
 
 void SGD_DECL sgd_SetEntityRotation(SGD_Entity hentity, SGD_Real rx, SGD_Real ry, SGD_Real rz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	setRotation(entity, {rx, ry, rz});
 }
 
 void SGD_DECL sgd_SetEntityScale(SGD_Entity hentity, SGD_Real sx, SGD_Real sy, SGD_Real sz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	setScale(entity, {sx, sy, sz});
 }
 
 void SGD_DECL sgd_MoveEntity(SGD_Entity hentity, SGD_Real tx, SGD_Real ty, SGD_Real tz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	move(entity, {tx, ty, tz});
 }
 
 void SGD_DECL sgd_TurnEntity(SGD_Entity hentity, SGD_Real rx, SGD_Real ry, SGD_Real rz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	turn(entity, {rx, ry, rz});
 }
 
 void SGD_DECL sgd_TranslateEntity(SGD_Entity hentity, SGD_Real tx, SGD_Real ty, SGD_Real tz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	translate(entity, {tx, ty, tz});
 }
 
 void SGD_DECL sgd_RotateEntity(SGD_Entity hentity, SGD_Real rx, SGD_Real ry, SGD_Real rz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	rotate(entity, {rx, ry, rz});
 }
 
 void SGD_DECL sgd_ScaleEntity(SGD_Entity hentity, SGD_Real sx, SGD_Real sy, SGD_Real sz) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-
 	scale(entity, {sx, sy, sz});
 }
 
@@ -240,6 +224,52 @@ SGD_Real SGD_DECL sgd_EntitySY(SGD_Entity hentity) {
 SGD_Real SGD_DECL sgd_EntitySZ(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return entity->worldScale().z;
+}
+
+void SGD_DECL sgd_AimEntityAtEntity(SGD_Entity hentity, SGD_Entity htarget, float roll) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	auto target = sgdx::resolveHandle<sgd::Entity>(htarget);
+	sgd::aim(entity, target->worldPosition(), roll);
+}
+
+void SGD_DECL sgd_AimEntityAtPoint(SGD_Entity hentity, SGD_Real x, SGD_Real y, SGD_Real z, float roll) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	sgd::aim(entity, {x,y,z}, roll);
+}
+
+void SGD_DECL sgd_TFormPoint(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrcEntity, SGD_Entity hdstEntity) {
+	auto src = sgdx::resolveHandle<sgd::Entity>(hsrcEntity);
+	auto dst = sgdx::resolveHandle<sgd::Entity>(hdstEntity);
+	auto tv = src ? src->worldMatrix() * sgd::Vec3r(x, y, z) : sgd::Vec3r(x, y, z);
+	g_tformed = dst ? inverse(dst->worldMatrix()) * tv : tv;
+}
+
+// Includes entity scale, maybe add a bool param?
+void SGD_DECL sgd_TFormVector(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrcEntity, SGD_Entity hdstEntity) {
+	auto src = sgdx::resolveHandle<sgd::Entity>(hsrcEntity);
+	auto dst = sgdx::resolveHandle<sgd::Entity>(hdstEntity);
+	auto tv = src ? src->worldMatrix().r * sgd::Vec3r(x, y, z) : sgd::Vec3r(x, y, z);
+	g_tformed = dst ? inverse(dst->worldMatrix().r) * tv : tv;
+}
+
+// Does no normalization.
+void SGD_DECL sgd_TFormNormal(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrcEntity, SGD_Entity hdstEntity) {
+	auto src = sgdx::resolveHandle<sgd::Entity>(hsrcEntity);
+	auto dst = sgdx::resolveHandle<sgd::Entity>(hdstEntity);
+	auto tv = src ? cofactor(src->worldBasis()) * sgd::Vec3r(x, y, z) : sgd::Vec3r(x, y, z);
+	g_tformed = dst ? cofactor(inverse(dst->worldBasis())) * tv : tv;
+}
+
+SGD_Real SGD_DECL sgd_TFormedX() {
+	return g_tformed.x;
+}
+
+SGD_Real SGD_DECL sgd_TFormedY() {
+	return g_tformed.y;
+}
+
+SGD_Real SGD_DECL sgd_TFormedZ() {
+	return g_tformed.z;
 }
 
 // ***** Camera *****
@@ -461,7 +491,13 @@ void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness) {
 
 SGD_Collider SGD_DECL sgd_CreateSphereCollider(SGD_Entity hentity, int collisionType, float radius) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	auto collider = new sgd::SphereCollider(entity, (uint32_t)collisionType, 1);
+	auto collider = new sgd::SphereCollider(entity, (uint32_t)collisionType, radius);
+	return sgdx::createHandle(collider);
+}
+
+SGD_Collider SGD_DECL sgd_CreateEllipsoidCollider(SGD_Entity hentity, int collisionType, float radius, float height) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	auto collider = new sgd::EllipsoidCollider(entity, (uint32_t)collisionType, radius, height);
 	return sgdx::createHandle(collider);
 }
 
@@ -487,8 +523,22 @@ SGD_Entity SGD_DECL sgd_ColliderEntity(SGD_Collider hcollider) {
 
 void SGD_DECL sgd_SetColliderRadius(SGD_Collider hcollider, float radius) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
-	if (!collider->is<sgd::SphereCollider>()) sgdx::error("Collider is not a sphere collider");
-	collider->as<sgd::SphereCollider>()->radius = radius;
+	if(collider->is<sgd::SphereCollider>()) {
+		collider->as<sgd::SphereCollider>()->radius = radius;
+	}else if(collider->is<sgd::EllipsoidCollider>()) {
+		collider->as<sgd::EllipsoidCollider>()->radius = radius;
+	}else{
+		sgdx::error("Collider does not have a radius property");
+	}
+}
+
+void SGD_DECL sgd_SetColliderHeight(SGD_Collider hcollider, float height) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	if(collider->is<sgd::EllipsoidCollider>()) {
+		collider->as<sgd::EllipsoidCollider>()->height = height;
+	}else{
+		sgdx::error("Collider does not have a height property");
+	}
 }
 
 void SGD_DECL sgd_EnableCollisions(int srcColliderType, int dstColliderType, int collisionRepsonse) {
@@ -504,7 +554,7 @@ SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera hcamera, float windowX, float wi
 	auto camera = sgdx::resolveHandle<sgd::Camera>(hcamera);
 	sgd::Contact contact;
 	auto collider = sgd::intersectRay(camera, {windowX, windowY}, colliderMask, contact);
-	if(collider) g_pickContact=contact;
+	if(collider) g_picked=contact;
 	return collider ? sgdx::getOrCreateHandle(collider) : 0;
 }
 
@@ -518,30 +568,30 @@ SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Re
 	sgd::Liner ray(src, dir / d);
 	sgd::Contact contact(d);
 	auto collider = sgdx::mainScene()->collisionSpace()->intersectRay(ray, radius, colliderMask, contact);
-	if(collider) g_pickContact=contact;
+	if(collider) g_picked=contact;
 	return collider ? sgdx::getOrCreateHandle(collider) : 0;
 }
 
 SGD_Real SGD_DECL sgd_PickedX() {
-	return g_pickContact.point.x;
+	return g_picked.point.x;
 }
 
 SGD_Real SGD_DECL sgd_PickedY() {
-	return g_pickContact.point.y;
+	return g_picked.point.y;
 }
 
 SGD_Real SGD_DECL sgd_PickedZ() {
-	return g_pickContact.point.z;
+	return g_picked.point.z;
 }
 
 SGD_Real SGD_DECL sgd_PickedNX() {
-	return g_pickContact.normal.x;
+	return g_picked.normal.x;
 }
 
 SGD_Real SGD_DECL sgd_PickedNY() {
-	return g_pickContact.normal.y;
+	return g_picked.normal.y;
 }
 
 SGD_Real SGD_DECL sgd_PickedNZ() {
-	return g_pickContact.normal.z;
+	return g_picked.normal.z;
 }

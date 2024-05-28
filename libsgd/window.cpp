@@ -60,6 +60,11 @@ int SGD_DECL sgd_GetChar() {
 	return (int)chr;
 }
 
+void SGD_DECL sgd_FlushChars() {
+	auto& queue = sgdx::mainWindow()->keyboard()->charQueue();
+	queue.clear();
+}
+
 float SGD_DECL sgd_MouseX() {
 	return sgdx::mainWindow()->mouse()->position().x;
 }
