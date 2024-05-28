@@ -1,16 +1,19 @@
 #include "renderpipeline.h"
 
 #include "material.h"
-#include "shadowmaterial.h"
 #include "scenebindings.h"
+#include "shadowmaterial.h"
+
+#define TCPP_IMPLEMENTATION
+#include "tcppLibrary.hpp"
 
 namespace sgd {
 
-wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
+wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc,	 //
 											   CBindGroup* material, //
-											   BlendMode blendMode, //
-											   DepthFunc depthFunc, //
-											   CullMode cullMode,	//
+											   BlendMode blendMode,	 //
+											   DepthFunc depthFunc,	 //
+											   CullMode cullMode,	 //
 											   CBindGroup* renderer, //
 											   DrawMode drawMode) {
 
@@ -42,6 +45,19 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
 					material->descriptor()->wgpuShaderSource + //
 					renderer->descriptor()->wgpuShaderSource;
 
+	{
+		auto errorCallback = [](const tcpp::TErrorInfo& err) {
+			SGD_LOG << "TinyCPP error:" << ErrorTypeToString(err.mType);
+			SGD_ABORT();
+		};
+
+		tcpp::Lexer lexer(std::make_unique<tcpp::StringInputStream>(source));
+
+		tcpp::Preprocessor preprocessor(lexer, {errorCallback});
+
+		source = preprocessor.Process();
+	}
+
 	auto module = createShaderModule(gc->wgpuDevice(), source);
 
 	wgpu::RenderPipelineDescriptor pipelineDescriptor;
@@ -58,11 +74,15 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
 	if (blendMode != BlendMode::undefined) {
 		switch (blendMode) {
 		case BlendMode::undefined:
+			blendState.color.srcFactor = wgpu::BlendFactor::Undefined;
+			blendState.color.dstFactor = wgpu::BlendFactor::Undefined;
+			break;
 		case BlendMode::opaque:
+		case BlendMode::alphaMask:
 			blendState.color.srcFactor = wgpu::BlendFactor::One;
 			blendState.color.dstFactor = wgpu::BlendFactor::Zero;
 			break;
-		case BlendMode::alpha:
+		case BlendMode::alphaBlend:
 			blendState.color.srcFactor = wgpu::BlendFactor::One;
 			blendState.color.dstFactor = wgpu::BlendFactor::OneMinusSrcAlpha;
 			break;
@@ -94,11 +114,14 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
 	depthStencilState.format = gc->depthBuffer()->wgpuTexture().GetFormat();
 	depthStencilState.depthCompare = (wgpu::CompareFunction)depthFunc;
 	switch (blendMode) {
-	case BlendMode::undefined:	// for shadows
+	case BlendMode::undefined: // for shadows
+		depthStencilState.depthWriteEnabled = true;
+		break;
 	case BlendMode::opaque:
+	case BlendMode::alphaMask:
 		depthStencilState.depthWriteEnabled = (depthFunc != DepthFunc::undefined);
 		break;
-	case BlendMode::alpha:
+	case BlendMode::alphaBlend:
 	case BlendMode::additive:
 	case BlendMode::multiply:
 		depthStencilState.depthWriteEnabled = false;
@@ -125,8 +148,8 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
 	return pipeline = gc->wgpuDevice().CreateRenderPipeline(&pipelineDescriptor);
 }
 
-wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
-											   CMaterial* material,	//
+wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc,	 //
+											   CMaterial* material,	 //
 											   CBindGroup* renderer, //
 											   DrawMode drawMode) {
 
@@ -134,12 +157,12 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc, //
 									 material->cullMode(), renderer, drawMode);
 }
 
-wgpu::RenderPipeline getOrCreateShadowPipeline(GraphicsContext* gc, //
+wgpu::RenderPipeline getOrCreateShadowPipeline(GraphicsContext* gc,	 //
 											   CBindGroup* renderer, //
 											   DrawMode drawMode) {
 
-//	return getOrCreateRenderPipeline(gc, shadowBindGroup(), BlendMode::undefined, DepthFunc::lessEqual, CullMode::back, renderer,
-//									 drawMode);
+	//	return getOrCreateRenderPipeline(gc, shadowBindGroup(), BlendMode::undefined, DepthFunc::lessEqual, CullMode::back,
+	//renderer, 									 drawMode);
 	return getOrCreateRenderPipeline(gc, shadowBindGroup(), BlendMode::undefined, DepthFunc::less, CullMode::front, renderer,
 									 drawMode);
 }

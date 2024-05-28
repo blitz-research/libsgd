@@ -46,7 +46,7 @@ DrawList::DrawList()
 	m_bindGroup->setBuffer(0, m_uniformBuffer);
 
 	auto cmaterial = new Material(&prelitMaterialDescriptor);
-	cmaterial->blendMode = BlendMode::alpha;
+	cmaterial->blendMode = BlendMode::alphaBlend;
 	//	cmaterial->depthFunc = DepthFunc::always;
 	cmaterial->cullMode = CullMode::none;
 	m_whiteMaterial = cmaterial;

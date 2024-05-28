@@ -99,7 +99,7 @@ Texture* GLTFLoader::loadTexture(int id, bool srgb) {
 
 	auto& gltfTex = gltfModel.textures[id];
 
-//	SGD_LOG << "Texture"<<id<<":"<<gltfTex.name;
+	//	SGD_LOG << "Texture"<<id<<":"<<gltfTex.name;
 
 	auto& gltfImage = gltfModel.images[gltfTex.source];
 
@@ -155,9 +155,11 @@ Material* GLTFLoader::loadMaterial(int id) {
 	auto& gltfMat = gltfModel.materials[id];
 	auto material = cachedMaterials[id] = new Material(&pbrMaterialDescriptor);
 
-//	SGD_LOG << "Material" << id << ":" << gltfMat.name;
-
-	material->blendMode = gltfMat.alphaMode == "BLEND" ? BlendMode::alpha : BlendMode::opaque;
+	//	SGD_LOG << "Material" << id << ":" << gltfMat.name;
+	static const Map<String, BlendMode> blendModes{
+		{"OPAQUE", BlendMode::opaque}, {"MASK", BlendMode::alphaMask}, {"BLEND", BlendMode::alphaBlend}};
+	auto it = blendModes.find(gltfMat.alphaMode);
+	material->blendMode = it != blendModes.end() ? it->second : BlendMode::opaque;
 	material->cullMode = gltfMat.doubleSided ? CullMode::none : CullMode::back;
 
 	auto& pbr = gltfMat.pbrMetallicRoughness;

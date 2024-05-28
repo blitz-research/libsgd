@@ -231,6 +231,27 @@ set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
 
 FetchContent_MakeAvailable(tinygltf)
 
+##### tcpp #####
+
+add_library(tcpp INTERFACE)
+
+FetchContent_Declare(tcpp
+	GIT_REPOSITORY https://github.com/blitz-research/tcpp.git
+	GIT_TAG master
+	GIT_SUBMODULES ""
+	GIT_SHALLOW TRUE
+	EXCLUDE_FROM_ALL
+)
+
+block()
+set(IS_PLUGIN_BUILDING_ENABLED OFF)
+set(IS_SAMPLES_BUILDING_ENABLED OFF)
+set(IS_TESTING_ENABLED OFF)
+FetchContent_MakeAvailable(tcpp)
+endblock()
+
+target_include_directories(tcpp INTERFACE ${tcpp_SOURCE_DIR}/source)
+
 ##### imgui #####
 
 FetchContent_Declare(imgui
@@ -243,7 +264,7 @@ FetchContent_Declare(imgui
 
 FetchContent_MakeAvailable(imgui)
 
-# imgui-core used by demo only
+# imgui-core used by imgui test only
 add_library(imgui-core
 	${imgui_SOURCE_DIR}/imgui.cpp
 	${imgui_SOURCE_DIR}/imgui_demo.cpp

@@ -69,6 +69,6 @@ add_library(graphics
 	exports.h
 )
 
-target_link_libraries(graphics window dawn tinygltf stb)
+target_link_libraries(graphics window dawn tinygltf stb tcpp)
 
 add_subdirectory(tests)

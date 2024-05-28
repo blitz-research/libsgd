@@ -101,7 +101,7 @@ Expected<Font*, FileioEx> loadFont(CPath path, float height) {
 
 	auto atlas = new Material(&fontMaterialDescriptor);
 	atlas->setTexture("atlasTexture", texture);
-	atlas->blendMode = BlendMode::alpha;
+	atlas->blendMode = BlendMode::alphaBlend;
 	atlas->depthFunc = DepthFunc::always;
 	atlas->cullMode = CullMode::none;
 

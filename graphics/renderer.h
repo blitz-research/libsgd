@@ -34,9 +34,11 @@ protected:
 inline RenderPassType renderPassType(BlendMode blendMode) {
 	switch (blendMode) {
 	case BlendMode::undefined:
+		return RenderPassType::shadow;
 	case BlendMode::opaque:
+	case BlendMode::alphaMask:
 		return RenderPassType::opaque;
-	case BlendMode::alpha:
+	case BlendMode::alphaBlend:
 	case BlendMode::additive:
 	case BlendMode::multiply:
 		return RenderPassType::blend;

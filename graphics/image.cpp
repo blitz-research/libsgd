@@ -44,7 +44,7 @@ Image::Image() : m_material(new Material(&materialDescriptor)) {
 	frames = g_defaultTexture;
 
 	blendMode.changed.connect(nullptr, [=](BlendMode mode) { m_material->blendMode = mode; });
-	blendMode = BlendMode::alpha;
+	blendMode = BlendMode::alphaBlend;
 
 	m_material->cullMode = CullMode::none;
 

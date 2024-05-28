@@ -11,7 +11,8 @@ SGD_SHARED(Material);
 enum struct BlendMode {
 	undefined,
 	opaque,
-	alpha,
+	alphaMask,
+	alphaBlend,
 	additive,
 	multiply,
 };

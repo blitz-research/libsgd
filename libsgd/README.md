@@ -35,12 +35,14 @@ Shane
 Simon Harrison
 Michael Hartlef
 MarLupin
-James Boyd
 Michael Denathorn
+James Boyd
 Dex
 Andy Hewco
 Dan
 Markus Rosse
-Panayiotis Yianni
+Amon
 JaviCervera
 Chaduke
+BlitzMan
+That1Guard

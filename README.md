@@ -15,7 +15,7 @@ Joins the LibSFD discussion at https://skirmish-dev.net/forum
 Help support LibSGD at https://patreon.com/libsgd
 
 
-## CMake build instuctions for 64bit Windows 10
+### CMake build instuctions for 64bit Windows 10
 
 * Install git, cmake, python3 and MSVC (I use the free 2022 Community Edition).
 
@@ -27,10 +27,10 @@ Help support LibSGD at https://patreon.com/libsgd
 
 * Install: ``cmake --install cmake-build-windows-release --config Release``
 
-After install output files should end up in cmake-build-windows-release/LIBSGD_INSTALL dir.
+After install, output files should end up in cmake-build-windows-release/LIBSGD_INSTALL dir.
 
 
-## CMake build instuctions for 64bit Linux (tested on Manjaro KDE)
+### CMake build instuctions for 64bit Linux (tested on Manjaro KDE)
 
 * You will need at least git, cmake, python3, g++, binutils etc. You may also need to install dev packages for things like x11, openssl and so on.
 
@@ -42,16 +42,16 @@ After install output files should end up in cmake-build-windows-release/LIBSGD_I
 
 * Install: ``cmake --install cmake-build-linux-release``
 
-After install output files should end up in cmake-build-linux-release/LIBSGD_INSTALL dir.
+After install, output files should end up in cmake-build-linux-release/LIBSGD_INSTALL dir.
 
 
-## CMake build instructions for MacOS (tested on Sonoma 14.4.1)
+### CMake build instructions for MacOS (tested on Sonoma 14.4.1)
 
 * Install 'XCode' from app store.
 
 * Install 'homebrew' from: https://brew.sh/
 
-* Install cmake using 'breqw install cmake'.
+* Install cmake using 'brew install cmake'.
 
 * Install openssl using 'brew install openssl'.
 
@@ -66,7 +66,7 @@ After install output files should end up in cmake-build-linux-release/LIBSGD_INS
 After install, output files should end up in cmake-build-macos-release/LIBSGD_INSTALL dir.
 
 
-## Build instructions for the BlitzMax target
+### Build instructions for the BlitzMax target
 
 * Build the libsgd/blitzmax/sgd2bmx.bmx tool and place the output executable somewhere in you system path.
 
@@ -75,7 +75,7 @@ After install, output files should end up in cmake-build-macos-release/LIBSGD_IN
 After building and installing, LIBSGD_INSTALL should include an additional blitzmax directory containing the SGD blitzmax module.
  
 
-## Build instructions for the Python target
+### Build instructions for the Python target
 
 * Install the python devlopment libraries and SWIG.
 
@@ -84,7 +84,7 @@ After building and installing, LIBSGD_INSTALL should include an additional blitz
 After building and installing, LIBSGD_INSTALL should include an additional python directory containing the SGD python module.
 
 
-## Build instructions for the node.js target
+### Build instructions for the node.js target
 
 * Install nodejs and SWIG.
 
@@ -93,7 +93,7 @@ After building and installing, LIBSGD_INSTALL should include an additional pytho
 After building and installing, LIBSGD_INSTALL should include an additional nodejs directory containing the SGD nodejs module.
 
 
-## Build instructions for html help files
+### Build instructions for html help files
 
 * Install Doxygen.
 
