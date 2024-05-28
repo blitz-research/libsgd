@@ -19,7 +19,7 @@ option(SGD_BLITZ3D_TARGET_ENABLED "Blitz3D target enabled" OFF)
 option(SGD_BLITZMAX_TARGET_ENABLED "BlitzMax target enabled" OFF)
 option(SGD_NODEJS_TARGET_ENABLED "Nodejs target enabled" OFF)
 option(SGD_PYTHON_TARGET_ENABLED "Python target enabled" OFF)
-option(SGD_DOXYGEN_TARGET_ENABED "Doxygen target enabled" OFF)
+option(SGD_DOXYGEN_TARGET_ENABLED "Doxygen target enabled" OFF)
 
 message("### Configuring LibSGD:")
 #

@@ -41,11 +41,10 @@ set_target_properties(libsgd_python PROPERTIES PREFIX "")
 
 if(SGD_OS_WINDOWS)
 	set_target_properties(libsgd_python PROPERTIES SUFFIX .pyd)
-	set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/_sgd.pyd)
-else()
-	set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/_sgd.so)
 endif()
 
-install(FILES ${OUTPUT_FILE} ${CMAKE_CURRENT_BINARY_DIR}/sgd.py ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.py DESTINATION python)
+install(TARGETS libsgd_python RUNTIME DESTINATION python)
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sgd.py ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.py DESTINATION python)
 
 #winpty python

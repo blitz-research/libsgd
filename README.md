@@ -70,7 +70,7 @@ After install, output files should end up in cmake-build-macos-release/LIBSGD_IN
 
 * Build the libsgd/blitzmax/sgd2bmx.bmx tool and place the output executable somewhere in you system path.
 
-* Set the cmake option SGD_BLITZMAX_TARGET_ENABLED to 1. You can do this by passing -DSGD_BLITZMAX_TARGET_ENABLED=1 to cmake when configuring.
+* Set the cmake option SGD_BLITZMAX_TARGET_ENABLED to ON. You can do this by passing -DSGD_BLITZMAX_TARGET_ENABLED=ON to cmake when configuring.
 
 After building and installing, LIBSGD_INSTALL should include an additional blitzmax directory containing the SGD blitzmax module.
  
@@ -79,7 +79,7 @@ After building and installing, LIBSGD_INSTALL should include an additional blitz
 
 * Install the python devlopment libraries and SWIG.
 
-* Set the cmake option SGD_PYTHON_TARGET_ENABLED to 1. You can do this by passing -DSGD_PYTHON_TARGET_ENABLED=1 to cmake when configuring.
+* Set the cmake option SGD_PYTHON_TARGET_ENABLED to ON. You can do this by passing -DSGD_PYTHON_TARGET_ENABLED=ON to cmake when configuring.
 
 After building and installing, LIBSGD_INSTALL should include an additional python directory containing the SGD python module.
 
@@ -88,7 +88,7 @@ After building and installing, LIBSGD_INSTALL should include an additional pytho
 
 * Install nodejs and SWIG.
 
-* Set the cmake option SGD_NODEJS_TARGET_ENABLED to 1. You can do this by passing -DSGD_NODEJS_TARGET_ENABLED=1 to cmake when configuring.
+* Set the cmake option SGD_NODEJS_TARGET_ENABLED to ON You can do this by passing -DSGD_NODEJS_TARGET_ENABLED=ON to cmake when configuring.
 
 After building and installing, LIBSGD_INSTALL should include an additional nodejs directory containing the SGD nodejs module.
 
@@ -97,6 +97,6 @@ After building and installing, LIBSGD_INSTALL should include an additional nodej
 
 * Install Doxygen.
 
-* Set the cmake option SGD_DOXYGEN_TARGET_ENABLED to 1. You can do this by passing -DSGD_DOXYGEN_TARGET_ENABLED=1 to cmake when configuring.  
+* Set the cmake option SGD_DOXYGEN_TARGET_ENABLED to ON. You can do this by passing -DSGD_DOXYGEN_TARGET_ENABLED=ON to cmake when configuring.  
 
 After building and installing, LIBSGD_INSTALL should include an additional html directory containing the SGD html help files.
