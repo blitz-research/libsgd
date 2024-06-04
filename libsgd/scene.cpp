@@ -88,6 +88,10 @@ float SGD_DECL sgd_FPS() {
 	return sgdx::mainGC()->FPS();
 }
 
+float SGD_DECL sgd_RPS() {
+	return sgdx::mainScene()->RPS();
+}
+
 // ***** Entity *****
 
 void SGD_DECL sgd_SetEntityEnabled(SGD_Entity hentity, SGD_Bool enabled) {
@@ -234,7 +238,7 @@ void SGD_DECL sgd_AimEntityAtEntity(SGD_Entity hentity, SGD_Entity htarget, floa
 
 void SGD_DECL sgd_AimEntityAtPoint(SGD_Entity hentity, SGD_Real x, SGD_Real y, SGD_Real z, float roll) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	sgd::aim(entity, {x,y,z}, roll);
+	sgd::aim(entity, {x, y, z}, roll);
 }
 
 void SGD_DECL sgd_TFormPoint(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrcEntity, SGD_Entity hdstEntity) {
@@ -300,8 +304,8 @@ void SGD_DECL sgd_SetCameraFar(SGD_Camera hcamera, float far) {
 
 SGD_Bool SGD_DECL sgd_CameraProject(SGD_Camera hcamera, SGD_Real x, SGD_Real y, SGD_Real z) {
 	auto camera = sgdx::resolveHandle<sgdx::Camera>(hcamera);
-	auto r = sgd::project(camera, {x,y,z});
-	if(r) g_projected = r.result();
+	auto r = sgd::project(camera, {x, y, z});
+	if (r) g_projected = r.result();
 	return r;
 }
 
@@ -337,35 +341,43 @@ SGD_Light SGD_DECL sgd_CreateSpotLight() {
 }
 
 void SGD_DECL sgd_SetLightColor(SGD_Light hlight, float red, float green, float blue, float alpha) {
-	sgdx::resolveHandle<sgdx::Light>(hlight)->color = sgdx::Vec4f(red, green, blue, alpha);
+	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
+	light->color = sgdx::Vec4f(red, green, blue, alpha);
 }
 
 void SGD_DECL sgd_SetLightRange(SGD_Light hlight, float range) {
-	sgdx::resolveHandle<sgdx::Light>(hlight)->range = range;
+	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
+	light->range = range;
 }
 
 void SGD_DECL sgd_SetLightFalloff(SGD_Light hlight, float falloff) {
-	sgdx::resolveHandle<sgdx::Light>(hlight)->falloff = falloff;
+	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
+	light->falloff = falloff;
 }
 
 void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light hlight, float angle) {
-	sgdx::resolveHandle<sgdx::Light>(hlight)->innerConeAngle = angle;
+	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
+	light->innerConeAngle = angle;
 }
 
 void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light hlight, float angle) {
-	sgdx::resolveHandle<sgdx::Light>(hlight)->outerConeAngle = angle;
+	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
+	light->outerConeAngle = angle;
 }
 
 void SGD_DECL sgd_SetLightCastsShadow(SGD_Light hlight, SGD_Bool castsShadow) {
-	sgdx::resolveHandle<sgdx::Light>(hlight)->castsShadow = castsShadow;
+	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
+	light->castsShadow = castsShadow;
 }
 
 SGD_Bool SGD_DECL sgd_LightCastsShadow(SGD_Light hlight) {
-	return sgdx::resolveHandle<sgdx::Light>(hlight)->castsShadow();
+	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
+	return light->castsShadow();
 }
 
 void SGD_DECL sgd_SetLightPriority(SGD_Light hlight, int priority) {
-	sgdx::resolveHandle<sgdx::Light>(hlight)->priority = priority;
+	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
+	light->priority = priority;
 }
 
 // ***** Model *****
@@ -410,36 +422,32 @@ SGD_Model SGD_DECL sgd_CreateModel(SGD_Mesh hmesh) {
 void SGD_DECL sgd_SetModelMesh(SGD_Model hmodel, SGD_Mesh hmesh) {
 	auto model = sgdx::resolveHandle<sgd::Model>(hmodel);
 	auto mesh = sgdx::resolveHandle<sgdx::Mesh>(hmesh);
-
 	model->mesh = mesh;
 }
 
 SGD_Mesh SGD_DECL sgd_ModelMesh(SGD_Model hmodel) {
 	auto model = sgdx::resolveHandle<sgd::Model>(hmodel);
-
 	auto mesh = model->mesh().get();
-
-	return sgdx::getOrCreateHandle(mesh);
+	return mesh ? sgdx::getOrCreateHandle(mesh) : 0;
 }
 
 void SGD_DECL sgd_SetModelColor(SGD_Model hmodel, float red, float green, float blue, float alpha) {
 	auto model = sgdx::resolveHandle<sgd::Model>(hmodel);
-
 	model->color = sgdx::Vec4f(red, green, blue, alpha);
 }
 
 // ***** Sprite *****
 
 SGD_Sprite SGD_DECL sgd_CreateSprite(SGD_Image himage) {
-	auto image = himage ? 	sgdx::resolveHandle<sgdx::Image>(himage) : nullptr;
+	auto image = himage ? sgdx::resolveHandle<sgdx::Image>(himage) : nullptr;
 	auto sprite = new sgdx::Sprite();
 	sgdx::mainScene()->add(sprite);
-	sprite->image=image;
+	sprite->image = image;
 	return sgdx::createHandle<sgdx::Sprite>(sprite);
 }
 
 void SGD_DECL sgd_SetSpriteImage(SGD_Sprite hsprite, SGD_Image himage) {
-	sgdx::resolveHandle<sgdx::Sprite>(hsprite)->image =	sgdx::resolveHandle<sgdx::Image>(himage);
+	sgdx::resolveHandle<sgdx::Sprite>(hsprite)->image = sgdx::resolveHandle<sgdx::Image>(himage);
 }
 
 void SGD_DECL sgd_SetSpriteColor(SGD_Sprite hsprite, float red, float green, float blue, float alpha) {
@@ -503,14 +511,12 @@ SGD_Collider SGD_DECL sgd_CreateEllipsoidCollider(SGD_Entity hentity, int collis
 
 SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity hentity, int collisionType, SGD_Mesh hmesh) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	auto mesh = hmesh ? sgdx::resolveHandle<sgd::Mesh>(hmesh) : nullptr;
-
+	sgd::CMesh* mesh = hmesh ? sgdx::resolveHandle<sgd::Mesh>(hmesh) : nullptr;
 	if (!mesh) {
 		if (!entity->is<sgd::Model>()) sgdx::error("Entity must be a model");
 		mesh = entity->as<sgd::Model>()->mesh();
 		if (!mesh) sgdx::error("Model must have a valid mesh");
 	}
-
 	auto data = sgd::getOrCreateMeshColliderData(mesh);
 	auto collider = new sgd::MeshCollider(entity, (uint32_t)collisionType, data);
 	return sgdx::createHandle(collider);
@@ -523,20 +529,20 @@ SGD_Entity SGD_DECL sgd_ColliderEntity(SGD_Collider hcollider) {
 
 void SGD_DECL sgd_SetColliderRadius(SGD_Collider hcollider, float radius) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
-	if(collider->is<sgd::SphereCollider>()) {
+	if (collider->is<sgd::SphereCollider>()) {
 		collider->as<sgd::SphereCollider>()->radius = radius;
-	}else if(collider->is<sgd::EllipsoidCollider>()) {
+	} else if (collider->is<sgd::EllipsoidCollider>()) {
 		collider->as<sgd::EllipsoidCollider>()->radius = radius;
-	}else{
+	} else {
 		sgdx::error("Collider does not have a radius property");
 	}
 }
 
 void SGD_DECL sgd_SetColliderHeight(SGD_Collider hcollider, float height) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
-	if(collider->is<sgd::EllipsoidCollider>()) {
+	if (collider->is<sgd::EllipsoidCollider>()) {
 		collider->as<sgd::EllipsoidCollider>()->height = height;
-	}else{
+	} else {
 		sgdx::error("Collider does not have a height property");
 	}
 }
@@ -554,7 +560,7 @@ SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera hcamera, float windowX, float wi
 	auto camera = sgdx::resolveHandle<sgd::Camera>(hcamera);
 	sgd::Contact contact;
 	auto collider = sgd::intersectRay(camera, {windowX, windowY}, colliderMask, contact);
-	if(collider) g_picked=contact;
+	if (collider) g_picked = contact;
 	return collider ? sgdx::getOrCreateHandle(collider) : 0;
 }
 
@@ -568,7 +574,7 @@ SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Re
 	sgd::Liner ray(src, dir / d);
 	sgd::Contact contact(d);
 	auto collider = sgdx::mainScene()->collisionSpace()->intersectRay(ray, radius, colliderMask, contact);
-	if(collider) g_picked=contact;
+	if (collider) g_picked = contact;
 	return collider ? sgdx::getOrCreateHandle(collider) : 0;
 }
 

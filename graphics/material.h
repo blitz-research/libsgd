@@ -1,5 +1,6 @@
 #pragma once
 
+#include "bindgroup.h"
 #include "renderpipeline.h"
 
 namespace sgd {

@@ -11,9 +11,13 @@ struct Contact {
 
 	Contact() = default;
 
-	Contact(real time) : time(time) {
+	explicit Contact(real time) : time(time) {
 	}
 };
 using CContact = const Contact&;
+
+inline std::ostream& operator<<(std::ostream& os, const Contact& c) {
+	return os << '(' << c.point << ',' << c.normal << ',' << c.time << ')';
+}
 
 } // namespace sgd

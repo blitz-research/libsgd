@@ -1,15 +1,13 @@
 #pragma once
 
-#include "renderpipeline.h"
 #include "rendercontext.h"
+#include "renderpipeline.h"
 
 #include <dawn/exports.h>
 
 namespace sgd {
 
 SGD_SHARED(Renderer);
-
-RenderPassType renderPassType(BlendMode blendMode);
 
 struct Renderer : GraphicsResource {
 
@@ -18,10 +16,13 @@ struct Renderer : GraphicsResource {
 	virtual void onUpdate(CVec3r eye) {
 	}
 
+	CVector<RenderOp> renderOps(RenderPassType rpassType) const {
+		return m_renderOps[(int)rpassType];
+	}
+
 	virtual void render(RenderContext* rc) const {
 		auto& ops = m_renderOps[(int)rc->renderPassType()];
-		if(ops.empty()) return;
-
+		if (ops.empty()) return;
 		rc->render(ops);
 	}
 
@@ -29,21 +30,20 @@ protected:
 	mutable Array<Vector<RenderOp>, renderPassTypeCount> m_renderOps;
 
 	Renderer() = default;
+
+	void addRenderOp(GraphicsContext* gc,	  //
+					 CMaterial* material,	  //
+					 CBuffer* instanceBuffer, //
+					 CBuffer* vertexBuffer,	  //
+					 CBuffer* indexBuffer,	  //
+					 CBindGroup* renderer,	  //
+					 DrawMode drawMode,		  //
+					 uint32_t elementCount,	  //
+					 uint32_t instanceCount,  //
+					 uint32_t firstElement,	  //
+					 bool castsShadow) const;
 };
 
-inline RenderPassType renderPassType(BlendMode blendMode) {
-	switch (blendMode) {
-	case BlendMode::undefined:
-		return RenderPassType::shadow;
-	case BlendMode::opaque:
-	case BlendMode::alphaMask:
-		return RenderPassType::opaque;
-	case BlendMode::alphaBlend:
-	case BlendMode::additive:
-	case BlendMode::multiply:
-		return RenderPassType::blend;
-	}
-	unreachable();
-}
+RenderPassType renderPassType(BlendMode blendMode);
 
 } // namespace sgd

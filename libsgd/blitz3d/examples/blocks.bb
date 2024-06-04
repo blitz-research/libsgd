@@ -1,7 +1,7 @@
 
 Include "start.bb"
 
-Const NUM_BLOCKS = 10000
+Const NUM_BLOCKS = 20000
 Const WORLD_SIZE = 100
 
 Type Block
@@ -18,7 +18,7 @@ End Type
 Global bulletImage
 Global slimeball
 
-CreateWindow(DesktopWidth(), DesktopHeight(), "スノー Blocks", 1)
+CreateWindow(DesktopWidth()/2, DesktopHeight()/2, "スノー Blocks", 4)
 
 CreateScene()
 
@@ -42,7 +42,7 @@ While (PollEvents() And 1) <> 1
 	
 	Clear2D()
 	
-	Draw2DText "FPS:"+FPS(),0,0
+	Draw2DText "FPS:"+FPS()+", RPS:"+RPS(),0,0
 	
 	RenderScene()
 	
@@ -137,7 +137,7 @@ Function CreateGround()
 	Local material = LoadPBRMaterial("sgd://materials/Gravel023_1K-JPG")
 
 	Local mesh = CreateBoxMesh(-WORLD_SIZE * 2,-1,-WORLD_SIZE*2,WORLD_SIZE*2,0,WORLD_SIZE*2,material)
-	TransformMeshTexCoords(mesh,100,100,0,0)
+	TFormMeshTexCoords(mesh,100,100,0,0)
 
 	Local model = CreateModel(mesh)
 	

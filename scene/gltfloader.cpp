@@ -94,24 +94,24 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 	return true;
 }
 
-Texture* GLTFLoader::loadTexture(int id, bool srgb) {
+Texture* GLTFLoader::loadTexture(int id, bool srgb, bool pmAlpha) {
 	if (cachedTextures[id]) return cachedTextures[id];
 
 	auto& gltfTex = gltfModel.textures[id];
-
-	//	SGD_LOG << "Texture"<<id<<":"<<gltfTex.name;
-
 	auto& gltfImage = gltfModel.images[gltfTex.source];
 
-	if (gltfImage.bits != 8) SGD_PANIC("gltfImage.bits: " + std::to_string(gltfImage.bits));
-	if (gltfImage.component != 4) SGD_PANIC("gltfImage.component: " + std::to_string(gltfImage.component));
+	// Shouldn't just PANIC!
+	if (gltfImage.bits != 8) SGD_PANIC("TODO: Unsupported gltfImage.bits: " + toString(gltfImage.bits));
+	if (gltfImage.component != 4) SGD_PANIC("TODO: Unsupported gltfImage.component: " + toString(gltfImage.component));
 
 	auto texFormat = srgb ? TextureFormat::srgba8 : TextureFormat::rgba8;
 	auto texFlags = TextureFlags::none;
 
 	if (!cachedImages[gltfTex.source]) {
-		premultiplyAlpha(gltfImage.image.data(), texFormat, Vec2u(gltfImage.width, gltfImage.height),
-						 gltfImage.width * bytesPerTexel(texFormat));
+		if(pmAlpha) {
+			premultiplyAlpha(gltfImage.image.data(), texFormat, Vec2u(gltfImage.width, gltfImage.height),
+							 gltfImage.width * bytesPerTexel(texFormat));
+		}
 		cachedImages[gltfTex.source] = true;
 	}
 
@@ -155,7 +155,6 @@ Material* GLTFLoader::loadMaterial(int id) {
 	auto& gltfMat = gltfModel.materials[id];
 	auto material = cachedMaterials[id] = new Material(&pbrMaterialDescriptor);
 
-	//	SGD_LOG << "Material" << id << ":" << gltfMat.name;
 	static const Map<String, BlendMode> blendModes{
 		{"OPAQUE", BlendMode::opaque}, {"MASK", BlendMode::alphaMask}, {"BLEND", BlendMode::alphaBlend}};
 	auto it = blendModes.find(gltfMat.alphaMode);
@@ -171,7 +170,8 @@ Material* GLTFLoader::loadMaterial(int id) {
 		auto& texInfo = pbr.baseColorTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
-			material->setTexture("albedoTexture", loadTexture(texInfo.index, true));
+			material->setTexture("albedoTexture",
+								 loadTexture(texInfo.index, true, material->blendMode() == BlendMode::alphaBlend));
 		}
 	}
 	{
@@ -180,7 +180,7 @@ Material* GLTFLoader::loadMaterial(int id) {
 		auto& texInfo = gltfMat.emissiveTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
-			material->setTexture("emissiveTexture", loadTexture(texInfo.index, true));
+			material->setTexture("emissiveTexture", loadTexture(texInfo.index, true, false));
 		}
 	}
 	{
@@ -188,14 +188,14 @@ Material* GLTFLoader::loadMaterial(int id) {
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
 			SGD_ASSERT(texInfo.scale == 1.0f);
-			material->setTexture("normalTexture", loadTexture(texInfo.index));
+			material->setTexture("normalTexture", loadTexture(texInfo.index, false, false));
 		}
 	}
 	{
 		auto& texInfo = gltfMat.occlusionTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
-			material->setTexture("occlusionTexture", loadTexture(texInfo.index));
+			material->setTexture("occlusionTexture", loadTexture(texInfo.index, false, false));
 		}
 	}
 	{
@@ -204,7 +204,7 @@ Material* GLTFLoader::loadMaterial(int id) {
 		auto& texInfo = pbr.metallicRoughnessTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
-			auto texture = loadTexture(texInfo.index);
+			auto texture = loadTexture(texInfo.index, false, false);
 			material->setTexture("metallicTexture", texture);
 			material->setTexture("roughnessTexture", texture);
 		}
@@ -287,7 +287,7 @@ Mesh* GLTFLoader::endMesh() {
 
 void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 	if (gltfPrim.mode != TINYGLTF_MODE_TRIANGLES) {
-		SGD_LOG << "TODO: Unsupported gltf primitive mode";
+		SGD_LOG << "TODO: Skipping unsupported gltf primitive mode:" << gltfPrim.mode;
 		return;
 	}
 	if (gltfPrim.material == -1) return;
@@ -347,7 +347,7 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 			}
 #endif
 		} else {
-			SGD_LOG << "TODO: Unrecognized Gltf attribute \"" << attrib.first << "\"";
+			SGD_LOG << "TODO: Skipping unrecognized gltf attribute:" << attrib.first;
 		}
 	}
 
@@ -373,8 +373,7 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 		copyBufferData<uint8_t, uint32_t>(accessor, tp, sizeof(uint32_t));
 		break;
 	default:
-		SGD_LOG << "TODO: Unsupported gltf component type for triangle indices";
-		SGD_ABORT();
+		SGD_PANIC("TODO: Unsupported gltf component type for triangle indices");
 	}
 	for (int i = 0; i < accessor.count; ++i) {
 		SGD_ASSERT(tp[i] < vertexCount);
@@ -442,8 +441,7 @@ void GLTFLoader::loadAnimations() {
 				copyBufferData(time_accessor, &seq->scaleKeys[0].time, sizeof(seq->scaleKeys[0]));
 				copyBufferData(value_accessor, &seq->scaleKeys[0].value, sizeof(seq->scaleKeys[0]));
 			} else {
-				SGD_LOG << "TODO: Unsupported gltf animation channel target_path \"" << chan.target_path << "\"";
-				SGD_ABORT();
+				SGD_PANIC("TODO: Unsupported gltf animation channel target_path");
 			}
 		}
 		Vector<CAnimationSeqPtr> seqs;
@@ -523,11 +521,7 @@ void GLTFLoader::loadJoints() {
 
 Expected<Mesh*, FileioEx> GLTFLoader::loadStaticMesh() {
 
-	SGD_LOG << "Loading bones";
-
 	loadBones();
-
-	SGD_LOG << "Loading meshes";
 
 	beginMesh();
 	for (int i = 0; i < bones.size(); ++i) {

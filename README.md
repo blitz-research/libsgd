@@ -8,6 +8,8 @@ The library is coded in C++, but the primary public API is pure 'C', making it h
 
 Currently supported languages include C/C++, Blitz3D, BlitzMax, Python and node.js. Support for more languages  is on the way.
 
+Note that Pull Requests are not currently being accepted for this repository.
+
 LibSGD is licensed under the Zlib/PNG license.
 
 Joins the LibSFD discussion at https://skirmish-dev.net/forum

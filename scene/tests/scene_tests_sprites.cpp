@@ -2,12 +2,7 @@
 
 void entry() {
 
-	EntityPtr pivot = new Model();
-	scene->add(pivot);
-
-	CameraPtr camera = new Camera(CameraType::perspective);
-	camera->setParent(pivot);
-	scene->add(camera);
+	createPlayer(nullptr);
 
 	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), 1).result();
 	image->spriteViewMode = SpriteViewMode::upright;
@@ -37,10 +32,10 @@ void entry() {
 	for (;;) {
 		pollEvents();
 
-		fly(pivot);
+		playerFly(.5f);
 
-		aim(gunModel, pivot->worldPosition(), 0);
-
+		aim(gunModel, camera->worldPosition(), 0);
+/*
 		static float zr;
 		if (window->keyboard()->key(KeyCode::LEFT).down()) {
 			zr += (-15 - zr) * .1f;
@@ -50,6 +45,7 @@ void entry() {
 			zr *= .9f;
 		}
 		setRotation(camera, {0, 0, zr});
+		*/
 
 		dc->clear();
 		auto mode = image->spriteViewMode();

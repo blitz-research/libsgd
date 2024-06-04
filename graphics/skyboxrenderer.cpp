@@ -1,5 +1,7 @@
 #include "skyboxrenderer.h"
 
+#include "prelitmaterial.h"
+
 #include "shaders/uniforms.h"
 
 namespace sgd {
@@ -11,8 +13,7 @@ auto shaderSource{
 };
 
 BindGroupDescriptor bindGroupDescriptor( //
-	"skyboxRenderer",
-	BindGroupType::renderer,
+	"skyboxRenderer", BindGroupType::renderer,
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform), // SkyboxUniforms
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::Cube),
@@ -23,6 +24,11 @@ BindGroupDescriptor bindGroupDescriptor( //
 } // namespace
 
 SkyboxRenderer::SkyboxRenderer() {
+
+	m_material = new Material(&prelitMaterialDescriptor);
+	m_material->blendMode = BlendMode::opaque;
+	m_material->depthFunc = DepthFunc::undefined;
+	m_material->cullMode = CullMode::none;
 
 	m_bindGroup = new BindGroup(&sgd::bindGroupDescriptor);
 
@@ -54,11 +60,8 @@ SkyboxRenderer::SkyboxRenderer() {
 void SkyboxRenderer::onValidate(GraphicsContext* gc) const {
 
 	if (m_rebuildRenderOps) {
-		auto pipeline = getOrCreateRenderPipeline(gc, nullptr, BlendMode::opaque, DepthFunc::undefined, CullMode::none,
-												  m_bindGroup, DrawMode::triangleStrip);
-		auto& ops = m_renderOps[(int)RenderPassType::opaque];
-		ops.clear();
-		ops.emplace_back(nullptr, nullptr, nullptr, emptyBindGroup(1), m_bindGroup, pipeline, 4, 1, 0);
+		m_material->validate(gc);
+		addRenderOp(gc, m_material, nullptr, nullptr, nullptr, m_bindGroup, DrawMode::triangleStrip, 4, 1, 0, false);
 		m_rebuildRenderOps = false;
 	}
 

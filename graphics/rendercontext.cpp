@@ -72,11 +72,11 @@ void RenderContext::render(CVector<RenderOp> ops) {
 	auto& encoder = m_wgpuRenderPassEncoder;
 
 	for (auto& op : ops) {
-		if (op.vertexBuffer.Get() != m_rop.vertexBuffer.Get()) {
-			encoder.SetVertexBuffer(0, m_rop.vertexBuffer = op.vertexBuffer);
-		}
 		if (op.instanceBuffer.Get() != m_rop.instanceBuffer.Get()) {
 			encoder.SetVertexBuffer(1, m_rop.instanceBuffer = op.instanceBuffer);
+		}
+		if (op.vertexBuffer.Get() != m_rop.vertexBuffer.Get()) {
+			encoder.SetVertexBuffer(0, m_rop.vertexBuffer = op.vertexBuffer);
 		}
 		if (op.indexBuffer.Get() != m_rop.indexBuffer.Get()) {
 			if((m_rop.indexBuffer = op.indexBuffer)) encoder.SetIndexBuffer(m_rop.indexBuffer = op.indexBuffer, wgpu::IndexFormat::Uint32);

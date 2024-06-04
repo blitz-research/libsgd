@@ -2,12 +2,10 @@
 
 #include "graphics.h"
 #include "renderop.h"
+#include "renderpipeline.h"
 #include "shaders/uniforms.h"
 
 namespace sgd {
-
-enum struct RenderPassType { shadow, opaque, blend };
-constexpr int renderPassTypeCount = 3;
 
 SGD_SHARED(RenderContext);
 

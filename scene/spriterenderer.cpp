@@ -71,16 +71,21 @@ void SpriteRenderer::onUpdate(CVec3r eye) {
 }
 
 void SpriteRenderer::onValidate(GraphicsContext* gc) const {
+
 	m_renderOps = {};
 	if (!m_instanceCount) return;
 
 	auto add = [&](Image* image, uint32_t count) {
 		auto material = image->material();
 		material->validate(gc);
-		auto pipeline = getOrCreateRenderPipeline(gc, material, m_bindGroup, DrawMode::triangleList);
+
 		auto& ops = m_renderOps[(int)renderPassType(material->blendMode())];
 		auto first = ops.empty() ? 0 : ops.back().firstElement + ops.back().elementCount;
-		ops.emplace_back(nullptr, nullptr, nullptr, material->bindGroup(), m_bindGroup, pipeline, count * 6, 1, first);
+
+		addRenderOp(gc, material,							  //
+					nullptr, nullptr, nullptr,				  //
+					m_bindGroup, sgd::DrawMode::triangleList, //
+					count * 6, 1, 0, first);
 	};
 
 	Image* image{};

@@ -1,13 +1,34 @@
 
 ***** V0.07 *****
 
-* Added FlushChars.
+* Changed static mesh instancing to use shader storage. Let me know if you notice mesh instancing doing anything weird or slowing down etc.
 
-* Fixed bug in FlipMesh.
+* Added alpha mask blend mode. *** WARNING *** material blend mode constants have been renamed and changed:
 
-* Added AimEntityAtEntity, AimEntityAtPoint.
+SGD_BLEND_MODE_OPAQUE = 1         // dst.rgb = src.rgb
+SGD_BLEND_MODE_ALPHA_MASK = 2     // dst.rgb = src.a >= 0.5 ? src.rgb : dst.rgb
+SGD_BLEND_MODE_ALPHA_BLEND = 3    // dst.rgb = src.rgb + dst.rgb * (1.0 - src.a)
 
-* Added deprecation system - you should now get a runtime warning when using a deprecated function.
+Additive and multiply have been removed for now until I work out haw transparency is gonna work in general.
+
+Note that ALPHA_MASK does not do any blending, it's just a binary render/discard mechanism so may not look as smooth as alpha blending.
+However, it works fine with a normal depth buffer so doesn't require any sorting and so is a good high speed alternative. I also have an
+idea for a little hack that should smooth out the edges a bit.
+
+If you've been using '2' for alpha blending, you'll now get alpha masking which I think is what a lot of people have been wanting anyway. If you
+want proper alpha blending, you'll need to change to 3.
+
+Note that sprite images still use ALPHA_BLEND. Sprites work with ALPHA_MASK but the grassdemo looked a bit ropey so I decided to sit on it.
+
+* Added FlushChars. I sorted of wanted to automate this (ie: it could be auto-called internally before poll events), but am worried people who
+aren't using GetChar in a loop will 'miss' chars if I did, so am playing it safe.
+
+* Fixed bug in FlipMesh where only first tri was getting flipped.
+
+* Added AimEntityAtEntity and AimEntityAtPoint. The docs for b3d PointEntity mention a rude hack for the 'AtPoint' version so thought I'd add
+this too.
+
+* Added deprecation system - you should now get a runtime warning when using a deprecated function, eg: TransformMesh, TransformMeshTexCoords.
 
 * Deprecated TransformMesh, TransformMeshtexCoords to TFormMesh, TFormMeshTexCoords for consitency.
 

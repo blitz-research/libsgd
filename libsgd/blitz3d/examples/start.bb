@@ -21,21 +21,22 @@ Const KEY_RIGHT_CONTROL = 345
 Const KEY_RIGHT_ALT = 346
 Const KEY_RIGHT_SUPER = 347
 
-
 Global player
 Global player_rvx#,player_rvy#
 Global player_vx#,player_vy#,player_vz#
 
 Global camera
+Global camera_rx#,camera_ry#
 
 Function CreatePlayer(mesh)
 
 	player = CreateModel(mesh)
 	
 	camera=CreatePerspectiveCamera()
+	SetEntityParent camera,player
 	SetCameraNear camera, .1
 	SetCameraFar camera, 1000
-	SetEntityParent camera,player
+	
 End Function
 
 Function PlayerWalk(speed#)
@@ -48,6 +49,15 @@ Function PlayerWalk(speed#)
 		player_rvy = player_rvy * .9
 	EndIf
 	RotateEntity player,0,player_rvy,0
+
+	If KeyDown(KEY_DOWN)
+		camera_rx = camera_rx + (-45-camera_rx) * .1
+	Else If KeyDown(KEY_UP)
+		camera_rx = camera_rx + (45-camera_rx) * .1
+	Else 
+		camera_rx = camera_rx * .9
+	EndIf
+	SetEntityRotation camera,camera_rx,0,0
 	
 	If KeyDown(KEY_W)
 		player_vz = player_vz + (speed-player_vz) * .1

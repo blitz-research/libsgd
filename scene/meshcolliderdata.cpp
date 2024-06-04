@@ -41,13 +41,13 @@ MeshColliderData::MeshColliderData(CMesh* mesh) {
 		dstp += surf->triangleCount();
 	}
 
-	SGD_LOG << "Creating mesh collision tree...";
+	SGD_LOG << "Creating mesh collider data...";
 
 	m_rootNode = createNode(std::move(triangles));
 
 	m_bounds = m_rootNode->bounds;
 
-	SGD_LOG << "Collision tree created, bounds:" << m_bounds;
+	SGD_LOG << "Done.";
 }
 
 MeshColliderData::Node* MeshColliderData::createNode(Vector<Triangle> triangles) { // NOLINT (recursive)
@@ -95,14 +95,12 @@ bool MeshColliderData::intersectRay(CLiner ray, float radius, Contact& contact) 
 	rayBounds.min -= radius + boundsPadding;
 	rayBounds.max += radius + boundsPadding;
 
-	//	SGD_LOG << ray << rayBounds;
-
 	return m_rootNode->intersectRay(ray, rayBounds, radius, contact, m_vertices);
 }
 
 bool MeshColliderData::intersectRay(CLiner ray, CVec3f radii, Contact& contact) const {
 
-	auto rradii=Vec3r(radii);
+	auto rradii = Vec3r(radii);
 
 	Boxr rayBounds(ray.o);
 	rayBounds |= ray * contact.time;
@@ -116,7 +114,6 @@ bool MeshColliderData::intersectRay(CLiner ray, CVec3f radii, Contact& contact) 
 	invContact.time = length(invRay.d);
 	invRay.d = normalize(invRay.d);
 
-//	if (!m_rootNode->intersectRay(invRay, rayBounds, 1, invContact, m_vertices)) return false;
 	if (!m_rootNode->intersectRay(invRay, rayBounds, invRadii, invContact, m_vertices)) return false;
 
 	contact.point = invContact.point * rradii;
@@ -139,9 +136,9 @@ bool MeshColliderData::Node::intersectRay(CLiner ray, CBoxr rayBounds, float rad
 	bool collision = false;
 
 	for (auto& tri : triangles) {
-		const auto& v0 = vertices[tri.indices[0]];
-		const auto& v1 = vertices[tri.indices[2]];
-		const auto& v2 = vertices[tri.indices[1]];
+		auto& v0 = vertices[tri.indices[0]];
+		auto& v1 = vertices[tri.indices[2]];
+		auto& v2 = vertices[tri.indices[1]];
 
 		Boxr triBounds(v0);
 		triBounds |= v1;
@@ -149,7 +146,6 @@ bool MeshColliderData::Node::intersectRay(CLiner ray, CBoxr rayBounds, float rad
 
 		if (!intersects(rayBounds, triBounds)) continue;
 
-		SGD_LOG << "radius"<<radius;
 		collision |= intersectRayTriangle(ray, radius, v0, v1, v2, contact);
 	}
 	return collision;
@@ -168,9 +164,9 @@ bool MeshColliderData::Node::intersectRay(CLiner ray, CBoxr rayBounds, CVec3f in
 	bool collision = false;
 
 	for (auto& tri : triangles) {
-		const auto& v0 = vertices[tri.indices[0]];
-		const auto& v1 = vertices[tri.indices[2]];
-		const auto& v2 = vertices[tri.indices[1]];
+		auto& v0 = vertices[tri.indices[0]];
+		auto& v1 = vertices[tri.indices[2]];
+		auto& v2 = vertices[tri.indices[1]];
 
 		Boxr triBounds(v0);
 		triBounds |= v1;
@@ -180,6 +176,7 @@ bool MeshColliderData::Node::intersectRay(CLiner ray, CBoxr rayBounds, CVec3f in
 
 		collision |= intersectRayTriangle(ray, 1, v0 * invRadii, v1 * invRadii, v2 * invRadii, contact);
 	}
+
 	return collision;
 }
 

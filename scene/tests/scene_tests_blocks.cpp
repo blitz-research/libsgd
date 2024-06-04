@@ -1,5 +1,8 @@
 #include "start.cpp"
 
+int numBlocks=10000;
+
+
 void entry() {
 
 	MeshPtr mesh = loadStaticMesh(Path("~/Desktop/terrain_v3/palm_tree1.glb")).result();

@@ -27,13 +27,13 @@
 #endif
 
 #if SGD_CONFIG_RELEASE
-#define SGD_PANIC(MSG) std::abort();
+#define SGD_PANIC(MSG) {sgd::alert(MSG);std::abort();}
+#define SGD_ABORT() {SGD_PANIC("Internal SGD Error");}
 #define SGD_ASSERT(COND)
-#define SGD_ABORT() std::abort();
 #else
-#define SGD_PANIC(MSG) {std::printf("%s(%i): %s\n", __FILE__, __LINE__, sgd::String(MSG).c_str());std::fflush(stdout);SGD_BREAK();}
-#define SGD_ASSERT(COND) if (!(COND)) SGD_PANIC("SGD_ASSERT failed with condition " #COND)
-#define SGD_ABORT() SGD_PANIC("SGD_ABORT")
+#define SGD_PANIC(MSG) {sgd::alert(MSG);SGD_BREAK()}
+#define SGD_ABORT() {SGD_PANIC("Internal SGD Error");}
+#define SGD_ASSERT(COND) if (!(COND)) {SGD_PANIC("SGD_ASSERT failed: " #COND);}
 #endif
 // clang-format on
 

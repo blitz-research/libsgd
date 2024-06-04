@@ -14,6 +14,9 @@ struct ImageMaterialUniforms {
 fn evaluateMaterial(position: vec3f, tanMatrix: mat3x3f, texCoords: vec3f, color: vec4f) -> vec4f {
 
 	let albedo = textureSample(material_albedoTexture, material_albedoSampler, texCoords.xy, u32(texCoords.z)) * color;
+#if BLEND_MODE_ALPHA_MASK
+	if(albedo.a < 0.5) { discard; }
+#endif
 
     return albedo;
 }

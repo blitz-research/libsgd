@@ -109,6 +109,11 @@ struct alignas(16) SkyboxUniforms {
 
 // ***** MeshRenderer *****
 
+struct alignas(16) MeshInstance {
+	Mat4f matrix;
+	Vec4f color;
+};
+
 struct alignas(16) MeshUniforms {
 	int32_t tangentsEnabled{0};
 };
@@ -122,7 +127,12 @@ struct alignas(16) SkinnedMeshInstance {
 	Vec4f color;
 	Mat4f jointMatrices[maxJoints];
 };
-//@group(2) @binding(1) var<storage> meshInstances: array<SkinnedMeshInstance>;
+
+struct alignas(16) SkinnedMeshUniforms {
+	int32_t tangentsEnabled{0};
+};
+// @group(2) @binding(0) var<uniform> meshUniforms: SkinnedMeshUniforms;
+// @group(2) @binding(1) var<storage> meshInstances: array<SkinnedMeshInstance>;
 
 // ***** PrelitMaterial *****
 

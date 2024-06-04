@@ -59,11 +59,16 @@ Log::~Log() {
 		std::lock_guard<std::mutex> lock(g_mutex);
 
 		if (!g_logstream.is_open()) {
-			Path path("~/.sgd/log.txt");
-			if (!path.createFile(true)) {
-				SGD_ABORT();
+			static bool opened;
+			if(opened) {
+				alert(String("Log stream closed:\n") + str);
+				return;
 			}
+			Path path("~/.sgd/log.txt");
+			if (!path.createFile(true)) SGD_PANIC("Logging error, failed to create log file");
 			g_logstream.open(path.filePath());
+			if(!g_logstream.is_open()) SGD_PANIC("Logging error, failed to open log file");
+			opened=true;
 		}
 
 		g_logstream << str;

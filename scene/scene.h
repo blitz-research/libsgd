@@ -57,6 +57,10 @@ struct Scene : Shared {
 		return m_collisionSpace;
 	}
 
+	float RPS() const {
+		return m_rps;
+	}
+
 private:
 	friend class Entity;
 
@@ -87,11 +91,19 @@ private:
 
 	RenderContextPtr m_renderContext;
 
+	static constexpr int timeStampCount = 4;
+
+	mutable bool m_timeStampsEnabled{true};
+	wgpu::QuerySet m_timeStampQueries;
+	wgpu::Buffer m_timeStampBuffer;
+	wgpu::Buffer m_timeStampResults;
+	uint64_t m_timeStamps[timeStampCount]{};
+	float m_rps = 0;
+
 	void updateCameraBindings();
 	void updateLightingBindings();
 
 	void renderPointLightShadowMaps() const;
-	void renderGeometry(RenderPassType renderPassType) const;
 
 	void renderASync() const;
 };

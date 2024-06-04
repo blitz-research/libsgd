@@ -42,7 +42,7 @@ void entry() {
 
 		dc->clear();
 
-		dc->addImage(image, {64,64}, frame+=.01f);
+		dc->addImage(image, {64,64}, frame+=.1f);
 
 		auto str = std::to_string(gc->FPS());
 		dc->addText(str,{w - font->textWidth(str),0});

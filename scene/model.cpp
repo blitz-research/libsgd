@@ -6,6 +6,10 @@
 
 namespace sgd {
 
+Model::Model(Mesh* mmesh) {
+	if (mmesh) mesh = mmesh;
+}
+
 Model::Model(const Model* that)
 	: Entity(that),					   //													//
 	  mesh(that->mesh()),			   //
@@ -13,10 +17,10 @@ Model::Model(const Model* that)
 	  m_bones(that->m_bones),		   //
 	  m_animations(that->m_animations) // We need an AnimationSet
 {
-	if (!m_bones.size()) return;
+	if (m_bones.empty()) return;
 
 	// This is currently a bit crusty, we need to remap bone entities to their copies, assumes they've been copied by Entity
-	// ctor 'in order'. We need a nicer way to do this ultimately.
+	// ctor 'in order'. Would like a nicer way to do this ultimately.
 	//
 	Map<Entity*, Entity*> bonesMap;
 	Function<void(const Entity*, const Entity*)> mapBones;
@@ -30,7 +34,7 @@ Model::Model(const Model* that)
 		}
 	};
 	mapBones(this, that);
-	for (int i = 0; i < m_bones.size(); ++i) m_bones[i] = bonesMap[m_bones[i]];
+	for (auto& bone : m_bones) bone = bonesMap[bone];
 }
 
 Model* Model::onCopy() const {
@@ -75,7 +79,7 @@ void Model::animate(uint32_t index, float time, AnimationMode mode, float weight
 	SGD_ASSERT(index < m_animations.size());
 	CAnimation* anim = m_animations[index];
 
-	if(weight<=0.0f) return;
+	if (weight <= 0.0f) return;
 
 	switch (mode) {
 	case AnimationMode::oneshot:
@@ -90,14 +94,14 @@ void Model::animate(uint32_t index, float time, AnimationMode mode, float weight
 		break;
 	}
 
-	if(weight>=1.0f) {
+	if (weight >= 1.0f) {
 		for (CAnimationSeq* seq : anim->sequences) {
 			auto bone = m_bones[seq->bone];
 			if (!seq->positionKeys.empty()) bone->setLocalPosition(evaluate(seq->positionKeys, time));
 			if (!seq->rotationKeys.empty()) bone->setLocalBasis(Mat3f::rotation(evaluate(seq->rotationKeys, time)));
 			if (!seq->scaleKeys.empty()) bone->setLocalScale(evaluate(seq->scaleKeys, time));
 		}
-	}else{
+	} else {
 		for (CAnimationSeq* seq : anim->sequences) {
 			auto bone = m_bones[seq->bone];
 

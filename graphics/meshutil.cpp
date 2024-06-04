@@ -167,7 +167,7 @@ void flip(Mesh* mesh) {
 
 	for (Surface* surf : mesh->surfaces()) { //
 		auto tp = surf->lockTriangles();
-		for (int i = 0; i < surf->triangleCount(); ++tp) {
+		for (int i = 0; i < surf->triangleCount(); ++i) {
 			std::swap(tp[i].indices[1], tp[i].indices[2]);
 		}
 		surf->unlockTriangles();

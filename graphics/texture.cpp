@@ -118,6 +118,7 @@ void Texture::onValidate(GraphicsContext* gc) const {
 		}
 		if (bool(m_flags & TextureFlags::renderTarget)) {
 			desc.usage |= wgpu::TextureUsage::RenderAttachment;
+			if(bool(m_flags & TextureFlags::msaa)) desc.sampleCount = 4;
 		}
 		m_wgpuTexture = gc->wgpuDevice().CreateTexture(&desc);
 

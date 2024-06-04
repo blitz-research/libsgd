@@ -315,10 +315,9 @@ SGD_API SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int fl
 //! @{
 
 //! @cond blend mode constants
-#define SGD_BLEND_MODE_OPAQUE   1
-#define SGD_BLEND_MODE_ALPHA    2
-#define SGD_BLEND_MODE_ADDITIVE 3
-#define SGD_BLEND_MODE_MULTIPLY 4
+#define SGD_BLEND_MODE_OPAQUE      1
+#define SGD_BLEND_MODE_ALPHA_MASK  2
+#define SGD_BLEND_MODE_ALPHA_BLEND 3
 //! @endcond
 
 //! @cond depth func constants
@@ -356,19 +355,18 @@ SGD_API SGD_Material SGD_DECL sgd_LoadPrelitMaterial(SGD_String path);
 //!
 //! `blendMode` should be one of the following:
 //!
-//! Blend mode              | Integer value | Description
-//! ------------------------|---------------|------------
-//! SGD_BLEND_MODE_OPAQUE   | 1             | Opaque
-//! SGD_BLEND_MODE_ALPHA    | 2             | Alpha blended
-//! SGD_BLEND_MODE_ADDITIVE | 3             | Additive blended
-//! SGD_BLEND_MODE_MULTIPLY | 4             | Multiply blended
+//! Blend mode                 | Integer value | Description
+//! ---------------------------|---------------|------------
+//! SGD_BLEND_MODE_OPAQUE      | 1             | Opaque
+//! SGD_BLEND_MODE_ALPHA_MASK  | 2             | Alpha mask - fragments with alpha >= 0.5 are rendered, others are discarded.
+//! SGD_BLEND_MODE_ALPHA_BLEND | 3             | Additive blend - fragments are blended ing using premultipled alpha.
 SGD_API void SGD_DECL sgd_SetMaterialBlendMode(SGD_Material material, int blendMode);
 
 //! Set material depth comparison function.
 //!
 //! `depthFunc` should be one of the following:
 //!
-//! Blend mode                   | Integer value
+//! Depth function               | Integer value
 //! -----------------------------|--------------
 //! SGD_DEPTH_FUNC_NEVER         | 1
 //! SGD_DEPTH_FUNC_LESS          | 2
@@ -708,6 +706,9 @@ SGD_API void SGD_DECL sgd_Present();
 //! Return frames per second.
 SGD_API float SGD_DECL sgd_FPS();
 
+//! Return renders per second.
+SGD_API float SGD_DECL sgd_RPS();
+
 //! @}
 
 //! @name Entity
@@ -975,8 +976,11 @@ SGD_API SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity entity, int coll
 //! Return entity a collider is attached to.
 SGD_API SGD_Entity SGD_DECL sgd_ColliderEntity(SGD_Collider collider);
 
-//! Set sphere collider radius.
+//! Set sphere or ellipsoid collider radius.
 SGD_API void SGD_DECL sgd_SetColliderRadius(SGD_Collider collider, float radius);
+
+//! Set ellipsoid collider height.
+SGD_API void SGD_DECL sgd_SetColliderHeight(SGD_Collider collider, float height);
 
 //! Enable collisons between 2 collider types.
 //!

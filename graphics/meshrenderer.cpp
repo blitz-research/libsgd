@@ -24,7 +24,7 @@ static_assert(sizeof(Vertex) == 88);
 
 wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(Vertex), wgpu::VertexStepMode::Vertex, std::size(vertexBufferAttribs),
 												  vertexBufferAttribs};
-
+#if 0
 inline wgpu::VertexAttribute instanceBufferAttribs[]{
 	{wgpu::VertexFormat::Float32x4, 0, 8},	 //
 	{wgpu::VertexFormat::Float32x4, 16, 9},	 //
@@ -36,6 +36,7 @@ static_assert(sizeof(MeshInstance) == 80);
 
 wgpu::VertexBufferLayout const instanceBufferLayout{sizeof(MeshInstance), wgpu::VertexStepMode::Instance,
 													std::size(instanceBufferAttribs), instanceBufferAttribs};
+#endif
 
 BindGroupDescriptor bindGroupDescriptor( //
 	"meshRenderer",						 //
@@ -43,8 +44,10 @@ BindGroupDescriptor bindGroupDescriptor( //
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 								   wgpu::BufferBindingType::Uniform),
+		bufferBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
+								   wgpu::BufferBindingType::ReadOnlyStorage),
 	},
-	{vertexBufferLayout, instanceBufferLayout}, //
+	{vertexBufferLayout}, //
 	shaderSource);
 
 } // namespace
@@ -53,11 +56,12 @@ MeshRenderer::MeshRenderer(CMesh* mesh)					//
 	: m_mesh(mesh),										//
 	  m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
 	  m_instanceCapacity(8),							//
-	  m_instanceBuffer(new Buffer(BufferType::instance, nullptr, m_instanceCapacity * sizeof(MeshInstance))) {
+	  m_instanceBuffer(new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(MeshInstance))) {
 
 	MeshUniforms meshUniforms;
 	meshUniforms.tangentsEnabled = int(bool(m_mesh->flags() & MeshFlags::tangentsEnabled));
 	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, &meshUniforms, sizeof(meshUniforms)));
+	m_bindGroup->setBuffer(1, m_instanceBuffer);
 
 	m_mesh->castsShadow.changed.connect(this, [=](bool) {
 		m_rebuildRenderOps = true;
@@ -104,44 +108,29 @@ void MeshRenderer::onValidate(GraphicsContext* gc) const {
 		m_renderOps = {};
 
 		for (Surface* surf : m_mesh->surfaces()) {
-
-			int pass = (int)renderPassType(surf->material()->blendMode());
-
-			auto pipeline = getOrCreateRenderPipeline(gc, surf->material(), m_bindGroup, DrawMode::triangleList);
-
-			m_renderOps[pass].emplace_back(	   //
-				m_mesh->vertexBuffer(),		   //
-				m_instanceBuffer,			   //
-				surf->triangleBuffer(),		   //
-				surf->material()->bindGroup(), //
-				m_bindGroup,				   //
-				pipeline,					   //
-				surf->triangleCount() * 3, m_instanceCount, 0);
-
-			if (surf->material()->blendMode() == BlendMode::opaque && m_mesh->castsShadow()) {
-
-				auto shadowPipeline = getOrCreateShadowPipeline(gc, m_bindGroup, DrawMode::triangleList);
-
-				m_renderOps[(int)RenderPassType::shadow].emplace_back( //
-					m_mesh->vertexBuffer(),							   //
-					m_instanceBuffer,								   //
-					surf->triangleBuffer(),							   //
-					shadowBindGroup(),								   //
-					m_bindGroup,									   //
-					shadowPipeline,									   //
-					surf->triangleCount() * 3, m_instanceCount, 0);
-			}
+			addRenderOp(gc,						   //
+						surf->material(),		   //
+						nullptr,//
+						m_mesh->vertexBuffer(),	   //
+						surf->triangleBuffer(),	   //
+						m_bindGroup,			   //
+						DrawMode::triangleList,	   //
+						surf->triangleCount() * 3, //
+						m_instanceCount,		   //
+						0,						   //
+						m_mesh->castsShadow());
 		}
 		m_rebuildRenderOps = m_updateInstanceCounts = false;
+		return;
 	}
 
 	if (m_updateInstanceCounts) {
+		m_updateInstanceCounts = false;
 		for (auto& ops : m_renderOps) {
 			for (auto& op : ops) {
 				op.instanceCount = m_instanceCount;
 			}
 		}
-		m_updateInstanceCounts = false;
 	}
 }
 

@@ -7,8 +7,8 @@
 namespace sgd {
 
 struct RenderOp {
-	wgpu::Buffer vertexBuffer;
 	wgpu::Buffer instanceBuffer;
+	wgpu::Buffer vertexBuffer;
 	wgpu::Buffer indexBuffer;
 	wgpu::BindGroup materialBindings;
 	wgpu::BindGroup rendererBindings;
@@ -21,8 +21,8 @@ struct RenderOp {
 
 	// clang-format off
 	RenderOp(
-		wgpu::Buffer vertexBuffer,
 		wgpu::Buffer instanceBuffer,
+		wgpu::Buffer vertexBuffer,
 		wgpu::Buffer indexBuffer,
 		wgpu::BindGroup materialBindings,
 		wgpu::BindGroup rendererBindings,
@@ -30,8 +30,8 @@ struct RenderOp {
 		uint32_t elementCount,
 		uint32_t instanceCount,
 		uint32_t firstElement):
-		vertexBuffer(std::move(vertexBuffer)),
 		instanceBuffer(std::move(instanceBuffer)),
+		vertexBuffer(std::move(vertexBuffer)),
 		indexBuffer(std::move(indexBuffer)),
 		materialBindings(std::move(materialBindings)),
 		rendererBindings(std::move(rendererBindings)),
@@ -41,8 +41,8 @@ struct RenderOp {
 		firstElement(firstElement){}
 
 	RenderOp(
-		const Buffer* vertexBuffer,
 		const Buffer* instanceBuffer,
+		const Buffer* vertexBuffer,
 		const Buffer* indexBuffer,
 		const BindGroup* materialBindings,
 		const BindGroup* rendererBindings,
@@ -50,10 +50,10 @@ struct RenderOp {
 		uint32_t elementCount,
 		uint32_t instanceCount,
 		uint32_t firstElement):
-		vertexBuffer(vertexBuffer ? vertexBuffer->wgpuBuffer() : nullptr),
 		instanceBuffer(instanceBuffer ? instanceBuffer->wgpuBuffer() : nullptr),
+		vertexBuffer(vertexBuffer ? vertexBuffer->wgpuBuffer() : nullptr),
 		indexBuffer(indexBuffer ? indexBuffer->wgpuBuffer() : nullptr),
-		materialBindings(materialBindings ? materialBindings->wgpuBindGroup() : nullptr),
+		materialBindings(materialBindings->wgpuBindGroup()),
 		rendererBindings(rendererBindings->wgpuBindGroup()),
 		pipeline(std::move(pipeline)),
 		elementCount(elementCount),

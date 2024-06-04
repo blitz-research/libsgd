@@ -24,27 +24,48 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 		[&] {
 			wgpu::RequestAdapterOptions opts{};
 			opts.backendType = wgpuBackendType;
-			if (opts.backendType == wgpu::BackendType::Undefined) {
+
 #ifdef SGD_OS_WINDOWS
-				OSVERSIONINFO info{sizeof(OSVERSIONINFO)};
-				GetVersionEx((OSVERSIONINFO*)&info);
-				if (info.dwMajorVersion > 6 ||
-					(info.dwMajorVersion == 6 && info.dwMinorVersion > 1)) { // 6.2 is Windows 8, 6.1 is Windows 7.
-#if _WIN64
-					opts.backendType = wgpu::BackendType::D3D12; // 64 bit Windows 8+ case
-#else
-					// Because D3D12 backend is 'freezing' Blitz3D in windowed mode for some users.
-					opts.backendType = wgpu::BackendType::D3D11; // 32 bit Windows 8+ case
-#endif
+			OSVERSIONINFO info{sizeof(OSVERSIONINFO)};
+			GetVersionEx((OSVERSIONINFO*)&info);
+			auto windows10 = (info.dwMajorVersion == 6 && info.dwMinorVersion >= 2); // 6.2 is windows 8
+			if (opts.backendType == wgpu::BackendType::Undefined) {
+				if (windows10 && sizeof(void*) == 8) {
+					opts.backendType = wgpu::BackendType::D3D12;
+				} else if (windows10 && sizeof(void*) == 4) {
+					opts.backendType = wgpu::BackendType::D3D11;
 				} else {
-					opts.backendType = wgpu::BackendType::Vulkan; // 32/64 bit Windows 7 case
+					opts.backendType = wgpu::BackendType::Vulkan;
 				}
-#elif SGD_OS_LINUX
-				opts.backendType = wgpu::BackendType::Vulkan; // Linux
-#elif SGD_OS_MACOS
-				opts.backendType = wgpu::BackendType::Metal; // MacOS
-#endif
+			} else if (windows10 && sizeof(void*) == 8) {
+				if (opts.backendType != wgpu::BackendType::D3D12 && //
+					opts.backendType != wgpu::BackendType::D3D11 && //
+					opts.backendType != wgpu::BackendType::Vulkan) {
+					SGD_PANIC("Graphics backend for 64 bits Windows 10 must be D3D12, D3D11 or Vulkan");
+				}
+			} else if (windows10 && sizeof(void*) == 4) {
+				if (opts.backendType != wgpu::BackendType::D3D11 && //
+					opts.backendType != wgpu::BackendType::Vulkan) {
+					SGD_PANIC("Graphics backend for 32 bits Windows 10 must be D3D12, D3D11 or Vulkan");
+				}
+			} else {
+				if (opts.backendType != wgpu::BackendType::Vulkan) {
+					SGD_PANIC("Graphics backend for Windows 7 must be Vulkan");
+				}
 			}
+#elif SGD_OS_LINUX
+			if (opts.backendType == wgpu::BackendType::Undefined) {
+				opts.backendType = wgpu::BackendType::Vulkan;
+			} else if (opts.backendType != wgpu::BackendType::Vulkan) {
+				SGD_PANIC("Graphics backend for Linux must be Vulkan");
+			}
+#elif SGD_OS_MACOS
+			if (opts.backendType == wgpu::BackendType::Undefined) {
+				opts.backendType = wgpu::BackendType::Metal;
+			} else if (opts.backendType != wgpu::BackendType::Metal) {
+				SGD_PANIC("Graphics backend for MacOS must be Metal");
+			}
+#endif
 			requestWGPUDevice(opts, [&](const wgpu::Device& device) {
 				m_wgpuDevice = device;
 				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
@@ -67,10 +88,8 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 					config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
 					m_wgpuSurface.Configure(&config);
 
-					m_colorBuffer =
-						new Texture(size, 1, sgd::TextureFormat::rgba16f, sgd::TextureFlags::renderTarget);
-					m_depthBuffer =
-						new Texture(size, 1, sgd::TextureFormat::depth32f, sgd::TextureFlags::renderTarget);
+					m_colorBuffer = new Texture(size, 1, TextureFormat::rgba16f, TextureFlags::renderTarget);
+					m_depthBuffer = new Texture(size, 1, TextureFormat::depth32f, TextureFlags::renderTarget);
 
 					m_colorBuffer->validate(this);
 					m_depthBuffer->validate(this);
@@ -91,6 +110,8 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 
 void GraphicsContext::present(Texture* texture) {
 
+	if (!m_canRender) return;
+
 	++m_frames;
 	auto elapsed = sgd::micros() - m_micros;
 	if (elapsed >= 1000000) {
@@ -100,20 +121,26 @@ void GraphicsContext::present(Texture* texture) {
 		m_frames = 0;
 	}
 
-	if (!m_canRender) return;
-
 	auto& wgpuTexture = texture->wgpuTexture();
 
 	requestRender([=] {
+#if !SGD_OS_EMSCRIPTEN
+		m_wgpuDevice.GetAdapter().GetInstance().ProcessEvents();
+#endif
 		struct wgpu::SurfaceTexture surfaceTexture {};
 		m_wgpuSurface.GetCurrentTexture(&surfaceTexture);
 		if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::Success) {
-			SGD_LOG << "wgpu::Surface::GetCurrentTexture() failed.";
+			SGD_PANIC("wgpu::Surface::GetCurrentTexture() failed.");
+			return;
+		}
+		if (!surfaceTexture.texture) {
+			SGD_PANIC("surface.texture is nullptr.");
 			return;
 		}
 		copyTexture(m_wgpuDevice, wgpuTexture, surfaceTexture.texture);
 #if !SGD_OS_EMSCRIPTEN
 		m_wgpuSurface.Present();
+		m_wgpuDevice.GetAdapter().GetInstance().ProcessEvents();
 #endif
 	});
 }

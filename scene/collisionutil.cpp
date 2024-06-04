@@ -8,9 +8,10 @@ namespace sgd {
 SGD_SHARED(Camera);
 
 template <class IntersectFunc>
-Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFunc intersectFunc,
-				 CollisionResponse response, Vector<Collision>& collisions) {
+Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFunc intersectFunc, CollisionResponse response,
+				 Vector<Collision>& collisions) {
 
+	static constexpr int maxLoops = 6;
 	static constexpr real eps = (real).0001;
 
 	// Max distance to travel
@@ -19,7 +20,7 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 	if (d <= eps) return src;
 
 	Planer hitPlanes[3];
-	int n = 0;
+	int nHits = 0;
 	int i = 0;
 
 	for (;;) {
@@ -31,17 +32,23 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 		auto collider = intersectFunc(ray, contact);
 		if (!collider) return dst;
 
-		SGD_ASSERT(contact.time >= 0);
-		++n;
-
 		collisions.emplace_back(ray, contact, collider);
-
 		if (response == CollisionResponse::ignore) return dst;
 
 		auto t = std::max(contact.time - eps, (real)0);
 		src = ray * t;
 
 		if (response == CollisionResponse::stop) return src;
+
+		if (++nHits == maxLoops) {
+#if SGD_CONFIG_DEBUG
+			SGD_LOG << "collideRay nHits == maxLoops! ray:" << ray << "contact:" << contact;
+#endif
+			return src;
+		}
+
+		auto ndot = dot(contact.normal, ray.d);
+		if (ndot == (real)-1) return src;
 
 		d -= t;
 		if (d <= eps) return src;
@@ -97,7 +104,8 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, float radius
 	return collideRay(space, src, dst, intersectFunc, response, collisions);
 }
 
-Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, CVec3f radii, uint32_t colliderMask, CollisionResponse response, Vector<Collision>& collisions) {
+Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, CVec3f radii, uint32_t colliderMask,
+				 CollisionResponse response, Vector<Collision>& collisions) {
 
 	auto intersectFunc = [=](CLiner ray, Contact& contact) -> Collider* {
 		return space->intersectRay(ray, radii, colliderMask, contact);

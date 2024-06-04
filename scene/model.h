@@ -16,7 +16,7 @@ struct Joint {
 struct Model : Entity {
 	SGD_OBJECT_TYPE(Model, Entity);
 
-	Model() = default;
+	Model(Mesh* mesh=nullptr);
 
 	explicit Model(const Model* that);;
 

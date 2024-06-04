@@ -10,52 +10,119 @@ ScenePtr scene;
 SkyboxPtr skybox;
 LightPtr light;
 
+ModelPtr player;
+float player_vx;
+float player_vy;
+float player_vz;
+float player_rvx;
+float player_rvy;
+
+CameraPtr camera;
+float camera_rx;
+
 void render() {
 	scene->render();
 	gc->present(gc->colorBuffer());
 }
 
-void fly(Entity* camera) {
+void createPlayer(Mesh* mesh) {
 
-	static float yr;
+	player = new Model();
+	scene->add(player);
+	player->mesh = mesh;
+
+	camera = new Camera(CameraType::perspective);
+	scene->add(camera);
+	camera->setParent(player);
+	camera->near = .1f;
+	camera->far = 1000;
+}
+
+void playerWalk(float speed) {
+
+	// Turn left/right
 	if (window->keyboard()->key(KeyCode::LEFT).down()) {
-		yr += (1.5f - yr) * .3f;
+		player_rvy += (1.5f - player_rvy) * .3f;
 	} else if (window->keyboard()->key(KeyCode::RIGHT).down()) {
-		yr += (-1.5f - yr) * .3f;
+		player_rvy += (-1.5f - player_rvy) * .3f;
 	} else {
-		yr *= .9f;
+		player_rvy *= .9f;
 	}
-	rotate(camera, {0, yr, 0});
+	rotate(player, {0, player_rvy, 0});
 
-	static float xr;
+	// Look up/down
 	if (window->keyboard()->key(KeyCode::UP).down()) {
-		xr += (-1.5f - xr) * .3f;
+		camera_rx += (45 - camera_rx) * .025f;
 	} else if (window->keyboard()->key(KeyCode::DOWN).down()) {
-		xr += (1.5f - xr) * .3f;
+		camera_rx += (-45 - camera_rx) * .025f;
 	} else {
-		xr *= .9f;
+		camera_rx *= .9f;
 	}
-	turn(camera, {xr, 0, 0});
+	setRotation(camera, {camera_rx, 0, 0});
 
-	static float vz;
+	// Move forward/backward
 	if (window->keyboard()->key(KeyCode::W).down()) {
-		vz += (.5f - vz) * .3f;
+		player_vz += (speed - player_vz) * .3f;
 	} else if (window->keyboard()->key(KeyCode::S).down()) {
-		vz += (-.5f - vz) * .3f;
+		player_vz += (-speed - player_vz) * .3f;
 	} else {
-		vz *= .9f;
+		player_vz *= .9f;
 	}
-	move(camera, {0, 0, vz});
+	move(player, {0, 0, player_vz});
 
-	static float vx;
+	// Move left/right
 	if (window->keyboard()->key(KeyCode::A).down()) {
-		vx += (-.5f - vz) * .3f;
+		player_vx += (-speed - player_vx) * .3f;
 	} else if (window->keyboard()->key(KeyCode::D).down()) {
-		vx += (.5f - vz) * .3f;
+		player_vx += (speed - player_vx) * .3f;
 	} else {
-		vx *= .9f;
+		player_vx *= .9f;
 	}
-	move(camera, {vx, 0, 0});
+	move(player, {player_vx, 0, 0});
+}
+
+void playerFly(float speed) {
+
+	// Turn left/right
+	if (window->keyboard()->key(KeyCode::LEFT).down()) {
+		player_rvy += (1.5f - player_rvy) * .3f;
+	} else if (window->keyboard()->key(KeyCode::RIGHT).down()) {
+		player_rvy += (-1.5f - player_rvy) * .3f;
+	} else {
+		player_rvy *= .9f;
+	}
+	rotate(player, {0, player_rvy, 0});
+	setRotation(camera, {0, 0, player_rvy * -15});
+
+	// Turn up/down
+	if (window->keyboard()->key(KeyCode::UP).down()) {
+		player_rvx += (-1.5f - player_rvx) * .3f;
+	} else if (window->keyboard()->key(KeyCode::DOWN).down()) {
+		player_rvx += (1.5f - player_rvx) * .3f;
+	} else {
+		player_rvx *= .9f;
+	}
+	turn(player, {player_rvx, 0, 0});
+
+	// Move forward/backward
+	if (window->keyboard()->key(KeyCode::W).down()) {
+		player_vz += (speed - player_vz) * .3f;
+	} else if (window->keyboard()->key(KeyCode::S).down()) {
+		player_vz += (-speed - player_vz) * .3f;
+	} else {
+		player_vz *= .9f;
+	}
+	move(player, {0, 0, player_vz});
+
+	// Move left/right
+	if (window->keyboard()->key(KeyCode::A).down()) {
+		player_vx += (-speed - player_vx) * .3f;
+	} else if (window->keyboard()->key(KeyCode::D).down()) {
+		player_vx += (speed - player_vx) * .3f;
+	} else {
+		player_vx *= .9f;
+	}
+	move(player, {player_vx, 0, 0});
 }
 
 void start(void (*entry)()) {

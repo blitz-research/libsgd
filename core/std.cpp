@@ -70,11 +70,11 @@ bool isMainThread() {
 
 void alert(CString msg) {
 #if SGD_OS_WINDOWS
-	MessageBoxA(GetActiveWindow(), msg.c_str(), "Alert!", MB_OK);
+	MessageBoxA(GetActiveWindow(), msg.c_str(), "Program Alert", MB_OK);
 #elif SGD_OS_EMSCRIPTEN
 	jsalert(msg.c_str());
 #elif SGD_OS_LINUX
-	system(("zenity --info --title \"Alert!\" --text \"" + msg + "\"").c_str());
+	system(("zenity --info --title \"Program Alert\" --text \"" + msg + "\"").c_str());
 #endif
 }
 

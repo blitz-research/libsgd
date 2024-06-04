@@ -18,6 +18,7 @@ struct SkyboxRenderer : Renderer {
 	Property<float> roughness;
 
 private:
+	MaterialPtr m_material;
 	BindGroupPtr m_bindGroup;
 	BufferPtr m_uniformBuffer;
 

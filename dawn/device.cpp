@@ -26,22 +26,65 @@ void* createMetalLayer(GLFWwindow* window);
 namespace {
 
 wgpu::FeatureName requiredFeatures[]{wgpu::FeatureName::TimestampQuery};
+//, wgpu::FeatureName::Float32Filterable};
 //, wgpu::FeatureName::TimestampQueryInsidePasses};
 
-const char* enabledToggles[] = {"float32-filterable", "allow_unsafe_apis"};
+const char* enabledToggles[] = {"allow_unsafe_apis"};
+//, "float32-filterable"
 
-const char* errorNames[] = {"No error", "Validation", "Out of memory", "Internal", "Unknown", "Device lost"};
+typedef void (*WGPULoggingCallback)(WGPULoggingType type, char const * message, void * userdata) WGPU_FUNCTION_ATTRIBUTE;
 
 void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
-	auto err = (uint32_t)type < std::size(errorNames) ? errorNames[(uint32_t)type] : "OOPS";
+	static const char* names[] = {"NoError", "Validation", "Out of memory", "Internal", "Unknown", "Device lost"};
 
-	SGD_LOG << "Dawn device error:";
-	SGD_LOG << err;
+	auto tname = (uint32_t)type < std::size(names) ? names[(uint32_t)type] : "OOPS";
+
+	SGD_LOG << "Dawn device error message:"<<tname;
 	SGD_LOG << message;
-
-	alert(String("Dawn Device error:\n") + err + "\n" + message);
-
+	alert(String("Dawn Device error:\n") + tname + "\n" + message);
 	SGD_ABORT();
+}
+
+void dawnDeviceLostCallback(WGPUDeviceLostReason reason, char const * message, void * userdata) {
+	static const char* names[] = {"Undefined", "Unknown", "Destroyed","InstanceDropped","FailedCreation"};
+
+	if(reason==WGPUDeviceLostReason_InstanceDropped) return;
+
+	auto rname = (uint32_t)reason < std::size(names) ? names[(uint32_t)reason] : "OOPS";
+
+//	SGD_LOG << "Dawn device lost:" << rname;
+//	SGD_LOG << message;
+	SGD_PANIC(String("Dawn device lost: ") + rname + "\n"+ message);
+}
+
+void dawnLoggingCallback(WGPULoggingType type, const char* message, void*) {
+	static const char* names[]= {"???", "Verbose", "Info", "Warning", "Error"};
+
+	auto tname = (uint32_t)type < std::size(names) ? names[(uint32_t)type] : "OOPS";
+
+	switch(type) {
+	case WGPULoggingType_Verbose:
+#if SGD_CONFIG_DEBUG
+		SGD_LOG << "Dawn:" << message;
+#endif
+		break;
+	case WGPULoggingType_Info:
+		SGD_LOG << "Dawn info:" << message;
+		break;
+	case WGPULoggingType_Warning:
+		SGD_LOG << "Dawn warning:" << message;
+#if SGD_CONFIG_DEBUG
+		alert(String("Dawn warning: ") + message);
+#endif
+		break;
+	case WGPULoggingType_Error:
+		SGD_LOG << "Dawn error:" << message;
+		alert(String("Dawn error: ") + message);
+		SGD_ABORT();
+		break;
+	default:
+		SGD_PANIC("Dawn logging error");
+	}
 }
 
 void logAdapterProps(const wgpu::Adapter& adapter) {
@@ -49,7 +92,7 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 	wgpu::AdapterProperties props{};
 
 	// Crashes on Linux sometimes!
-	//adapter.GetProperties(&props);
+	// adapter.GetProperties(&props);
 	wgpuAdapterGetProperties(adapter.Get(), reinterpret_cast<WGPUAdapterProperties*>(&props));
 
 	SGD_LOG << "Dawn WGPU Adapter Properties:";
@@ -100,8 +143,20 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 
 			logAdapterProps(adapter);
 
+			wgpu::DeviceDescriptor devDesc{};
+			wgpu::DawnTogglesDescriptor togglesDesc{};
+			auto feature = wgpu::FeatureName::TimestampQuery;
+
+			if (adapter.HasFeature(feature)) {
+				devDesc.nextInChain = &togglesDesc;
+				devDesc.requiredFeatureCount = 1;
+				devDesc.requiredFeatures = &feature;
+				togglesDesc.enabledToggleCount = std::size(enabledToggles);
+				togglesDesc.enabledToggles = enabledToggles;
+			}
+
 			adapter.RequestDevice(
-				nullptr,
+				&devDesc,
 				[](WGPURequestDeviceStatus status, WGPUDevice cDevice, const char* message, void* userdata) {
 					//
 					if (status != WGPURequestDeviceStatus_Success) {
@@ -110,8 +165,12 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 					auto device = wgpu::Device::Acquire(cDevice);
 
 					device.SetUncapturedErrorCallback(&dawnErrorCallback, nullptr);
+					device.SetDeviceLostCallback(&dawnDeviceLostCallback,nullptr);
+					device.SetLoggingCallback(&dawnLoggingCallback, nullptr);
+
 					auto callback = (Function<void(const wgpu::Device&)>*)userdata;
 					(*callback)(device);
+
 					delete callback;
 					//
 				},

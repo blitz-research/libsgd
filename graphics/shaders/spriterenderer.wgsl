@@ -69,10 +69,12 @@ struct Varying {
 
 @fragment fn fragmentMain(in: Varying) -> @location(0) vec4f {
 
+#if !RENDER_PASS_SHADOW
     var tanMatrix: mat3x3f;
     tanMatrix[2] = normalize(in.normal);
 
     return evaluateMaterial(in.position, tanMatrix, vec3f(in.texCoords, 0), in.color);
+#endif
 }
 
 )"

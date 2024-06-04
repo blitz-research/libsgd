@@ -21,6 +21,8 @@ void start(void(*entry)()) {
 
 	sgd_CreateWindow(sgd_DesktopWidth()/2, sgd_DesktopHeight()*3/4, "Hello LibSGD!", SGD_WINDOW_FLAGS_RESIZABLE|SGD_WINDOW_FLAGS_CENTERED);
 
+//	sgd_SetWebGPUBackend("D3D12");
+
 	sgd_CreateScene();
 
 	reset();

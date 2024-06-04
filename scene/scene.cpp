@@ -47,6 +47,22 @@ Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
 	});
 
 	m_collisionSpace = new CollisionSpace();
+
+	m_timeStampsEnabled = m_gc->wgpuDevice().GetAdapter().HasFeature(wgpu::FeatureName::TimestampQuery);
+	if(m_timeStampsEnabled) {
+		wgpu::QuerySetDescriptor qsDesc{};
+		qsDesc.type = wgpu::QueryType::Timestamp;
+		qsDesc.count = timeStampCount;
+		m_timeStampQueries = gc->wgpuDevice().CreateQuerySet(&qsDesc);
+
+		wgpu::BufferDescriptor bufDesc{};
+		bufDesc.size = timeStampCount * 8;
+		bufDesc.usage = wgpu::BufferUsage::QueryResolve | wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+		m_timeStampBuffer = gc->wgpuDevice().CreateBuffer(&bufDesc);
+
+		bufDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
+		m_timeStampResults = gc->wgpuDevice().CreateBuffer(&bufDesc);
+	}
 }
 
 void Scene::clear() {
@@ -305,26 +321,78 @@ void Scene::renderPointLightShadowMaps() const {
 	}
 }
 
-void Scene::renderGeometry(RenderPassType renderPassType) const {
-	m_renderContext->beginRenderPass(renderPassType, m_gc->colorBuffer(), m_gc->depthBuffer(), clearColor(), clearDepth());
-	m_renderContext->wgpuRenderPassEncoder().SetBindGroup(0, m_sceneBindings->bindGroup()->wgpuBindGroup());
-	for (Renderer* r : m_renderers) {
-		if (r && r->enabled()) r->render(m_renderContext);
-	}
-	m_renderContext->endRenderPass();
-}
-
 void Scene::renderASync() const {
+
+	if(m_timeStampsEnabled) {
+		m_renderContext->beginRender();
+		m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 0);
+		m_renderContext->endRender();
+	}
 
 	renderPointLightShadowMaps();
 
 	m_renderContext->beginRender();
 
-	renderGeometry(RenderPassType::opaque);
+	// Timestamp 1
+	if (m_timeStampsEnabled) m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 1);
 
-	renderGeometry(RenderPassType::blend);
+	{
+		m_renderContext->beginRenderPass(RenderPassType::opaque, m_gc->colorBuffer(), m_gc->depthBuffer(), clearColor(),
+										 clearDepth());
+		m_renderContext->wgpuRenderPassEncoder().SetBindGroup(0, m_sceneBindings->bindGroup()->wgpuBindGroup());
+		for (Renderer* r : m_renderers) {
+			if (r) r->render(m_renderContext); //->render(r->renderOps(RenderPassType::opaque));
+		}
+		m_renderContext->endRenderPass();
+	}
+
+	// Timestamp 2
+	if (m_timeStampsEnabled) m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 2);
+
+	{
+		m_renderContext->beginRenderPass(RenderPassType::blend, m_gc->colorBuffer(), m_gc->depthBuffer(), clearColor(),
+										 clearDepth());
+		m_renderContext->wgpuRenderPassEncoder().SetBindGroup(0, m_sceneBindings->bindGroup()->wgpuBindGroup());
+		for (Renderer* r : m_renderers) {
+			if (r) r->render(m_renderContext); //->render(r->renderOps(RenderPassType::blend));
+		}
+		m_renderContext->endRenderPass();
+	}
+
+	if (m_timeStampsEnabled) {
+		// Timestamp 3
+		m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 3);
+
+		// Resolve queries
+		m_renderContext->wgpuCommandEncoder().ResolveQuerySet(m_timeStampQueries, 0, 4, m_timeStampBuffer, 0);
+
+		// Copy query results
+		m_renderContext->wgpuCommandEncoder().CopyBufferToBuffer(m_timeStampBuffer, 0, m_timeStampResults, 0,
+																 timeStampCount * 8);
+	}
 
 	m_renderContext->endRender();
+
+	if (m_timeStampsEnabled) {
+
+		m_timeStampsEnabled = false;
+
+		m_timeStampResults.MapAsync(
+			wgpu::MapMode::Read, 0, timeStampCount * 8,
+			[](WGPUBufferMapAsyncStatus status, void* userdata) {
+				if(status != WGPUBufferMapAsyncStatus_Success) {
+					return;
+				}
+//				SGD_LOG << "Mapped callback!";
+				auto scene = (Scene*)userdata;
+				std::memcpy(scene->m_timeStamps, scene->m_timeStampResults.GetConstMappedRange(), timeStampCount * 8);
+				scene->m_timeStampResults.Unmap();
+				scene->m_timeStampsEnabled = true;
+				auto elapsed = scene->m_timeStamps[3] - scene->m_timeStamps[1];
+				scene->m_rps = (float)(1e9 / (double)elapsed);
+			},
+			(void*)this);
+	}
 }
 
 } // namespace sgd

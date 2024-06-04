@@ -101,7 +101,7 @@ start:;	// Need semi-colon for Macos?!?
 
 		{
 			char buf[80];
-			sprintf(buf, "FPS: %f", sgd_FPS());
+			sprintf(buf, "FPS: %f, RPS: %f", sgd_FPS(), sgd_RPS());
 			sgd_Draw2DText(buf, 2, 2);
 		}
 

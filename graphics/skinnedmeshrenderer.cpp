@@ -49,7 +49,7 @@ SkinnedMeshRenderer::SkinnedMeshRenderer(CMesh* mesh)
 	  m_instanceCapacity(8),							//
 	  m_instanceBuffer(new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(SkinnedMeshInstance))) {
 
-	MeshUniforms meshUniforms;
+	SkinnedMeshUniforms meshUniforms;
 	meshUniforms.tangentsEnabled = int(bool(m_mesh->flags() & MeshFlags::tangentsEnabled));
 	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, &meshUniforms, sizeof(meshUniforms)));
 	m_bindGroup->setBuffer(1, m_instanceBuffer);
@@ -94,45 +94,29 @@ void SkinnedMeshRenderer::onValidate(GraphicsContext* gc) const {
 		m_renderOps = {};
 
 		for (Surface* surf : m_mesh->surfaces()) {
-
-			int rpass = (int)renderPassType(surf->material()->blendMode());
-
-			auto pipeline = getOrCreateRenderPipeline(gc, surf->material(), m_bindGroup, DrawMode::triangleList);
-
-			m_renderOps[rpass].emplace_back(   //
-				m_mesh->vertexBuffer(),		   //
-				nullptr,					   //
-				surf->triangleBuffer(),		   //
-				surf->material()->bindGroup(), //
-				m_bindGroup,				   //
-				pipeline,					   //
-				surf->triangleCount() * 3, m_instanceCount, 0);
-
-			if (surf->material()->blendMode() == BlendMode::opaque) {
-
-				auto shadowPipeline = getOrCreateShadowPipeline(gc, m_bindGroup, DrawMode::triangleList);
-
-				m_renderOps[(int)RenderPassType::shadow].emplace_back( //
-					m_mesh->vertexBuffer(),							   //
-					nullptr,										   //
-					surf->triangleBuffer(),							   //
-					shadowBindGroup(),								   //
-					m_bindGroup,									   //
-					shadowPipeline,									   //
-					surf->triangleCount() * 3, m_instanceCount, 0);
-			}
+			addRenderOp(gc,						   //
+						surf->material(),		   //
+						nullptr,				   //
+						m_mesh->vertexBuffer(),	   //
+						surf->triangleBuffer(),	   //
+						m_bindGroup,			   //
+						DrawMode::triangleList,	   //
+						surf->triangleCount() * 3, //
+						m_instanceCount,		   //
+						0,						   //
+						m_mesh->castsShadow());
 		}
-
 		m_rebuildRenderOps = m_updateInstanceCounts = false;
+		return;
 	}
 
 	if (m_updateInstanceCounts) {
+		m_updateInstanceCounts = false;
 		for (auto& ops : m_renderOps) {
 			for (auto& op : ops) {
 				op.instanceCount = m_instanceCount;
 			}
 		}
-		m_updateInstanceCounts = false;
 	}
 }
 

@@ -21,15 +21,14 @@ static_assert(sizeof(DrawList::Vertex) == 40);
 wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(DrawList::Vertex), wgpu::VertexStepMode::Vertex,
 												  std::size(vertexBufferAttribs), vertexBufferAttribs};
 
-BindGroupDescriptor bindGroupDescriptor(//
-	"drawListRenderer",
-	BindGroupType::renderer,
-	 {
-		 bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
-									wgpu::BufferBindingType::Uniform),
-	 },
-	 {vertexBufferLayout}, //
-	 shaderSource);
+BindGroupDescriptor bindGroupDescriptor( //
+	"drawListRenderer", BindGroupType::renderer,
+	{
+		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
+								   wgpu::BufferBindingType::Uniform),
+	},
+	{vertexBufferLayout}, //
+	shaderSource);
 } // namespace
 
 DrawList::DrawList()
@@ -316,21 +315,20 @@ void DrawList::onValidate(GraphicsContext* gc) const {
 	m_renderOps = {};
 	if (m_drawOps.empty()) return;
 
-	RenderOp renderOp;
-	renderOp.rendererBindings = m_bindGroup->wgpuBindGroup();
-	renderOp.vertexBuffer = m_vertexBuffer->wgpuBuffer();
-	renderOp.instanceCount = 1;
+	uint32_t firstElement = 0;
 
 	// TODO: only need to build new layers here...
 	for (auto& drawOp : m_drawOps) {
+
 		auto cmaterial = drawOp.material ? drawOp.material : m_whiteMaterial;
 		cmaterial->validate(gc);
-		renderOp.pipeline = getOrCreateRenderPipeline(gc, cmaterial, m_bindGroup, DrawMode::triangleList);
-		renderOp.materialBindings = cmaterial->bindGroup()->wgpuBindGroup();
-		renderOp.elementCount = drawOp.triangleCount * 3;
-		auto& renderOps = m_renderOps[(int)renderPassType(cmaterial->blendMode())];
-		renderOps.push_back(renderOp);
-		renderOp.firstElement += renderOp.elementCount;
+
+		addRenderOp(gc, cmaterial,						 //
+					nullptr, m_vertexBuffer, nullptr,	 //
+					m_bindGroup, DrawMode::triangleList, //
+					drawOp.triangleCount * 3, 1, firstElement, false);
+
+		firstElement += drawOp.triangleCount * 3;
 	}
 }
 

@@ -2,18 +2,18 @@ R"(
 
 // ***** SkinnedMeshRenderer *****
 
-struct MeshUniforms {
-    tangentsEnabled: i32,
-}
-
 const maxJoints: u32 = 256;
 struct SkinnedMeshInstance {
     worldMatrix: mat4x4f,
     color: vec4f,
     jointMatrices: array<mat4x4f, maxJoints>,
 };
-@group(2) @binding(0) var<uniform> mesh_uniforms: MeshUniforms;
-@group(2) @binding(1) var<storage> skinnedMeshInstances: array<SkinnedMeshInstance>;
+
+struct SkinnedMeshUniforms {
+    tangentsEnabled: i32,
+}
+@group(2) @binding(0) var<uniform> meshUniforms: SkinnedMeshUniforms;
+@group(2) @binding(1) var<storage> meshInstances: array<SkinnedMeshInstance>;
 
 struct Vertex {
 	@location(0) position: vec3f,
@@ -38,10 +38,9 @@ struct Varying {
 
 @vertex fn vertexMain(vertex: Vertex, @builtin(instance_index) instanceId : u32) -> Varying {
 
-    let instance = &skinnedMeshInstances[instanceId];
+    let instance = &meshInstances[instanceId];
 
     let joints = vertex.joints;
-
     let weights = vertex.weights;
 
     let matrix0 = (*instance).jointMatrices[joints.x];
@@ -71,7 +70,7 @@ struct Varying {
 
 	out.clipPosition = camera_uniforms.viewProjectionMatrix * vec4f(position, 1);
 	out.position = position;
-	if mesh_uniforms.tangentsEnabled != 0 {
+	if meshUniforms.tangentsEnabled != 0 {
         out.tanMatrix2 = normal;
         out.tanMatrix0 = tangent.xyz;
         out.tanMatrix1 = cross(out.tanMatrix0, out.tanMatrix2) * tangent.a;
@@ -85,16 +84,23 @@ struct Varying {
 }
 
 @fragment fn fragmentMain(in: Varying) -> @location(0) vec4f {
+#if !RENDER_PASS_SHADOW
 
     var tanMatrix: mat3x3f;
 
-    if mesh_uniforms.tangentsEnabled != 0 {
+    if meshUniforms.tangentsEnabled != 0 {
         tanMatrix = mat3x3f(normalize(in.tanMatrix0), normalize(in.tanMatrix1), normalize(in.tanMatrix2));
     }else{
         tanMatrix[2] = in.tanMatrix2;
     }
 
     return evaluateMaterial(in.position, tanMatrix, in.texCoords, in.color);
+
+#else
+
+    return vec4f(0);
+
+#endif
 }
 
 )"
