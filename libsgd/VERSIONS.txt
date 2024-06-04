@@ -1,32 +1,46 @@
 
 ***** V0.07 *****
 
-* Changed static mesh instancing to use shader storage. Let me know if you notice mesh instancing doing anything weird or slowing down etc.
+* Disabled D3D12 backend in 32 bit Blitz3D. I can at least reproduce (some of) the D3D12 problems now, so there's little benefit leaving
+it in there as it seems like it'll just lead to spurious bug reports.
 
-* Added alpha mask blend mode. *** WARNING *** material blend mode constants have been renamed and changed:
+* Changed static mesh instancing to use shader storage instead of vertex buffers. Let me know if you notice mesh instancing doing
+anything weird or slowing down etc.
+
+* Added alpha mask blend mode. *** WARNING *** material blend mode constants have been renamed and changed - sorry, and alas it may not be
+the last time:
 
 SGD_BLEND_MODE_OPAQUE = 1         // dst.rgb = src.rgb
 SGD_BLEND_MODE_ALPHA_MASK = 2     // dst.rgb = src.a >= 0.5 ? src.rgb : dst.rgb
 SGD_BLEND_MODE_ALPHA_BLEND = 3    // dst.rgb = src.rgb + dst.rgb * (1.0 - src.a)
 
-Additive and multiply have been removed for now until I work out haw transparency is gonna work in general.
+Additive and multiply have been removed for now until I work out how transparency is gonna work in general.
 
-Note that ALPHA_MASK does not do any blending, it's just a binary render/discard mechanism so may not look as smooth as alpha blending.
+Note that alpha mask does not do any blending, it's just a binary render/discard mechanism so may not look as smooth as alpha blending.
 However, it works fine with a normal depth buffer so doesn't require any sorting and so is a good high speed alternative. I also have an
-idea for a little hack that should smooth out the edges a bit.
+idea for a little hack that should smooth out the edges a bit, and it should be possible to get them going with shadows too.
 
-If you've been using '2' for alpha blending, you'll now get alpha masking which I think is what a lot of people have been wanting anyway. If you
-want proper alpha blending, you'll need to change to 3.
+For alpha masking, premultiplied alpha should NOT really be used as it means the edges of things get darker as they approach 0.5 alpha. I
+tried using 1.0 instead but there were issues with filtering and mipmapping - might revisit this though. However, there is currently no easy
+way to disable premultiplied alpha, apart from loading a model with alpha mask materials. Not sure of the best way to deal with this yet. I
+don't really want to add an extra format as it's still just 'alpha' so it'll probably be a new texture flag.
 
-Note that sprite images still use ALPHA_BLEND. Sprites work with ALPHA_MASK but the grassdemo looked a bit ropey so I decided to sit on it.
+If you've been using '2' for alpha blending, you'll now get alpha masking instead which I think is what a lot of people have been wanting
+anyway. If you want proper alpha blending, you'll need to change to 3. Best just to use symbolic constants if possible - alas, Blitz3D
+*still* can't do this - I need to get off my ass and fix this, even if it's just an include file for now!
 
-* Added FlushChars. I sorted of wanted to automate this (ie: it could be auto-called internally before poll events), but am worried people who
-aren't using GetChar in a loop will 'miss' chars if I did, so am playing it safe.
+Note that sprite images still use ALPHA_BLEND. Sprites do work with ALPHA_MASK, but the grassdemo looked a bit ropey (mostly due to the
+low-res texture, which does hurt alpha mask quality) and there's the issue with not being able to not premultiply alpha, so I left it for
+now.
 
-* Fixed bug in FlipMesh where only first tri was getting flipped.
+All-in-all, decent transparency support will be an ongoing mission...
 
-* Added AimEntityAtEntity and AimEntityAtPoint. The docs for b3d PointEntity mention a rude hack for the 'AtPoint' version so thought I'd add
-this too.
+* Added FlushChars. I sorted of wanted to automate this (ie: it could be auto-called internally before poll events), but am worried people
+who aren't using GetChar in a loop will 'miss' chars if I did, so am playing it safe.
+
+* Fixed a bug in FlipMesh where only first tri was getting flipped.
+
+* Added AimEntityAtEntity and AimEntityAtPoint.
 
 * Added deprecation system - you should now get a runtime warning when using a deprecated function, eg: TransformMesh, TransformMeshTexCoords.
 

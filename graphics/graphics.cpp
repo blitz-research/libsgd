@@ -41,12 +41,12 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 				if (opts.backendType != wgpu::BackendType::D3D12 && //
 					opts.backendType != wgpu::BackendType::D3D11 && //
 					opts.backendType != wgpu::BackendType::Vulkan) {
-					SGD_PANIC("Graphics backend for 64 bits Windows 10 must be D3D12, D3D11 or Vulkan");
+					SGD_PANIC("Graphics backend for 64 bits Windows 10 must be D3D12 (the default), D3D11 or Vulkan");
 				}
 			} else if (windows10 && sizeof(void*) == 4) {
 				if (opts.backendType != wgpu::BackendType::D3D11 && //
 					opts.backendType != wgpu::BackendType::Vulkan) {
-					SGD_PANIC("Graphics backend for 32 bits Windows 10 must be D3D12, D3D11 or Vulkan");
+					SGD_PANIC("Graphics backend for 32 bits Windows 10 must be D3D11 (the default) or Vulkan");
 				}
 			} else {
 				if (opts.backendType != wgpu::BackendType::Vulkan) {
@@ -66,6 +66,7 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 				SGD_PANIC("Graphics backend for MacOS must be Metal");
 			}
 #endif
+
 			requestWGPUDevice(opts, [&](const wgpu::Device& device) {
 				m_wgpuDevice = device;
 				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
