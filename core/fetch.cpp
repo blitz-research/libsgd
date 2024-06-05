@@ -59,7 +59,7 @@ bool initCache() {
 		++g_nextFileId;
 	}
 
-	SGD_LOG << "Cache initialized";
+	SGD_LOG << "Asset cache initialized";
 
 	return g_cacheOk = true;
 }

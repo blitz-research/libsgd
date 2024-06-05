@@ -261,6 +261,8 @@ Repeat
 	
 Until quit
 
+SGD.Terminate()
+
 End
 
 ' Utility functions...

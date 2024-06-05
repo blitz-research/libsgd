@@ -60,14 +60,15 @@ Log::~Log() {
 
 		if (!g_logstream.is_open()) {
 			static bool opened;
-			if(opened) {
-				alert(String("Log stream closed:\n") + str);
-				return;
-			}
+
+			if(opened) SGD_PANIC("Logging error, log file unexpectedly closed");
+
 			Path path("~/.sgd/log.txt");
 			if (!path.createFile(true)) SGD_PANIC("Logging error, failed to create log file");
+
 			g_logstream.open(path.filePath());
 			if(!g_logstream.is_open()) SGD_PANIC("Logging error, failed to open log file");
+
 			opened=true;
 		}
 

@@ -20,8 +20,6 @@ void CollisionSpace::enableCollisions(uint32_t srcType, uint32_t dstType, Collis
 
 CollisionNode* CollisionSpace::insert(Collider* collider) {
 
-	SGD_LOG << "inserting collider" << collider << "collisionType" << collider->colliderType();
-
 	auto node = new CollisionNode(collider, this);
 	m_collisionNodes[collider->colliderType()].push_back(node);
 
