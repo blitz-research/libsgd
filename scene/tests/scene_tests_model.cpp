@@ -2,7 +2,7 @@
 
 void entry() {
 
-	MeshPtr mesh = loadStaticMesh(Path("~/Desktop/terrain_v3/palm_tree1.glb")).result();
+	MeshPtr mesh = loadStaticMesh(Path("sgd://models/palm_tree1.glb")).result();
 	fit(mesh, {-1, 1}, true);
 
 	ModelPtr model = new Model();

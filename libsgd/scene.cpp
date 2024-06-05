@@ -14,6 +14,9 @@ void createOverlay() {
 #elif SGD_OS_LINUX
 		auto font = sgd::loadFont(sgd::Path("/usr/share/fonts/TTF/Inconsolata-Medium.ttf"), 16);
 		if (font) sgdx::g_defaultFont = font.result();
+#elif SGD_OS_MACOS
+		auto font = sgd::loadFont(sgd::Path("/Library/Fonts/Arial Unicode.ttf"), 16);
+		if (font) sgdx::g_defaultFont = font.result();
 #endif
 	}
 	sgdx::g_overlay = new sgd::Overlay();

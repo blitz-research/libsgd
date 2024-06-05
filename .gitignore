@@ -27,3 +27,5 @@ libsgd/go
 # Ignore blitzmax backup files
 *.bmx.bak
 
+# Macos info
+.DS_Store
