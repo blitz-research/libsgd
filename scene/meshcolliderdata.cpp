@@ -41,13 +41,13 @@ MeshColliderData::MeshColliderData(CMesh* mesh) {
 		dstp += surf->triangleCount();
 	}
 
-	SGD_LOG << "Creating mesh collider data...";
+	auto ms = sgd::micros();
 
 	m_rootNode = createNode(std::move(triangles));
 
 	m_bounds = m_rootNode->bounds;
 
-	SGD_LOG << "Done.";
+	SGD_LOG << "Created mesh collider data in" << (double)(sgd::micros()-ms) / 1000000.0 << "secs.";
 }
 
 MeshColliderData::Node* MeshColliderData::createNode(Vector<Triangle> triangles) { // NOLINT (recursive)

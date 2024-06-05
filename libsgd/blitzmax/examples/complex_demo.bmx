@@ -271,6 +271,8 @@ Repeat
 	
 Until quit
 
+SGD.Terminate()
+
 End
 
 ' Cube management...
