@@ -1,8 +1,11 @@
 
 ***** V0.07 *****
 
-* Disabled D3D12 backend in 32 bit Blitz3D. I can at least reproduce (some of) the D3D12 problems now, so there's little benefit leaving
-it in there as it seems like it'll just lead to spurious bug reports.
+* Added trees.bb alpha mask demo.
+
+* Fixed Fetch CURL code caching 404 pages.
+
+* Disabled D3D12 backend in 32 bit Blitz3D.
 
 * Changed static mesh instancing to use shader storage instead of vertex buffers. Let me know if you notice mesh instancing doing
 anything weird or slowing down etc.
@@ -44,7 +47,7 @@ who aren't using GetChar in a loop will 'miss' chars if I did, so am playing it 
 
 * Added deprecation system - you should now get a runtime warning when using a deprecated function, eg: TransformMesh, TransformMeshTexCoords.
 
-* Deprecated TransformMesh, TransformMeshtexCoords to TFormMesh, TFormMeshTexCoords for consitency.
+* Deprecated/renamed TransformMesh, TransformMeshtexCoords to TFormMesh, TFormTexCoords.
 
 * Added TFormPoint, TFormVector, TFormNormal, TFormedX, TFormedY, TFormedZ.
 

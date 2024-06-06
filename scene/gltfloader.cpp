@@ -61,7 +61,10 @@ int GLTFLoader::byteSize(const tinygltf::Accessor& accessor) {
 
 Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 
-	auto data = loadData(path).result();
+	auto rdata = loadData(path);
+	if (!rdata) return rdata.error();
+
+	auto data = rdata.result();
 
 	std::string err;
 	std::string warn;
@@ -108,7 +111,7 @@ Texture* GLTFLoader::loadTexture(int id, bool srgb, bool pmAlpha) {
 	auto texFlags = TextureFlags::none;
 
 	if (!cachedImages[gltfTex.source]) {
-		if(pmAlpha) {
+		if (pmAlpha) {
 			premultiplyAlpha(gltfImage.image.data(), texFormat, Vec2u(gltfImage.width, gltfImage.height),
 							 gltfImage.width * bytesPerTexel(texFormat));
 		}
@@ -600,7 +603,8 @@ Expected<Model*, FileioEx> GLTFLoader::loadSkinnedModel() {
 Expected<Mesh*, FileioEx> loadStaticMesh(CPath path) {
 	GLTFLoader loader;
 
-	loader.open(path);
+	auto r = loader.open(path);
+	if (!r) return r.error();
 
 	return loader.loadStaticMesh();
 }
@@ -608,7 +612,8 @@ Expected<Mesh*, FileioEx> loadStaticMesh(CPath path) {
 Expected<Model*, FileioEx> loadBonedModel(CPath path) {
 	GLTFLoader loader;
 
-	loader.open(path);
+	auto r= loader.open(path);
+	if(!r) return r.error();
 
 	return loader.loadBonedModel();
 }
@@ -616,7 +621,8 @@ Expected<Model*, FileioEx> loadBonedModel(CPath path) {
 Expected<Model*, FileioEx> loadSkinnedModel(CPath path) {
 	GLTFLoader loader;
 
-	loader.open(path);
+	auto r= loader.open(path);
+	if(!r) return r.error();
 
 	return loader.loadSkinnedModel();
 }

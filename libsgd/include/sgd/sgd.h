@@ -451,7 +451,7 @@ SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh mesh, float minX, float minY, float m
 SGD_API void SGD_DECL sgd_TFormMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz);
 
 //! Transform mesh texture coordinates.
-SGD_API void SGD_DECL sgd_TFormMeshTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
+SGD_API void SGD_DECL sgd_TFormTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
 
 //! @deprecated Use sgd_TFormMesh.
 SGD_API void SGD_DECL sgd_TransformMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz);

@@ -164,7 +164,7 @@ void SGD_DECL sgd_TFormMesh(SGD_Mesh hmesh, float tx, float ty, float tz, float 
 	sgdx::transform(mesh, sgd::AffineMat4f::TRS({tx,ty,tz},{rx,ry,rz},{sx,sy,sz}));
 }
 
-void SGD_DECL sgd_TFormMeshTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY, float offsetX, float offsetY) {
+void SGD_DECL sgd_TFormTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY, float offsetX, float offsetY) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	sgdx::transformTexCoords(mesh, sgd::Vec2f(scaleX, scaleY), sgdx::Vec2f(offsetX, offsetY));
 }
@@ -175,8 +175,8 @@ void SGD_DECL sgd_TransformMesh(SGD_Mesh hmesh, float tx, float ty, float tz, fl
 }
 
 void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh hmesh, float sx, float sy, float tx, float ty) {
-	SGDX_DEPRECATED(sgd_TFormMeshTexCoords);
-	return sgd_TFormMeshTexCoords(hmesh,sx,sy,tx,ty);
+	SGDX_DEPRECATED(sgd_TFormTexCoords);
+	return sgd_TFormTexCoords(hmesh,sx,sy,tx,ty);
 }
 
 void SGD_DECL sgd_FlipMesh(SGD_Mesh hmesh) {

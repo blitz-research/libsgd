@@ -1,29 +1,15 @@
 #pragma once
 
 #include "expected.h"
+#include "fileio.h"
 #include "std.h"
 
 namespace sgd {
 
 struct StreamBuffer;
 
-struct FetchEx;
-using CFetchEx = const FetchEx&;
+Expected<String, FileioEx> fetchString(CString url);
 
-struct FetchEx {
-	explicit FetchEx(String message) : m_message(std::move(message)) {
-	}
-
-	CString message() const {
-		return m_message;
-	}
-
-private:
-	String m_message;
-};
-
-Expected<String, FetchEx> fetchString(CString url);
-
-Expected<Data, FetchEx> fetchData(CString url);
+Expected<Data, FileioEx> fetchData(CString url);
 
 } // namespace sgd

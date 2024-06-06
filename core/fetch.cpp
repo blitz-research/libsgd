@@ -126,7 +126,7 @@ CURL* openCurl() {
 	return g_curl;
 }
 
-Expected<bool, FetchEx> fetch(CString url, curl_write_callback writeFunc, void* writeData) {
+Expected<bool, FileioEx> fetch(CString url, curl_write_callback writeFunc, void* writeData) {
 
 	auto turl = url;
 	if (startsWith(url, sgdPrefix)) {
@@ -140,31 +140,26 @@ Expected<bool, FetchEx> fetch(CString url, curl_write_callback writeFunc, void* 
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeFunc);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, writeData);
 
-	char error[CURL_ERROR_SIZE] = "";
-	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error);
-
 	auto result = curl_easy_perform(curl);
-	if (result == CURLcode::CURLE_OK) return true;
+	if (result != CURLcode::CURLE_OK) return FileioEx("CURL error: " + toString(curl_easy_strerror(result)));
 
+	// CURLcode::CURLE_OK
 	long httpStatus = -1;
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
-	SGD_LOG << "Curl request failed:" << curl_easy_strerror(result);
-	SGD_LOG << "Curl request URL:" << turl;
-	SGD_LOG << "Curl httpStatus:" << httpStatus;
-	SGD_LOG << "Curl errors:" << error;
-	return FetchEx(curl_easy_strerror(result));
+	if (httpStatus >= 200 && httpStatus < 300) return true;
+
+	return FileioEx("CURL http request failed: " + toString(httpStatus));
 }
 
 } // namespace
 
-Expected<String, FetchEx> fetchString(CString url) {
-	if (auto cpath = cacheFile(url)) {
-		return loadString(cpath).result();
-	}
+Expected<String, FileioEx> fetchString(CString url) {
+	if (auto path = cacheFile(url)) return loadString(path);
 
 	auto writeFunc = [](char* buffer, size_t size, size_t nmemb, void* datap) {
 		size *= nmemb;
 		auto text = (String*)datap;
+		// FIXME: This is probably way less than optimal!
 		text->append(buffer, size);
 		return size;
 	};
@@ -178,15 +173,14 @@ Expected<String, FetchEx> fetchString(CString url) {
 	return result;
 }
 
-Expected<Data, FetchEx> fetchData(CString url) {
-	if (auto cpath = cacheFile(url)) {
-		return loadData(cpath).result();
-	}
+Expected<Data, FileioEx> fetchData(CString url) {
+	if (auto path = cacheFile(url)) return loadData(path);
 
 	auto writeFunc = [](char* buffer, size_t size, size_t nmemb, void* datap) {
 		size *= nmemb;
 		auto data = (Data*)datap;
 		auto datasz = data->size();
+		// FIXME: This is way less than optimal!
 		data->resize(datasz + size);
 		std::memcpy(data->data() + datasz, buffer, size);
 		return size;
