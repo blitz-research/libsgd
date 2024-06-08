@@ -1,6 +1,6 @@
 Include "start.bb"
 
-CreateWindow 1280, 720, "Hello World", 4
+CreateWindow 1280, 720, "Collisions Demo", 4
 
 CreateScene()
 
@@ -25,12 +25,12 @@ Local levelCollider = CreateMeshCollider(levelModel, 0, 0)
 Local playerMesh = CreateSphereMesh(1,48,24,CreatePBRMaterial())
 
 CreatePlayer(playerMesh)
-SetEntityPosition player,-8,-4,36
+SetEntityPosition player,-8,20, 36
 SetEntityRotation player,0,-145.5,0
 MoveEntity camera,0,.8,0
 
-; I am NOT this skinny!
-playerCollider = CreateEllipsoidCollider(player, 1, .2, 1.8)
+;Skinny dude!
+Local playerCollider = CreateEllipsoidCollider(player, 1, .2, 1.8)
 
 EnableCollisions 1, 0, 2
 
@@ -60,9 +60,15 @@ While PollEvents()<>1
 	vel = newvel
 	
 	Clear2D
-	Draw2DText EntityX(camera)+", "+EntityY(camera)+", "+EntityZ(camera),0,0
-	Draw2DText EntityRX(camera)+", "+EntityRY(camera)+", "+EntityRZ(camera),0,16
-	
+	Set2DTextColor 0,0,0,1
+	Draw2DText "Player position: "+EntityX(player)+", "+EntityY(player)+", "+EntityZ(player),0,0
+	Draw2DText "Player rotation: "+EntityRX(player)+", "+EntityRY(player)+", "+EntityRZ(player),0,16
+
+	;GetCollisionCount is updated by UpdateColliders().	 OK to just first (if there is one).
+	If GetCollisionCount(playerCollider)>0
+		Draw2DText "Collision Point : "+CollisionX(playerCollider,0)+", "+CollisionY(playerCollider,0)+", "+CollisionZ(playerCollider,0),0,32
+		Draw2DText "Collision Normal: "+CollisionNX(playerCollider,0)+", "+CollisionNY(playerCollider,0)+", "+CollisionNZ(playerCollider,0),0,48
+	EndIf
 	
 	RenderScene()
 	Present()
