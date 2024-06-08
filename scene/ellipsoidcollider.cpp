@@ -44,7 +44,7 @@ void EllipsoidCollider::onUpdate(const CollisionSpace* space, uint32_t colliderM
 
 	m_src = dst;
 
-	for (auto& c : collisions) c.contact.point -= c.contact.normal * radii();
+	for (auto& c : collisions) c.contact.point -= c.contact.normal * Vec3r(radii());
 }
 
 void EllipsoidCollider::onReset(Entity* entity) {

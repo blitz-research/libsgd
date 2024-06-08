@@ -38,7 +38,7 @@ void SphereCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask
 
 	m_src = dst;
 
-	for (auto& c : collisions) c.contact.point -= c.contact.normal * radius();
+	for (auto& c : collisions) c.contact.point -= c.contact.normal * (real)radius();
 }
 
 void SphereCollider::onReset(Entity* entity) {

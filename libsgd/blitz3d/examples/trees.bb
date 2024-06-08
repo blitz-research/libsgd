@@ -39,7 +39,7 @@ createPlayer(0)
 MoveEntity player,0,1,0
 
 While PollEvents()<>1
-	PlayerFly(.25)
+	PlayerFly(.125)
 	RenderScene()
 	Clear2D()
 	Draw2DText "FPS:"+FPS()+", RPS:"+RPS(),0,0
