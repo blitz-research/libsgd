@@ -559,6 +559,47 @@ void SGD_DECL sgd_UpdateColliders() {
 	sgdx::mainScene()->collisionSpace()->updateColliders();
 }
 
+int SGD_DECL sgd_GetCollisionCount(SGD_Collider hcollider) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	return (int)collider->collisions().size();
+}
+
+SGD_Real SGD_DECL sgd_CollisionX(SGD_Collider hcollider, int index) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	return collider->collisions()[index].contact.point.x;
+}
+
+SGD_Real SGD_DECL sgd_CollisionY(SGD_Collider hcollider, int index) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	return collider->collisions()[index].contact.point.y;
+}
+
+SGD_Real SGD_DECL sgd_CollisionZ(SGD_Collider hcollider, int index) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	return collider->collisions()[index].contact.point.z;
+}
+
+SGD_Real SGD_DECL sgd_CollisionNX(SGD_Collider hcollider, int index) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	return collider->collisions()[index].contact.normal.x;
+}
+
+SGD_Real SGD_DECL sgd_CollisionNY(SGD_Collider hcollider, int index) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	return collider->collisions()[index].contact.normal.y;
+}
+
+SGD_Real SGD_DECL sgd_CollisionNZ(SGD_Collider hcollider, int index) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	return collider->collisions()[index].contact.normal.z;
+}
+
 SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera hcamera, float windowX, float windowY, int colliderMask) {
 	auto camera = sgdx::resolveHandle<sgd::Camera>(hcamera);
 	sgd::Contact contact;

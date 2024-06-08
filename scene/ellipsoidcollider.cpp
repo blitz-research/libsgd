@@ -38,13 +38,13 @@ Collider* EllipsoidCollider::intersectRay(CLiner ray, CVec3f radii, Contact& con
 void EllipsoidCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask, CollisionResponse response,
 								 Vector<Collision>& collisions) {
 
-	Vec3f radii(radius(), height() * .5f, radius());
-
-	auto dst = collideRay(space, m_src, entity()->worldPosition(), radii, colliderMask, response, collisions);
+	auto dst = collideRay(space, m_src, entity()->worldPosition(), radii(), colliderMask, response, collisions);
 
 	entity()->setWorldPosition(dst);
 
 	m_src = dst;
+
+	for (auto& c : collisions) c.contact.point -= c.contact.normal * radii();
 }
 
 void EllipsoidCollider::onReset(Entity* entity) {

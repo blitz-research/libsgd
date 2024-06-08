@@ -15,6 +15,10 @@ struct EllipsoidCollider : Collider {
 
 	Property<float> height;
 
+	Vec3f radii() const {
+		return {radius(), height() * .5f, radius()};
+	}
+
 	Collider* intersectRay(CLiner ray, float rradius, Contact& contact) override;
 
 	Collider* intersectRay(CLiner ray, CVec3f radii, Contact& contact) override;
@@ -22,9 +26,10 @@ struct EllipsoidCollider : Collider {
 private:
 	Vec3r m_src;
 
-	void onUpdate(const CollisionSpace* space, uint32_t colliderMask, CollisionResponse response, Vector<Collision>& collisions) override;
+	void onUpdate(const CollisionSpace* space, uint32_t colliderMask, CollisionResponse response,
+				  Vector<Collision>& collisions) override;
 
 	void onReset(Entity* entity) override;
 };
 
-}
+} // namespace sgd

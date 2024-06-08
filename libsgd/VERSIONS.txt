@@ -1,4 +1,11 @@
 
+***** V0.07.1 *****
+
+* Updated collide.bb to show collision point/normal.
+
+* Added GetCollisionCount, CollisionX, CollisionY, CollisionZ, CollsionNX, CollisionNY, CollisionNZ.
+
+
 ***** V0.07 *****
 
 * Added trees.bb alpha mask demo.
