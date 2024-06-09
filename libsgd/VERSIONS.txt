@@ -1,3 +1,7 @@
+***** V0.07.2 *****
+
+* Fix sprite instance bug.
+
 
 ***** V0.07.1 *****
 
