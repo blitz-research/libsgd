@@ -96,7 +96,8 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc,		 //
 		source = preprocessor.Process();
 	}
 
-	auto module = createShaderModule(gc->wgpuDevice(), source);
+	String label = String(material->descriptor()->label) + ":" + renderer->descriptor()->label;
+	auto module = createShaderModule(gc->wgpuDevice(), source, label.c_str());
 
 	wgpu::RenderPipelineDescriptor pipelineDescriptor;
 

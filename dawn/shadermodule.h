@@ -4,7 +4,7 @@
 
 namespace sgd {
 
-wgpu::ShaderModule createShaderModule(const wgpu::Device& device, CString source);
+wgpu::ShaderModule createShaderModule(const wgpu::Device& device, CString source, const char* label=nullptr);
 
 constexpr wgpu::BindGroupLayoutEntry bufferBindGroupLayoutEntry(uint32_t binding, wgpu::ShaderStage visibility,
 																wgpu::BufferBindingType bindingType) {

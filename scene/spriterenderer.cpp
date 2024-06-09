@@ -85,7 +85,7 @@ void SpriteRenderer::onValidate(GraphicsContext* gc) const {
 		addRenderOp(gc, material,							  //
 					nullptr, nullptr, nullptr,				  //
 					m_bindGroup, sgd::DrawMode::triangleList, //
-					count * 6, 1, 0, first);
+					count * 6, 1, first, false);
 	};
 
 	Image* image{};
