@@ -9,36 +9,19 @@
 
 namespace sgd {
 
-namespace {
-
-void setCameraUniforms(CameraUniforms& uniforms, CAffineMat4r worldMatrix, CMat4f projMatrix) {
-	uniforms.worldMatrix.i = {worldMatrix.r.i, 0};
-	uniforms.worldMatrix.j = {worldMatrix.r.j, 0};
-	uniforms.worldMatrix.k = {worldMatrix.r.k, 0};
-	uniforms.worldMatrix.t = {0, 0, 0, 1};
-	uniforms.projectionMatrix = projMatrix;
-	uniforms.viewMatrix = inverse(uniforms.worldMatrix);
-	uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
-	uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
-}
-
-} // namespace
-
 Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
 
-	auto texture = new Texture({1, 1}, 6, TextureFormat::rgba8, TextureFlags::cube);
-	uint32_t data[6]{0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000};
-	texture->update(data, sizeof(uint32_t));
-	envTexture = texture;
+//	auto texture = new Texture({1, 1}, 6, TextureFormat::rgba8, TextureFlags::cube);
+//	uint32_t data[6]{0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000};
+//	texture->update(data, sizeof(uint32_t));
+	envTexture = whiteTexture(TextureFlags::cube);
 
 	m_sceneBindings = new SceneBindings();
-	for (int i = 0; i < 6; ++i) {
-		m_shadowBindings[i] = new SceneBindings();
-	}
 
 	m_renderContext = new RenderContext(m_gc);
 
 	m_viewportSize = m_gc->window()->size();
+
 	m_gc->window()->sizeChanged1.connect(this, [=](CVec2u size) {
 		if (!m_gc->canRender()) return;
 		SGD_ASSERT(size == m_gc->colorBuffer()->size());
@@ -141,21 +124,30 @@ Renderer* Scene::getRenderer(RendererType type) {
 }
 
 void Scene::updateCameraBindings() {
-	CameraUniforms uniforms;
+	AffineMat4f worldMatrix;
+	Mat4f projMatrix;
 	if (m_cameras.empty()) {
 		// Quick mouselook hack for no camera
 		auto mouse = m_gc->window()->mouse()->position().xy() / Vec2f(m_gc->window()->size()) * 2.0f - 1.0f;
-		auto matrix = AffineMat4r::rotation({-mouse.y * halfPi, -mouse.x * pi, 0});
+		worldMatrix = AffineMat4r::rotation({-mouse.y * halfPi, -mouse.x * pi, 0});
 		auto aspect = (float)m_viewportSize.x / (float)m_viewportSize.y;
-		auto proj = Mat4f::perspective(45, aspect, .1, 100);
-		setCameraUniforms(uniforms, matrix, proj);
-		m_eye = {};
+		projMatrix = Mat4f::perspective(45, aspect, .1, 100);
 	} else {
 		auto camera = m_cameras.front();
-		setCameraUniforms(uniforms, camera->worldMatrix(), camera->projectionMatrix());
-		m_eye = camera->worldPosition();
+		worldMatrix = camera->worldMatrix();
+		projMatrix = camera->projectionMatrix();
 	}
-	m_sceneBindings->updateCameraUniforms(uniforms);
+	CameraUniforms uniforms;
+	uniforms.worldMatrix.i = {worldMatrix.r.i, 0};
+	uniforms.worldMatrix.j = {worldMatrix.r.j, 0};
+	uniforms.worldMatrix.k = {worldMatrix.r.k, 0};
+	uniforms.worldMatrix.t = {0, 0, 0, 1};
+	uniforms.projectionMatrix = projMatrix;
+	uniforms.viewMatrix = inverse(uniforms.worldMatrix);
+	uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
+	uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
+	m_sceneBindings->setCameraUniforms(uniforms);
+	m_eye = worldMatrix.t;
 }
 
 void Scene::updateLightingBindings() {
@@ -207,9 +199,6 @@ void Scene::updateLightingBindings() {
 	std::sort(pointLights.begin(), pointLights.end(), cmp);
 
 	uniforms.pointLightCount = std::min((int)pointLights.size(), LightingUniforms::maxPointLights);
-
-	m_pointShadowLights.clear();
-
 	for (int i = 0; i < uniforms.pointLightCount; ++i) {
 		auto light = pointLights[i];
 		auto& ulight = uniforms.pointLights[i];
@@ -218,23 +207,11 @@ void Scene::updateLightingBindings() {
 		ulight.range = light->range();
 		ulight.falloff = light->falloff();
 		ulight.castsShadow = light->castsShadow();
-
-		if (light->castsShadow()) m_pointShadowLights.push_back(light);
 	}
 
-	m_sceneBindings->updateLightingUniforms(uniforms);
+	m_sceneBindings->setLightingUniforms(uniforms);
 
 	m_sceneBindings->setEnvTexture(envTexture());
-
-	auto n = m_pointShadowLights.size();
-	if (n && (!m_pointShadowTexture || n * 6 > m_pointShadowTexture->depth())) {
-		m_pointShadowTexture = new Texture({1024, 1024}, n * 6, TextureFormat::depth32f,
-										   TextureFlags::cube | TextureFlags::array | TextureFlags::renderTarget);
-		m_pointShadowTextureFaces.resize(n * 6);
-		for (int i = 0; i < n * 6; ++i) m_pointShadowTextureFaces[i] = new Texture(m_pointShadowTexture, i);
-
-		m_sceneBindings->setPointShadowTexture(m_pointShadowTexture);
-	}
 }
 
 void Scene::render() {
@@ -252,7 +229,7 @@ void Scene::render() {
 	}
 
 	runOnMainThread(
-		[=] { // We should really add dependencies on these...
+		[=] {
 			GraphicsResource::validateAll(m_gc);
 		},
 		true);
@@ -264,79 +241,30 @@ void Scene::render() {
 		isMainThread());
 }
 
-void Scene::renderPointLightShadowMaps() const {
-	if (m_pointShadowLights.empty()) return;
+void Scene::renderASync() const {
 
-	CameraUniforms cameraUniforms;
+	m_renderContext->beginRender();
 
-	for (int i = 0; i < m_pointShadowLights.size(); ++i) {
+	// Timestamp 0
+	if(m_timeStampsEnabled) m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 0);
 
-		auto light = m_pointShadowLights[i];
-
-		for (int face = 0; face < 6; ++face) {
-
-			static constexpr Mat3f faceTransforms[]		//
-				{{{0, 0, +1}, {0, +1, 0}, {-1, 0, 0}},	// 0: +X
-				 {{0, 0, -1}, {0, +1, 0}, {+1, 0, 0}},	// 1: -X
-				 {{+1, 0, 0}, {0, 0, +1}, {0, -1, 0}},	// 2: +Y
-				 {{+1, 0, 0}, {0, 0, -1}, {0, +1, 0}},	// 3: -Y
-				 {{+1, 0, 0}, {0, +1, 0}, {0, 0, +1}},	// 4: +Z
-				 {{-1, 0, 0}, {0, +1, 0}, {0, 0, -1}}}; // 5: -Z
-
-			float near = .1f;
-			float far = light->range();
-
-			auto projMatrix = Mat4f::frustum(-near, near, -near, near, near, far);
-			auto faceMatrix = AffineMat4f(faceTransforms[face], {}) * inverse(AffineMat4f({}, light->worldPosition() - m_eye));
-
-			cameraUniforms.projectionMatrix = projMatrix;
-			cameraUniforms.worldMatrix = Mat4f(inverse(faceMatrix));
-			cameraUniforms.inverseProjectionMatrix = inverse(projMatrix);
-			cameraUniforms.viewMatrix = Mat4f(faceMatrix);
-			cameraUniforms.viewProjectionMatrix = cameraUniforms.projectionMatrix * cameraUniforms.viewMatrix;
-			cameraUniforms.clipNear = near;
-			cameraUniforms.clipFar = far;
-
-			m_shadowBindings[face]->updateCameraUniforms(cameraUniforms);
-		}
-
-		// upload camera buffer changes
-		GraphicsResource::validateAll(m_gc);
-
-		m_renderContext->beginRender();
-
-		for (int face = 0; face < 6; ++face) {
-
-			auto texture = m_pointShadowTextureFaces[i * 6 + face];
-
-			m_renderContext->beginRenderPass(RenderPassType::shadow, nullptr, texture, {}, 1);
-			m_renderContext->wgpuRenderPassEncoder().SetBindGroup(0, m_shadowBindings[face]->bindGroup()->wgpuBindGroup());
+	{
+		// Shadows
+		for(auto& pass : m_sceneBindings->shadowPasses()) {
+			m_renderContext->beginRenderPass(RenderPassType::shadow, nullptr, pass.renderTarget, {}, 1);
+			m_renderContext->wgpuRenderPassEncoder().SetBindGroup(0, pass.sceneBindings->wgpuBindGroup());
 			for (Renderer* r : m_renderers) {
 				if (r && r->enabled()) r->render(m_renderContext);
 			}
 			m_renderContext->endRenderPass();
 		}
-
-		m_renderContext->endRender();
 	}
-}
-
-void Scene::renderASync() const {
-
-	if(m_timeStampsEnabled) {
-		m_renderContext->beginRender();
-		m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 0);
-		m_renderContext->endRender();
-	}
-
-	renderPointLightShadowMaps();
-
-	m_renderContext->beginRender();
 
 	// Timestamp 1
 	if (m_timeStampsEnabled) m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 1);
 
 	{
+		// Opaque
 		m_renderContext->beginRenderPass(RenderPassType::opaque, m_gc->colorBuffer(), m_gc->depthBuffer(), clearColor(),
 										 clearDepth());
 		m_renderContext->wgpuRenderPassEncoder().SetBindGroup(0, m_sceneBindings->bindGroup()->wgpuBindGroup());
@@ -350,6 +278,7 @@ void Scene::renderASync() const {
 	if (m_timeStampsEnabled) m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 2);
 
 	{
+		// AlphaBlend
 		m_renderContext->beginRenderPass(RenderPassType::blend, m_gc->colorBuffer(), m_gc->depthBuffer(), clearColor(),
 										 clearDepth());
 		m_renderContext->wgpuRenderPassEncoder().SetBindGroup(0, m_sceneBindings->bindGroup()->wgpuBindGroup());
@@ -360,6 +289,7 @@ void Scene::renderASync() const {
 	}
 
 	if (m_timeStampsEnabled) {
+
 		// Timestamp 3
 		m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 3);
 
@@ -383,7 +313,6 @@ void Scene::renderASync() const {
 				if(status != WGPUBufferMapAsyncStatus_Success) {
 					return;
 				}
-//				SGD_LOG << "Mapped callback!";
 				auto scene = (Scene*)userdata;
 				std::memcpy(scene->m_timeStamps, scene->m_timeStampResults.GetConstMappedRange(), timeStampCount * 8);
 				scene->m_timeStampResults.Unmap();

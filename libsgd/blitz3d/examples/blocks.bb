@@ -20,8 +20,6 @@ Global slimeball
 
 CreateWindow(DesktopWidth()/2, DesktopHeight()/2, "スノー Blocks", 4)
 
-;SetWebGPUBackend "D3D12"
-
 CreateScene()
 
 LoadScene()

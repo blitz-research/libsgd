@@ -31,7 +31,7 @@ struct Scene : Shared {
 	Property<float> clearDepth{1};
 
 	Property<Vec4f> ambientLightColor{Vec4f(1, 1, 1, 0)};
-	Property<TexturePtr> envTexture;
+	Property<CTexturePtr> envTexture;
 
 	Signal<Vec2u> viewportSizeChanged;
 	Signal<> beginRender;
@@ -68,9 +68,6 @@ private:
 
 	Vec2u m_viewportSize;
 
-	SceneBindingsPtr m_sceneBindings;
-	Array<SceneBindingsPtr, 6> m_shadowBindings;
-
 	Vector<EntityPtr> m_entities;
 
 	Vector<Camera*> m_cameras;
@@ -84,10 +81,7 @@ private:
 
 	Vec3r m_eye;
 
-	Vector<Light*> m_pointShadowLights;
-	TexturePtr m_pointShadowTexture;
-
-	Vector<TexturePtr> m_pointShadowTextureFaces;
+	SceneBindingsPtr m_sceneBindings;
 
 	RenderContextPtr m_renderContext;
 
@@ -102,8 +96,6 @@ private:
 
 	void updateCameraBindings();
 	void updateLightingBindings();
-
-	void renderPointLightShadowMaps() const;
 
 	void renderASync() const;
 };

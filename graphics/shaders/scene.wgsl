@@ -4,7 +4,11 @@ R"(
 // in a fragment shader you can use:
 // @diagnostic(off, derivative_uniformity)
 
-// ***** Camera *****
+// ***** Scene *****
+
+const maxDirectionalLights: u32 = 4;
+const maxPointLights: u32 = 32;
+const maxSpotLights: u32 = 16;
 
 struct CameraUniforms {
 	projectionMatrix: mat4x4f,
@@ -15,14 +19,6 @@ struct CameraUniforms {
 	clipNear: f32,
 	clipFar: f32,
 };
-
-@group(0) @binding(0) var<uniform> camera_uniforms: CameraUniforms;
-
-// ***** Lighting *****
-
-const maxDirectionalLights: u32 = 4;
-const maxPointLights: u32 = 32;
-const maxSpotLights: u32 = 16;
 
 struct DirectionalLight {
     direction: vec3f,
@@ -57,13 +53,14 @@ struct LightingUniforms {
 	spotLights: array<SpotLight, maxSpotLights>,
 }
 
+@group(0) @binding(0) var<uniform> camera_uniforms: CameraUniforms;
 @group(0) @binding(1) var<uniform> lighting_uniforms: LightingUniforms;
-
 @group(0) @binding(2) var lighting_envTexture: texture_cube<f32>;
 @group(0) @binding(3) var lighting_envSampler: sampler;
-
-@group(0) @binding(4) var lighting_pointShadowTexture: texture_depth_cube_array;
-@group(0) @binding(5) var lighting_pointShadowSampler: sampler;
+@group(0) @binding(4) var lighting_csmTexture: texture_2d_array<f32>;
+@group(0) @binding(5) var lighting_csmSampler: sampler;
+@group(0) @binding(6) var lighting_psmTexture: texture_depth_cube_array;
+@group(0) @binding(7) var lighting_psmSampler: sampler;
 
 fn pointLightAtten(d: f32, range: f32, falloff: f32) -> f32 {
     // Attenuation - This seems like the most practially useful:
@@ -133,7 +130,7 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 	    if light.castsShadow != 0 {
             let near = .1;
             let far = light.range;
-            let zw = textureSampleLevel(lighting_pointShadowTexture, lighting_pointShadowSampler, -lvec, i, 0);
+            let zw = textureSampleLevel(lighting_psmTexture, lighting_psmSampler, -lvec, i, 0);
             let vz = far * near / (far + zw * (near - far));
             let dz = max(abs(lvec.x), max(abs(lvec.y), abs(lvec.z)));
             if dz > vz {continue;}

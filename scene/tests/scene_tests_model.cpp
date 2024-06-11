@@ -13,10 +13,9 @@ void entry() {
 	}
 
 	MeshPtr meshes[3];
-
 	meshes[0] = loadStaticMesh(Path("sgd://models/tree1.glb")).result();
 	meshes[1] = loadStaticMesh(Path("sgd://models/palm_tree1.glb")).result();
-	meshes[2] = loadStaticMesh(Path("~/Desktop/terrain_v3/birch_tree1.glb")).result();
+	meshes[2] = loadStaticMesh(Path("sgd://models/birch_tree1.glb")).result();
 
 	for(int i=0;i<50;++i) {
 		ModelPtr model = new Model();

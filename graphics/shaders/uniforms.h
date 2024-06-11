@@ -15,6 +15,7 @@ struct alignas(16) CameraUniforms {
 	float clipNear{.1};
 	float clipFar{100};
 };
+using CCameraUniforms = const CameraUniforms&;
 
 struct alignas(16) LightingUniforms {
 
@@ -57,12 +58,16 @@ struct alignas(16) LightingUniforms {
 	uint32_t spotLightCount{};
 	SpotLight spotLights[maxSpotLights];
 };
+using CLightingUniforms = const LightingUniforms&;
+
 // @group(0) @binding(0) var<uniform> camera_uniforms: CameraUniforms;
 // @group(0) @binding(1) var<uniform> lighting_uniforms: LightingUniforms;
 // @group(0) @binding(2) var lighting_envTexture: texture_cube<f32>;
 // @group(0) @binding(3) var lighting_envSampler: sampler;
-// @group(0) @binding(4) var lighting_pointShadowTexture: array<texture_cube<f32>, maxPointLights>;
-// @group(1) @binding(5) var lighting_pointShadowSampler: sampler;
+// @group(0) @binding(4) var lighting_csmTexture: texture_array<f32>;
+// @group(0) @binding(5) var lighting_csmSampler: sampler;
+// @group(0) @binding(6) var lighting_psmTexture: texture_depth_cube_array;
+// @group(0) @binding(7) var lighting_psmSampler: sampler;
 
 // ***** MatteMaterial *****
 

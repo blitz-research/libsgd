@@ -5,19 +5,32 @@
 
 namespace sgd {
 
-const Texture* rgbaTexture(uint32_t rgba) {
+CTexture* rgbaTexture(uint32_t rgba, TextureFlags flags) {
 
-	static Map<uint32_t, TexturePtr> cache;
+	static Map<std::pair<uint32_t, TextureFlags>, TexturePtr> cache;
 
-	auto& texture = cache[rgba];
+	auto& texture = cache[std::make_pair(rgba, flags)];
 	if (texture) return texture;
 
-	texture = new Texture({1, 1}, 1, TextureFormat::rgba8, TextureFlags::none);
-
-	texture->update(&rgba, bytesPerTexel(TextureFormat::rgba8));
+	uint32_t depth = bool(flags & TextureFlags::cube) ? 6 : 1;
+	texture = new Texture({1, 1}, depth, TextureFormat::rgba8, flags);
+	uint32_t data[]{rgba, rgba, rgba, rgba, rgba, rgba};
+	texture->update(&rgba, sizeof(rgba));
 
 	return texture;
 }
+
+CTexture* dummyTexture(TextureFormat format, TextureFlags flags) {
+
+	static Map<std::pair<TextureFormat, TextureFlags>, TexturePtr> cache;
+
+	auto& texture = cache[std::make_pair(format,flags)];
+	if(texture) return texture;
+
+	uint32_t depth = bool(flags & TextureFlags::cube) ? 6 : 1;
+	return texture = new Texture({1,1}, depth, format, flags);
+}
+
 
 Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags, uint32_t depth) {
 
