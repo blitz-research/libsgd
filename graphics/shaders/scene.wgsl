@@ -21,12 +21,13 @@ struct CameraUniforms {
 };
 
 struct DirectionalLight {
-    direction: vec3f,
+    worldMatrix: mat4x4f,
     color: vec4f,
+    castsShadow: i32,
 }
 
 struct PointLight {
-	position: vec3f,
+    position: vec3f,
  	color: vec4f,
 	range: f32,
 	falloff: f32,
@@ -53,14 +54,21 @@ struct LightingUniforms {
 	spotLights: array<SpotLight, maxSpotLights>,
 }
 
-@group(0) @binding(0) var<uniform> camera_uniforms: CameraUniforms;
-@group(0) @binding(1) var<uniform> lighting_uniforms: LightingUniforms;
-@group(0) @binding(2) var lighting_envTexture: texture_cube<f32>;
-@group(0) @binding(3) var lighting_envSampler: sampler;
-@group(0) @binding(4) var lighting_csmTexture: texture_2d_array<f32>;
-@group(0) @binding(5) var lighting_csmSampler: sampler;
-@group(0) @binding(6) var lighting_psmTexture: texture_depth_cube_array;
-@group(0) @binding(7) var lighting_psmSampler: sampler;
+struct ShadowUniforms {
+    csmSplits: vec4f,
+    psmNear: f32,
+}
+
+@group(0) @binding(0) var<uniform> cameraUniforms: CameraUniforms;
+@group(0) @binding(1) var<uniform> lightingUniforms: LightingUniforms;
+@group(0) @binding(2) var<uniform> shadowUniforms: ShadowUniforms;
+@group(0) @binding(3) var lighting_envTexture: texture_cube<f32>;
+@group(0) @binding(4) var lighting_envSampler: sampler;
+@group(0) @binding(5) var lighting_csmTexture: texture_depth_2d_array;
+@group(0) @binding(6) var lighting_csmSampler: sampler_comparison;
+@group(0) @binding(7) var<storage> lighting_csmMatrices: array<mat4x4f>;
+@group(0) @binding(8) var lighting_psmTexture: texture_depth_cube_array;
+@group(0) @binding(9) var lighting_psmSampler: sampler_comparison;
 
 fn pointLightAtten(d: f32, range: f32, falloff: f32) -> f32 {
     // Attenuation - This seems like the most practially useful:
@@ -95,11 +103,11 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
     let spower = pow(2.0, glossiness * 12.0);       // specular power
     let fnorm = (spower + 2.0) / 8.0;               // normalization factor
 
-	let vpos = camera_uniforms.worldMatrix[3].xyz;  // viewer position
+	let vpos = cameraUniforms.worldMatrix[3].xyz;  // viewer position
     let vvec = normalize(vpos - position);          // vector to viewer
 	let ndotv = max(dot(normal, vvec), 0.0);
 
-    let fdiffuse = lighting_uniforms.ambientLightColor.rgb * lighting_uniforms.ambientLightColor.a * diffuse;
+    let fdiffuse = lightingUniforms.ambientLightColor.rgb * lightingUniforms.ambientLightColor.a * diffuse;
 
     let mips = f32(textureNumLevels(lighting_envTexture));
     let env = textureSampleLevel(lighting_envTexture, lighting_envSampler,  reflect(-vvec, normal), roughness * mips).rgb;
@@ -109,41 +117,64 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	var color = (fdiffuse + fspecular) * occlusion;
 
-	for(var i: u32 = 0; i < lighting_uniforms.numDirectionalLights; i += 1) {
-	    let light = lighting_uniforms.directionalLights[i];
+	for(var i: u32 = 0; i < lightingUniforms.numDirectionalLights; i += 1) {
 
-    	let lvec = light.direction;
-    	let atten = 1.0;
+	    let light = lightingUniforms.directionalLights[i];
+
+	    var atten = 1.0;
+
+	    if light.castsShadow != 0 {
+	        let vpos = (cameraUniforms.viewMatrix * vec4f(position, 1.0)).xyz;
+	        if vpos.z >= shadowUniforms.csmSplits.w {continue;}
+            var split = i * 4;
+            if vpos.z >= shadowUniforms.csmSplits.x {
+                if vpos.z < shadowUniforms.csmSplits.y {
+                    split += 1;
+                } else if vpos.z < shadowUniforms.csmSplits.z {
+                    split += 2;
+                } else {
+                    split += 3;
+                }
+            }
+            let wpos = lighting_csmMatrices[split] * vec4f(position, 1.0);
+            let spos = wpos.xyz / wpos.w;
+            atten = textureSampleCompareLevel(lighting_csmTexture, lighting_csmSampler, spos.xy * vec2f(0.5, -0.5) + 0.5, split, spos.z);
+            if atten == 0.0 {continue;}
+	    }
+
+    	let lvec = -light.worldMatrix[2].xyz;
 
 	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten, light.color);
 	}
 
-	for(var i: u32 = 0; i < lighting_uniforms.numPointLights; i += 1) {
-	    let light = lighting_uniforms.pointLights[i];
+	for(var i: u32 = 0; i < lightingUniforms.numPointLights; i += 1) {
+	    let light = lightingUniforms.pointLights[i];
 
         // vector to light
 	    var lvec = light.position - position;
 	    let d = length(lvec);
 	    if d >= light.range {continue;}
 
-	    // check shadow map
+	    var atten = 1.0;
+
 	    if light.castsShadow != 0 {
-            let near = .1;
+	        let near = shadowUniforms.psmNear;
             let far = light.range;
-            let zw = textureSampleLevel(lighting_psmTexture, lighting_psmSampler, -lvec, i, 0);
-            let vz = far * near / (far + zw * (near - far));
-            let dz = max(abs(lvec.x), max(abs(lvec.y), abs(lvec.z)));
-            if dz > vz {continue;}
+            let z = max(abs(lvec.x), max(abs(lvec.y), abs(lvec.z)));
+            let zw = (far * (near - z)) / (z * (near - far));
+            atten = textureSampleCompareLevel(lighting_psmTexture, lighting_psmSampler, -lvec, i, zw);
+            if atten == 0.0 {continue;}
         }
 
 	    lvec /= d;
-	    let atten = pointLightAtten(d, light.range, light.falloff);
+	    atten *= pointLightAtten(d, light.range, light.falloff);
 
 	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten, light.color);
 	}
 
-	for(var i: u32 = 0; i < lighting_uniforms.numSpotLights; i += 1) {
-	    let light = lighting_uniforms.spotLights[i];
+	for(var i: u32 = 0; i < lightingUniforms.numSpotLights; i += 1) {
+
+	    let light = lightingUniforms.spotLights[i];
 
         // vector to light
 	    var lvec = light.position - position;

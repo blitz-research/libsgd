@@ -37,6 +37,7 @@ enum struct TextureFlags {
 	renderTarget = 0x80,
 	layerView = 0x100,
 	msaa = 0x200,
+	compare = 0x400,
 
 	envmapDefault = 0x38,
 	materialDefault = 0x18,

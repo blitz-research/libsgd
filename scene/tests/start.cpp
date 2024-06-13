@@ -150,13 +150,13 @@ void start(void (*entry)()) {
 
 	scene->envTexture = skyTexture;
 
-	SkyboxPtr skybox = new Skybox();
-	skybox->skyTexture = skyTexture;
+	skybox = new Skybox();
 	scene->add(skybox);
+	skybox->skyTexture = skyTexture;
 
-	LightPtr light = new Light(LightType::directional);
-	turn(light, {-45, 225, 0});
+	light = new Light(LightType::directional);
 	scene->add(light);
+	turn(light, {-45, 45, 0});
 
 	entry();
 }

@@ -18,24 +18,25 @@ struct alignas(16) CameraUniforms {
 using CCameraUniforms = const CameraUniforms&;
 
 struct alignas(16) LightingUniforms {
-
 	static constexpr int maxDirectionalLights = 4;
 	static constexpr int maxPointLights = 32;
 	static constexpr int maxSpotLights = 16;
 
 	struct alignas(16) DirectionalLight {
-		alignas(16) Vec3f direction{0, 0, -1}; // -forward
-		alignas(16) Vec4f color{1};
+		Mat4f worldMatrix;
+		Vec4f color{1};
+		int castsShadow{0};
 	};
+	static_assert(sizeof(DirectionalLight) == 96);
 
 	struct alignas(16) PointLight {
-		alignas(16) Vec3f position{0, 0, 0};
+		Vec3f position;
 		alignas(16) Vec4f color{1};
 		float range{100};
 		float falloff{1};
 		int castsShadow{0};
 	};
-	static_assert(sizeof(PointLight)==48);
+	static_assert(sizeof(PointLight) == 48);
 
 	struct alignas(16) SpotLight {
 		alignas(16) Vec3f position{0, 0, 0};
@@ -60,14 +61,24 @@ struct alignas(16) LightingUniforms {
 };
 using CLightingUniforms = const LightingUniforms&;
 
-// @group(0) @binding(0) var<uniform> camera_uniforms: CameraUniforms;
-// @group(0) @binding(1) var<uniform> lighting_uniforms: LightingUniforms;
-// @group(0) @binding(2) var lighting_envTexture: texture_cube<f32>;
-// @group(0) @binding(3) var lighting_envSampler: sampler;
-// @group(0) @binding(4) var lighting_csmTexture: texture_array<f32>;
-// @group(0) @binding(5) var lighting_csmSampler: sampler;
-// @group(0) @binding(6) var lighting_psmTexture: texture_depth_cube_array;
-// @group(0) @binding(7) var lighting_psmSampler: sampler;
+struct alignas(16) ShadowUniforms {
+	Array<float, 4> csmSplits{};
+	float psmNear{.1f};
+};
+using CShadowUniforms = const ShadowUniforms&;
+
+// @group(0) @binding(0) var<uniform> cameraUniforms: CameraUniforms;
+// @group(0) @binding(1) var<uniform> lightingUniforms: LightingUniforms;
+// @group(0) @binding(2) var<uniform> shadowUniforms: ShadowUniforms;
+// @group(0) @binding(3) var lighting_envTexture: texture_cube<f32>;
+// @group(0) @binding(4) var lighting_envSampler: sampler;
+
+// @group(0) @binding(5) var lighting_csmTexture: texture_depth_2d_array;
+// @group(0) @binding(6) var lighting_csmSampler: sampler;
+// @group(0) @binding(7) var lighting_csmMatrices: array<mat4x4f>;
+
+// @group(0) @binding(8) var lighting_psmTexture: texture_depth_cube_array;
+// @group(0) @binding(9) var lighting_psmSampler: sampler;
 
 // ***** MatteMaterial *****
 

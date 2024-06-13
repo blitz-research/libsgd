@@ -697,6 +697,18 @@ SGD_API void SGD_DECL sgd_SetSceneClearDepth(float depth);
 //! Set scene environment texture.
 SGD_API void SGD_DECL sgd_SetSceneEnvTexture(SGD_Texture texture);
 
+//! Set cascading shadow map texture size. Defaults to 1024, must be a power of 2.
+SGD_API void SGD_DECL sgd_SetCSMTextureSize(int textureSize);
+
+//! Set shadow casting directional lights. Defaults to 1, max is 4 (max directional lights).
+SGD_API void SGD_DECL sgd_SetMaxCSMLights(int maxLights);
+
+//! Set point lint shadow map texture size. Defaults to 1024, must be power of 2.
+SGD_API void SGD_DECL sgd_SetPSMTextureSize(int textureSize);
+
+//! Set shadow casting point lights. Defaults to 4, max is 32 (max point lights).
+SGD_API void SGD_DECL sgd_SetMaxPSMLights(int maxLights);
+
 //! Render scene.
 SGD_API void SGD_DECL sgd_RenderScene();
 
@@ -847,13 +859,13 @@ SGD_API float SGD_DECL sgd_ProjectedY();
 //! @name Light
 //! @{
 
-//! Create a directional light.
+//! Create a directional light. Max directional lights is currently hardcoded at 4.
 SGD_API SGD_Light SGD_DECL sgd_CreateDirectionalLight();
 
-//! Create a point light.
+//! Create a point light. Max point lights is currently hardcoded at 32.
 SGD_API SGD_Light SGD_DECL sgd_CreatePointLight();
 
-//! Create a spot light.
+//! Create a spot light. Max spot lights is currently hardcodeded at 16.
 SGD_API SGD_Light SGD_DECL sgd_CreateSpotLight();
 
 //! Set a light's color.

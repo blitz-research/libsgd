@@ -79,6 +79,22 @@ void SGD_DECL sgd_SetSceneEnvTexture(SGD_Texture htexture) {
 	sgdx::mainScene()->envTexture = texture;
 }
 
+void SGD_DECL sgd_SetCSMTextureSize(int textureSize) {
+	sgdx::mainScene()->sceneBindings()->csmTextureSize = textureSize;
+}
+
+void SGD_DECL sgd_SetMaxCSMLights(int maxLights) {
+	sgdx::mainScene()->sceneBindings()->maxCSMLights = maxLights;
+}
+
+void SGD_DECL sgd_SetPSMTextureSize(int textureSize) {
+	sgdx::mainScene()->sceneBindings()->psmTextureSize = textureSize;
+}
+
+void SGD_DECL sgd_SetMaxPSMLights(int maxLights) {
+	sgdx::mainScene()->sceneBindings()->maxPSMLights = maxLights;
+}
+
 void SGD_DECL sgd_RenderScene() {
 	sgdx::mainScene()->render();
 }

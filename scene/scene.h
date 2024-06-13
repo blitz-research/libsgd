@@ -53,6 +53,10 @@ struct Scene : Shared {
 	void setRenderer(RendererType type, Renderer* renderer);
 	Renderer* getRenderer(RendererType type);
 
+	SceneBindings* sceneBindings()const{
+		return m_sceneBindings;
+	}
+
 	CollisionSpace* collisionSpace()const {
 		return m_collisionSpace;
 	}
@@ -71,7 +75,9 @@ private:
 	Vector<EntityPtr> m_entities;
 
 	Vector<Camera*> m_cameras;
-	Vector<Light*> m_lights;
+	Vector<Light*> m_directionalLights;
+	Vector<Light*> m_pointLights;
+	Vector<Light*> m_spotLights;
 
 	Vector<Entity*> m_invalid;
 

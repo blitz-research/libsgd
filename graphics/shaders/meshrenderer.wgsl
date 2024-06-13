@@ -37,7 +37,7 @@ struct Varying {
 
 	let worldMatrix = (*instance).worldMatrix;
 	let normalMatrix = mat3x3f(worldMatrix[0].xyz, worldMatrix[1].xyz, worldMatrix[2].xyz);
-	let mvpMatrix = camera_uniforms.viewProjectionMatrix * worldMatrix;
+	let mvpMatrix = cameraUniforms.viewProjectionMatrix * worldMatrix;
 
 	var out: Varying;
 

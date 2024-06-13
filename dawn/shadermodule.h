@@ -4,11 +4,13 @@
 
 namespace sgd {
 
-wgpu::ShaderModule createShaderModule(const wgpu::Device& device, CString source, const char* label=nullptr);
+wgpu::ShaderModule createShaderModule(const wgpu::Device& device, CString source, const char* label = nullptr);
 
-constexpr wgpu::BindGroupLayoutEntry bufferBindGroupLayoutEntry(uint32_t binding, wgpu::ShaderStage visibility,
-																wgpu::BufferBindingType bindingType) {
-	return wgpu::BindGroupLayoutEntry{nullptr, binding, visibility, {nullptr, bindingType}};
+constexpr wgpu::BindGroupLayoutEntry bufferBindGroupLayoutEntry( //
+	uint32_t binding,											 //
+	wgpu::ShaderStage visibility,								 //
+	wgpu::BufferBindingType bindingType) {
+	return wgpu::BindGroupLayoutEntry{nullptr, binding, visibility, {nullptr, bindingType}, {}, {}};
 }
 
 constexpr wgpu::BindGroupLayoutEntry textureBindGroupLayoutEntry(				//
@@ -16,12 +18,14 @@ constexpr wgpu::BindGroupLayoutEntry textureBindGroupLayoutEntry(				//
 	wgpu::ShaderStage visibility,												//
 	wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::e2D, //
 	wgpu::TextureSampleType sampleType = wgpu::TextureSampleType::Float) {
-	return wgpu::BindGroupLayoutEntry{nullptr, binding, visibility,
-									  {},	   {},		{nullptr, sampleType, viewDimension}};
+	return wgpu::BindGroupLayoutEntry{nullptr, binding, visibility, {}, {}, {nullptr, sampleType, viewDimension}};
 }
 
-constexpr wgpu::BindGroupLayoutEntry samplerBindGroupLayoutEntry(uint32_t binding, wgpu::ShaderStage visibility) {
-	return wgpu::BindGroupLayoutEntry{nullptr, binding, visibility, {}, {nullptr, wgpu::SamplerBindingType::Filtering}};
+constexpr wgpu::BindGroupLayoutEntry samplerBindGroupLayoutEntry( //
+	uint32_t binding,											  //
+	wgpu::ShaderStage visibility,								  //
+	wgpu::SamplerBindingType bindingType = wgpu::SamplerBindingType::Filtering) {
+	return wgpu::BindGroupLayoutEntry{nullptr, binding, visibility, {}, {nullptr, bindingType}, {}};
 }
 
 inline wgpu::BindGroupEntry bufferBindGroupEntry(uint32_t binding, wgpu::Buffer buffer) { //

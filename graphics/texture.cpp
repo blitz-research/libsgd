@@ -38,17 +38,19 @@ wgpu::Sampler getOrCreateWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
 
 	static Map<TextureFlags, wgpu::Sampler> cache;
 
-	auto& sampler = cache[flags & (TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clamp)];
+	auto key = flags & (TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clamp | TextureFlags::compare);
+
+	auto& sampler = cache[key];
 	if (sampler) return sampler;
 
 	wgpu::SamplerDescriptor desc{};
 	desc.addressModeU = bool(flags & TextureFlags::clampU) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.addressModeV = bool(flags & TextureFlags::clampV) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.addressModeW = bool(flags & TextureFlags::clampW) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
-
 	desc.magFilter = bool(flags & TextureFlags::filter) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
 	desc.minFilter = wgpu::FilterMode::Linear;
 	desc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
+	desc.compare = bool(flags & TextureFlags::compare) ? wgpu::CompareFunction::Less : wgpu::CompareFunction::Undefined;
 
 	return sampler = gc->wgpuDevice().CreateSampler(&desc);
 }

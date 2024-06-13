@@ -32,7 +32,7 @@ struct Varying {
 
     if material_uniforms.spriteViewMode == 1 {  // fixed, locked to camera
 
-        position = (camera_uniforms.worldMatrix * vec4f(vertex, 0)).xyz + instance.matrix[3].xyz;
+        position = (cameraUniforms.worldMatrix * vec4f(vertex, 0)).xyz + instance.matrix[3].xyz;
 
     } else if material_uniforms.spriteViewMode == 2 {   // free, billboard style
 
@@ -42,7 +42,7 @@ struct Varying {
 
         var matrix: mat4x4f;
         let j = instance.matrix[1].xyz;
-        let i = normalize(cross(camera_uniforms.worldMatrix[3].xyz - instance.matrix[3].xyz, j));
+        let i = normalize(cross(cameraUniforms.worldMatrix[3].xyz - instance.matrix[3].xyz, j));
         let k = normalize(cross(i, j));
 
         matrix[0] = vec4f(i, 0);
@@ -59,7 +59,7 @@ struct Varying {
 
     var out: Varying;
 
-    out.clipPosition = camera_uniforms.viewProjectionMatrix * vec4(position, 1);
+    out.clipPosition = cameraUniforms.viewProjectionMatrix * vec4(position, 1);
     out.position = position;
     out.texCoords = 1 - vcoords;
     out.color = instance.color;

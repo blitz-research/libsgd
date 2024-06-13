@@ -7,7 +7,6 @@ namespace sgd {
 SGD_SHARED(Light);
 
 enum struct LightType {
-	undefined,
 	directional,
 	point,
 	spot,

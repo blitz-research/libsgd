@@ -30,9 +30,9 @@ struct Varying {
 
 @fragment fn fragmentMain(in: Varying) -> @location(0) vec4<f32> {
 
-    let tv = camera_uniforms.inverseProjectionMatrix * vec4f(in.clipCoords, 0, 1);
+    let tv = cameraUniforms.inverseProjectionMatrix * vec4f(in.clipCoords, 0, 1);
 
-    let wv = camera_uniforms.worldMatrix * skybox_uniforms.worldMatrix * vec4f(tv.xyz / tv.w, 0);
+    let wv = cameraUniforms.worldMatrix * skybox_uniforms.worldMatrix * vec4f(tv.xyz / tv.w, 0);
 
     return textureSampleBias(skybox_skyboxTexture, skybox_skyboxSampler, wv.xyz, skybox_uniforms.mipmapBias);
 }

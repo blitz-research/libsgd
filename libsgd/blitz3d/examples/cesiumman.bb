@@ -38,6 +38,7 @@ Function LoadScene()
 	SetSkyboxRoughness skybox,.3
 
 	Local light = CreateDirectionalLight()
+	SetLightCastsShadow light, True
 	TurnEntity light,-30,0,0	; Tilt light down 30 degrees 
 
 	camera = CreatePerspectiveCamera()
@@ -49,5 +50,6 @@ Function LoadScene()
 	Local ground = CreateModel(mesh)
 	
 	model = LoadBonedModel("sgd://models/cesiumman.glb", True)
+	SetMeshCastsShadow ModelMesh(model),True
 
 End Function

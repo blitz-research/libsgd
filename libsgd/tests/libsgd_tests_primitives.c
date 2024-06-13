@@ -9,6 +9,10 @@ start:;	// Need semi-colon for Macos?!?
 	SGD_Camera camera = sgd_CreatePerspectiveCamera();
 	sgd_MoveEntity(camera, 0, 2, tz - 5.0);
 
+	// Nice high res shadow maps!
+	sgd_SetMaxPSMLights(5);
+	sgd_SetPSMTextureSize(4096);
+
 	SGD_Light light0 = sgd_CreatePointLight();
 	sgd_SetLightCastsShadow(light0, SGD_TRUE);
 	sgd_MoveEntity(light0, 0, 5, 0);

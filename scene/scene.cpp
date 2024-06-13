@@ -11,9 +11,9 @@ namespace sgd {
 
 Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
 
-//	auto texture = new Texture({1, 1}, 6, TextureFormat::rgba8, TextureFlags::cube);
-//	uint32_t data[6]{0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000};
-//	texture->update(data, sizeof(uint32_t));
+	//	auto texture = new Texture({1, 1}, 6, TextureFormat::rgba8, TextureFlags::cube);
+	//	uint32_t data[6]{0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000, 0xff000000};
+	//	texture->update(data, sizeof(uint32_t));
 	envTexture = whiteTexture(TextureFlags::cube);
 
 	m_sceneBindings = new SceneBindings();
@@ -32,7 +32,7 @@ Scene::Scene(GraphicsContext* gc) : m_gc(gc) {
 	m_collisionSpace = new CollisionSpace();
 
 	m_timeStampsEnabled = m_gc->wgpuDevice().GetAdapter().HasFeature(wgpu::FeatureName::TimestampQuery);
-	if(m_timeStampsEnabled) {
+	if (m_timeStampsEnabled) {
 		wgpu::QuerySetDescriptor qsDesc{};
 		qsDesc.type = wgpu::QueryType::Timestamp;
 		qsDesc.count = timeStampCount;
@@ -77,7 +77,17 @@ void Scene::add(Entity* entity) { // NOLINT (recursive)
 		m_cameras.emplace_back(camera);
 	} else if (entity->is<Light>()) {
 		auto light = entity->as<Light>();
-		m_lights.emplace_back(light);
+		switch (light->type()) {
+		case LightType::directional:
+			m_directionalLights.emplace_back(light);
+			break;
+		case LightType::point:
+			m_pointLights.emplace_back(light);
+			break;
+		case LightType::spot:
+			m_spotLights.emplace_back(light);
+			break;
+		}
 	}
 
 	entity->create(this);
@@ -103,7 +113,18 @@ void Scene::remove(Entity* entity) { // NOLINT (recursive)
 		viewportSizeChanged.disconnect(camera);
 		sgd::remove(m_cameras, camera);
 	} else if (entity->is<Light>()) {
-		sgd::remove(m_lights, entity->as<Light>());
+		auto light = entity->as<Light>();
+		switch (light->type()) {
+		case LightType::directional:
+			sgd::remove(m_directionalLights, light);
+			break;
+		case LightType::point:
+			sgd::remove(m_pointLights, light);
+			break;
+		case LightType::spot:
+			sgd::remove(m_spotLights, light);
+			break;
+		}
 	}
 
 	// Careful, this could be last reference and could delete entity
@@ -155,58 +176,62 @@ void Scene::updateLightingBindings() {
 	LightingUniforms uniforms;
 	uniforms.ambientLightColor = ambientLightColor();
 
-	Vector<Light*> pointLights;
+	// Directional lights
+	{
+		auto cmp = [=](const Light* lhs, const Light* rhs) { return lhs->priority() > rhs->priority(); };
+		std::sort(m_directionalLights.begin(), m_directionalLights.end(), cmp);
 
-	uniforms.directionalLightCount = 0;
-	uniforms.spotLightCount = 0;
-
-	for (Light* light : m_lights) {
-		if (!light->visible()) continue;
-		switch (light->type()) {
-		case LightType::undefined:
-		case LightType::directional: {
-			if (uniforms.directionalLightCount == LightingUniforms::maxDirectionalLights) break;
-			auto& ulight = uniforms.directionalLights[uniforms.directionalLightCount++];
-			ulight.direction = -light->worldMatrix().r.k;
+		uniforms.directionalLightCount = std::min((int)m_directionalLights.size(), LightingUniforms::maxDirectionalLights);
+		for (int i = 0, n = 0; i < uniforms.directionalLightCount; ++i) {
+			auto light = m_directionalLights[i];
+			auto& ulight = uniforms.directionalLights[i];
+			ulight.worldMatrix = light->worldMatrix();
 			ulight.color = light->color();
-			break;
-		}
-		case LightType::point: {
-			pointLights.push_back(light);
-			break;
-		}
-		case LightType::spot: {
-			if (uniforms.spotLightCount == LightingUniforms::maxSpotLights) break;
-			auto& ulight = uniforms.spotLights[uniforms.spotLightCount++];
-			ulight.position = light->worldMatrix().t - m_eye;
-			ulight.direction = -light->worldMatrix().r.k;
-			ulight.color = light->color();
-			ulight.range = light->range();
-			ulight.falloff = light->falloff();
-			ulight.innerConeAngle = light->innerConeAngle() * degreesToRadians;
-			ulight.outerConeAngle = light->outerConeAngle() * degreesToRadians;
-			break;
-		}
+			ulight.castsShadow = light->castsShadow() && n < m_sceneBindings->maxCSMLights();
+			n += ulight.castsShadow;
 		}
 	}
 
-	// sort point lights
-	auto cmp = [=](const Light* lhs, const Light* rhs) {
-		// return true if lhs higher priority than rhs
-		if (lhs->priority() != rhs->priority()) return lhs->priority() > rhs->priority();
-		return lengthsq(lhs->worldMatrix().t - m_eye) < lengthsq(rhs->worldMatrix().t - m_eye);
-	};
-	std::sort(pointLights.begin(), pointLights.end(), cmp);
+	// Point lights
+	{
+		auto cmp = [=](const Light* lhs, const Light* rhs) {
+			if (lhs->priority() != rhs->priority()) return lhs->priority() > rhs->priority();
+			return lengthsq(lhs->worldMatrix().t - m_eye) < lengthsq(rhs->worldMatrix().t - m_eye);
+		};
+		std::sort(m_pointLights.begin(), m_pointLights.end(), cmp);
 
-	uniforms.pointLightCount = std::min((int)pointLights.size(), LightingUniforms::maxPointLights);
-	for (int i = 0; i < uniforms.pointLightCount; ++i) {
-		auto light = pointLights[i];
-		auto& ulight = uniforms.pointLights[i];
-		ulight.position = light->worldMatrix().t - m_eye;
-		ulight.color = light->color();
-		ulight.range = light->range();
-		ulight.falloff = light->falloff();
-		ulight.castsShadow = light->castsShadow();
+		uniforms.pointLightCount = std::min((int)m_pointLights.size(), LightingUniforms::maxPointLights);
+		for (int i = 0, n = 0; i < uniforms.pointLightCount; ++i) {
+			auto light = m_pointLights[i];
+			auto& ulight = uniforms.pointLights[i];
+			ulight.position = light->worldPosition() - m_eye;
+			ulight.color = light->color();
+			ulight.range = light->range();
+			ulight.falloff = light->falloff();
+			ulight.castsShadow = light->castsShadow() && n < m_sceneBindings->maxPSMLights();
+			n += ulight.castsShadow;
+		}
+	}
+
+	// Spot lights
+	{
+		auto cmp = [=](const Light* lhs, const Light* rhs) {
+			if (lhs->priority() != rhs->priority()) return lhs->priority() > rhs->priority();
+			return lengthsq(lhs->worldMatrix().t - m_eye) < lengthsq(rhs->worldMatrix().t - m_eye);
+		};
+		std::sort(m_spotLights.begin(), m_spotLights.end(), cmp);
+
+		uniforms.spotLightCount = std::min((int)m_spotLights.size(), LightingUniforms::maxSpotLights);
+		for (int i = 0; i < uniforms.spotLightCount; ++i) {
+			auto light = m_spotLights[i];
+			auto& ulight = uniforms.spotLights[i];
+			ulight.position = light->worldPosition() - m_eye;
+			ulight.color = light->color();
+			ulight.range = light->range();
+			ulight.falloff = light->falloff();
+			ulight.innerConeAngle = light->innerConeAngle();
+			ulight.outerConeAngle = light->outerConeAngle();
+		}
 	}
 
 	m_sceneBindings->setLightingUniforms(uniforms);
@@ -228,11 +253,7 @@ void Scene::render() {
 		if (r && r->enabled()) r->onUpdate(m_eye);
 	}
 
-	runOnMainThread(
-		[=] {
-			GraphicsResource::validateAll(m_gc);
-		},
-		true);
+	runOnMainThread([=] { GraphicsResource::validateAll(m_gc); }, true);
 
 	runOnMainThread(
 		[=] { //
@@ -246,11 +267,11 @@ void Scene::renderASync() const {
 	m_renderContext->beginRender();
 
 	// Timestamp 0
-	if(m_timeStampsEnabled) m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 0);
+	if (m_timeStampsEnabled) m_renderContext->wgpuCommandEncoder().WriteTimestamp(m_timeStampQueries, 0);
 
 	{
 		// Shadows
-		for(auto& pass : m_sceneBindings->shadowPasses()) {
+		for (auto& pass : m_sceneBindings->shadowPasses()) {
 			m_renderContext->beginRenderPass(RenderPassType::shadow, nullptr, pass.renderTarget, {}, 1);
 			m_renderContext->wgpuRenderPassEncoder().SetBindGroup(0, pass.sceneBindings->wgpuBindGroup());
 			for (Renderer* r : m_renderers) {
@@ -310,7 +331,7 @@ void Scene::renderASync() const {
 		m_timeStampResults.MapAsync(
 			wgpu::MapMode::Read, 0, timeStampCount * 8,
 			[](WGPUBufferMapAsyncStatus status, void* userdata) {
-				if(status != WGPUBufferMapAsyncStatus_Success) {
+				if (status != WGPUBufferMapAsyncStatus_Success) {
 					return;
 				}
 				auto scene = (Scene*)userdata;

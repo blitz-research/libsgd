@@ -21,8 +21,11 @@ struct SceneBindings : GraphicsResource {
 
 	SceneBindings();
 
+	Property<Array<float,4>> csmSplits{{12,32,64,128}};
 	Property<uint32_t> csmTextureSize{1024};
 	Property<uint32_t> maxCSMLights{1};
+
+	Property<float> psmNear{{.1f}};
 	Property<uint32_t> psmTextureSize{1024};
 	Property<uint32_t> maxPSMLights{8};
 
@@ -50,7 +53,7 @@ private:
 	BindGroupPtr m_bindGroup;
 	BufferPtr m_cameraUniforms;
 	BufferPtr m_lightingUniforms;
-	BufferPtr m_shadowLightingUniforms;
+	BufferPtr m_shadowUniforms;
 
 	// Config
 	mutable TexturePtr m_csmTexture;
@@ -65,9 +68,12 @@ private:
 	mutable bool m_configDirty{};
 	mutable bool m_passesDirty{};
 
+	static BindGroup* createShadowPassBindings();
+
 	void updateCSMConfig() const;
 	void updatePSMConfig() const;
 
+	void addCSMPasses() const;
 	void addPSMPasses() const;
 
 	void onValidate(GraphicsContext* gc) const override;

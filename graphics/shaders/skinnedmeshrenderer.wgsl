@@ -68,7 +68,7 @@ struct Varying {
 
 	var out: Varying;
 
-	out.clipPosition = camera_uniforms.viewProjectionMatrix * vec4f(position, 1);
+	out.clipPosition = cameraUniforms.viewProjectionMatrix * vec4f(position, 1);
 	out.position = position;
 	if meshUniforms.tangentsEnabled != 0 {
         out.tanMatrix2 = normal;
