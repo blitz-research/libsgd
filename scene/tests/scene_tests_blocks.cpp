@@ -11,14 +11,13 @@ void entry() {
 		float sz = 32;
 		MaterialPtr material = loadPBRMaterial(Path("sgd://misc/brownish-grass.jpg")).result();
 		MeshPtr mesh = createBoxMesh({{-sz, -1, -sz}, {sz, 0, sz}}, material);
-		mesh->castsShadow = true;
 		transformTexCoords(mesh, {sz, sz}, {0, 0});
 		ModelPtr model = new Model(mesh);
 		scene->add(model);
 	}
 
 	{
-		MeshPtr mesh = loadStaticMesh(Path("~/dev/assets/sci-fi_crate.glb")).result();
+		MeshPtr mesh = loadStaticMesh(Path("sgd://models/sci-fi_crate.glb")).result();
 		mesh->castsShadow=true;
 		fit(mesh, {-.4f, .4f}, true);
 		for (int x = -20; x <= 20; ++x) {
@@ -36,8 +35,9 @@ void entry() {
 	move(player, {0,10,0});
 	turn(player, {-90,0,0});
 
-	camera->near = .2f;
-	camera->far = 4096;
+	camera->near = .1f;
+	camera->far = 256;
+	scene->sceneBindings()->csmSplits ={16,64,192,256};
 
 	for (;;) {
 		pollEvents();
