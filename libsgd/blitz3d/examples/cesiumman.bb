@@ -10,15 +10,15 @@ LoadScene()
 
 atime#=0
 While Not PollEvents()
-	If KeyDown(263)
+	If GetKeyDown(263)
 		TurnEntity model,0,3,0
-	Else If KeyDown(262)
+	Else If GetKeyDown(262)
 		TurnEntity model,0,-3,0
 	EndIf
 	
-	If KeyDown(264)
+	If GetKeyDown(264)
 		MoveEntity model,0,0,.03
-	Else If KeyDown(265)
+	Else If GetKeyDown(265)
 		MoveEntity model,0,0,-.03
 	EndIf
 
@@ -46,7 +46,7 @@ Function LoadScene()
 	
 	Local material = LoadPBRMaterial("sgd://materials/PavingStones065_1K-JPG")
 	Local mesh = CreateBoxMesh(-10, -1, -10, 10, 0, 10, material)
-	TransformMeshTexCoords mesh, 4,4,0,0
+	TFormTexCoords mesh, 4,4,0,0
 	Local ground = CreateModel(mesh)
 	
 	model = LoadBonedModel("sgd://models/cesiumman.glb", True)

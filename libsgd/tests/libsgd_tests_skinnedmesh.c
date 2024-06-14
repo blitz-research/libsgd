@@ -17,7 +17,7 @@ restart:
 
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/PavingStones065_1K-JPG");
 	SGD_Mesh mesh = sgd_CreateBoxMesh(-15, -1, -10, 10, 0, 10, material);
-	sgd_TransformMeshTexCoords(mesh, 7.5, 7.5, 0, 0);
+	sgd_TFormTexCoords(mesh, 7.5, 7.5, 0, 0);
 	SGD_Model ground = sgd_CreateModel(mesh);
 
 	sgd_DebugMemory();

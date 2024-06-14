@@ -67,16 +67,16 @@ While (PollEvents() And 1) <> 1
 	TurnEntity model4, .3, .4, .5
 	TurnEntity model5, .3, .4, .5
 	
-	If KeyHit(49) SetEntityVisible model0,1-EntityVisible(model0)
-	If KeyHit(50) SetEntityVisible model1,1-EntityVisible(model1)
-	If KeyHit(51) SetEntityVisible model2,1-EntityVisible(model2)
-	If KeyHit(52) SetEntityVisible model3,1-EntityVisible(model3)
-	If KeyHit(53) SetEntityVisible model4,1-EntityVisible(model4)
-	If KeyHit(54) SetEntityVisible model5,1-EntityVisible(model5)
+	If GetKeyHit(49) SetEntityVisible model0,1-EntityVisible(model0)
+	If GetKeyHit(50) SetEntityVisible model1,1-EntityVisible(model1)
+	If GetKeyHit(51) SetEntityVisible model2,1-EntityVisible(model2)
+	If GetKeyHit(52) SetEntityVisible model3,1-EntityVisible(model3)
+	If GetKeyHit(53) SetEntityVisible model4,1-EntityVisible(model4)
+	If GetKeyHit(54) SetEntityVisible model5,1-EntityVisible(model5)
 	
 	PlayerFly(.05)
 	
-	Local collider = CameraPick(camera,MouseX(),MouseY(),1)
+	Local collider = CameraPick(camera,GetMouseX(),GetMouseY(),1)
 	
 	Clear2D()
 	Draw2DText "Picked collider:" + collider,0,0

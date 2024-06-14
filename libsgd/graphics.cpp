@@ -138,7 +138,7 @@ void SGD_DECL sgd_SetMeshCastsShadow(SGD_Mesh hmesh, SGD_Bool castsShadow) {
 	mesh->castsShadow = castsShadow;
 }
 
-SGD_Bool SGD_DECL sgd_MeshCastsShadow(SGD_Mesh hmesh) {
+SGD_Bool SGD_DECL sgd_GetMeshCastsShadow(SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	return mesh->castsShadow();
 }
@@ -169,16 +169,6 @@ void SGD_DECL sgd_TFormTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY, flo
 	sgdx::transformTexCoords(mesh, sgd::Vec2f(scaleX, scaleY), sgdx::Vec2f(offsetX, offsetY));
 }
 
-void SGD_DECL sgd_TransformMesh(SGD_Mesh hmesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz) {
-	SGDX_DEPRECATED(sgd_TFormMesh);
-	return sgd_TFormMesh(hmesh,tx,ty,tz,rx,ry,rz,sx,sy,sz);
-}
-
-void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh hmesh, float sx, float sy, float tx, float ty) {
-	SGDX_DEPRECATED(sgd_TFormTexCoords);
-	return sgd_TFormTexCoords(hmesh,sx,sy,tx,ty);
-}
-
 void SGD_DECL sgd_FlipMesh(SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	sgd::flip(mesh);
@@ -197,7 +187,7 @@ void SGD_DECL sgd_ResizeVertices(SGD_Mesh hmesh, int count) {
 	mesh->resizeVertices(count);
 }
 
-int SGD_DECL sgd_VertexCount(SGD_Mesh hmesh) {
+int SGD_DECL sgd_GetVertexCount(SGD_Mesh hmesh) {
 	return (int)sgdx::resolveHandle<sgd::Mesh>(hmesh)->vertexCount();
 }
 
@@ -262,6 +252,11 @@ void SGD_DECL sgd_ResizeTriangles(SGD_Surface hsurface, int count) {
 	surf->resizeTriangles(count);
 }
 
+int SGD_DECL sgd_GetTriangleCount(SGD_Surface hsurface) {
+	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
+	return (int)surf->triangleCount();
+}
+
 int SGD_DECL sgd_AddTriangle(SGD_Surface hsurface, int v0, int v1, int v2) {
 	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
 	int i = (int)surf->triangleCount();
@@ -278,16 +273,6 @@ void SGD_DECL sgd_SetTriangle(SGD_Surface hsurface, int triangle, int v0, int v1
 	surf->unlockTriangles();
 }
 
-void SGD_DECL sgd_ClearTriangles(SGD_Surface hsurface) {
-	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
-	surf->resizeTriangles(0);
-}
-
-int SGD_DECL sgd_TriangleCount(SGD_Surface hsurface) {
-	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
-	return (int)surf->triangleCount();
-}
-
 // ***** Font *****
 
 SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height) {
@@ -298,12 +283,12 @@ SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height) {
 }
 
 //! Get width of text.
-float SGD_DECL sgd_FontTextWidth(SGD_Font hfont, SGD_String text) {
+float SGD_DECL sgd_GetTextWidth(SGD_Font hfont, SGD_String text) {
 	return sgdx::resolveHandle<sgd::Font>(hfont)->textWidth(text);
 }
 
 //! get height of font.
-float SGD_DECL sgd_FontHeight(SGD_Font hfont) {
+float SGD_DECL sgd_GetFontHeight(SGD_Font hfont) {
 	return sgdx::resolveHandle<sgd::Font>(hfont)->height;
 }
 
@@ -332,15 +317,15 @@ void SGD_DECL sgd_SetImageDraw2DHandle(SGD_Image himage, float x, float y) {
 	sgdx::resolveHandle<sgd::Image>(himage)->drawHandle = {x, y};
 }
 
-int SGD_DECL sgd_ImageWidth(SGD_Image himage) {
+int SGD_DECL sgd_GetImageWidth(SGD_Image himage) {
 	return (int)sgdx::resolveHandle<sgd::Image>(himage)->frames()->size().x;
 }
 
-int SGD_DECL sgd_ImageHeight(SGD_Image himage) {
+int SGD_DECL sgd_GetImageHeight(SGD_Image himage) {
 	return (int)sgdx::resolveHandle<sgd::Image>(himage)->frames()->size().y;
 }
 
-int SGD_DECL sgd_ImageFrameCount(SGD_Image himage) {
+int SGD_DECL sgd_GetImageFrameCount(SGD_Image himage) {
 	return (int)sgdx::resolveHandle<sgd::Image>(himage)->frames()->depth();
 }
 

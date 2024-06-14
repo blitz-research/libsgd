@@ -40,13 +40,13 @@ Local vel# = 0
 While PollEvents()<>1
 
 	Local sp#=3.2
-	If KeyDown(KEY_LEFT_SHIFT) sp=5.6
+	If GetKeyDown(KEY_LEFT_SHIFT) sp=5.6
 
 	PlayerWalk(sp/60.0)
 	
 	Local 	py# = EntityY(player)
 	
-	If KeyHit(KEY_SPACE)
+	If GetKeyHit(KEY_SPACE)
 		vel = vel + .1
 	EndIf
 		

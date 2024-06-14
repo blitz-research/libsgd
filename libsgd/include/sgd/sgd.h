@@ -128,7 +128,7 @@ SGD_API int SGD_DECL sgd_GetDesktopHeight();
 //! SGD_EVENT_MASK_GOT_FOCUS       | 8             | Window received input focus
 //! SGD_EVENT_MASK_SUSPENDED       | 16            | App suspended
 //! SGD_EVENT_MASK_RESUMED         | 32            | App resumed
-SGD_API SGD_Bool SGD_DECL sgd_PollEvents();
+SGD_API int SGD_DECL sgd_PollEvents();
 
 //! @cond Debug memory state, does nothing in release builds.
 SGD_API void SGD_DECL sgd_DebugMemory();
@@ -172,10 +172,10 @@ SGD_API int SGD_DECL sgd_GetWindowHeight();
 //! @name User Input
 //! @{
 
-//! True if key currently held down.
+//! True if key is currently held down.
 SGD_API SGD_Bool SGD_DECL sgd_GetKeyDown(int keyCode);
 
-//! True if key pressed since last call to sgd_PollEvents.
+//! True if key was pressed down last frame.
 SGD_API SGD_Bool SGD_DECL sgd_GetKeyHit(int keyCode);
 
 //! Get next unicode character from keyboard input queue.
@@ -227,7 +227,7 @@ SGD_API void SGD_DECL sgd_SetMouseCursorMode(int cursorMode);
 //! True if mouse button is curently held down.
 SGD_API SGD_Bool SGD_DECL sgd_GetMouseButtonDown(int button);
 
-//! True if mouse button is curently held down.
+//! True if mouse button was pressed down last frame.
 SGD_API SGD_Bool SGD_DECL sgd_GetMouseButtonHit(int button);
 
 //! True if gamepad is currently connected.
@@ -236,7 +236,7 @@ SGD_API SGD_Bool SGD_DECL sgd_GetGamepadConnected(int gamepad);
 //! True if gamepad button currently held down.
 SGD_API SGD_Bool SGD_DECL sgd_GetGamepadButtonDown(int gamepad, int button);
 
-//! True if gamepad button pressed since last call to sgd_PollEvents().
+//! True if gamepad button was pressed down last frame.
 SGD_API SGD_Bool SGD_DECL sgd_GetGamepadButtonHit(int gamepad, int button);
 
 //! Value in the range -1 to 1 representing joystick axis position.
@@ -432,7 +432,7 @@ SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadi
 SGD_API void SGD_DECL sgd_SetMeshCastsShadow(SGD_Mesh mesh, SGD_Bool castsShadow);
 
 //! Get mesh casts shadow flag.
-SGD_API SGD_Bool SGD_DECL sgd_MeshCastsShadow(SGD_Mesh mesh);
+SGD_API SGD_Bool SGD_DECL sgd_GetMeshCastsShadow(SGD_Mesh mesh);
 
 //! Copy mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_CopyMesh(SGD_Mesh mesh);
@@ -453,12 +453,6 @@ SGD_API void SGD_DECL sgd_TFormMesh(SGD_Mesh mesh, float tx, float ty, float tz,
 //! Transform mesh texture coordinates.
 SGD_API void SGD_DECL sgd_TFormTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
 
-//! @deprecated Use sgd_TFormMesh.
-SGD_API void SGD_DECL sgd_TransformMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz);
-
-//! @deprecated Use sgd_TFormMeshTexCoords.
-SGD_API void SGD_DECL sgd_TransformMeshTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
-
 //! Flip mesh.
 SGD_API void SGD_DECL sgd_FlipMesh(SGD_Mesh mesh);
 
@@ -474,7 +468,7 @@ SGD_API SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, int flags);
 SGD_API void SGD_DECL sgd_ResizeVertices(SGD_Mesh mesh, int count);
 
 //! Get number of vertices in mesh.
-SGD_API int SGD_DECL sgd_VertexCount(SGD_Mesh mesh);
+SGD_API int SGD_DECL sgd_GetVertexCount(SGD_Mesh mesh);
 
 //! Add a vertex to a mesh, returning index of new vertex.
 SGD_API int SGD_DECL sgd_AddVertex(SGD_Mesh mesh, float x, float y, float z, float nx, float ny, float nz, float s, float t);
@@ -505,14 +499,14 @@ SGD_API SGD_Surface SGD_DECL sgd_CreateSurface(SGD_Mesh mesh, int triangleCount,
 //! Add empty triangles to surface, returning index of first new triangle.
 SGD_API void SGD_DECL sgd_ResizeTriangles(SGD_Surface surface, int count);
 
+//! Get number of triangles in surface.
+SGD_API int SGD_DECL sgd_GetTriangleCount(SGD_Surface surface);
+
 //! Add triangle to surface, returning index of new triangle.
 SGD_API int SGD_DECL sgd_AddTriangle(SGD_Surface surface, int v0, int v1, int v2);
 
 //! Update existing triangle vertices in surface.
 SGD_API void SGD_DECL sgd_SetTriangle(SGD_Surface surface, int triangle, int v0, int v1, int v2);
-
-//! Get number of triangles in surface.
-SGD_API int SGD_DECL sgd_TriangleCount(SGD_Surface surface);
 
 //! @}
 
@@ -523,10 +517,10 @@ SGD_API int SGD_DECL sgd_TriangleCount(SGD_Surface surface);
 SGD_API SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height);
 
 //! Get width of text.
-SGD_API float SGD_DECL sgd_FontTextWidth(SGD_Font font, SGD_String text);
+SGD_API float SGD_DECL sgd_GetTextWidth(SGD_Font font, SGD_String text);
 
 //! get height of font.
-SGD_API float SGD_DECL sgd_FontHeight(SGD_Font font);
+SGD_API float SGD_DECL sgd_GetFontHeight(SGD_Font font);
 
 //! @}
 
@@ -563,13 +557,13 @@ SGD_API void SGD_DECL sgd_SetImageSpriteRect(SGD_Image image, float minX, float 
 SGD_API void SGD_DECL sgd_SetImageDraw2DHandle(SGD_Image image, float x, float y);
 
 //! Get width of image.
-SGD_API int SGD_DECL sgd_ImageWidth(SGD_Image image);
+SGD_API int SGD_DECL sgd_GetImageWidth(SGD_Image image);
 
 //! Get height of image.
-SGD_API int SGD_DECL sgd_ImageHeight(SGD_Image image);
+SGD_API int SGD_DECL sgd_GetImageHeight(SGD_Image image);
 
 //! Get number of animation frames in image.
-SGD_API int SGD_DECL sgd_ImageFrameCount(SGD_Image image);
+SGD_API int SGD_DECL sgd_GetImageFrameCount(SGD_Image image);
 
 //! @}
 
@@ -669,7 +663,7 @@ SGD_API void SGD_DECL sgd_SetAudioLooping(int audio, SGD_Bool looping);
 SGD_API void SGD_DECL sgd_SetAudioPaused(int audio, SGD_Bool paused);
 
 //! Get audio valid flag. Audio is valid if it is playing or paused.
-SGD_API SGD_Bool SGD_DECL sgd_AudioValid(int audio);
+SGD_API SGD_Bool SGD_DECL sgd_GetAudioValid(int audio);
 
 //! Stop audio.
 SGD_API void SGD_DECL sgd_StopAudio(int audio);

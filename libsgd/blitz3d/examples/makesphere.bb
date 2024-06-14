@@ -70,15 +70,15 @@ MoveEntity model,0,0,3
 
 While Not PollEvents()
 
-	If KeyDown(263)
+	If GetKeyDown(263)
 		TurnEntity model,0,3,0
-	Else If KeyDown(262)
+	Else If GetKeyDown(262)
 		TurnEntity model,0,-3,0
 	EndIf
 	
-	If KeyDown(264)
+	If GetKeyDown(264)
 		TurnEntity model,3,0,0
-	Else If KeyDown(265)
+	Else If GetKeyDown(265)
 		TurnEntity model,-3,0,0
 	EndIf
 	

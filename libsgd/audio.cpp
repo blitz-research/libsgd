@@ -50,7 +50,7 @@ void SGD_DECL sgd_SetAudioPaused(int audio, SGD_Bool paused) {
 	sgd::setAudioPaused(audio, paused);
 }
 
-SGD_Bool SGD_DECL sgd_AudioValid(int audio) {
+SGD_Bool SGD_DECL sgd_GetAudioValid(int audio) {
 	sgdx::started();
 
 	return sgd::audioValid(audio);

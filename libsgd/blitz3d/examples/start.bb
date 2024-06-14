@@ -41,35 +41,35 @@ End Function
 
 Function PlayerWalk(speed#)
 
-	If KeyDown(KEY_LEFT)
+	If GetKeyDown(KEY_LEFT)
 		player_rvy = player_rvy + (1.5-player_rvy) * .3
-	Else If KeyDown(KEY_RIGHT)
+	Else If GetKeyDown(KEY_RIGHT)
 		player_rvy = player_rvy + (-1.5-player_rvy) * .3
 	Else
 		player_rvy = player_rvy * .9
 	EndIf
 	RotateEntity player,0,player_rvy,0
 
-	If KeyDown(KEY_DOWN)
+	If GetKeyDown(KEY_DOWN)
 		camera_rx = camera_rx + (-45-camera_rx) * .025
-	Else If KeyDown(KEY_UP)
+	Else If GetKeyDown(KEY_UP)
 		camera_rx = camera_rx + (45-camera_rx) * .025
 	Else 
 		camera_rx = camera_rx * .9
 	EndIf
 	SetEntityRotation camera,camera_rx,0,0
 	
-	If KeyDown(KEY_W)
+	If GetKeyDown(KEY_W)
 		player_vz = player_vz + (speed-player_vz) * .3
-	Else If KeyDown(KEY_S)
+	Else If GetKeyDown(KEY_S)
 		player_vz = player_vz + (-speed-player_vz) * .3
 	Else
 		player_vz = player_vz * .9
 	EndIf
 	
-	If KeyDown(KEY_A)
+	If GetKeyDown(KEY_A)
 		player_vx = player_vx + (-speed-player_vx) * .3
-	Else If KeyDown(KEY_D)
+	Else If GetKeyDown(KEY_D)
 		player_vx = player_vx + (speed-player_vx) * .3
 	Else
 		player_vx = player_vx * .9
@@ -81,9 +81,9 @@ End Function
 
 Function PlayerFly(speed#)
 
-	If KeyDown(KEY_LEFT)
+	If GetKeyDown(KEY_LEFT)
 		player_rvy = player_rvy + (1.5-player_rvy) * .3
-	Else If KeyDown(KEY_RIGHT)
+	Else If GetKeyDown(KEY_RIGHT)
 		player_rvy = player_rvy + (-1.5-player_rvy) * .3
 	Else
 		player_rvy = player_rvy * .9
@@ -91,27 +91,27 @@ Function PlayerFly(speed#)
 	RotateEntity player,0,player_rvy,0
 	SetEntityRotation camera,0,0,player_rvy*-15
 	
-	If KeyDown(KEY_UP)
+	If GetKeyDown(KEY_UP)
 		player_rvx = player_rvx + (-1.5-player_rvx) * .3
-	ElseIf KeyDown(KEY_DOWN)
+	ElseIf GetKeyDown(KEY_DOWN)
 		player_rvx = player_rvx + (1.5-player_rvx) * .3
 	Else 
 		player_rvx = player_rvx * .9
 	EndIf
 	TurnEntity player,player_rvx,0,0
 
-	If KeyDown(KEY_W)
+	If GetKeyDown(KEY_W)
 		player_vz = player_vz + (speed-player_vz) * .3
-	Else If KeyDown(KEY_S)
+	Else If GetKeyDown(KEY_S)
 		player_vz = player_vz + (-speed-player_vz) * .3
 	Else
 		player_vz = player_vz * .9
 	EndIf
 	MoveEntity player,0,0,player_vz
 
-	If KeyDown(KEY_A)
+	If GetKeyDown(KEY_A)
 		player_vx = player_vx + (-speed-player_vx) * .3
-	Else If KeyDown(KEY_D)
+	Else If GetKeyDown(KEY_D)
 		player_vx = player_vx + (speed-player_vx) * .3
 	Else
 		player_vx = player_vx * .9

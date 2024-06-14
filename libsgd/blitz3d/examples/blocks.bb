@@ -26,7 +26,7 @@ LoadScene()
 
 While (PollEvents() And 1) <> 1
 
-	If KeyHit(KEY_ESCAPE)
+	If GetKeyHit(KEY_ESCAPE)
 		End
 		Delete Each Bullet
 		Delete Each Block
@@ -88,7 +88,7 @@ End Function
 
 Function UpdateBullets() 
 
-	If KeyHit(KEY_SPACE)
+	If GetKeyHit(KEY_SPACE)
 		Local r#=Rnd(1), g# = Rnd(1), b#=Rnd(1)
 		
 		;Fake some NEON baby!
