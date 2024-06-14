@@ -61,9 +61,9 @@ void entry() {
 		sgd_TurnEntity(pivot, 0, .1f, 0);
 
 		sgd_SetEntityPosition(camera, 0, 0, 0);
-		if (sgd_KeyDown(SGD_KEY_LEFT)) {
+		if (sgd_GetKeyDown(SGD_KEY_LEFT)) {
 			sgd_RotateEntity(camera, 0, -1, 0);
-		} else if (sgd_KeyDown(SGD_KEY_RIGHT)) {
+		} else if (sgd_GetKeyDown(SGD_KEY_RIGHT)) {
 			sgd_RotateEntity(camera, 0, 1, 0);
 		}
 		sgd_MoveEntity(camera, 0, 0, -10);

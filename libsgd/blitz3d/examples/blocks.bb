@@ -18,7 +18,7 @@ End Type
 Global bulletImage
 Global slimeball
 
-CreateWindow(DesktopWidth()/2, DesktopHeight()/2, "スノー Blocks", 4)
+CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "スノー Blocks", 4)
 
 CreateScene()
 

@@ -69,11 +69,11 @@ void SGD_DECL sgd_Alert(SGD_String message) {
 	sgd::alert(message);
 }
 
-int SGD_DECL sgd_DesktopWidth() {
+int SGD_DECL sgd_GetDesktopWidth() {
 	return (int)sgd::desktopSize().x;
 }
 
-int SGD_DECL sgd_DesktopHeight() {
+int SGD_DECL sgd_GetDesktopHeight() {
 	return (int)sgd::desktopSize().y;
 }
 

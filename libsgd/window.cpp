@@ -34,20 +34,20 @@ void SGD_DECL sgd_DestroyWindow() {
 	sgdx::g_mainWindow = nullptr;
 }
 
-int SGD_DECL sgd_WindowWidth() {
+int SGD_DECL sgd_GetWindowWidth() {
 	return (int)sgdx::mainWindow()->size().x;
 }
 
-int SGD_DECL sgd_WindowHeight() {
+int SGD_DECL sgd_GetWindowHeight() {
 	return (int)sgdx::mainWindow()->size().y;
 }
 
-SGD_Bool SGD_DECL sgd_KeyDown(int keyCode) {
+SGD_Bool SGD_DECL sgd_GetKeyDown(int keyCode) {
 	if ((uint32_t)keyCode > SGD_KEY_LAST) sgd_Error("Key code out of range");
 	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)keyCode).down();
 }
 
-SGD_Bool SGD_DECL sgd_KeyHit(int keyCode) {
+SGD_Bool SGD_DECL sgd_GetKeyHit(int keyCode) {
 	if ((uint32_t)keyCode > SGD_KEY_LAST) sgd_Error("Key code out of range");
 	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)keyCode).hit();
 }
@@ -65,27 +65,27 @@ void SGD_DECL sgd_FlushChars() {
 	queue.clear();
 }
 
-float SGD_DECL sgd_MouseX() {
+float SGD_DECL sgd_GetMouseX() {
 	return sgdx::mainWindow()->mouse()->position().x;
 }
 
-float SGD_DECL sgd_MouseY() {
+float SGD_DECL sgd_GetMouseY() {
 	return sgdx::mainWindow()->mouse()->position().y;
 }
 
-float SGD_DECL sgd_MouseZ() {
+float SGD_DECL sgd_GetMouseZ() {
 	return sgdx::mainWindow()->mouse()->position().z;
 }
 
-float SGD_DECL sgd_MouseVX() {
+float SGD_DECL sgd_GetMouseVX() {
 	return sgdx::mainWindow()->mouse()->velocity().x;
 }
 
-float SGD_DECL sgd_MouseVY() {
+float SGD_DECL sgd_GetMouseVY() {
 	return sgdx::mainWindow()->mouse()->velocity().y;
 }
 
-float SGD_DECL sgd_MouseVZ() {
+float SGD_DECL sgd_GetMouseVZ() {
 	return sgdx::mainWindow()->mouse()->velocity().z;
 }
 
@@ -97,15 +97,15 @@ void SGD_DECL sgd_SetMouseCursorMode(int cursorMode) {
 	sgdx::mainWindow()->mouse()->cursorMode = (sgd::CursorMode)cursorMode;
 }
 
-SGD_Bool SGD_DECL sgd_MouseButtonDown(int button) {
+SGD_Bool SGD_DECL sgd_GetMouseButtonDown(int button) {
 	return sgdx::mainWindow()->mouse()->button(button).down();
 }
 
-SGD_Bool SGD_DECL sgd_MouseButtonHit(int button) {
+SGD_Bool SGD_DECL sgd_GetMouseButtonHit(int button) {
 	return sgdx::mainWindow()->mouse()->button(button).hit();
 }
 
-SGD_Bool SGD_DECL sgd_GamepadConnected(int gamepad) {
+SGD_Bool SGD_DECL sgd_GetGamepadConnected(int gamepad) {
 	sgdx::mainWindow();
 
 	if ((uint32_t)gamepad >= sgdx::Window::maxGamepads) sgd_Error("Gamepad index out of range");
@@ -113,7 +113,7 @@ SGD_Bool SGD_DECL sgd_GamepadConnected(int gamepad) {
 	return sgdx::Gamepad::getGamepad(gamepad)->connected();
 }
 
-SGD_Bool SGD_DECL sgd_GamepadButtonDown(int gamepad, int button) {
+SGD_Bool SGD_DECL sgd_GetGamepadButtonDown(int gamepad, int button) {
 	sgdx::mainWindow();
 
 	if ((uint32_t)gamepad >= sgdx::Window::maxGamepads) sgd_Error("Gamepad index out of range");
@@ -122,7 +122,7 @@ SGD_Bool SGD_DECL sgd_GamepadButtonDown(int gamepad, int button) {
 	return sgdx::Gamepad::getGamepad(gamepad)->button(button).down();
 }
 
-SGD_Bool SGD_DECL sgd_GamepadButtonHit(int gamepad, int button) {
+SGD_Bool SGD_DECL sgd_GetGamepadButtonHit(int gamepad, int button) {
 	sgdx::mainWindow();
 
 	if ((uint32_t)gamepad >= sgdx::Window::maxGamepads) sgd_Error("Gamepad index out of range");
@@ -131,7 +131,7 @@ SGD_Bool SGD_DECL sgd_GamepadButtonHit(int gamepad, int button) {
 	return sgdx::Gamepad::getGamepad(gamepad)->button(button).hit();
 }
 
-float SGD_DECL sgd_GamepadAxis(int gamepad, int axis) {
+float SGD_DECL sgd_GetGamepadAxis(int gamepad, int axis) {
 	sgdx::mainWindow();
 
 	if ((uint32_t)gamepad >= sgdx::Window::maxGamepads) sgd_Error("Gamepad index out of range");

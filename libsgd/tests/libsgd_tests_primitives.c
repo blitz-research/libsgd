@@ -61,7 +61,7 @@ start:;	// Need semi-colon for Macos?!?
 
 	while (!(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)) {
 
-		if (sgd_KeyHit(SGD_KEY_ESCAPE)) {
+		if (sgd_GetKeyHit(SGD_KEY_ESCAPE)) {
 			SGD_Real dz = 1ll << 33;
 
 			if (sgd_EntityZ(camera) > dz / 2) dz = -dz;
@@ -73,25 +73,25 @@ start:;	// Need semi-colon for Macos?!?
 			printf("### Camera Z: %f\n", sgd_EntityZ(camera));
 		}
 
-		if (sgd_KeyDown(SGD_KEY_A)) {
+		if (sgd_GetKeyDown(SGD_KEY_A)) {
 			sgd_MoveEntity(camera, 0, 0, .3);
 			printf("### Camera Z: %f\n", sgd_EntityZ(camera));
-		} else if (sgd_KeyDown(SGD_KEY_Z)) {
+		} else if (sgd_GetKeyDown(SGD_KEY_Z)) {
 			sgd_MoveEntity(camera, 0, 0, -.3);
 			printf("### Camera Z: %f\n", sgd_EntityZ(camera));
 		}
 
 		fflush(stdout);
 
-		if (sgd_KeyDown(SGD_KEY_LEFT)) {
+		if (sgd_GetKeyDown(SGD_KEY_LEFT)) {
 			sgd_RotateEntity(camera, 0, 1, 0);
-		} else if (sgd_KeyDown(SGD_KEY_RIGHT)) {
+		} else if (sgd_GetKeyDown(SGD_KEY_RIGHT)) {
 			sgd_RotateEntity(camera, 0, -1, 0);
 		}
 
-		if (sgd_KeyDown(SGD_KEY_UP)) {
+		if (sgd_GetKeyDown(SGD_KEY_UP)) {
 			sgd_TurnEntity(camera, -1, 0, 0);
-		} else if (sgd_KeyDown(SGD_KEY_DOWN)) {
+		} else if (sgd_GetKeyDown(SGD_KEY_DOWN)) {
 			sgd_TurnEntity(camera, 1, 0, 0);
 		}
 
@@ -110,7 +110,7 @@ start:;	// Need semi-colon for Macos?!?
 		}
 
 //		sgd_Clear2D();
-		if (sgd_CameraPick(camera, sgd_MouseX(), sgd_MouseY(), ~0)) {
+		if (sgd_CameraPick(camera, sgd_GetMouseX(), sgd_GetMouseY(), ~0)) {
 			sgd_Draw2DText("Picked!", 0, 20);
 		}
 

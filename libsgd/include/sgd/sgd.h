@@ -102,10 +102,10 @@ SGD_API void SGD_DECL sgd_Error(SGD_String error);
 SGD_API void SGD_DECL sgd_Alert(SGD_String message);
 
 //! Return width of desktop in pixels.
-SGD_API int SGD_DECL sgd_DesktopWidth();
+SGD_API int SGD_DECL sgd_GetDesktopWidth();
 
 //! Return height of desktop in pixels.
-SGD_API int SGD_DECL sgd_DesktopHeight();
+SGD_API int SGD_DECL sgd_GetDesktopHeight();
 
 //! @cond Event mask  constants returned by sgd_NextEvent.
 #define SGD_EVENT_MASK_CLOSE_CLICKED 1
@@ -162,10 +162,10 @@ SGD_API void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, 
 SGD_API void SGD_DECL sgd_DestroyWindow();
 
 //! Get window width.
-SGD_API int SGD_DECL sgd_WindowWidth();
+SGD_API int SGD_DECL sgd_GetWindowWidth();
 
 //! Get window height.
-SGD_API int SGD_DECL sgd_WindowHeight();
+SGD_API int SGD_DECL sgd_GetWindowHeight();
 
 //! @}
 
@@ -173,10 +173,10 @@ SGD_API int SGD_DECL sgd_WindowHeight();
 //! @{
 
 //! True if key currently held down.
-SGD_API SGD_Bool SGD_DECL sgd_KeyDown(int keyCode);
+SGD_API SGD_Bool SGD_DECL sgd_GetKeyDown(int keyCode);
 
 //! True if key pressed since last call to sgd_PollEvents.
-SGD_API SGD_Bool SGD_DECL sgd_KeyHit(int keyCode);
+SGD_API SGD_Bool SGD_DECL sgd_GetKeyHit(int keyCode);
 
 //! Get next unicode character from keyboard input queue.
 SGD_API int SGD_DECL sgd_GetChar();
@@ -185,22 +185,22 @@ SGD_API int SGD_DECL sgd_GetChar();
 SGD_API void SGD_DECL sgd_FlushChars();
 
 //! Mouse X position in window coordinates.
-SGD_API float SGD_DECL sgd_MouseX();
+SGD_API float SGD_DECL sgd_GetMouseX();
 
 //! Mouse Y position in window coordinates.
-SGD_API float SGD_DECL sgd_MouseY();
+SGD_API float SGD_DECL sgd_GetMouseY();
 
 //! Mouse Z (scrollwheel) position.
-SGD_API float SGD_DECL sgd_MouseZ();
+SGD_API float SGD_DECL sgd_GetMouseZ();
 
 //! Mouse X velocity.
-SGD_API float SGD_DECL sgd_MouseVX();
+SGD_API float SGD_DECL sgd_GetMouseVX();
 
 //! Mouse Y velocity.
-SGD_API float SGD_DECL sgd_MouseVY();
+SGD_API float SGD_DECL sgd_GetMouseVY();
 
 //! Mouse Z (scrollwheel) velocity.
-SGD_API float SGD_DECL sgd_MouseVZ();
+SGD_API float SGD_DECL sgd_GetMouseVZ();
 
 //! Set Mouse Z (scrollwheel) position.
 SGD_API void SGD_DECL sgd_SetMouseZ(float z);
@@ -225,22 +225,22 @@ SGD_API void SGD_DECL sgd_SetMouseZ(float z);
 SGD_API void SGD_DECL sgd_SetMouseCursorMode(int cursorMode);
 
 //! True if mouse button is curently held down.
-SGD_API SGD_Bool SGD_DECL sgd_MouseButtonDown(int button);
+SGD_API SGD_Bool SGD_DECL sgd_GetMouseButtonDown(int button);
 
 //! True if mouse button is curently held down.
-SGD_API SGD_Bool SGD_DECL sgd_MouseButtonHit(int button);
+SGD_API SGD_Bool SGD_DECL sgd_GetMouseButtonHit(int button);
 
 //! True if gamepad is currently connected.
-SGD_API SGD_Bool SGD_DECL sgd_GamepadConnected(int gamepad);
+SGD_API SGD_Bool SGD_DECL sgd_GetGamepadConnected(int gamepad);
 
 //! True if gamepad button currently held down.
-SGD_API SGD_Bool SGD_DECL sgd_GamepadButtonDown(int gamepad, int button);
+SGD_API SGD_Bool SGD_DECL sgd_GetGamepadButtonDown(int gamepad, int button);
 
 //! True if gamepad button pressed since last call to sgd_PollEvents().
-SGD_API SGD_Bool SGD_DECL sgd_GamepadButtonHit(int gamepad, int button);
+SGD_API SGD_Bool SGD_DECL sgd_GetGamepadButtonHit(int gamepad, int button);
 
 //! Value in the range -1 to 1 representing joystick axis position.
-SGD_API float SGD_DECL sgd_GamepadAxis(int gamepad, int axis);
+SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, int axis);
 
 //! @}
 

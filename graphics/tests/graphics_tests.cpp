@@ -46,7 +46,7 @@ int main() {
 	cameraUniforms.viewProjectionMatrix = cameraUniforms.projectionMatrix * cameraUniforms.viewMatrix;
 	cameraUniforms.clipNear=.1f;
 	cameraUniforms.clipFar=.100;
-	sceneBindings->updateCameraUniforms(cameraUniforms);
+	sceneBindings->setCameraUniforms(cameraUniforms);
 
 	renderContext = new RenderContext(gc);
 

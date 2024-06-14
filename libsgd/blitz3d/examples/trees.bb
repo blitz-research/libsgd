@@ -1,7 +1,7 @@
 
 Include "start.bb"
 
-CreateWindow(DesktopWidth()/2, DesktopHeight()/2, "Trees!", 4)
+CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "Trees!", 4)
 
 SetWebGPUBackend "Vulkan"
 
