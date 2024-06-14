@@ -20,8 +20,6 @@ Global slimeball
 
 CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "スノー Blocks", 4)
 
-CreateScene()
-
 LoadScene()
 
 While (PollEvents() And 1) <> 1
@@ -52,7 +50,7 @@ Wend
 Function LoadScene() 
 
 	Local env =  LoadTexture("sgd://envmaps/stormy-cube.jpg", 4, 56)
-	SetSceneEnvTexture env
+	SetEnvTexture env
 	
 	Local skybox = CreateSkybox(env)
 	

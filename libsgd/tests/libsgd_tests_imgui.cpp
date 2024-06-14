@@ -21,8 +21,6 @@ int main(int, char**) {
 
 	sgd_CreateWindow(1280, 720, "Hello World!", 2);
 
-	sgd_CreateScene();
-
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	auto& io = ImGui::GetIO();

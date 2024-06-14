@@ -27,6 +27,8 @@ void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flag
 	});
 
 	sgdx::g_mainWindow = window;
+
+	sgd_ClearScene();
 }
 
 void SGD_DECL sgd_DestroyWindow() {

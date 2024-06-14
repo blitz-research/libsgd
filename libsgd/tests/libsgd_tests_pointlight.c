@@ -2,7 +2,7 @@
 
 void entry() {
 
-	sgd_SetSceneAmbientLightColor(0, 0, 0, 1);
+	sgd_SetAmbientLightColor(0, 0, 0, 1);
 
 	SGD_Camera camera = sgd_CreatePerspectiveCamera();
 	sgd_TurnEntity(camera, -30, 0, 0);
@@ -13,8 +13,11 @@ void entry() {
 	sgd_FlipMesh(mesh);
 	SGD_Model model = sgd_CreateModel(mesh);
 
+	sgd_SetMaxCSMLights(2);
+
 	SGD_Mesh mesh2 = sgd_CreateSphereMesh(1, 24, 12, material);
 	sgd_SetMeshCastsShadow(mesh2, 1);
+
 	SGD_Model model2 = sgd_CreateModel(mesh2);
 	sgd_MoveEntity(model2, 0, 0, 0);
 

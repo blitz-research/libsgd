@@ -52,7 +52,7 @@ restart:
 		sgd_AnimateModel(model, 0, time += .017f, SGD_ANIMATION_MODE_LOOP, 1);
 
 		char buf[80];
-		sprintf(buf, "FPS:%f", sgd_FPS());
+		sprintf(buf, "FPS:%f", sgd_GetFPS());
 		sgd_Clear2D();
 		sgd_Draw2DText(buf, 0, 0);
 

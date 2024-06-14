@@ -3,15 +3,11 @@ Include "start.bb"
 
 CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "Trees!", 4)
 
-SetWebGPUBackend "Vulkan"
-
-CreateScene()
-
 Local light = CreateDirectionalLight()
 RotateEntity light,-45,0,0
 
 Local env =  LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
-SetSceneEnvTexture env
+SetEnvTexture env
 
 Local skybox = CreateSkybox(env)
 

@@ -2,7 +2,7 @@
 
 void entry() {
 
-	sgd_SetSceneAmbientLightColor(0,0,0,1);
+	sgd_SetAmbientLightColor(0,0,0,1);
 
 	SGD_Camera camera = sgd_CreatePerspectiveCamera();
 	sgd_MoveEntity(camera, 0, 0, 0);

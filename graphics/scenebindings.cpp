@@ -81,9 +81,12 @@ SceneBindings::SceneBindings() {
 		g_dummyMatricesBuffer = new Buffer(BufferType::storage, &matrices, sizeof(matrices));
 	}
 
-	setEnvTexture(whiteTexture(TextureFlags::cube));
+	envTexture.changed.connect(nullptr, [=](CTexture* texture) { //
+		m_bindGroup->setTexture(3, texture);
+	});
+	envTexture = whiteTexture(TextureFlags::cube);
 
-	csmSplits.changed.connect(nullptr, [=](CArray<float, 4> splits) {
+	csmSplits.changed.connect(nullptr, [=](CArray<float, 4> splits) { //
 		m_shadowUniforms->update(&splits, offsetof(ShadowUniforms, csmSplits), sizeof(splits));
 	});
 
@@ -124,10 +127,6 @@ void SceneBindings::setLightingUniforms(CLightingUniforms uniforms) {
 	m_lightingUniforms->update(&uniforms, 0, sizeof(uniforms));
 	m_passesDirty = true;
 	invalidate();
-}
-
-void SceneBindings::setEnvTexture(CTexture* texture) {
-	m_bindGroup->setTexture(3, texture);
 }
 
 BindGroup* SceneBindings::createShadowPassBindings() {
@@ -262,7 +261,7 @@ void SceneBindings::addPSMPasses() const {
 		auto& light = lightingUniforms().pointLights[i];
 		if (!light.castsShadow) continue;
 
-		SGD_ASSERT(n++ < maxCSMLights());
+		SGD_ASSERT(n++ < maxPSMLights());
 
 		auto lightMatrix = AffineMat4f({}, light.position);
 		auto invLightMatrix = inverse(lightMatrix);

@@ -36,7 +36,6 @@ seq0 = 1	;initially idle
 time0Step = .02
 
 CreateWindow 800,600,"Animation Blender",256
-CreateScene()
 camera = CreatePerspectiveCamera()
 MoveEntity camera,0,1,-3
 light = CreateDirectionalLight()

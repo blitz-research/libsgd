@@ -235,8 +235,6 @@ void Scene::updateLightingBindings() {
 	}
 
 	m_sceneBindings->setLightingUniforms(uniforms);
-
-	m_sceneBindings->setEnvTexture(envTexture());
 }
 
 void Scene::render() {

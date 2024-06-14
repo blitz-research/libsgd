@@ -5,11 +5,9 @@ Include "start.bb"
 
 CreateWindow(1280, 720, "Sprite Grass", 0)
 
-CreateScene()
-
 env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
 
-SetSceneEnvTexture env
+SetEnvTexture env
 
 skybox = CreateSkybox(env)
 SetSkyboxRoughness skybox,.3
@@ -39,7 +37,7 @@ While Not PollEvents()
 	PlayerFly(.1)
 	
 	Clear2D()
-	If KeyHit(KEY_SPACE)
+	If GetKeyHit(KEY_SPACE)
 		viewMode = viewMode + 1
 		If viewMode=4 viewMode=1
 		SetImageSpriteViewMode grassImage, viewMode

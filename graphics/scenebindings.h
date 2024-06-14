@@ -21,13 +21,15 @@ struct SceneBindings : GraphicsResource {
 
 	SceneBindings();
 
-	Property<Array<float,4>> csmSplits{{12,32,64,128}};
+	Property<CTexturePtr> envTexture;
+
 	Property<uint32_t> csmTextureSize{1024};
 	Property<uint32_t> maxCSMLights{1};
+	Property<Array<float,4>> csmSplits{{12,32,64,128}};
 
-	Property<float> psmNear{{.1f}};
 	Property<uint32_t> psmTextureSize{1024};
 	Property<uint32_t> maxPSMLights{8};
+	Property<float> psmNear{{.1f}};
 
 	void setCameraUniforms(CCameraUniforms uniforms);
 	CCameraUniforms cameraUniforms() const {
@@ -38,8 +40,6 @@ struct SceneBindings : GraphicsResource {
 	CLightingUniforms lightingUniforms() const {
 		return *(const LightingUniforms*)m_lightingUniforms->data();
 	}
-
-	void setEnvTexture(CTexture* texture);
 
 	CVector<ShadowPass> shadowPasses() const {
 		return m_shadowPasses;

@@ -673,23 +673,20 @@ SGD_API void SGD_DECL sgd_StopAudio(int audio);
 //! @name Scene
 //! @{
 
-//! Create a new scene.
-SGD_API void SGD_DECL sgd_CreateScene();
-
 //! Clear scene and destroy all resources.
 SGD_API void SGD_DECL sgd_ClearScene();
 
 //! Set scene ambient light color.
-SGD_API void SGD_DECL sgd_SetSceneAmbientLightColor(float red, float green, float blue, float alpha);
+SGD_API void SGD_DECL sgd_SetAmbientLightColor(float red, float green, float blue, float alpha);
 
 //! Set scene clear color.
-SGD_API void SGD_DECL sgd_SetSceneClearColor(float red, float green, float blue, float alpha);
+SGD_API void SGD_DECL sgd_SetClearColor(float red, float green, float blue, float alpha);
 
 //! Set scene clear depth.
-SGD_API void SGD_DECL sgd_SetSceneClearDepth(float depth);
+SGD_API void SGD_DECL sgd_SetClearDepth(float depth);
 
 //! Set scene environment texture.
-SGD_API void SGD_DECL sgd_SetSceneEnvTexture(SGD_Texture texture);
+SGD_API void SGD_DECL sgd_SetEnvTexture(SGD_Texture texture);
 
 //! Set cascading shadow map texture size. Defaults to 1024, must be a power of 2.
 SGD_API void SGD_DECL sgd_SetCSMTextureSize(int textureSize);
@@ -710,10 +707,10 @@ SGD_API void SGD_DECL sgd_RenderScene();
 SGD_API void SGD_DECL sgd_Present();
 
 //! Return frames per second.
-SGD_API float SGD_DECL sgd_FPS();
+SGD_API float SGD_DECL sgd_GetFPS();
 
 //! Return renders per second.
-SGD_API float SGD_DECL sgd_RPS();
+SGD_API float SGD_DECL sgd_GetRPS();
 
 //! @}
 
@@ -724,13 +721,13 @@ SGD_API float SGD_DECL sgd_RPS();
 SGD_API void SGD_DECL sgd_SetEntityEnabled(SGD_Entity entity, SGD_Bool enabled);
 
 //! Get entity enabled state. An entity is only enabled in the scene if both it and all its ancestors are enabled.
-SGD_API SGD_Bool SGD_DECL sgd_EntityEnabled(SGD_Entity entity);
+SGD_API SGD_Bool SGD_DECL sgd_GetEntityEnabled(SGD_Entity entity);
 
 //! Show or hide entity.
 SGD_API void SGD_DECL sgd_SetEntityVisible(SGD_Entity entity, SGD_Bool visible);
 
 //! Get entity visible state. An entity is only visible in the scene if both it and all its ancestors are visible.
-SGD_API SGD_Bool SGD_DECL sgd_EntityVisible(SGD_Entity entity);
+SGD_API SGD_Bool SGD_DECL sgd_GetEntityVisible(SGD_Entity entity);
 
 //! Destroy entity and children recursively.
 SGD_API void SGD_DECL sgd_DestroyEntity(SGD_Entity entity);
@@ -742,7 +739,7 @@ SGD_API SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity entity);
 SGD_API void SGD_DECL sgd_SetEntityParent(SGD_Entity entity, SGD_Entity parent);
 
 //! Get entity parent.
-SGD_API SGD_Entity SGD_DECL sgd_EntityParent(SGD_Entity entity);
+SGD_API SGD_Entity SGD_DECL sgd_GetEntityParent(SGD_Entity entity);
 
 //! Set entity position in world space.
 SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity entity, SGD_Real tx, SGD_Real ty, SGD_Real tz);
@@ -769,31 +766,58 @@ SGD_API void SGD_DECL sgd_MoveEntity(SGD_Entity entity, SGD_Real tx, SGD_Real ty
 SGD_API void SGD_DECL sgd_TurnEntity(SGD_Entity entity, SGD_Real rx, SGD_Real ry, SGD_Real rz);
 
 //! Get the X component of an entity's position in world space.
-SGD_API SGD_Real SGD_DECL sgd_EntityX(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_GetEntityX(SGD_Entity entity);
 
 //! Get the Y component of an entity's position in world space.
-SGD_API SGD_Real SGD_DECL sgd_EntityY(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_GetEntityY(SGD_Entity entity);
 
 //! Get the Z component of an entity's position in world space.
-SGD_API SGD_Real SGD_DECL sgd_EntityZ(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_GetEntityZ(SGD_Entity entity);
 
 //! Get the X rotation component (ie: 'pitch') of an entity's orientation in world space.
-SGD_API SGD_Real SGD_DECL sgd_EntityRX(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_GetEntityRX(SGD_Entity entity);
 
 //! Get the Y rotation component (ie: 'yaw') of an entity's orientation in world space.
-SGD_API SGD_Real SGD_DECL sgd_EntityRY(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_GetEntityRY(SGD_Entity entity);
 
 //! Get the Z rotation component (ie: 'roll') of an entity's orientation in world space.
-SGD_API SGD_Real SGD_DECL sgd_EntityRZ(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_GetEntityRZ(SGD_Entity entity);
 
 //! Get the X rotation component (ie: 'pitch') of an entity's orientation in world space.
-SGD_API SGD_Real SGD_DECL sgd_EntitySX(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_GetEntitySX(SGD_Entity entity);
 
 //! Get the Y rotation component (ie: 'yaw') of an entity's orientation in world space.
-SGD_API SGD_Real SGD_DECL sgd_EntitySY(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_GetEntitySY(SGD_Entity entity);
 
 //! Get the Z rotation component (ie: 'roll') of an entity's orientation in world space.
-SGD_API SGD_Real SGD_DECL sgd_EntitySZ(SGD_Entity entity);
+SGD_API SGD_Real SGD_DECL sgd_GetEntitySZ(SGD_Entity entity);
+
+//! Get the X component of an entity's basis matrix right vector.
+SGD_API SGD_Real SGD_DECL sgd_GetEntityIX(SGD_Entity entity);
+
+//! Get the Y component of an entity's basis matrix right vector.
+SGD_API SGD_Real SGD_DECL sgd_GetEntityIY(SGD_Entity entity);
+
+//! Get the Z component of an entity's basis matrix right vector.
+SGD_API SGD_Real SGD_DECL sgd_GetEntityIZ(SGD_Entity entity);
+
+//! Get the X component of an entity's basis matrix up vector.
+SGD_API SGD_Real SGD_DECL sgd_GetEntityJX(SGD_Entity entity);
+
+//! Get the Y component of an entity's basis matrix up vector.
+SGD_API SGD_Real SGD_DECL sgd_GetEntityJY(SGD_Entity entity);
+
+//! Get the Z component of an entity's basis matrix up vector.
+SGD_API SGD_Real SGD_DECL sgd_GetEntityJZ(SGD_Entity entity);
+
+//! Get the X component of an entity's basis matrix forward vector.
+SGD_API SGD_Real SGD_DECL sgd_GetEntityKX(SGD_Entity entity);
+
+//! Get the Y component of an entity's basis matrix forward vector.
+SGD_API SGD_Real SGD_DECL sgd_GetEntityKY(SGD_Entity entity);
+
+//! Get the Z component of an entity's basis matrix forward vector.
+SGD_API SGD_Real SGD_DECL sgd_GetEntityKZ(SGD_Entity entity);
 
 //! Aim entity at entity.
 SGD_API void SGD_DECL sgd_AimEntityAtEntity(SGD_Entity entity, SGD_Entity target, float roll);
@@ -811,13 +835,13 @@ SGD_API void SGD_DECL sgd_TFormVector(SGD_Real x, SGD_Real y, SGD_Real z, SGD_En
 SGD_API void SGD_DECL sgd_TFormNormal(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity srcEntity, SGD_Entity dstEntity);
 
 //! X component of most recent sgd_TransfromPoint result.
-SGD_API SGD_Real SGD_DECL sgd_TFormedX();
+SGD_API SGD_Real SGD_DECL sgd_GetTFormedX();
 
 //! Y component of most recent sgd_TransfromPoint result.
-SGD_API SGD_Real SGD_DECL sgd_TFormedY();
+SGD_API SGD_Real SGD_DECL sgd_GetTFormedY();
 
 //! Z component of most recent sgd_TransfromPoint result.
-SGD_API SGD_Real SGD_DECL sgd_TFormedZ();
+SGD_API SGD_Real SGD_DECL sgd_GetTFormedZ();
 
 //! @}
 
@@ -843,10 +867,10 @@ SGD_API void SGD_DECL sgd_SetCameraFar(SGD_Camera camera, float far);
 SGD_API SGD_Bool SGD_DECL sgd_CameraProject(SGD_Camera camera, SGD_Real x, SGD_Real y, SGD_Real z);
 
 //! X coordinate of projected point in window coordinates.
-SGD_API float SGD_DECL sgd_ProjectedX();
+SGD_API float SGD_DECL sgd_GetProjectedX();
 
 //! Y coordinate of projected point in window coordinates.
-SGD_API float SGD_DECL sgd_ProjectedY();
+SGD_API float SGD_DECL sgd_GetProjectedY();
 
 //! @}
 
@@ -881,7 +905,7 @@ SGD_API void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light light, float angle);
 SGD_API void SGD_DECL sgd_SetLightCastsShadow(SGD_Light light, SGD_Bool castShadow);
 
 //! Get light castsShadow flag.
-SGD_API SGD_Bool SGD_DECL sgd_LightCastsShadow(SGD_Light light);
+SGD_API SGD_Bool SGD_DECL sgd_GetLightCastsShadow(SGD_Light light);
 
 //! Set light priority.
 SGD_API void SGD_DECL sgd_SetLightPriority(SGD_Light light, int priority);
@@ -910,7 +934,7 @@ SGD_API SGD_Model SGD_DECL sgd_CreateModel(SGD_Mesh mesh);
 SGD_API void SGD_DECL sgd_SetModelMesh(SGD_Model model, SGD_Mesh mesh);
 
 //! Get model mesh.
-SGD_API SGD_Mesh SGD_DECL sgd_ModelMesh(SGD_Model model);
+SGD_API SGD_Mesh SGD_DECL sgd_GetModelMesh(SGD_Model model);
 
 //! Set model color.
 SGD_API void SGD_DECL sgd_SetModelColor(SGD_Model model, float red, float green, float blue, float alpha);
@@ -980,7 +1004,7 @@ SGD_API SGD_Collider SGD_DECL sgd_CreateEllipsoidCollider(SGD_Entity entity, int
 SGD_API SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity entity, int colliderType, SGD_Mesh mesh);
 
 //! Return entity a collider is attached to.
-SGD_API SGD_Entity SGD_DECL sgd_ColliderEntity(SGD_Collider collider);
+SGD_API SGD_Entity SGD_DECL sgd_GetColliderEntity(SGD_Collider collider);
 
 //! Set sphere or ellipsoid collider radius.
 SGD_API void SGD_DECL sgd_SetColliderRadius(SGD_Collider collider, float radius);
@@ -1005,22 +1029,22 @@ SGD_API void SGD_DECL sgd_UpdateColliders();
 SGD_API int SGD_DECL sgd_GetCollisionCount(SGD_Collider collider);
 
 //! Get collision X coordinate.
-SGD_API SGD_Real SGD_DECL sgd_CollisionX(SGD_Collider collider, int index);
+SGD_API SGD_Real SGD_DECL sgd_GetCollisionX(SGD_Collider collider, int index);
 
 //! Get collision Y coordinate.
-SGD_API SGD_Real SGD_DECL sgd_CollisionY(SGD_Collider collider, int index);
+SGD_API SGD_Real SGD_DECL sgd_GetCollisionY(SGD_Collider collider, int index);
 
 //! Get collision Z coordinate.
-SGD_API SGD_Real SGD_DECL sgd_CollisionZ(SGD_Collider collider, int index);
+SGD_API SGD_Real SGD_DECL sgd_GetCollisionZ(SGD_Collider collider, int index);
 
 //! Get collision normal X component.
-SGD_API SGD_Real SGD_DECL sgd_CollisionNX(SGD_Collider collider, int index);
+SGD_API SGD_Real SGD_DECL sgd_GetCollisionNX(SGD_Collider collider, int index);
 
 //! Get collision normal Y component.
-SGD_API SGD_Real SGD_DECL sgd_CollisionNY(SGD_Collider collider, int index);
+SGD_API SGD_Real SGD_DECL sgd_GetCollisionNY(SGD_Collider collider, int index);
 
 //! Get collision normal Z component.
-SGD_API SGD_Real SGD_DECL sgd_CollisionNZ(SGD_Collider collider, int index);
+SGD_API SGD_Real SGD_DECL sgd_GetCollisionNZ(SGD_Collider collider, int index);
 
 //! Pick first collider along ray passing from camera eye through window coordinates.
 SGD_API SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera camera, float windowX, float windowY, int colliderMask);
@@ -1029,22 +1053,22 @@ SGD_API SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera camera, float windowX, f
 SGD_API SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Real x1, SGD_Real y1, SGD_Real z1, SGD_Real radius, int colliderMask);
 
 //! X coordinate of pick contact point in world space.
-SGD_API SGD_Real SGD_DECL sgd_PickedX();
+SGD_API SGD_Real SGD_DECL sgd_GetPickedX();
 
 //! Y coordinate of pick contact point in world space.
-SGD_API SGD_Real SGD_DECL sgd_PickedY();
+SGD_API SGD_Real SGD_DECL sgd_GetPickedY();
 
 //! Z coordinate of pick contact point in world space.
-SGD_API SGD_Real SGD_DECL sgd_PickedZ();
+SGD_API SGD_Real SGD_DECL sgd_GetPickedZ();
 
 //! X compnent of pick contact normal in world space.
-SGD_API SGD_Real SGD_DECL sgd_PickedNX();
+SGD_API SGD_Real SGD_DECL sgd_GetPickedNX();
 
 //! Y component of pick contact normal in world space.
-SGD_API SGD_Real SGD_DECL sgd_PickedNY();
+SGD_API SGD_Real SGD_DECL sgd_GetPickedNY();
 
 //! Z component of pick contact normal in world space.
-SGD_API SGD_Real SGD_DECL sgd_PickedNZ();
+SGD_API SGD_Real SGD_DECL sgd_GetPickedNZ();
 
 //! @}
 

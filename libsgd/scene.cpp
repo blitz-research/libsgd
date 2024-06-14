@@ -1,10 +1,8 @@
 #include "internal.h"
 
-// ***** Scene *****
-
 namespace {
 
-wgpu::BackendType g_backendType{wgpu::BackendType::Undefined};
+wgpu::BackendType g_backendType = wgpu::BackendType::Undefined;
 
 void createOverlay() {
 	if (!sgdx::g_defaultFont) {
@@ -25,14 +23,16 @@ void createOverlay() {
 	sgdx::g_drawList->font = sgdx::g_defaultFont;
 }
 
-sgd::Contact g_picked;
-sgd::Vec2f g_projected;
 sgd::Vec3r g_tformed;
+sgd::Vec2f g_projected;
+sgd::Contact g_picked;
 
-} // namespace
+}
+
+// ***** Scene *****
 
 void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend) {
-	if (sgdx::g_mainScene) sgdx::error("Backend type must be selected before scene is created");
+	if (sgdx::g_mainWindow) sgdx::error("Backend type must be selected before Window is created");
 
 	sgdx::Map<sgdx::String, wgpu::BackendType> types{
 		{"D3D12", wgpu::BackendType::D3D12},   {"D3D11", wgpu::BackendType::D3D11},		  {"Vulkan", wgpu::BackendType::Vulkan},
@@ -45,38 +45,32 @@ void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend) {
 	g_backendType = it->second;
 }
 
-void SGD_DECL sgd_CreateScene() {
-	if (sgdx::g_mainScene) sgdx::error("Scene has already been created");
-	sgdx::mainWindow();
-
-	sgdx::g_mainGC = new sgdx::GraphicsContext(sgdx::g_mainWindow, g_backendType);
-
-	sgdx::g_mainScene = new sgdx::Scene(sgdx::g_mainGC);
-
-	createOverlay();
-}
-
 void SGD_DECL sgd_ClearScene() {
-	sgdx::mainScene()->clear();
+	if(!sgdx::g_mainScene) {
+		sgdx::g_mainGC = new sgdx::GraphicsContext(sgdx::mainWindow(), g_backendType);
+		sgdx::g_mainScene = new sgdx::Scene(sgdx::g_mainGC);
+	}else{
+		sgdx::mainScene()->clear();
+		sgdx::destroyAllHandles();
+	}
 	createOverlay();
-	sgdx::destroyAllHandles();
 }
 
-SGD_API void SGD_DECL sgd_SetSceneAmbientLightColor(float red, float green, float blue, float alpha) {
-	sgdx::mainScene()->ambientLightColor = sgdx::Vec4f(red, green, blue, alpha);
-}
-
-void SGD_DECL sgd_SetSceneClearColor(float red, float green, float blue, float alpha) {
+void SGD_DECL sgd_SetClearColor(float red, float green, float blue, float alpha) {
 	sgdx::mainScene()->clearColor = sgdx::Vec4f(red, green, blue, alpha);
 }
 
-void SGD_DECL sgd_SetSceneClearDepth(float depth) {
+void SGD_DECL sgd_SetClearDepth(float depth) {
 	sgdx::mainScene()->clearDepth = depth;
 }
 
-void SGD_DECL sgd_SetSceneEnvTexture(SGD_Texture htexture) {
+SGD_API void SGD_DECL sgd_SetAmbientLightColor(float red, float green, float blue, float alpha) {
+	sgdx::mainScene()->ambientLightColor = sgdx::Vec4f(red, green, blue, alpha);
+}
+
+void SGD_DECL sgd_SetEnvTexture(SGD_Texture htexture) {
 	auto texture = sgdx::resolveHandle<sgdx::Texture>(htexture);
-	sgdx::mainScene()->envTexture = texture;
+	sgdx::mainScene()->sceneBindings()->envTexture = texture;
 }
 
 void SGD_DECL sgd_SetCSMTextureSize(int textureSize) {
@@ -103,11 +97,11 @@ void SGD_DECL sgd_Present() {
 	sgdx::mainGC()->present(sgdx::mainGC()->colorBuffer());
 }
 
-float SGD_DECL sgd_FPS() {
+float SGD_DECL sgd_GetFPS() {
 	return sgdx::mainGC()->FPS();
 }
 
-float SGD_DECL sgd_RPS() {
+float SGD_DECL sgd_GetRPS() {
 	return sgdx::mainScene()->RPS();
 }
 
@@ -117,7 +111,7 @@ void SGD_DECL sgd_SetEntityEnabled(SGD_Entity hentity, SGD_Bool enabled) {
 	sgdx::resolveHandle<sgd::Entity>(hentity)->setIsEnabled(enabled);
 }
 
-SGD_Bool SGD_DECL sgd_EntityEnabled(SGD_Entity hentity) {
+SGD_Bool SGD_DECL sgd_GetEntityEnabled(SGD_Entity hentity) {
 	return sgdx::resolveHandle<sgd::Entity>(hentity)->enabled();
 }
 
@@ -125,7 +119,7 @@ void SGD_DECL sgd_SetEntityVisible(SGD_Entity hentity, SGD_Bool visible) {
 	sgdx::resolveHandle<sgd::Entity>(hentity)->setIsVisible(visible);
 }
 
-SGD_Bool SGD_DECL sgd_EntityVisible(SGD_Entity hentity) {
+SGD_Bool SGD_DECL sgd_GetEntityVisible(SGD_Entity hentity) {
 	return sgdx::resolveHandle<sgd::Entity>(hentity)->visible();
 }
 
@@ -158,7 +152,7 @@ void SGD_DECL sgd_SetEntityParent(SGD_Entity hentity, SGD_Entity hparent) {
 	entity->setParent(parent);
 }
 
-SGD_Entity SGD_DECL sgd_EntityParent(SGD_Entity hentity) {
+SGD_Entity SGD_DECL sgd_GetEntityParent(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	auto parent = entity->parent();
 	return parent ? sgdx::getOrCreateHandle(parent) : 0;
@@ -204,49 +198,94 @@ void SGD_DECL sgd_ScaleEntity(SGD_Entity hentity, SGD_Real sx, SGD_Real sy, SGD_
 	scale(entity, {sx, sy, sz});
 }
 
-SGD_Real SGD_DECL sgd_EntityX(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_GetEntityX(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return entity->worldPosition().x;
 }
 
-SGD_Real SGD_DECL sgd_EntityY(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_GetEntityY(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return entity->worldPosition().y;
 }
 
-SGD_Real SGD_DECL sgd_EntityZ(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_GetEntityZ(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return entity->worldPosition().z;
 }
 
-SGD_Real SGD_DECL sgd_EntityRX(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_GetEntityRX(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return sgdx::pitch(entity->worldBasis()) * sgdx::radiansToDegrees;
 }
 
-SGD_Real SGD_DECL sgd_EntityRY(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_GetEntityRY(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return sgdx::yaw(entity->worldBasis()) * sgdx::radiansToDegrees;
 }
 
-SGD_Real SGD_DECL sgd_EntityRZ(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_GetEntityRZ(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return sgdx::roll(entity->worldBasis()) * sgdx::radiansToDegrees;
 }
 
-SGD_Real SGD_DECL sgd_EntitySX(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_GetEntitySX(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return entity->worldScale().x;
 }
 
-SGD_Real SGD_DECL sgd_EntitySY(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_GetEntitySY(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return entity->worldScale().y;
 }
 
-SGD_Real SGD_DECL sgd_EntitySZ(SGD_Entity hentity) {
+SGD_Real SGD_DECL sgd_GetEntitySZ(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return entity->worldScale().z;
+}
+
+SGD_Real SGD_DECL sgd_GetEntityIX(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return entity->worldBasis().i.x;
+}
+
+SGD_Real SGD_DECL sgd_GetEntityIY(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return entity->worldBasis().i.y;
+}
+
+SGD_Real SGD_DECL sgd_GetEntityIZ(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return entity->worldBasis().i.z;
+}
+
+SGD_Real SGD_DECL sgd_GetEntityJX(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return entity->worldBasis().j.x;
+}
+
+SGD_Real SGD_DECL sgd_GetEntityJY(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return entity->worldBasis().j.y;
+}
+
+SGD_Real SGD_DECL sgd_GetEntityJZ(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return entity->worldBasis().j.z;
+}
+
+SGD_Real SGD_DECL sgd_GetEntityKX(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return entity->worldBasis().k.x;
+}
+
+SGD_Real SGD_DECL sgd_GetEntityKY(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return entity->worldBasis().k.y;
+}
+
+SGD_Real SGD_DECL sgd_GetEntityKZ(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return entity->worldBasis().k.z;
 }
 
 void SGD_DECL sgd_AimEntityAtEntity(SGD_Entity hentity, SGD_Entity htarget, float roll) {
@@ -283,15 +322,15 @@ void SGD_DECL sgd_TFormNormal(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsr
 	g_tformed = dst ? cofactor(inverse(dst->worldBasis())) * tv : tv;
 }
 
-SGD_Real SGD_DECL sgd_TFormedX() {
+SGD_Real SGD_DECL sgd_GetTFormedX() {
 	return g_tformed.x;
 }
 
-SGD_Real SGD_DECL sgd_TFormedY() {
+SGD_Real SGD_DECL sgd_GetTFormedY() {
 	return g_tformed.y;
 }
 
-SGD_Real SGD_DECL sgd_TFormedZ() {
+SGD_Real SGD_DECL sgd_GetTFormedZ() {
 	return g_tformed.z;
 }
 
@@ -328,11 +367,11 @@ SGD_Bool SGD_DECL sgd_CameraProject(SGD_Camera hcamera, SGD_Real x, SGD_Real y, 
 	return r;
 }
 
-SGD_API float SGD_DECL sgd_ProjectedX() {
+SGD_API float SGD_DECL sgd_GetProjectedX() {
 	return g_projected.x;
 }
 
-SGD_API float SGD_DECL sgd_ProjectedY() {
+SGD_API float SGD_DECL sgd_GetProjectedY() {
 	return g_projected.y;
 }
 
@@ -389,7 +428,7 @@ void SGD_DECL sgd_SetLightCastsShadow(SGD_Light hlight, SGD_Bool castsShadow) {
 	light->castsShadow = castsShadow;
 }
 
-SGD_Bool SGD_DECL sgd_LightCastsShadow(SGD_Light hlight) {
+SGD_Bool SGD_DECL sgd_GetLightCastsShadow(SGD_Light hlight) {
 	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
 	return light->castsShadow();
 }
@@ -444,7 +483,7 @@ void SGD_DECL sgd_SetModelMesh(SGD_Model hmodel, SGD_Mesh hmesh) {
 	model->mesh = mesh;
 }
 
-SGD_Mesh SGD_DECL sgd_ModelMesh(SGD_Model hmodel) {
+SGD_Mesh SGD_DECL sgd_GetModelMesh(SGD_Model hmodel) {
 	auto model = sgdx::resolveHandle<sgd::Model>(hmodel);
 	auto mesh = model->mesh().get();
 	return mesh ? sgdx::getOrCreateHandle(mesh) : 0;
@@ -541,7 +580,7 @@ SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity hentity, int collisionTy
 	return sgdx::createHandle(collider);
 }
 
-SGD_Entity SGD_DECL sgd_ColliderEntity(SGD_Collider hcollider) {
+SGD_Entity SGD_DECL sgd_GetColliderEntity(SGD_Collider hcollider) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
 	return sgdx::getOrCreateHandle(collider->entity());
 }
@@ -580,39 +619,39 @@ int SGD_DECL sgd_GetCollisionCount(SGD_Collider hcollider) {
 	return (int)collider->collisions().size();
 }
 
-SGD_Real SGD_DECL sgd_CollisionX(SGD_Collider hcollider, int index) {
+SGD_Real SGD_DECL sgd_GetCollisionX(SGD_Collider hcollider, int index) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
-	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	if ((uint32_t)index >= collider->collisions().size()) sgdx::error("Collision index out of range");
 	return collider->collisions()[index].contact.point.x;
 }
 
-SGD_Real SGD_DECL sgd_CollisionY(SGD_Collider hcollider, int index) {
+SGD_Real SGD_DECL sgd_GetCollisionY(SGD_Collider hcollider, int index) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
-	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	if ((uint32_t)index >= collider->collisions().size()) sgdx::error("Collision index out of range");
 	return collider->collisions()[index].contact.point.y;
 }
 
-SGD_Real SGD_DECL sgd_CollisionZ(SGD_Collider hcollider, int index) {
+SGD_Real SGD_DECL sgd_GetCollisionZ(SGD_Collider hcollider, int index) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
-	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	if ((uint32_t)index >= collider->collisions().size()) sgdx::error("Collision index out of range");
 	return collider->collisions()[index].contact.point.z;
 }
 
-SGD_Real SGD_DECL sgd_CollisionNX(SGD_Collider hcollider, int index) {
+SGD_Real SGD_DECL sgd_GetCollisionNX(SGD_Collider hcollider, int index) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
-	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	if ((uint32_t)index >= collider->collisions().size()) sgdx::error("Collision index out of range");
 	return collider->collisions()[index].contact.normal.x;
 }
 
-SGD_Real SGD_DECL sgd_CollisionNY(SGD_Collider hcollider, int index) {
+SGD_Real SGD_DECL sgd_GetCollisionNY(SGD_Collider hcollider, int index) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
-	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	if ((uint32_t)index >= collider->collisions().size()) sgdx::error("Collision index out of range");
 	return collider->collisions()[index].contact.normal.y;
 }
 
-SGD_Real SGD_DECL sgd_CollisionNZ(SGD_Collider hcollider, int index) {
+SGD_Real SGD_DECL sgd_GetCollisionNZ(SGD_Collider hcollider, int index) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
-	if((uint32_t)index>=collider->collisions().size()) sgdx::error("Collision index out of range");
+	if ((uint32_t)index >= collider->collisions().size()) sgdx::error("Collision index out of range");
 	return collider->collisions()[index].contact.normal.z;
 }
 
@@ -638,26 +677,26 @@ SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Re
 	return collider ? sgdx::getOrCreateHandle(collider) : 0;
 }
 
-SGD_Real SGD_DECL sgd_PickedX() {
+SGD_Real SGD_DECL sgd_GetPickedX() {
 	return g_picked.point.x;
 }
 
-SGD_Real SGD_DECL sgd_PickedY() {
+SGD_Real SGD_DECL sgd_GetPickedY() {
 	return g_picked.point.y;
 }
 
-SGD_Real SGD_DECL sgd_PickedZ() {
+SGD_Real SGD_DECL sgd_GetPickedZ() {
 	return g_picked.point.z;
 }
 
-SGD_Real SGD_DECL sgd_PickedNX() {
+SGD_Real SGD_DECL sgd_GetPickedNX() {
 	return g_picked.normal.x;
 }
 
-SGD_Real SGD_DECL sgd_PickedNY() {
+SGD_Real SGD_DECL sgd_GetPickedNY() {
 	return g_picked.normal.y;
 }
 
-SGD_Real SGD_DECL sgd_PickedNZ() {
+SGD_Real SGD_DECL sgd_GetPickedNZ() {
 	return g_picked.normal.z;
 }

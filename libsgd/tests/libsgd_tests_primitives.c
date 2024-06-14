@@ -64,21 +64,21 @@ start:;	// Need semi-colon for Macos?!?
 		if (sgd_GetKeyHit(SGD_KEY_ESCAPE)) {
 			SGD_Real dz = 1ll << 33;
 
-			if (sgd_EntityZ(camera) > dz / 2) dz = -dz;
+			if (sgd_GetEntityZ(camera) > dz / 2) dz = -dz;
 
 			sgd_TranslateEntity(camera, 0, 0, dz);
 			sgd_TranslateEntity(ground, 0, 0, dz);
 			for (int i = 0; i < 5; ++i) sgd_TranslateEntity(models[i], 0, 0, dz);
 
-			printf("### Camera Z: %f\n", sgd_EntityZ(camera));
+			printf("### Camera Z: %f\n", sgd_GetEntityZ(camera));
 		}
 
 		if (sgd_GetKeyDown(SGD_KEY_A)) {
 			sgd_MoveEntity(camera, 0, 0, .3);
-			printf("### Camera Z: %f\n", sgd_EntityZ(camera));
+			printf("### Camera Z: %f\n", sgd_GetEntityZ(camera));
 		} else if (sgd_GetKeyDown(SGD_KEY_Z)) {
 			sgd_MoveEntity(camera, 0, 0, -.3);
-			printf("### Camera Z: %f\n", sgd_EntityZ(camera));
+			printf("### Camera Z: %f\n", sgd_GetEntityZ(camera));
 		}
 
 		fflush(stdout);
@@ -98,14 +98,14 @@ start:;	// Need semi-colon for Macos?!?
 		sgd_Clear2D();
 		for (int i = 0; i < 5; ++i) {
 			sgd_TurnEntity(models[i], i / 10.0f, i / 5.0f + .1f, 0);
-			if(sgd_CameraProject(camera, sgd_EntityX(models[i]), sgd_EntityY(models[i]), sgd_EntityZ(models[i]))) {
-				sgd_Draw2DText("MODEL!", sgd_ProjectedX(), sgd_ProjectedY());
+			if(sgd_CameraProject(camera, sgd_GetEntityX(models[i]), sgd_GetEntityY(models[i]), sgd_GetEntityZ(models[i]))) {
+				sgd_Draw2DText("MODEL!", sgd_GetProjectedX(), sgd_GetProjectedY());
 			}
 		}
 
 		{
 			char buf[80];
-			sprintf(buf, "FPS: %f, RPS: %f", sgd_FPS(), sgd_RPS());
+			sprintf(buf, "FPS: %f, RPS: %f", sgd_GetFPS(), sgd_GetRPS());
 			sgd_Draw2DText(buf, 2, 2);
 		}
 
