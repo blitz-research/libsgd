@@ -81,6 +81,10 @@ void SGD_DECL sgd_SetMaxCSMLights(int maxLights) {
 	sgdx::mainScene()->sceneBindings()->maxCSMLights = maxLights;
 }
 
+void SGD_DECL sgd_SetCSMSplitDistances(float split0, float split1, float split2, float split3) {
+	sgdx::mainScene()->sceneBindings()->csmSplits={split0, split1, split2, split3};
+}
+
 void SGD_DECL sgd_SetPSMTextureSize(int textureSize) {
 	sgdx::mainScene()->sceneBindings()->psmTextureSize = textureSize;
 }

@@ -1,11 +1,15 @@
 
 ***** V0.08 *****
 
+Renamed a few things.
+
 Fixed sprite scaling.
 
-Added SetCSMTextureSize, SetMaxCSMLights, SetPSMTextureSize, SetMaxPSMLights, where PSM = point light shadow maps.
+Added SetCSMTextureSize, SetMaxCSMLights, SetCSMSplitDistances, SetPSMTextureSize, SetMaxPSMLights, where PSM = point light shadow maps. Checkout
+primitives.bb for the different 4K shadows make!
 
-Added 'cascading shadow maps' (CSM) for directional lights.
+Added 'cascading shadow maps' (CSM) for directional lights! Checkout csmcrates.bb - works well here on Windows, not so greate opn linux you might
+need to reduce the number of crates to get a decent result.
 
 
 ***** V0.07.2 *****

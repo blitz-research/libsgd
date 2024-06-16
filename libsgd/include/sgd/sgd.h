@@ -694,6 +694,9 @@ SGD_API void SGD_DECL sgd_SetCSMTextureSize(int textureSize);
 //! Set shadow casting directional lights. Defaults to 1, max is 4 (max directional lights).
 SGD_API void SGD_DECL sgd_SetMaxCSMLights(int maxLights);
 
+//! Set split distances for CSM shadow.
+SGD_API void SGD_DECL sgd_SetCSMSplitDistances(float sklit0, float split1, float split2, float split3);
+
 //! Set point lint shadow map texture size. Defaults to 1024, must be power of 2.
 SGD_API void SGD_DECL sgd_SetPSMTextureSize(int textureSize);
 
