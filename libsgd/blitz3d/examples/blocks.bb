@@ -24,7 +24,7 @@ LoadScene()
 
 While (PollEvents() And 1) <> 1
 
-	If GetKeyHit(KEY_ESCAPE)
+	If IsKeyHit(KEY_ESCAPE)
 		End
 		Delete Each Bullet
 		Delete Each Block
@@ -40,7 +40,7 @@ While (PollEvents() And 1) <> 1
 	
 	Clear2D()
 	
-	Draw2DText "FPS:"+FPS()+", RPS:"+RPS(),0,0
+	Draw2DText "FPS:"+GetFPS(),0,0
 	
 	RenderScene()
 	
@@ -86,7 +86,7 @@ End Function
 
 Function UpdateBullets() 
 
-	If GetKeyHit(KEY_SPACE)
+	If IsKeyHit(KEY_SPACE)
 		Local r#=Rnd(1), g# = Rnd(1), b#=Rnd(1)
 		
 		;Fake some NEON baby!
@@ -109,7 +109,7 @@ Function UpdateBullets()
 		If bullet\vz<1 bullet\vz=1
 		
 		Local light=CreatePointLight()
-		SetLightCastsShadow light,True
+		SetLightShadowMappingEnabled light,True
 		SetEntityParent light,bullet\entity
 		SetLightColor light,r,g,b,2
 		SetLightRange light,50
@@ -135,7 +135,7 @@ Function CreateGround()
 	Local material = LoadPBRMaterial("sgd://materials/Gravel023_1K-JPG")
 
 	Local mesh = CreateBoxMesh(-WORLD_SIZE * 2,-1,-WORLD_SIZE*2,WORLD_SIZE*2,0,WORLD_SIZE*2,material)
-	TFormTexCoords(mesh,100,100,0,0)
+	TFormMeshTexCoords(mesh,100,100,0,0)
 
 	Local model = CreateModel(mesh)
 	
@@ -146,7 +146,7 @@ Function CreateBlocks()
 	Local material = LoadPBRMaterial("sgd://materials/Fabric048_1K-JPG")
 ;	Local material = LoadPBRMaterial("sgd://materials/PaintedWood09C_1K-JPG")
 	Local mesh = CreateBoxMesh(-1,-1,-1,1,1,1,material)
-	SetMeshCastsShadow mesh,True
+	SetMeshShadowCastingEnabled mesh,True
 	
 	For i=1 To NUM_BLOCKS
 		block.Block = New Block

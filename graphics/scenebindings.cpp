@@ -205,7 +205,7 @@ void SceneBindings::addCSMPasses() const {
 	for (int i = 0, n = 0; i < lightingUniforms().directionalLightCount; ++i) {
 
 		auto& light = lightingUniforms().directionalLights[i];
-		if (!light.castsShadow) continue;
+		if (!light.shadowsEnabled) continue;
 
 		SGD_ASSERT(n++ < maxCSMLights());
 
@@ -259,7 +259,7 @@ void SceneBindings::addPSMPasses() const {
 	for (int i = 0, n = 0; i < lightingUniforms().pointLightCount; ++i) {
 
 		auto& light = lightingUniforms().pointLights[i];
-		if (!light.castsShadow) continue;
+		if (!light.shadowsEnabled) continue;
 
 		SGD_ASSERT(n++ < maxPSMLights());
 

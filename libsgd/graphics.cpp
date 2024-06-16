@@ -133,14 +133,14 @@ SGD_Mesh SGD_DECL sgd_CopyMesh(SGD_Mesh hmesh) {
 	return sgdx::createHandle(sgd::copy(mesh));
 }
 
-void SGD_DECL sgd_SetMeshCastsShadow(SGD_Mesh hmesh, SGD_Bool castsShadow) {
+void SGD_DECL sgd_SetMeshShadowCastingEnabled(SGD_Mesh hmesh, SGD_Bool enabled) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	mesh->castsShadow = castsShadow;
+	mesh->shadowsEnabled = enabled;
 }
 
-SGD_Bool SGD_DECL sgd_GetMeshCastsShadow(SGD_Mesh hmesh) {
+SGD_Bool SGD_DECL sgd_IsMeshShadowCastingEnabled(SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	return mesh->castsShadow();
+	return mesh->shadowsEnabled();
 }
 
 void SGD_DECL sgd_UpdateMeshNormals(SGD_Mesh hmesh) {
@@ -164,7 +164,7 @@ void SGD_DECL sgd_TFormMesh(SGD_Mesh hmesh, float tx, float ty, float tz, float 
 	sgdx::transform(mesh, sgd::AffineMat4f::TRS({tx,ty,tz},{rx,ry,rz},{sx,sy,sz}));
 }
 
-void SGD_DECL sgd_TFormTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY, float offsetX, float offsetY) {
+void SGD_DECL sgd_TFormMeshTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY, float offsetX, float offsetY) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	sgdx::transformTexCoords(mesh, sgd::Vec2f(scaleX, scaleY), sgdx::Vec2f(offsetX, offsetY));
 }
@@ -182,16 +182,16 @@ SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, int flags) {
 	return sgdx::createHandle(mesh);
 }
 
-void SGD_DECL sgd_ResizeVertices(SGD_Mesh hmesh, int count) {
+void SGD_DECL sgd_ResizeMeshVertices(SGD_Mesh hmesh, int count) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	mesh->resizeVertices(count);
 }
 
-int SGD_DECL sgd_GetVertexCount(SGD_Mesh hmesh) {
+int SGD_DECL sgd_GetMeshVertexCount(SGD_Mesh hmesh) {
 	return (int)sgdx::resolveHandle<sgd::Mesh>(hmesh)->vertexCount();
 }
 
-int SGD_DECL sgd_AddVertex(SGD_Mesh hmesh, float x, float y, float z, float nx, float ny, float nz, float s, float t) {
+int SGD_DECL sgd_AddMeshVertex(SGD_Mesh hmesh, float x, float y, float z, float nx, float ny, float nz, float s, float t) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	int i = (int)mesh->vertexCount();
 	mesh->resizeVertices(i + 1);
@@ -200,38 +200,38 @@ int SGD_DECL sgd_AddVertex(SGD_Mesh hmesh, float x, float y, float z, float nx, 
 	return i;
 }
 
-void SGD_DECL sgd_SetVertex(SGD_Mesh hmesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s,
+void SGD_DECL sgd_SetMeshVertex(SGD_Mesh hmesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s,
 							float t) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	mesh->lockVertices(vertex, 1)[0] = {{x, y, z}, {nx, ny, nz}, {s, t}};
 	mesh->unlockVertices();
 }
 
-void SGD_DECL sgd_SetVertexPosition(SGD_Mesh hmesh, int vertex, float x, float y, float z) {
+void SGD_DECL sgd_SetMeshVertexPosition(SGD_Mesh hmesh, int vertex, float x, float y, float z) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	mesh->lockVertices(vertex, 1)->position = {x, y, z};
 	mesh->unlockVertices();
 }
 
-void SGD_DECL sgd_SetVertexNormal(SGD_Mesh hmesh, int vertex, float x, float y, float z) {
+void SGD_DECL sgd_SetMeshVertexNormal(SGD_Mesh hmesh, int vertex, float x, float y, float z) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	mesh->lockVertices(vertex, 1)->normal = {x, y, z};
 	mesh->unlockVertices();
 }
 
-void SGD_DECL sgd_SetVertexTangent(SGD_Mesh hmesh, int vertex, float x, float y, float z, float w) {
+void SGD_DECL sgd_SetMeshVertexTangent(SGD_Mesh hmesh, int vertex, float x, float y, float z, float w) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	mesh->lockVertices(vertex, 1)->tangent = {x, y, z, w};
 	mesh->unlockVertices();
 }
 
-void SGD_DECL sgd_SetVertexTexCoords(SGD_Mesh hmesh, int vertex, float u, float v) {
+void SGD_DECL sgd_SetMeshVertexTexCoords(SGD_Mesh hmesh, int vertex, float u, float v) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	mesh->lockVertices(vertex, 1)->texCoords = {u, v, 0};
 	mesh->unlockVertices();
 }
 
-void SGD_DECL sgd_SetVertexColor(SGD_Mesh hmesh, int vertex, float r, float g, float b, float a) {
+void SGD_DECL sgd_SetMeshVertexColor(SGD_Mesh hmesh, int vertex, float r, float g, float b, float a) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	mesh->lockVertices(vertex, 1)->color = {r, g, b, a};
 	mesh->unlockVertices();
@@ -247,17 +247,17 @@ SGD_Surface SGD_DECL sgd_CreateSurface(SGD_Mesh hmesh, int triangleCount, SGD_Ma
 	return sgdx::createHandle(surface);
 }
 
-void SGD_DECL sgd_ResizeTriangles(SGD_Surface hsurface, int count) {
+void SGD_DECL sgd_ResizeSurfaceTriangles(SGD_Surface hsurface, int count) {
 	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
 	surf->resizeTriangles(count);
 }
 
-int SGD_DECL sgd_GetTriangleCount(SGD_Surface hsurface) {
+int SGD_DECL sgd_GetSurfaceTriangleCount(SGD_Surface hsurface) {
 	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
 	return (int)surf->triangleCount();
 }
 
-int SGD_DECL sgd_AddTriangle(SGD_Surface hsurface, int v0, int v1, int v2) {
+int SGD_DECL sgd_AddSurfaceTriangle(SGD_Surface hsurface, int v0, int v1, int v2) {
 	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
 	int i = (int)surf->triangleCount();
 	surf->resizeTriangles(i + 1);
@@ -266,7 +266,7 @@ int SGD_DECL sgd_AddTriangle(SGD_Surface hsurface, int v0, int v1, int v2) {
 	return i;
 }
 
-void SGD_DECL sgd_SetTriangle(SGD_Surface hsurface, int triangle, int v0, int v1, int v2) {
+void SGD_DECL sgd_SetSurfaceTriangle(SGD_Surface hsurface, int triangle, int v0, int v1, int v2) {
 	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
 	if (triangle < 0 || triangle >= surf->triangleCount()) sgdx::error("Triangle index out of range");
 	surf->lockTriangles(triangle, 1)[0] = {(uint32_t)v0, (uint32_t)v1, (uint32_t)v2};

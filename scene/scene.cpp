@@ -187,8 +187,8 @@ void Scene::updateLightingBindings() {
 			auto& ulight = uniforms.directionalLights[i];
 			ulight.worldMatrix = light->worldMatrix();
 			ulight.color = light->color();
-			ulight.castsShadow = light->castsShadow() && n < m_sceneBindings->maxCSMLights();
-			n += ulight.castsShadow;
+			ulight.shadowsEnabled = light->shadowsEnabled() && n < m_sceneBindings->maxCSMLights();
+			n += ulight.shadowsEnabled;
 		}
 	}
 
@@ -208,8 +208,8 @@ void Scene::updateLightingBindings() {
 			ulight.color = light->color();
 			ulight.range = light->range();
 			ulight.falloff = light->falloff();
-			ulight.castsShadow = light->castsShadow() && n < m_sceneBindings->maxPSMLights();
-			n += ulight.castsShadow;
+			ulight.shadowsEnabled = light->shadowsEnabled() && n < m_sceneBindings->maxPSMLights();
+			n += ulight.shadowsEnabled;
 		}
 	}
 

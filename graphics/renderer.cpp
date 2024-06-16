@@ -26,7 +26,7 @@ void Renderer::addRenderOp(GraphicsContext* gc,		//
 						   uint32_t elementCount,	//
 						   uint32_t instanceCount,	//
 						   uint32_t firstElement,	//
-						   bool castsShadow) const {
+						   bool shadowsEnabled) const {
 
 	{
 		auto rpassType = renderPassType(material->blendMode());
@@ -60,7 +60,7 @@ void Renderer::addRenderOp(GraphicsContext* gc,		//
 #endif
 	}
 
-	if (castsShadow) {
+	if (shadowsEnabled) {
 		SGD_ASSERT(material->blendMode() == BlendMode::opaque); // TODO: || material->blendMode() == BlendMode::alphaMask);
 		auto rpassType = RenderPassType::shadow;
 		auto spipeline = getOrCreateRenderPipeline(gc, rpassType, material, renderer, drawMode);

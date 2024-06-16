@@ -104,7 +104,7 @@ void SkinnedMeshRenderer::onValidate(GraphicsContext* gc) const {
 						surf->triangleCount() * 3, //
 						m_instanceCount,		   //
 						0,						   //
-						m_mesh->castsShadow());
+						m_mesh->shadowsEnabled());
 		}
 		m_rebuildRenderOps = m_updateInstanceCounts = false;
 		return;

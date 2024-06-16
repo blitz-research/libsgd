@@ -7,7 +7,7 @@ void entry() {
 
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/Bricks076C_1K-JPG");
 	SGD_Mesh mesh = sgd_CreateSphereMesh(1, 64, 32, material);
-	sgd_TFormTexCoords(mesh, 2, 2, 0, 0);
+	sgd_TFormMeshTexCoords(mesh, 2, 2, 0, 0);
 	SGD_Model model = sgd_CreateModel(mesh);
 
 	// Pointing rightwards
@@ -38,7 +38,6 @@ void entry() {
 		sgd_TurnEntity(model, 0, .1f, 0);
 
 		sgd_RenderScene();
-
 		sgd_Present();
 	}
 

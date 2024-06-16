@@ -86,7 +86,7 @@ struct Mesh : GraphicsResource {
 
 	Mesh(uint32_t vertexCount, MeshFlags flags);
 
-	Property<bool> castsShadow;
+	Property<bool> shadowsEnabled;
 
 	const Vertex* vertices() const {
 		return (Vertex*)m_vertexBuffer->data();

@@ -25,7 +25,7 @@ struct alignas(16) LightingUniforms {
 	struct alignas(16) DirectionalLight {
 		Mat4f worldMatrix;
 		Vec4f color{1};
-		int castsShadow{0};
+		int shadowsEnabled{0};
 	};
 	static_assert(sizeof(DirectionalLight) == 96);
 
@@ -34,7 +34,7 @@ struct alignas(16) LightingUniforms {
 		alignas(16) Vec4f color{1};
 		float range{100};
 		float falloff{1};
-		int castsShadow{0};
+		int shadowsEnabled{0};
 	};
 	static_assert(sizeof(PointLight) == 48);
 

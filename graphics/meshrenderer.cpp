@@ -63,7 +63,7 @@ MeshRenderer::MeshRenderer(CMesh* mesh)					//
 	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, &meshUniforms, sizeof(meshUniforms)));
 	m_bindGroup->setBuffer(1, m_instanceBuffer);
 
-	m_mesh->castsShadow.changed.connect(this, [=](bool) {
+	m_mesh->shadowsEnabled.changed.connect(this, [=](bool) {
 		m_rebuildRenderOps = true;
 		invalidate();
 	});
@@ -118,7 +118,7 @@ void MeshRenderer::onValidate(GraphicsContext* gc) const {
 						surf->triangleCount() * 3, //
 						m_instanceCount,		   //
 						0,						   //
-						m_mesh->castsShadow());
+						m_mesh->shadowsEnabled());
 		}
 		m_rebuildRenderOps = m_updateInstanceCounts = false;
 		return;

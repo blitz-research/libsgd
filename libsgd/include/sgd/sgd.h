@@ -89,7 +89,7 @@ SGD_API void SGD_DECL sgd_Init();
 //! Shut down libsgd.
 SGD_API void SGD_DECL sgd_Terminate();
 
-//! Set WebGPU backend: D3D12, D3D11, Vulkan. Must be called before sgd_CreateScene().
+//! Set WebGPU backend: D3D12, D3D11, Vulkan. Must be called before sgd_CreateWindow().
 SGD_API void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend);
 
 //! Set error handler callback.
@@ -173,10 +173,10 @@ SGD_API int SGD_DECL sgd_GetWindowHeight();
 //! @{
 
 //! True if key is currently held down.
-SGD_API SGD_Bool SGD_DECL sgd_GetKeyDown(int keyCode);
+SGD_API SGD_Bool SGD_DECL sgd_IsKeyDown(int keyCode);
 
 //! True if key was pressed down last frame.
-SGD_API SGD_Bool SGD_DECL sgd_GetKeyHit(int keyCode);
+SGD_API SGD_Bool SGD_DECL sgd_IsKeyHit(int keyCode);
 
 //! Get next unicode character from keyboard input queue.
 SGD_API int SGD_DECL sgd_GetChar();
@@ -225,19 +225,19 @@ SGD_API void SGD_DECL sgd_SetMouseZ(float z);
 SGD_API void SGD_DECL sgd_SetMouseCursorMode(int cursorMode);
 
 //! True if mouse button is curently held down.
-SGD_API SGD_Bool SGD_DECL sgd_GetMouseButtonDown(int button);
+SGD_API SGD_Bool SGD_DECL sgd_IsMouseButtonDown(int button);
 
 //! True if mouse button was pressed down last frame.
-SGD_API SGD_Bool SGD_DECL sgd_GetMouseButtonHit(int button);
+SGD_API SGD_Bool SGD_DECL sgd_IsMouseButtonHit(int button);
 
 //! True if gamepad is currently connected.
-SGD_API SGD_Bool SGD_DECL sgd_GetGamepadConnected(int gamepad);
+SGD_API SGD_Bool SGD_DECL sgd_IsGamepadConnected(int gamepad);
 
 //! True if gamepad button currently held down.
-SGD_API SGD_Bool SGD_DECL sgd_GetGamepadButtonDown(int gamepad, int button);
+SGD_API SGD_Bool SGD_DECL sgd_IsGamepadButtonDown(int gamepad, int button);
 
 //! True if gamepad button was pressed down last frame.
-SGD_API SGD_Bool SGD_DECL sgd_GetGamepadButtonHit(int gamepad, int button);
+SGD_API SGD_Bool SGD_DECL sgd_IsGamepadButtonHit(int gamepad, int button);
 
 //! Value in the range -1 to 1 representing joystick axis position.
 SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, int axis);
@@ -429,10 +429,10 @@ SGD_API SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int seg
 SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs, SGD_Material material);
 
 //! Set mesh casts shadow flag, defaults to true.
-SGD_API void SGD_DECL sgd_SetMeshCastsShadow(SGD_Mesh mesh, SGD_Bool castsShadow);
+SGD_API void SGD_DECL sgd_SetMeshShadowCastingEnabled(SGD_Mesh mesh, SGD_Bool enabled);
 
 //! Get mesh casts shadow flag.
-SGD_API SGD_Bool SGD_DECL sgd_GetMeshCastsShadow(SGD_Mesh mesh);
+SGD_API SGD_Bool SGD_DECL sgd_IsMeshShadowCastingEnabled(SGD_Mesh mesh);
 
 //! Copy mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_CopyMesh(SGD_Mesh mesh);
@@ -451,7 +451,7 @@ SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh mesh, float minX, float minY, float m
 SGD_API void SGD_DECL sgd_TFormMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz);
 
 //! Transform mesh texture coordinates.
-SGD_API void SGD_DECL sgd_TFormTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
+SGD_API void SGD_DECL sgd_TFormMeshTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
 
 //! Flip mesh.
 SGD_API void SGD_DECL sgd_FlipMesh(SGD_Mesh mesh);
@@ -465,31 +465,31 @@ SGD_API void SGD_DECL sgd_FlipMesh(SGD_Mesh mesh);
 SGD_API SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, int flags);
 
 //! Add uninitialized vertices to a mesh, returning index of the first new vertex.
-SGD_API void SGD_DECL sgd_ResizeVertices(SGD_Mesh mesh, int count);
+SGD_API void SGD_DECL sgd_ResizeMeshVertices(SGD_Mesh mesh, int count);
 
 //! Get number of vertices in mesh.
-SGD_API int SGD_DECL sgd_GetVertexCount(SGD_Mesh mesh);
+SGD_API int SGD_DECL sgd_GetMeshVertexCount(SGD_Mesh mesh);
 
 //! Add a vertex to a mesh, returning index of new vertex.
-SGD_API int SGD_DECL sgd_AddVertex(SGD_Mesh mesh, float x, float y, float z, float nx, float ny, float nz, float s, float t);
+SGD_API int SGD_DECL sgd_AddMeshVertex(SGD_Mesh mesh, float x, float y, float z, float nx, float ny, float nz, float s, float t);
 
 //! Set vertex.
-SGD_API void SGD_DECL sgd_SetVertex(SGD_Mesh mesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s, float t);
+SGD_API void SGD_DECL sgd_SetMeshVertex(SGD_Mesh mesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s, float t);
 
 //! Set vertex position.
-SGD_API void SGD_DECL sgd_SetVertexPosition(SGD_Mesh mesh, int vertex, float x, float y, float z);
+SGD_API void SGD_DECL sgd_SetMeshVertexPosition(SGD_Mesh mesh, int vertex, float x, float y, float z);
 
 //! Set vertex normal.
-SGD_API void SGD_DECL sgd_SetVertexNormal(SGD_Mesh mesh, int vertex, float nx, float ny, float nz);
+SGD_API void SGD_DECL sgd_SetMeshVertexNormal(SGD_Mesh mesh, int vertex, float nx, float ny, float nz);
 
 //! Set vertex tangent.
-SGD_API void SGD_DECL sgd_SetVertexTangent(SGD_Mesh mesh, int vertex, float tx, float ty, float tz, float tw);
+SGD_API void SGD_DECL sgd_SetMeshVertexTangent(SGD_Mesh mesh, int vertex, float tx, float ty, float tz, float tw);
 
 //! Set vertex texture coordinates.
-SGD_API void SGD_DECL sgd_SetVertexTexCoords(SGD_Mesh mesh, int vertex, float u, float v);
+SGD_API void SGD_DECL sgd_SetMeshVertexTexCoords(SGD_Mesh mesh, int vertex, float u, float v);
 
 //! Set vertex color.
-SGD_API void SGD_DECL sgd_SetVertexColor(SGD_Mesh mesh, int vertex, float r, float g, float b, float a);
+SGD_API void SGD_DECL sgd_SetMeshVertexColor(SGD_Mesh mesh, int vertex, float r, float g, float b, float a);
 
 // ***** Surfaces *****
 
@@ -497,16 +497,16 @@ SGD_API void SGD_DECL sgd_SetVertexColor(SGD_Mesh mesh, int vertex, float r, flo
 SGD_API SGD_Surface SGD_DECL sgd_CreateSurface(SGD_Mesh mesh, int triangleCount, SGD_Material material);
 
 //! Add empty triangles to surface, returning index of first new triangle.
-SGD_API void SGD_DECL sgd_ResizeTriangles(SGD_Surface surface, int count);
+SGD_API void SGD_DECL sgd_ResizeSurfaceTriangles(SGD_Surface surface, int count);
 
 //! Get number of triangles in surface.
-SGD_API int SGD_DECL sgd_GetTriangleCount(SGD_Surface surface);
+SGD_API int SGD_DECL sgd_GetSurfaceTriangleCount(SGD_Surface surface);
 
 //! Add triangle to surface, returning index of new triangle.
-SGD_API int SGD_DECL sgd_AddTriangle(SGD_Surface surface, int v0, int v1, int v2);
+SGD_API int SGD_DECL sgd_AddSurfaceTriangle(SGD_Surface surface, int v0, int v1, int v2);
 
 //! Update existing triangle vertices in surface.
-SGD_API void SGD_DECL sgd_SetTriangle(SGD_Surface surface, int triangle, int v0, int v1, int v2);
+SGD_API void SGD_DECL sgd_SetSurfaceTriangle(SGD_Surface surface, int triangle, int v0, int v1, int v2);
 
 //! @}
 
@@ -663,7 +663,7 @@ SGD_API void SGD_DECL sgd_SetAudioLooping(int audio, SGD_Bool looping);
 SGD_API void SGD_DECL sgd_SetAudioPaused(int audio, SGD_Bool paused);
 
 //! Get audio valid flag. Audio is valid if it is playing or paused.
-SGD_API SGD_Bool SGD_DECL sgd_GetAudioValid(int audio);
+SGD_API SGD_Bool SGD_DECL sgd_IsAudioValid(int audio);
 
 //! Stop audio.
 SGD_API void SGD_DECL sgd_StopAudio(int audio);
@@ -673,7 +673,7 @@ SGD_API void SGD_DECL sgd_StopAudio(int audio);
 //! @name Scene
 //! @{
 
-//! Clear scene and destroy all resources.
+//! Release SGD resources currently in use.
 SGD_API void SGD_DECL sgd_ClearScene();
 
 //! Set scene ambient light color.
@@ -721,13 +721,13 @@ SGD_API float SGD_DECL sgd_GetRPS();
 SGD_API void SGD_DECL sgd_SetEntityEnabled(SGD_Entity entity, SGD_Bool enabled);
 
 //! Get entity enabled state. An entity is only enabled in the scene if both it and all its ancestors are enabled.
-SGD_API SGD_Bool SGD_DECL sgd_GetEntityEnabled(SGD_Entity entity);
+SGD_API SGD_Bool SGD_DECL sgd_IsEntityEnabled(SGD_Entity entity);
 
 //! Show or hide entity.
 SGD_API void SGD_DECL sgd_SetEntityVisible(SGD_Entity entity, SGD_Bool visible);
 
 //! Get entity visible state. An entity is only visible in the scene if both it and all its ancestors are visible.
-SGD_API SGD_Bool SGD_DECL sgd_GetEntityVisible(SGD_Entity entity);
+SGD_API SGD_Bool SGD_DECL sgd_IsEntityVisible(SGD_Entity entity);
 
 //! Destroy entity and children recursively.
 SGD_API void SGD_DECL sgd_DestroyEntity(SGD_Entity entity);
@@ -902,10 +902,10 @@ SGD_API void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light light, float angle);
 SGD_API void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light light, float angle);
 
 //! Set light casts shadow flag, defaults to true.
-SGD_API void SGD_DECL sgd_SetLightCastsShadow(SGD_Light light, SGD_Bool castShadow);
+SGD_API void SGD_DECL sgd_SetLightShadowMappingEnabled(SGD_Light light, SGD_Bool castShadow);
 
 //! Get light castsShadow flag.
-SGD_API SGD_Bool SGD_DECL sgd_GetLightCastsShadow(SGD_Light light);
+SGD_API SGD_Bool SGD_DECL sgd_IsLightShadowMappingEnabled(SGD_Light light);
 
 //! Set light priority.
 SGD_API void SGD_DECL sgd_SetLightPriority(SGD_Light light, int priority);

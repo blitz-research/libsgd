@@ -14,7 +14,7 @@ start:;	// Need semi-colon for Macos?!?
 	sgd_SetPSMTextureSize(4096);
 
 	SGD_Light light0 = sgd_CreatePointLight();
-	sgd_SetLightCastsShadow(light0, SGD_TRUE);
+	sgd_SetLightShadowMappingEnabled(light0, SGD_TRUE);
 	sgd_MoveEntity(light0, 0, 5, 0);
 	sgd_SetEntityParent(light0, camera);
 	sgd_SetLightRange(light0, 50);
@@ -34,34 +34,34 @@ start:;	// Need semi-colon for Macos?!?
 	SGD_Model models[5];
 
 	SGD_Mesh mesh0 = sgd_CreateSphereMesh(r, 96, 48, material);
-	sgd_SetMeshCastsShadow(mesh0, SGD_TRUE);
+	sgd_SetMeshShadowCastingEnabled(mesh0, SGD_TRUE);
 	models[0] = sgd_CreateModel(mesh0);
 	sgd_MoveEntity(models[0], -2.5f, y, tz);
 
 	float r2 = r * .7071f;
 	SGD_Mesh mesh1 = sgd_CreateBoxMesh(-r2, -r2, -r2, r2, r2, r2, material);
-	sgd_SetMeshCastsShadow(mesh1, SGD_TRUE);
+	sgd_SetMeshShadowCastingEnabled(mesh1, SGD_TRUE);
 	models[1] = sgd_CreateModel(mesh1);
 	sgd_MoveEntity(models[1], -1.25f, y, tz);
 
 	SGD_Mesh mesh2 = sgd_CreateCylinderMesh(r * 2, r / 2, 96, material);
-	sgd_SetMeshCastsShadow(mesh2, SGD_TRUE);
+	sgd_SetMeshShadowCastingEnabled(mesh2, SGD_TRUE);
 	models[2] = sgd_CreateModel(mesh2);
 	sgd_MoveEntity(models[2], 0, y, tz);
 
 	SGD_Mesh mesh3 = sgd_CreateConeMesh(r * 2, r / 2, 96, material);
-	sgd_SetMeshCastsShadow(mesh3, SGD_TRUE);
+	sgd_SetMeshShadowCastingEnabled(mesh3, SGD_TRUE);
 	models[3] = sgd_CreateModel(mesh3);
 	sgd_MoveEntity(models[3], 1.25f, y, tz);
 
 	SGD_Mesh mesh4 = sgd_CreateTorusMesh(r * .75f, r * .25f, 96, 48, material);
-	sgd_SetMeshCastsShadow(mesh4, SGD_TRUE);
+	sgd_SetMeshShadowCastingEnabled(mesh4, SGD_TRUE);
 	models[4] = sgd_CreateModel(mesh4);
 	sgd_MoveEntity(models[4], 2.5f, y, tz);
 
 	while (!(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)) {
 
-		if (sgd_GetKeyHit(SGD_KEY_ESCAPE)) {
+		if (sgd_IsKeyHit(SGD_KEY_ESCAPE)) {
 			SGD_Real dz = 1ll << 33;
 
 			if (sgd_GetEntityZ(camera) > dz / 2) dz = -dz;
@@ -73,25 +73,25 @@ start:;	// Need semi-colon for Macos?!?
 			printf("### Camera Z: %f\n", sgd_GetEntityZ(camera));
 		}
 
-		if (sgd_GetKeyDown(SGD_KEY_A)) {
+		if (sgd_IsKeyDown(SGD_KEY_A)) {
 			sgd_MoveEntity(camera, 0, 0, .3);
 			printf("### Camera Z: %f\n", sgd_GetEntityZ(camera));
-		} else if (sgd_GetKeyDown(SGD_KEY_Z)) {
+		} else if (sgd_IsKeyDown(SGD_KEY_Z)) {
 			sgd_MoveEntity(camera, 0, 0, -.3);
 			printf("### Camera Z: %f\n", sgd_GetEntityZ(camera));
 		}
 
 		fflush(stdout);
 
-		if (sgd_GetKeyDown(SGD_KEY_LEFT)) {
+		if (sgd_IsKeyDown(SGD_KEY_LEFT)) {
 			sgd_RotateEntity(camera, 0, 1, 0);
-		} else if (sgd_GetKeyDown(SGD_KEY_RIGHT)) {
+		} else if (sgd_IsKeyDown(SGD_KEY_RIGHT)) {
 			sgd_RotateEntity(camera, 0, -1, 0);
 		}
 
-		if (sgd_GetKeyDown(SGD_KEY_UP)) {
+		if (sgd_IsKeyDown(SGD_KEY_UP)) {
 			sgd_TurnEntity(camera, -1, 0, 0);
-		} else if (sgd_GetKeyDown(SGD_KEY_DOWN)) {
+		} else if (sgd_IsKeyDown(SGD_KEY_DOWN)) {
 			sgd_TurnEntity(camera, 1, 0, 0);
 		}
 

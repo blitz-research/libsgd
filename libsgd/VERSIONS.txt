@@ -1,9 +1,12 @@
 
 ***** V0.08 *****
 
+Fixed sprite scaling.
+
 Added SetCSMTextureSize, SetMaxCSMLights, SetPSMTextureSize, SetMaxPSMLights, where PSM = point light shadow maps.
 
 Added 'cascading shadow maps' (CSM) for directional lights.
+
 
 ***** V0.07.2 *****
 
@@ -65,7 +68,7 @@ who aren't using GetChar in a loop will 'miss' chars if I did, so am playing it 
 
 * Added deprecation system - you should now get a runtime warning when using a deprecated function, eg: TransformMesh, TransformMeshTexCoords.
 
-* Deprecated/renamed TransformMesh, TransformMeshtexCoords to TFormMesh, TFormTexCoords.
+* Deprecated/renamed TransformMesh, TransformMeshtexCoords to TFormMesh, TFormMeshTexCoords.
 
 * Added TFormPoint, TFormVector, TFormNormal, TFormedX, TFormedY, TFormedZ.
 
@@ -190,7 +193,7 @@ who aren't using GetChar in a loop will 'miss' chars if I did, so am playing it 
 
 * Fixed lots of mesh primitive issues, including all box meshes scaled by 2 for some reason.
 
-* Added sgd_SetMeshCastsShadoqw and sgd_SetLightCastsShadow, both off by default for now.
+* Added sgd_SetMeshCastsShadoqw and sgd_SetLightShadowMappingEnabled, both off by default for now.
 
 * Begin work on shadowmapping!
 

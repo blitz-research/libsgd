@@ -44,26 +44,26 @@ model = LoadBonedModel ("sgd://models/base_male_animated.glb",True)
 
 While (PollEvents() And 1)=0
 	
-	If GetKeyHit(KEY_SPACE) useBlend = 1 - useBlend
+	If IsKeyHit(KEY_SPACE) useBlend = 1 - useBlend
 	
 	;Select new anim
 	Local nseq=1
-	If GetKeyDown(KEY_LEFT_SHIFT)
+	If IsKeyDown(KEY_LEFT_SHIFT)
 		;Run
-		If GetKeyDown(KEY_UP)
+		If IsKeyDown(KEY_UP)
 			nseq=6
-		ElseIf GetKeyDown(KEY_LEFT)
+		ElseIf IsKeyDown(KEY_LEFT)
 			nseq=5
-		ElseIf GetKeyDown(KEY_RIGHT)
+		ElseIf IsKeyDown(KEY_RIGHT)
 			nseq=4
 		EndIf
 	Else
 		;Walk
-		If GetKeyDown(KEY_UP)
+		If IsKeyDown(KEY_UP)
 			nseq=8
-		ElseIf GetKeyDown(KEY_LEFT)
+		ElseIf IsKeyDown(KEY_LEFT)
 			nseq=10
-		ElseIf GetKeyDown(KEY_RIGHT)
+		ElseIf IsKeyDown(KEY_RIGHT)
 			nseq=9
 		EndIf
 	EndIf

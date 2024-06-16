@@ -23,7 +23,7 @@ struct CameraUniforms {
 struct DirectionalLight {
     worldMatrix: mat4x4f,
     color: vec4f,
-    castsShadow: i32,
+    shadowsEnabled: i32,
 }
 
 struct PointLight {
@@ -31,7 +31,7 @@ struct PointLight {
  	color: vec4f,
 	range: f32,
 	falloff: f32,
- 	castsShadow: i32,
+ 	shadowsEnabled: i32,
 }
 
 struct SpotLight {
@@ -123,7 +123,7 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	    var atten = 1.0;
 
-	    if light.castsShadow != 0 {
+	    if light.shadowsEnabled!= 0 {
 	        let vpos = (cameraUniforms.viewMatrix * vec4f(position, 1.0)).xyz;
 	        if vpos.z >= shadowUniforms.csmSplits.w {continue;}
             var split = i * 4;
@@ -157,7 +157,7 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	    var atten = 1.0;
 
-	    if light.castsShadow != 0 {
+	    if light.shadowsEnabled != 0 {
 	        let near = shadowUniforms.psmNear;
             let far = light.range;
             let z = max(abs(lvec.x), max(abs(lvec.y), abs(lvec.z)));

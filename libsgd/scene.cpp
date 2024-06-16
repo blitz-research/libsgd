@@ -111,7 +111,7 @@ void SGD_DECL sgd_SetEntityEnabled(SGD_Entity hentity, SGD_Bool enabled) {
 	sgdx::resolveHandle<sgd::Entity>(hentity)->setIsEnabled(enabled);
 }
 
-SGD_Bool SGD_DECL sgd_GetEntityEnabled(SGD_Entity hentity) {
+SGD_Bool SGD_DECL sgd_IsEntityEnabled(SGD_Entity hentity) {
 	return sgdx::resolveHandle<sgd::Entity>(hentity)->enabled();
 }
 
@@ -119,7 +119,7 @@ void SGD_DECL sgd_SetEntityVisible(SGD_Entity hentity, SGD_Bool visible) {
 	sgdx::resolveHandle<sgd::Entity>(hentity)->setIsVisible(visible);
 }
 
-SGD_Bool SGD_DECL sgd_GetEntityVisible(SGD_Entity hentity) {
+SGD_Bool SGD_DECL sgd_IsEntityVisible(SGD_Entity hentity) {
 	return sgdx::resolveHandle<sgd::Entity>(hentity)->visible();
 }
 
@@ -423,14 +423,14 @@ void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light hlight, float angle) {
 	light->outerConeAngle = angle;
 }
 
-void SGD_DECL sgd_SetLightCastsShadow(SGD_Light hlight, SGD_Bool castsShadow) {
+void SGD_DECL sgd_SetLightShadowMappingEnabled(SGD_Light hlight, SGD_Bool enabled) {
 	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-	light->castsShadow = castsShadow;
+	light->shadowsEnabled = enabled;
 }
 
-SGD_Bool SGD_DECL sgd_GetLightCastsShadow(SGD_Light hlight) {
+SGD_Bool SGD_DECL sgd_IsLightShadowMappingEnabled(SGD_Light hlight) {
 	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-	return light->castsShadow();
+	return light->shadowsEnabled();
 }
 
 void SGD_DECL sgd_SetLightPriority(SGD_Light hlight, int priority) {

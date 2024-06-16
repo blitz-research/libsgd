@@ -5,7 +5,7 @@ int numBlocks = 10000;
 void entry() {
 
 	setRotation(light, {-75, 25, 0});
-	light->castsShadow = true;
+	light->shadowsEnabled = true;
 
 	{
 		float sz = 32;
@@ -18,7 +18,7 @@ void entry() {
 
 	{
 		MeshPtr mesh = loadStaticMesh(Path("sgd://models/sci-fi_crate.glb")).result();
-		mesh->castsShadow=true;
+		mesh->shadowsEnabled = true;
 		fit(mesh, {-.4f, .4f}, true);
 		for (int x = -20; x <= 20; ++x) {
 			for (int z = -20; z <= 20; ++z) {

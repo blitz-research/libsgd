@@ -41,7 +41,7 @@ protected:
 					 uint32_t elementCount,	  //
 					 uint32_t instanceCount,  //
 					 uint32_t firstElement,	  //
-					 bool castsShadow) const;
+					 bool shadowsEnabled) const;
 };
 
 RenderPassType renderPassType(BlendMode blendMode);

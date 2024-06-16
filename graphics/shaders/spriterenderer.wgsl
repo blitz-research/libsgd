@@ -23,16 +23,20 @@ struct Varying {
     let instance = spriteInstances[vertexId / 6];
     let vcoords = vertices[vertexId % 6];
 
-    // Very cheeky! Will only with imagematerial...
+    // Very cheeky! Will only work with imagematerial...
     let rect = material_uniforms.rect;
 
     let vertex = vec3f(rect.zw * vcoords + rect.xy, 0);
 
     var position:vec3f;
 
+    // Note: Might be better to just store trans/basis/scle
+
     if material_uniforms.spriteViewMode == 1 {  // fixed, locked to camera
 
-        position = (cameraUniforms.worldMatrix * vec4f(vertex, 0)).xyz + instance.matrix[3].xyz;
+        let scale = vec3f(length(instance.matrix[0]), length(instance.matrix[1]), length(instance.matrix[2]));
+
+        position = (cameraUniforms.worldMatrix * vec4f(scale * vertex, 0)).xyz + instance.matrix[3].xyz;
 
     } else if material_uniforms.spriteViewMode == 2 {   // free, billboard style
 
@@ -40,17 +44,14 @@ struct Varying {
 
     } else if material_uniforms.spriteViewMode == 3 {   // upright, tree style
 
-        var matrix: mat4x4f;
-        let j = instance.matrix[1].xyz;
-        let i = normalize(cross(cameraUniforms.worldMatrix[3].xyz - instance.matrix[3].xyz, j));
-        let k = normalize(cross(i, j));
+        let scale = vec3f(length(instance.matrix[0]), length(instance.matrix[1]), length(instance.matrix[2]));
 
-        matrix[0] = vec4f(i, 0);
-        matrix[1] = vec4f(j, 0);
-        matrix[2] = vec4f(k, 0);
-        matrix[3] = instance.matrix[3];
+        var basis: mat3x3f;
+        basis[1] = instance.matrix[1].xyz / scale[1];
+        basis[0] = normalize(cross(cameraUniforms.worldMatrix[3].xyz - instance.matrix[3].xyz, basis[1]));
+        basis[2] = normalize(cross(basis[0], basis[1]));
 
-        position = (matrix * vec4f(rect.zw * vcoords + rect.xy, 0, 1)).xyz;
+        position = (basis * (scale * vertex)) + instance.matrix[3].xyz;
 
     } else {    // default to billboard style
 

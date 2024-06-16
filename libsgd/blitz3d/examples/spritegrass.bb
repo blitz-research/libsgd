@@ -18,14 +18,14 @@ TurnEntity light,-45,0,0	; Tilt light down 45 degrees
 grassImage = LoadImage("sgd://misc/grass1.png", 1)
 SetImageSpriteRect grassImage,-1,0,1,1
 
-Const n=20000
+Const n=30000
 
 For i=0 To n
 	sprite = CreateSprite(grassImage)
 	TurnEntity(sprite,0,Rnd(360),0)
 	MoveEntity(sprite,0,-1.5,Rnd(100))
-	Local sc#=Rnd(1,2)
-	SetEntityScale sprite, sc,sc,sc
+	Local sc#=Rnd(.1,1)
+	ScaleEntity sprite, sc,sc,sc
 Next
 
 CreatePlayer(0)
@@ -37,7 +37,7 @@ While Not PollEvents()
 	PlayerFly(.1)
 	
 	Clear2D()
-	If GetKeyHit(KEY_SPACE)
+	If IsKeyHit(KEY_SPACE)
 		viewMode = viewMode + 1
 		If viewMode=4 viewMode=1
 		SetImageSpriteViewMode grassImage, viewMode

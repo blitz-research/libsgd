@@ -63,8 +63,7 @@ Local sky_map_path:String			= "sgd://envmaps/"		+ sky_texture_file
 ' SCENE:
 ' -------
 
-SGD.CreateScene ()
-SGD.SetSceneAmbientLightColor 0, 0, 0, 1'0.025, 0.05, 0.0375, 1.0
+SGD.SetAmbientLightColor 0, 0, 0, 1'0.025, 0.05, 0.0375, 1.0
 
 ' --------
 ' SKYBOX:
@@ -72,7 +71,7 @@ SGD.SetSceneAmbientLightColor 0, 0, 0, 1'0.025, 0.05, 0.0375, 1.0
  
 Local sky_texture:Int = SGD.LoadTexture (sky_map_path, SGD.TEXTURE_FORMAT_SRGBA8, SGD.TEXTURE_FLAGS_ENVMAP_DEFAULT)
 
-SGD.SetSceneEnvTexture sky_texture
+SGD.SetEnvTexture sky_texture
 
 Local skybox:Int = SGD.CreateSkybox (sky_texture)
 SGD.SetSkyboxRoughness skybox, 0.3
@@ -88,7 +87,7 @@ Local light:Int = SGD.CreatePointLight ()
 ' Light details:
 
 SGD.SetLightRange light, 25.0
-SGD.SetLightCastsShadow (light, True) ' CASTING SHADOW
+SGD.SetLightShadowMappingEnabled (light, True) ' CASTING SHADOW
 SGD.SetLightColor light, 1.0, 1.0, 1.0, 1.0
 
 ' Positioning:
@@ -111,7 +110,7 @@ Local ground:Int			= SGD.CreateModel (ground_mesh)
 
 Local ground_scale:Float = 50.0
 
-SGD.TransformMeshTexCoords (ground_mesh, ground_scale, ground_scale, 0.0, 0.0)
+SGD.TFormMeshTexCoords (ground_mesh, ground_scale, ground_scale, 0.0, 0.0)
 
 ' ------
 ' CUBE:
@@ -122,7 +121,7 @@ Local cube_material:Int	= SGD.CreatePBRMaterial ()
 Local cube_size:Float	= 1.0
 Local cube_mesh			= SGD.CreateBoxMesh (-cube_size * 0.5, -cube_size * 0.5, -cube_size * 0.5, cube_size * 0.5, cube_size * 0.5, cube_size * 0.5, cube_material)
 
-SGD.SetMeshCastsShadow cube_mesh, True ' CUBE CASTS SHADOW
+SGD.SetMeshShadowCastingEnabled cube_mesh, True ' CUBE CASTS SHADOW
 
 ' Change colour here!
 
@@ -172,7 +171,7 @@ Repeat
 	
 	' Check for ESC key or window close gadget-hit...
 	
-	If SGD.KeyHit (SGD.KEY_ESCAPE) Or events & SGD.EVENT_MASK_CLOSE_CLICKED
+	If SGD.IsKeyHit (SGD.KEY_ESCAPE) Or events & SGD.EVENT_MASK_CLOSE_CLICKED
 		quit = True
 	EndIf
 	
@@ -180,11 +179,11 @@ Repeat
 	
 	' LEFT/RIGHT cursors: camera strafe...
 	
-	If SGD.KeyDown (SGD.KEY_LEFT)
+	If SGD.IsKeyDown (SGD.KEY_LEFT)
 		yaw = yaw + 0.1
 		If yaw > 1.5 Then yaw = 1.5
 	Else
-		If SGD.KeyDown (SGD.KEY_RIGHT)
+		If SGD.IsKeyDown (SGD.KEY_RIGHT)
 			yaw = yaw - 0.1
 			If yaw < -1.5 Then yaw = -1.5
 		EndIf
@@ -198,11 +197,11 @@ Repeat
 	
 	' UP/DOWN cursors: camera tilt...
 	
-	If SGD.KeyDown (SGD.KEY_UP)
+	If SGD.IsKeyDown (SGD.KEY_UP)
 		pitch = pitch - 0.1 * pitcher
 		If pitch < -1.5 Then pitch = -1.5
 	Else
-		If SGD.KeyDown (SGD.KEY_DOWN)
+		If SGD.IsKeyDown (SGD.KEY_DOWN)
 			pitch = pitch + 0.1 * pitcher
 			If pitch > 1.5 Then pitch = 1.5
 		EndIf
@@ -212,17 +211,17 @@ Repeat
 	
 	Local shifted:Float = 1.0
 	
-	If SGD.KeyDown (SGD.KEY_LEFT_SHIFT)
+	If SGD.IsKeyDown (SGD.KEY_LEFT_SHIFT)
 		shifted = 2.0
 	EndIf
 	
 	' A/D keys: strafe left/right...
 
-	If SGD.KeyDown (SGD.KEY_A)
+	If SGD.IsKeyDown (SGD.KEY_A)
 		strafe = strafe - 0.01 * shifted
 		If strafe < -0.1 * shifted Then strafe = -0.1 * shifted
 	Else
-		If SGD.KeyDown (SGD.KEY_D)
+		If SGD.IsKeyDown (SGD.KEY_D)
 			strafe = strafe + 0.1 * shifted
 			If strafe > 0.1 * shifted Then strafe = 0.1 * shifted
 		EndIf
@@ -230,11 +229,11 @@ Repeat
 
 	' W/S keys: forward/back...
 
-	If SGD.KeyDown (SGD.KEY_W)
+	If SGD.IsKeyDown (SGD.KEY_W)
 		z = z + 0.01 * shifted
 		If z > 0.1 * shifted Then z = 0.1 * shifted
 	Else
-		If SGD.KeyDown (SGD.KEY_S)
+		If SGD.IsKeyDown (SGD.KEY_S)
 			z = z - 0.01 * shifted
 			If z < -0.1 * shifted Then z = -0.1 * shifted
 		EndIf
@@ -288,5 +287,5 @@ End Type
 ' No doubt to come!
 
 Function temp_EntityDistance:Float (src:Int, dest:Int)
-	Return Sqr ((SGD.EntityX (src) - SGD.EntityX (dest)) ^ 2 + (SGD.EntityY (src) - SGD.EntityY (dest)) ^ 2 + (SGD.EntityZ (src) - SGD.EntityZ (dest)) ^ 2)
+	Return Sqr ((SGD.GetEntityX (src) - SGD.GetEntityX (dest)) ^ 2 + (SGD.GetEntityY (src) - SGD.GetEntityY (dest)) ^ 2 + (SGD.GetEntityZ (src) - SGD.GetEntityZ (dest)) ^ 2)
 End Function

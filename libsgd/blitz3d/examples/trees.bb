@@ -15,7 +15,7 @@ Local sz#=32
 
 Local groundMaterial = LoadPBRMaterial("sgd://misc/brownish-grass.jpg")
 Local groundMesh = CreateBoxMesh(-sz,-1,-sz,sz,0,sz,groundMaterial)
-TFormTexCoords groundMesh,sz,sz,0,0
+TFormMeshTexCoords groundMesh,sz,sz,0,0
 Local ground = CreateModel(groundMesh)
 
 Dim treeMeshes(3)
@@ -38,6 +38,6 @@ While PollEvents()<>1
 	PlayerFly(.125)
 	RenderScene()
 	Clear2D()
-	Draw2DText "FPS:"+FPS()+", RPS:"+RPS(),0,0
+	Draw2DText "FPS:"+GetFPS(),0,0
 	Present()
 Wend

@@ -6,7 +6,7 @@ Function createSphere(radius#, xSegs, ySegs, material)
 	Local fxSegs# = 1/Float(xSegs), fySegs# = 1/Float(ySegs)
 	
 	For i=0 To xSegs-1
-		AddVertex mesh, 0, radius, 0, 0, 1, 0, (Float(i) + .5) * 2 * fxSegs, 0
+		AddMeshVertex mesh, 0, radius, 0, 0, 1, 0, (Float(i) + .5) * 2 * fxSegs, 0
 	Next
 	For j = 1 To ySegs-1
 		Local pitch# = HALF_PI - Float(j) * Pi * fySegs;
@@ -16,30 +16,30 @@ Function createSphere(radius#, xSegs, ySegs, material)
 			Local y# = Sin(pitch);
 			Local x# = Cos(yaw) * r;
 			Local z# = Sin(yaw) * r;
-			AddVertex mesh, x * radius, y * radius, z * radius, x, y, z, Float(i) * 2 * fxSegs, Float(j) * fySegs
+			AddMeshVertex mesh, x * radius, y * radius, z * radius, x, y, z, Float(i) * 2 * fxSegs, Float(j) * fySegs
 		Next
 	Next
 	For i = 0 To xSegs-1
-		AddVertex mesh, 0, -radius, 0, 0, -1, 0, (Float(i) + .5) * 2 * fxSegs, 1
+		AddMeshVertex mesh, 0, -radius, 0, 0, -1, 0, (Float(i) + .5) * 2 * fxSegs, 1
 	Next
 	
 	Local surf = CreateSurface(mesh, 0, material);
 	
 	For i = 0 To xSegs-1
-		AddTriangle surf, i, i + xSegs, i + xSegs + 1
+		AddSurfaceTriangle surf, i, i + xSegs, i + xSegs + 1
 	Next
 	
 	For j = 1 To ySegs-2
 		For i = 0 To xSegs-1
 			Local v0 = j * (xSegs + 1) + i - 1
 			Local v2 = v0 + xSegs + 2
-			AddTriangle surf, v0, v2, v0 + 1
-			AddTriangle surf, v0, v2 - 1, v2
+			AddSurfaceTriangle surf, v0, v2, v0 + 1
+			AddSurfaceTriangle surf, v0, v2 - 1, v2
 		Next
 	Next
 	For i = 0 To xSegs-1
 		v0 = (xSegs + 1) * (ySegs - 1) + i - 1
-		AddTriangle surf, v0, v0 + xSegs + 1, v0 + 1
+		AddSurfaceTriangle surf, v0, v0 + xSegs + 1, v0 + 1
 	Next
 	
 	Return mesh
@@ -49,11 +49,9 @@ End Function
 
 CreateWindow(1280, 720, "Custom mesh demo", 0)
 
-CreateScene()
-
 env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
 
-SetSceneEnvTexture env
+SetEnvTexture env
 
 skybox = CreateSkybox(env)
 SetSkyboxRoughness skybox, .3
@@ -70,15 +68,15 @@ MoveEntity model,0,0,3
 
 While Not PollEvents()
 
-	If GetKeyDown(263)
+	If IsKeyDown(263)
 		TurnEntity model,0,3,0
-	Else If GetKeyDown(262)
+	Else If IsKeyDown(262)
 		TurnEntity model,0,-3,0
 	EndIf
 	
-	If GetKeyDown(264)
+	If IsKeyDown(264)
 		TurnEntity model,3,0,0
-	Else If GetKeyDown(265)
+	Else If IsKeyDown(265)
 		TurnEntity model,-3,0,0
 	EndIf
 	

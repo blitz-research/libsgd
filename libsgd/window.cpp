@@ -44,12 +44,12 @@ int SGD_DECL sgd_GetWindowHeight() {
 	return (int)sgdx::mainWindow()->size().y;
 }
 
-SGD_Bool SGD_DECL sgd_GetKeyDown(int keyCode) {
+SGD_Bool SGD_DECL sgd_IsKeyDown(int keyCode) {
 	if ((uint32_t)keyCode > SGD_KEY_LAST) sgd_Error("Key code out of range");
 	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)keyCode).down();
 }
 
-SGD_Bool SGD_DECL sgd_GetKeyHit(int keyCode) {
+SGD_Bool SGD_DECL sgd_IsKeyHit(int keyCode) {
 	if ((uint32_t)keyCode > SGD_KEY_LAST) sgd_Error("Key code out of range");
 	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)keyCode).hit();
 }
@@ -99,15 +99,15 @@ void SGD_DECL sgd_SetMouseCursorMode(int cursorMode) {
 	sgdx::mainWindow()->mouse()->cursorMode = (sgd::CursorMode)cursorMode;
 }
 
-SGD_Bool SGD_DECL sgd_GetMouseButtonDown(int button) {
+SGD_Bool SGD_DECL sgd_IsMouseButtonDown(int button) {
 	return sgdx::mainWindow()->mouse()->button(button).down();
 }
 
-SGD_Bool SGD_DECL sgd_GetMouseButtonHit(int button) {
+SGD_Bool SGD_DECL sgd_IsMouseButtonHit(int button) {
 	return sgdx::mainWindow()->mouse()->button(button).hit();
 }
 
-SGD_Bool SGD_DECL sgd_GetGamepadConnected(int gamepad) {
+SGD_Bool SGD_DECL sgd_IsGamepadConnected(int gamepad) {
 	sgdx::mainWindow();
 
 	if ((uint32_t)gamepad >= sgdx::Window::maxGamepads) sgd_Error("Gamepad index out of range");
@@ -115,7 +115,7 @@ SGD_Bool SGD_DECL sgd_GetGamepadConnected(int gamepad) {
 	return sgdx::Gamepad::getGamepad(gamepad)->connected();
 }
 
-SGD_Bool SGD_DECL sgd_GetGamepadButtonDown(int gamepad, int button) {
+SGD_Bool SGD_DECL sgd_IsGamepadButtonDown(int gamepad, int button) {
 	sgdx::mainWindow();
 
 	if ((uint32_t)gamepad >= sgdx::Window::maxGamepads) sgd_Error("Gamepad index out of range");
@@ -124,7 +124,7 @@ SGD_Bool SGD_DECL sgd_GetGamepadButtonDown(int gamepad, int button) {
 	return sgdx::Gamepad::getGamepad(gamepad)->button(button).down();
 }
 
-SGD_Bool SGD_DECL sgd_GetGamepadButtonHit(int gamepad, int button) {
+SGD_Bool SGD_DECL sgd_IsGamepadButtonHit(int gamepad, int button) {
 	sgdx::mainWindow();
 
 	if ((uint32_t)gamepad >= sgdx::Window::maxGamepads) sgd_Error("Gamepad index out of range");

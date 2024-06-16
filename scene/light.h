@@ -31,7 +31,7 @@ struct Light : Entity {
 	Property<float> falloff{1};
 	Property<float> innerConeAngle{0};
 	Property<float> outerConeAngle{45};
-	Property<bool> castsShadow{false};
+	Property<bool> shadowsEnabled{false};
 	Property<int> priority{0};
 
 private:

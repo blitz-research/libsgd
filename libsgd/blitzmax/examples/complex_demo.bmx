@@ -128,7 +128,7 @@ Repeat
 	
 	' Check for ESC key or window close gadget-hit...
 	
-	If SGD.KeyHit (SGD.KEY_ESCAPE) Or events & SGD.EVENT_MASK_CLOSE_CLICKED
+	If SGD.IsKeyHit (SGD.KEY_ESCAPE) Or events & SGD.EVENT_MASK_CLOSE_CLICKED
 		quit = True
 	EndIf
 	
@@ -146,11 +146,11 @@ Repeat
 		
 		' LEFT/RIGHT cursors: camera strafe...
 		
-		If SGD.KeyDown (SGD.KEY_LEFT)
+		If SGD.IsKeyDown (SGD.KEY_LEFT)
 			yaw = yaw + 0.1
 			If yaw > 1.5 Then yaw = 1.5
 		Else
-			If SGD.KeyDown (SGD.KEY_RIGHT)
+			If SGD.IsKeyDown (SGD.KEY_RIGHT)
 				yaw = yaw - 0.1
 				If yaw < -1.5 Then yaw = -1.5
 			EndIf
@@ -164,11 +164,11 @@ Repeat
 		
 		' UP/DOWN cursors: camera tilt...
 		
-		If SGD.KeyDown (SGD.KEY_UP)
+		If SGD.IsKeyDown (SGD.KEY_UP)
 			pitch = pitch - 0.1 * pitcher
 			If pitch < -1.5 Then pitch = -1.5
 		Else
-			If SGD.KeyDown (SGD.KEY_DOWN)
+			If SGD.IsKeyDown (SGD.KEY_DOWN)
 				pitch = pitch + 0.1 * pitcher
 				If pitch > 1.5 Then pitch = 1.5
 			EndIf
@@ -178,13 +178,13 @@ Repeat
 		
 		Local shifted:Int = False
 		
-		If SGD.KeyDown (SGD.KEY_LEFT_SHIFT)
+		If SGD.IsKeyDown (SGD.KEY_LEFT_SHIFT)
 			shifted = True
 		EndIf
 		
 		' A/D keys: strafe left/right...
 
-		If SGD.KeyDown (SGD.KEY_A)
+		If SGD.IsKeyDown (SGD.KEY_A)
 			If Not shifted
 				strafe = strafe - 0.01
 				If strafe < -0.1 Then strafe = -0.1
@@ -193,7 +193,7 @@ Repeat
 				If strafe < -0.5 Then strafe = -0.5
 			EndIf
 		Else
-			If SGD.KeyDown (SGD.KEY_D)
+			If SGD.IsKeyDown (SGD.KEY_D)
 				If Not shifted
 					strafe = strafe + 0.1
 					If strafe > 0.1 Then strafe = 0.1
@@ -206,7 +206,7 @@ Repeat
 
 		' W/S keys: forward/back...
 
-		If SGD.KeyDown (SGD.KEY_W)
+		If SGD.IsKeyDown (SGD.KEY_W)
 			If Not shifted
 				z = z + 0.01
 				If z > 0.1 Then z = 0.1
@@ -215,7 +215,7 @@ Repeat
 				If z > 0.5 Then z = 0.5
 			EndIf
 		Else
-			If SGD.KeyDown (SGD.KEY_S)
+			If SGD.IsKeyDown (SGD.KEY_S)
 				If Not shifted
 					z = z - 0.01
 					If z < -0.1 Then z = -0.1
@@ -228,11 +228,11 @@ Repeat
 
 		' RIGHT SHIFT/CTRL keys: raise/lower camera...
 
-		If SGD.KeyDown (SGD.KEY_RIGHT_SHIFT)
+		If SGD.IsKeyDown (SGD.KEY_RIGHT_SHIFT)
 			rise = rise + 0.01
 			If rise > 0.1 Then rise = 0.1
 		Else
-			If SGD.KeyDown (SGD.KEY_RIGHT_CONTROL)
+			If SGD.IsKeyDown (SGD.KEY_RIGHT_CONTROL)
 				rise = rise - 0.01
 				If rise < -0.1 Then rise = -0.1
 			EndIf
@@ -242,7 +242,7 @@ Repeat
 		
 		' New Bullet z creates a new Bullet, passing current z speed to add to Bullet.BulletSpeed...
 		
-		If SGD.KeyHit (SGD.KEY_SPACE) Then New Bullet z
+		If SGD.IsKeyHit (SGD.KEY_SPACE) Then New Bullet z
 		
 		' Diminish all movement towards 0...
 		
@@ -312,7 +312,7 @@ Type Bullet
 			light = SGD.CreatePointLight ()
 			SGD.SetLightRange light, 25
 			If SHADOWS_ON
-				SGD.SetLightCastsShadow light, True
+				SGD.SetLightShadowMappingEnabled light, True
 			EndIf
 '		EndIf
 		
@@ -379,28 +379,28 @@ Function demo_XBCameraControl:Int (movement_trigger:Float = 0.1)
 	
 	For Local gamepad:Int = 0 To 3 ' No count facility yet
 
-		If SGD.GamepadConnected (gamepad)
+		If SGD.IsGamepadConnected (gamepad)
 
 			' Left stick -- camera look
 
 			Local pitcher:Float = 1.0
 			If CAMERA_PITCH_INVERT Then pitcher = -1.0
 
-			Local pitch:Float	= SGD.GamepadAxis (gamepad, 1) * pitcher
-			Local yaw:Float		= -SGD.GamepadAxis (gamepad, 0)
+			Local pitch:Float	= SGD.GetGamepadAxis (gamepad, 1) * pitcher
+			Local yaw:Float		= -SGD.GetGamepadAxis (gamepad, 0)
 
 			' Triggers - forward/reverse
 
-			Local left_trig:Float	= SGD.GamepadAxis (gamepad, 4)
-			Local right_trig:Float	= SGD.GamepadAxis (gamepad, 5)
+			Local left_trig:Float	= SGD.GetGamepadAxis (gamepad, 4)
+			Local right_trig:Float	= SGD.GetGamepadAxis (gamepad, 5)
 
 			' Right stick - left/right: strafe
 
-			Local strafe:Float = SGD.GamepadAxis (gamepad, 2)
+			Local strafe:Float = SGD.GetGamepadAxis (gamepad, 2)
 
 			' Right stick - up/down: raise/lower
 
-			Local rise:Float = SGD.GamepadAxis (gamepad, 3)
+			Local rise:Float = SGD.GetGamepadAxis (gamepad, 3)
 
 			If Abs (pitch)	< movement_trigger Then pitch = 0 Else movement = True
 			If Abs (yaw)	< movement_trigger Then yaw = 0 Else movement = True
@@ -429,7 +429,7 @@ Function demo_XBCameraControl:Int (movement_trigger:Float = 0.1)
 			
 			' TMP: Meant to be GamepadButtonHIT
 			
-			If SGD.GamepadButtonHit (gamepad, 0)
+			If SGD.IsGamepadButtonHit (gamepad, 0)
 				New Bullet z ' New Bullet z creates a new Bullet, passing current z speed to add to Bullet.BulletSpeed...
 			EndIf
 			
@@ -470,7 +470,7 @@ Function demo_CreateCamera:Int ()
 	Local camera_light:Int = SGD.CreateSpotLight ()
 	SGD.SetEntityParent camera_light, camera
 	If SHADOWS_ON
-		SGD.SetLightCastsShadow camera_light, True ' Working? Can't see shadows from it, even offset:
+		SGD.SetLightShadowMappingEnabled camera_light, True ' Working? Can't see shadows from it, even offset:
 	EndIf
 '	SGD.MoveEntity camera_light, -2, 2, 2
 '	SGD.TurnEntity camera_light, 0, -10, 0
@@ -483,7 +483,7 @@ Function demo_CreateSkyBox:Int (texture:String, format:Int = SGD.TEXTURE_FORMAT_
 
 	Local sky_texture:Int = SGD.LoadTexture (texture, format, flags)
 
-	SGD.SetSceneEnvTexture sky_texture
+	SGD.SetEnvTexture sky_texture
 
 	Local skybox:Int = SGD.CreateSkybox (sky_texture)
 	SGD.SetSkyboxRoughness skybox, 0.3
@@ -496,9 +496,8 @@ Function demo_CreateScene (num_cubes:Int = 10000, ground_scale:Float = 1.0, grou
 
 	' Basic scene init...
 
-	SGD.CreateScene ()
-	SGD.SetSceneClearColor 0.1, 0.25, 0.5, 1.0
-	SGD.SetSceneAmbientLightColor 0.025, 0.05, 0.0375, 1.0
+	SGD.SetClearColor 0.1, 0.25, 0.5, 1.0
+	SGD.SetAmbientLightColor 0.025, 0.05, 0.0375, 1.0
 
 	' Skybox...
 	
@@ -533,7 +532,7 @@ Function demo_CreateScene (num_cubes:Int = 10000, ground_scale:Float = 1.0, grou
 
 	' Scale texture...
 	
-	SGD.TransformMeshTexCoords (ground_mesh, ground_scale, ground_scale, 0.0, 0.0)
+	SGD.TFormMeshTexCoords (ground_mesh, ground_scale, ground_scale, 0.0, 0.0)
 
 	SGD.MoveEntity ground, 0, -21, 0
 
@@ -553,7 +552,7 @@ Function demo_GetStaticCubeMesh:Int (cube_material_path:String = "sgd://material
 		CubeMesh = SGD.CreateBoxMesh (-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, cube_material)
 
 		If SHADOWS_ON
-			SGD.SetMeshCastsShadow CubeMesh, True
+			SGD.SetMeshShadowCastingEnabled CubeMesh, True
 		EndIf
 
 	EndIf
@@ -586,7 +585,7 @@ Function demo_GetStaticBulletMesh:Int ()'cube_material_path:String = "sgd://mate
 
 		BulletMesh = SGD.CreateBoxMesh (-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, cube_material)
 		If SHADOWS_ON
-			SGD.SetMeshCastsShadow BulletMesh, False
+			SGD.SetMeshShadowCastingEnabled BulletMesh, False
 		EndIf
 		
 	EndIf
@@ -618,5 +617,5 @@ End Type
 ' No doubt to come!
 
 Function temp_EntityDistance:Float (src:Int, dest:Int)
-	Return Sqr ((SGD.EntityX (src) - SGD.EntityX (dest)) ^ 2 + (SGD.EntityY (src) - SGD.EntityY (dest)) ^ 2 + (SGD.EntityZ (src) - SGD.EntityZ (dest)) ^ 2)
+	Return Sqr ((SGD.GetEntityX (src) - SGD.GetEntityX (dest)) ^ 2 + (SGD.GetEntityY (src) - SGD.GetEntityY (dest)) ^ 2 + (SGD.GetEntityZ (src) - SGD.GetEntityZ (dest)) ^ 2)
 End Function

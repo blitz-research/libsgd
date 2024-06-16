@@ -17,7 +17,7 @@ restart:
 
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/PavingStones065_1K-JPG");
 	SGD_Mesh mesh = sgd_CreateBoxMesh(-15, -1, -10, 10, 0, 10, material);
-	sgd_TFormTexCoords(mesh, 7.5, 7.5, 0, 0);
+	sgd_TFormMeshTexCoords(mesh, 7.5, 7.5, 0, 0);
 	SGD_Model ground = sgd_CreateModel(mesh);
 
 	sgd_DebugMemory();
@@ -29,22 +29,22 @@ restart:
 		if (mask & SGD_EVENT_MASK_CLOSE_CLICKED) break;
 
 		// Gamepad...
-		if (sgd_GetGamepadButtonDown(0, SGD_GAMEPAD_BUTTON_LEFT_BUMPER)) {
+		if (sgd_IsGamepadButtonDown(0, SGD_GAMEPAD_BUTTON_LEFT_BUMPER)) {
 			sgd_TurnEntity(model, 0, 3, 0);
-		} else if (sgd_GetGamepadButtonDown(0, SGD_GAMEPAD_BUTTON_RIGHT_BUMPER)) {
+		} else if (sgd_IsGamepadButtonDown(0, SGD_GAMEPAD_BUTTON_RIGHT_BUMPER)) {
 			sgd_TurnEntity(model, 0, -3, 0);
 		}
 
 		// Keyboard...
-		if (sgd_GetKeyDown(SGD_KEY_LEFT)) {
+		if (sgd_IsKeyDown(SGD_KEY_LEFT)) {
 			sgd_TurnEntity(model, 0, 3, 0);
-		} else if (sgd_GetKeyDown(SGD_KEY_RIGHT)) {
+		} else if (sgd_IsKeyDown(SGD_KEY_RIGHT)) {
 			sgd_TurnEntity(model, 0, -3, 0);
 		}
 
-		if (sgd_GetKeyDown(SGD_KEY_UP)) {
+		if (sgd_IsKeyDown(SGD_KEY_UP)) {
 			sgd_MoveEntity(model, 0, 0, -.03f);
-		} else if (sgd_GetKeyDown(SGD_KEY_DOWN)) {
+		} else if (sgd_IsKeyDown(SGD_KEY_DOWN)) {
 			sgd_MoveEntity(model, 0, 0, .03f);
 		}
 
