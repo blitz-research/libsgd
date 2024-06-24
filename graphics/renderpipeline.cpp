@@ -182,7 +182,8 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc,		 //
 											   CBindGroup* renderer,	 //
 											   DrawMode drawMode) {
 
-	auto cullMode = (rpassType==RenderPassType::shadow) ? CullMode::front : material->cullMode();
+//	auto cullMode = (rpassType==RenderPassType::shadow) ? CullMode::front : material->cullMode();
+	auto cullMode = material->cullMode();
 
 	return getOrCreateRenderPipeline(gc, rpassType, material->bindGroup(), material->blendMode(), material->depthFunc(),
 									 cullMode, renderer, drawMode);

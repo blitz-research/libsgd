@@ -25,11 +25,13 @@ struct SceneBindings : GraphicsResource {
 
 	Property<uint32_t> csmTextureSize{1024};
 	Property<uint32_t> maxCSMLights{1};
-	Property<Array<float,4>> csmSplits{{12,32,64,128}};
-
 	Property<uint32_t> psmTextureSize{1024};
 	Property<uint32_t> maxPSMLights{8};
-	Property<float> psmNear{{.1f}};
+
+	Property<Array<float, 4>> csmSplitDistances{{8, 32, 64, 128}};
+	Property<float> csmDepthBias{.0001f};
+	Property<float> psmClipNear{.1f};
+	Property<float> psmDepthBias{.0001f};
 
 	void setCameraUniforms(CCameraUniforms uniforms);
 	CCameraUniforms cameraUniforms() const {
@@ -65,8 +67,9 @@ private:
 	// Passes
 	mutable Vector<ShadowPass> m_shadowPasses;
 
-	mutable bool m_configDirty{};
-	mutable bool m_passesDirty{};
+	mutable bool m_configDirty{true};
+	mutable bool m_passesDirty{true};
+	mutable bool m_uniformsDirty{true};
 
 	static BindGroup* createShadowPassBindings();
 

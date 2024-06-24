@@ -15,7 +15,7 @@ CTexture* rgbaTexture(uint32_t rgba, TextureFlags flags) {
 	uint32_t depth = bool(flags & TextureFlags::cube) ? 6 : 1;
 	texture = new Texture({1, 1}, depth, TextureFormat::rgba8, flags);
 	uint32_t data[]{rgba, rgba, rgba, rgba, rgba, rgba};
-	texture->update(&rgba, sizeof(rgba));
+	texture->update(data, sizeof(rgba));
 
 	return texture;
 }
@@ -24,13 +24,12 @@ CTexture* dummyTexture(TextureFormat format, TextureFlags flags) {
 
 	static Map<std::pair<TextureFormat, TextureFlags>, TexturePtr> cache;
 
-	auto& texture = cache[std::make_pair(format,flags)];
-	if(texture) return texture;
+	auto& texture = cache[std::make_pair(format, flags)];
+	if (texture) return texture;
 
 	uint32_t depth = bool(flags & TextureFlags::cube) ? 6 : 1;
-	return texture = new Texture({1,1}, depth, format, flags);
+	return texture = new Texture({1, 1}, depth, format, flags);
 }
-
 
 Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags, uint32_t depth) {
 

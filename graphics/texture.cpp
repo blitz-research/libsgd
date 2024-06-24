@@ -50,7 +50,7 @@ wgpu::Sampler getOrCreateWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
 	desc.magFilter = bool(flags & TextureFlags::filter) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
 	desc.minFilter = wgpu::FilterMode::Linear;
 	desc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
-	desc.compare = bool(flags & TextureFlags::compare) ? wgpu::CompareFunction::Less : wgpu::CompareFunction::Undefined;
+	desc.compare = bool(flags & TextureFlags::compare) ? wgpu::CompareFunction::LessEqual : wgpu::CompareFunction::Undefined;
 
 	return sampler = gc->wgpuDevice().CreateSampler(&desc);
 }

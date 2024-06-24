@@ -25,7 +25,7 @@ void entry() {
 				ModelPtr model = new Model();
 				scene->add(model);
 				model->mesh = mesh;
-				move(model, {(float)x*2, (float)(20-std::sqrt(x*x+z*z)), (float)z*2});
+				move(model, {(float)x*2, (float)(30-std::sqrt(x*x+z*z)), (float)z*2});
 			}
 		}
 	}
@@ -37,7 +37,8 @@ void entry() {
 
 	camera->near = .1f;
 	camera->far = 256;
-	scene->sceneBindings()->csmSplits ={16,64,192,256};
+	scene->sceneBindings()->csmSplitDistances = {16,64,192,256};
+	scene->sceneBindings()->csmDepthBias=0.001f;
 
 	for (;;) {
 		pollEvents();

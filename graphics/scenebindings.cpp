@@ -51,27 +51,6 @@ const BindGroupDescriptor sceneBindingsDescriptor( //
 
 SceneBindings::SceneBindings() {
 
-	m_bindGroup = new BindGroup(&sceneBindingsDescriptor);
-	{
-		CameraUniforms uniforms;
-		m_cameraUniforms = new Buffer(BufferType::uniform, &uniforms, sizeof(uniforms));
-		m_bindGroup->setBuffer(0, m_cameraUniforms);
-	}
-
-	{
-		LightingUniforms uniforms;
-		m_lightingUniforms = new Buffer(BufferType::uniform, &uniforms, sizeof(uniforms));
-		m_bindGroup->setBuffer(1, m_lightingUniforms);
-	}
-
-	{
-		ShadowUniforms uniforms;
-		uniforms.csmSplits = csmSplits();
-		uniforms.psmNear = psmNear();
-		m_shadowUniforms = new Buffer(BufferType::uniform, &uniforms, sizeof(uniforms));
-		m_bindGroup->setBuffer(2, m_shadowUniforms);
-	}
-
 	if (!g_dummyLightingUniforms) {
 		LightingUniforms lightingUniforms;
 		g_dummyLightingUniforms = new Buffer(BufferType::uniform, &lightingUniforms, sizeof(lightingUniforms));
@@ -81,15 +60,28 @@ SceneBindings::SceneBindings() {
 		g_dummyMatricesBuffer = new Buffer(BufferType::storage, &matrices, sizeof(matrices));
 	}
 
+	// Lighting
+	m_bindGroup = new BindGroup(&sceneBindingsDescriptor);
+	{
+		CameraUniforms uniforms;
+		m_cameraUniforms = new Buffer(BufferType::uniform, &uniforms, sizeof(uniforms));
+		m_bindGroup->setBuffer(0, m_cameraUniforms);
+	}
+	{
+		LightingUniforms uniforms;
+		m_lightingUniforms = new Buffer(BufferType::uniform, &uniforms, sizeof(uniforms));
+		m_bindGroup->setBuffer(1, m_lightingUniforms);
+	}
+	{
+		m_shadowUniforms = new Buffer(BufferType::uniform, nullptr, sizeof(ShadowUniforms));
+		m_bindGroup->setBuffer(2, m_shadowUniforms);
+	}
 	envTexture.changed.connect(nullptr, [=](CTexture* texture) { //
 		m_bindGroup->setTexture(3, texture);
 	});
-	envTexture = whiteTexture(TextureFlags::cube);
+	envTexture = blackTexture(TextureFlags::cube);
 
-	csmSplits.changed.connect(nullptr, [=](CArray<float, 4> splits) { //
-		m_shadowUniforms->update(&splits, offsetof(ShadowUniforms, csmSplits), sizeof(splits));
-	});
-
+	// Config
 	csmTextureSize.changed.connect(nullptr, [=](uint32_t size) { //
 		m_configDirty = true;
 		invalidate();
@@ -100,9 +92,6 @@ SceneBindings::SceneBindings() {
 		invalidate();
 	});
 
-	psmNear.changed.connect(
-		nullptr, [=](float near) { m_shadowUniforms->update(&near, offsetof(ShadowUniforms, psmNear), sizeof(near)); });
-
 	psmTextureSize.changed.connect(nullptr, [=](uint32_t size) { //
 		m_configDirty = true;
 		invalidate();
@@ -110,6 +99,22 @@ SceneBindings::SceneBindings() {
 
 	maxPSMLights.changed.connect(nullptr, [=](uint32_t max) { //
 		m_configDirty = true;
+		invalidate();
+	});
+
+	// Shadow uniforms
+	csmSplitDistances.changed.connect(nullptr, [=](CArray<float, 4>) { //
+		m_uniformsDirty = true;
+		invalidate();
+	});
+
+	psmClipNear.changed.connect(nullptr, [=](float) { //
+		m_uniformsDirty = true;
+		invalidate();
+	});
+
+	csmDepthBias.changed.connect(nullptr, [=](float) {
+		m_uniformsDirty = true;
 		invalidate();
 	});
 
@@ -220,7 +225,7 @@ void SceneBindings::addCSMPasses() const {
 		for (int split = 0; split < 4; ++split) {
 
 			Boxf boundsFar;
-			float dFar = csmSplits()[split];
+			float dFar = csmSplitDistances()[split];
 			for (auto& ray : rays) boundsFar |= boundsMatrix * (ray * dFar);
 
 			auto bounds = boundsNear | boundsFar;
@@ -236,7 +241,7 @@ void SceneBindings::addCSMPasses() const {
 			CameraUniforms uniforms;
 			uniforms.projectionMatrix = projMatrix;
 			uniforms.worldMatrix = lightMatrix;
-			uniforms.inverseProjectionMatrix = inverse(projMatrix);
+			uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
 			uniforms.viewMatrix = invLightMatrix;
 			uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
 			uniforms.clipNear = bounds.min.z;
@@ -244,7 +249,9 @@ void SceneBindings::addCSMPasses() const {
 
 			((Buffer*)pass->sceneBindings->getBuffer(0))->update(&uniforms, 0, sizeof(uniforms));
 
-			csmMatrices.push_back(uniforms.viewProjectionMatrix);
+			//			csmMatrices.push_back(uniforms.viewProjectionMatrix);
+			auto biasMatrix = Mat4f(AffineMat4f::TRS({0, 0, 0}));
+			csmMatrices.push_back(projMatrix * biasMatrix * uniforms.viewMatrix);
 
 			m_shadowPasses.push_back(*pass++);
 		}
@@ -280,7 +287,9 @@ void SceneBindings::addPSMPasses() const {
 			float far = light.range;
 
 			auto projMatrix = Mat4f::frustum(-near, near, -near, near, near, far);
-			auto faceMatrix = AffineMat4f(faceTransforms[face], {}) * invLightMatrix;
+
+			auto biasMatrix = AffineMat4f::TRS({0,0,0});
+			auto faceMatrix = AffineMat4f(faceTransforms[face], {}) * biasMatrix * invLightMatrix;
 
 			CameraUniforms uniforms;
 			uniforms.projectionMatrix = projMatrix;
@@ -309,6 +318,16 @@ void SceneBindings::onValidate(GraphicsContext* gc) const {
 		addCSMPasses();
 		addPSMPasses();
 		m_passesDirty = false;
+	}
+	if (m_uniformsDirty) {
+		ShadowUniforms uniforms;
+		uniforms.csmSplitDistances = {csmSplitDistances()[0], csmSplitDistances()[1], csmSplitDistances()[2], csmSplitDistances()[3]};
+		uniforms.csmDepthBias = csmDepthBias();
+		uniforms.psmClipNear = psmClipNear();
+		uniforms.psmDepthBias = psmDepthBias();
+		SGD_LOG << uniforms.psmDepthBias;
+		m_shadowUniforms->update(&uniforms,0,sizeof(uniforms));
+		m_uniformsDirty = false;
 	}
 }
 

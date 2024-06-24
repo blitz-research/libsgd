@@ -55,8 +55,10 @@ struct LightingUniforms {
 }
 
 struct ShadowUniforms {
-    csmSplits: vec4f,
-    psmNear: f32,
+    csmSplitDistances: vec4f,
+	csmDepthBias: f32,
+    psmClipNear: f32,
+    psmDepthBias: f32,
 }
 
 @group(0) @binding(0) var<uniform> cameraUniforms: CameraUniforms;
@@ -125,20 +127,24 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	    if light.shadowsEnabled!= 0 {
 	        let vpos = (cameraUniforms.viewMatrix * vec4f(position, 1.0)).xyz;
-	        if vpos.z >= shadowUniforms.csmSplits.w {continue;}
+	        if vpos.z >= shadowUniforms.csmSplitDistances.w {continue;}
             var split = i * 4;
-            if vpos.z >= shadowUniforms.csmSplits.x {
-                if vpos.z < shadowUniforms.csmSplits.y {
+            if vpos.z >= shadowUniforms.csmSplitDistances.x {
+                if vpos.z < shadowUniforms.csmSplitDistances.y {
                     split += 1;
-                } else if vpos.z < shadowUniforms.csmSplits.z {
+                } else if vpos.z < shadowUniforms.csmSplitDistances.z {
                     split += 2;
                 } else {
                     split += 3;
                 }
             }
-            let wpos = lighting_csmMatrices[split] * vec4f(position, 1.0);
+            let wpos = lighting_csmMatrices[split] * vec4f(position, 1);
             let spos = wpos.xyz / wpos.w;
-            atten = textureSampleCompareLevel(lighting_csmTexture, lighting_csmSampler, spos.xy * vec2f(0.5, -0.5) + 0.5, split, spos.z);
+
+            let tcoords = spos.xy * vec2f(0.5, -0.5) + 0.5;
+//            let tcoords = spos.xy * vec2f(0.5, -0.5) + 0.5 + 0.5 / 2048.0;
+
+            atten = textureSampleCompareLevel(lighting_csmTexture, lighting_csmSampler, tcoords, split, spos.z - shadowUniforms.csmDepthBias);
             if atten == 0.0 {continue;}
 	    }
 
@@ -158,11 +164,11 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 	    var atten = 1.0;
 
 	    if light.shadowsEnabled != 0 {
-	        let near = shadowUniforms.psmNear;
+	        let near = shadowUniforms.psmClipNear;
             let far = light.range;
             let z = max(abs(lvec.x), max(abs(lvec.y), abs(lvec.z)));
             let zw = (far * (near - z)) / (z * (near - far));
-            atten = textureSampleCompareLevel(lighting_psmTexture, lighting_psmSampler, -lvec, i, zw);
+            atten = textureSampleCompareLevel(lighting_psmTexture, lighting_psmSampler, -lvec, i, zw - shadowUniforms.psmDepthBias);
             if atten == 0.0 {continue;}
         }
 

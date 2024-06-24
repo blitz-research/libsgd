@@ -1,4 +1,11 @@
 
+***** V0.08.1 *****
+
+Fixed rgabTexture() function.
+
+Made default evnmap texture black again, as in v0.07.2
+
+
 ***** V0.08 *****
 
 Renamed a few things.

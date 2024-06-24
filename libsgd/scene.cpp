@@ -27,7 +27,7 @@ sgd::Vec3r g_tformed;
 sgd::Vec2f g_projected;
 sgd::Contact g_picked;
 
-}
+} // namespace
 
 // ***** Scene *****
 
@@ -46,10 +46,10 @@ void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend) {
 }
 
 void SGD_DECL sgd_ClearScene() {
-	if(!sgdx::g_mainScene) {
+	if (!sgdx::g_mainScene) {
 		sgdx::g_mainGC = new sgdx::GraphicsContext(sgdx::mainWindow(), g_backendType);
 		sgdx::g_mainScene = new sgdx::Scene(sgdx::g_mainGC);
-	}else{
+	} else {
 		sgdx::mainScene()->clear();
 		sgdx::destroyAllHandles();
 	}
@@ -81,16 +81,28 @@ void SGD_DECL sgd_SetMaxCSMLights(int maxLights) {
 	sgdx::mainScene()->sceneBindings()->maxCSMLights = maxLights;
 }
 
-void SGD_DECL sgd_SetCSMSplitDistances(float split0, float split1, float split2, float split3) {
-	sgdx::mainScene()->sceneBindings()->csmSplits={split0, split1, split2, split3};
-}
-
 void SGD_DECL sgd_SetPSMTextureSize(int textureSize) {
 	sgdx::mainScene()->sceneBindings()->psmTextureSize = textureSize;
 }
 
 void SGD_DECL sgd_SetMaxPSMLights(int maxLights) {
 	sgdx::mainScene()->sceneBindings()->maxPSMLights = maxLights;
+}
+
+void SGD_DECL sgd_SetCSMSplitDistances(float split0, float split1, float split2, float split3) {
+	sgdx::mainScene()->sceneBindings()->csmSplitDistances = {split0, split1, split2, split3};
+}
+
+void SGD_DECL sgd_SetCSMDepthBias(float bias) {
+	sgdx::mainScene()->sceneBindings()->csmDepthBias = bias;
+}
+
+void SGD_DECL sgd_SetPSMClipNear(float near) {
+	sgdx::mainScene()->sceneBindings()->psmClipNear = near;
+}
+
+void SGD_DECL sgd_SetPSMDepthBias(float bias) {
+	sgdx::mainScene()->sceneBindings()->psmDepthBias = bias;
 }
 
 void SGD_DECL sgd_RenderScene() {

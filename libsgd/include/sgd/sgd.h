@@ -691,17 +691,26 @@ SGD_API void SGD_DECL sgd_SetEnvTexture(SGD_Texture texture);
 //! Set cascading shadow map texture size. Defaults to 1024, must be a power of 2.
 SGD_API void SGD_DECL sgd_SetCSMTextureSize(int textureSize);
 
-//! Set shadow casting directional lights. Defaults to 1, max is 4 (max directional lights).
+//! Set max shadow casting directional lights. Defaults to 1, max is max directional lights (4).
 SGD_API void SGD_DECL sgd_SetMaxCSMLights(int maxLights);
-
-//! Set split distances for CSM shadow.
-SGD_API void SGD_DECL sgd_SetCSMSplitDistances(float sklit0, float split1, float split2, float split3);
 
 //! Set point lint shadow map texture size. Defaults to 1024, must be power of 2.
 SGD_API void SGD_DECL sgd_SetPSMTextureSize(int textureSize);
 
-//! Set shadow casting point lights. Defaults to 4, max is 32 (max point lights).
+//! Set max shadow casting point lights. Defaults to 4, max is max points lights (32).
 SGD_API void SGD_DECL sgd_SetMaxPSMLights(int maxLights);
+
+//! Set split distances for CSM shadow, last value should match camera far. Defaults to 8, 32, 64, 128.
+SGD_API void SGD_DECL sgd_SetCSMSplitDistances(float sklit0, float split1, float split2, float split3);
+
+//! Set depth bia for CSM shadows, increase to reduce 'shadow acne'. Defaults to 0.0001.
+SGD_API void SGD_DECL sgd_SetCSMDepthBias(float bias);
+
+//! Set near clip plane distance for PSM shadows.
+SGD_API void SGD_DECL sgd_SetPSMClipNear(float near);
+
+//! Set depth bias for PSM shadows, increase to reduce 'shadow acne'. Defaults to 0.0001.
+SGD_API void SGD_DECL sgd_SetPSMDepthBias(float bias);
 
 //! Render scene.
 SGD_API void SGD_DECL sgd_RenderScene();
