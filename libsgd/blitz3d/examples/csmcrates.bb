@@ -12,12 +12,6 @@ SetSkyboxRoughness skybox, .3
 CreatePlayer(0)
 MoveEntity player,0,15,-25
 
-SetCameraNear camera,.1
-SetCameraFar camera,128
-
-SetCSMTextureSize 2048
-SetCSMSplitDistances 8,32,64,128	; No shadows after last distance, so set same as far clip if you want shadows everywhere.
-
 Local light = CreateDirectionalLight()
 SetLightShadowMappingEnabled light,True
 TurnEntity light,-75,15,0

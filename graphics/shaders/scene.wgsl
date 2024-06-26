@@ -56,6 +56,7 @@ struct LightingUniforms {
 
 struct ShadowUniforms {
     csmSplitDistances: vec4f,
+    csmClipRange: f32,
 	csmDepthBias: f32,
     psmClipNear: f32,
     psmDepthBias: f32,
@@ -128,6 +129,7 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 	    if light.shadowsEnabled!= 0 {
 	        let vpos = (cameraUniforms.viewMatrix * vec4f(position, 1.0)).xyz;
 	        if vpos.z >= shadowUniforms.csmSplitDistances.w {continue;}
+//	        if vpos.z >= shadowUniforms.csmSplitDistances.w {return vec4f(1,1,0,1);}
             var split = i * 4;
             if vpos.z >= shadowUniforms.csmSplitDistances.x {
                 if vpos.z < shadowUniforms.csmSplitDistances.y {

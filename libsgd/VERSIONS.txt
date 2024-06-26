@@ -1,4 +1,9 @@
 
+***** V0.09 *****
+
+Added SetCSMClipRange, SetCSMDepthBias, SetPSMClipNear, SetPSMDepthBias for fine tuning shadows.
+
+
 ***** V0.08.1 *****
 
 Fixed rgabTexture() function.

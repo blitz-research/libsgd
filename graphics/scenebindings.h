@@ -23,15 +23,17 @@ struct SceneBindings : GraphicsResource {
 
 	Property<CTexturePtr> envTexture;
 
-	Property<uint32_t> csmTextureSize{1024};
+	Property<uint32_t> csmTextureSize{2048};
 	Property<uint32_t> maxCSMLights{1};
 	Property<uint32_t> psmTextureSize{1024};
 	Property<uint32_t> maxPSMLights{8};
 
-	Property<Array<float, 4>> csmSplitDistances{{8, 32, 64, 128}};
+	Property<Array<float, 4>> csmSplitDistances{{16, 64, 256, 1024}};
+	Property<float> csmClipRange{1000.0f};
 	Property<float> csmDepthBias{.0001f};
+
 	Property<float> psmClipNear{.1f};
-	Property<float> psmDepthBias{.0001f};
+	Property<float> psmDepthBias{.00001f};
 
 	void setCameraUniforms(CCameraUniforms uniforms);
 	CCameraUniforms cameraUniforms() const {

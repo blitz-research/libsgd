@@ -230,9 +230,7 @@ void SceneBindings::addCSMPasses() const {
 
 			auto bounds = boundsNear | boundsFar;
 
-			bounds.min.z -= 100.0f;
-
-			//			if(split==0) SGD_LOG << boundsNear << boundsFar << bounds;
+			bounds.min.z -= csmClipRange();
 
 			auto projMatrix = Mat4f::ortho(bounds.min.x, bounds.max.x, bounds.min.y, bounds.max.y, bounds.min.z, bounds.max.z);
 

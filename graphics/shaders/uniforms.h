@@ -63,6 +63,7 @@ using CLightingUniforms = const LightingUniforms&;
 
 struct alignas(16) ShadowUniforms {
 	Array<float, 4> csmSplitDistances{};
+	float csmClipRange{1000.0f};
 	float csmDepthBias{0.0001f};
 	float psmClipNear{0.1f};
 	float psmDepthBias{0.0001f};

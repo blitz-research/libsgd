@@ -16,7 +16,6 @@ start:;	// Need semi-colon for Macos?!?
 	SGD_Light light0 = sgd_CreatePointLight();
 	sgd_SetLightShadowMappingEnabled(light0, SGD_TRUE);
 	sgd_MoveEntity(light0, 0, 5, 0);
-//	sgd_SetEntityParent(light0, camera);
 	sgd_SetLightRange(light0, 10);
 
 	SGD_Material material = sgd_CreatePBRMaterial();

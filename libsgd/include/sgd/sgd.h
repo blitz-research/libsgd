@@ -688,28 +688,31 @@ SGD_API void SGD_DECL sgd_SetClearDepth(float depth);
 //! Set scene environment texture.
 SGD_API void SGD_DECL sgd_SetEnvTexture(SGD_Texture texture);
 
-//! Set cascading shadow map texture size. Defaults to 1024, must be a power of 2.
+//! Set cascading shadow map texture size. Defaults to 2048, must be a power of 2.
 SGD_API void SGD_DECL sgd_SetCSMTextureSize(int textureSize);
 
-//! Set max shadow casting directional lights. Defaults to 1, max is max directional lights (4).
+//! Set max shadow casting directional lights. Defaults to 1, must be <= max directional lights (4).
 SGD_API void SGD_DECL sgd_SetMaxCSMLights(int maxLights);
 
-//! Set point lint shadow map texture size. Defaults to 1024, must be power of 2.
+//! Set point lint shadow map texture size. Defaults to 1024, must be a power of 2.
 SGD_API void SGD_DECL sgd_SetPSMTextureSize(int textureSize);
 
-//! Set max shadow casting point lights. Defaults to 4, max is max points lights (32).
+//! Set max shadow casting point lights. Defaults to 4, mus be <= max points lights (32).
 SGD_API void SGD_DECL sgd_SetMaxPSMLights(int maxLights);
 
-//! Set split distances for CSM shadow, last value should match camera far. Defaults to 8, 32, 64, 128.
+//! Set split distances for CSM shadow, last value should match camera far. Defaults to 16, 64, 256, 1024.
 SGD_API void SGD_DECL sgd_SetCSMSplitDistances(float sklit0, float split1, float split2, float split3);
 
-//! Set depth bia for CSM shadows, increase to reduce 'shadow acne'. Defaults to 0.0001.
+//! Set max range to render potential CSM obscurers at. Defaults to 1024.
+SGD_API void SGD_DECL sgd_SetCSMClipRange(float range);
+
+//! Set depth bia for CSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.001.
 SGD_API void SGD_DECL sgd_SetCSMDepthBias(float bias);
 
-//! Set near clip plane distance for PSM shadows.
+//! Set near clip plane distance for PSM shadows. Default to .01.
 SGD_API void SGD_DECL sgd_SetPSMClipNear(float near);
 
-//! Set depth bias for PSM shadows, increase to reduce 'shadow acne'. Defaults to 0.0001.
+//! Set depth bias for PSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.0001.
 SGD_API void SGD_DECL sgd_SetPSMDepthBias(float bias);
 
 //! Render scene.
@@ -866,13 +869,13 @@ SGD_API SGD_Camera SGD_DECL sgd_CreatePerspectiveCamera();
 //! Create an orthographic camera.
 SGD_API SGD_Camera SGD_DECL sgd_CreateOrthographicCamera();
 
-//! Set camera vertical field of view in degrees.
+//! Set camera vertical field of view in degrees. Defaults to 45.
 SGD_API void SGD_DECL sgd_SetCameraFOV(SGD_Camera camera, float fovY);
 
-//! Set camera near clipping plane.
+//! Set camera near clipping plane. Defaults to 0.125.
 SGD_API void SGD_DECL sgd_SetCameraNear(SGD_Camera camera, float near);
 
-//! Set camera far clipping plane.
+//! Set camera far clipping plane. Defaults to 1024.
 SGD_API void SGD_DECL sgd_SetCameraFar(SGD_Camera camera, float far);
 
 //! Project 3d point in world space to window coordinates.

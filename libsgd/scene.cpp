@@ -93,6 +93,10 @@ void SGD_DECL sgd_SetCSMSplitDistances(float split0, float split1, float split2,
 	sgdx::mainScene()->sceneBindings()->csmSplitDistances = {split0, split1, split2, split3};
 }
 
+void SGD_DECL sgd_SetCSMClipRange(float range) {
+	sgdx::mainScene()->sceneBindings()->csmClipRange = range;
+}
+
 void SGD_DECL sgd_SetCSMDepthBias(float bias) {
 	sgdx::mainScene()->sceneBindings()->csmDepthBias = bias;
 }
