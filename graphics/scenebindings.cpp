@@ -247,9 +247,7 @@ void SceneBindings::addCSMPasses() const {
 
 			((Buffer*)pass->sceneBindings->getBuffer(0))->update(&uniforms, 0, sizeof(uniforms));
 
-			//			csmMatrices.push_back(uniforms.viewProjectionMatrix);
-			auto biasMatrix = Mat4f(AffineMat4f::TRS({0, 0, 0}));
-			csmMatrices.push_back(projMatrix * biasMatrix * uniforms.viewMatrix);
+			csmMatrices.push_back(uniforms.viewProjectionMatrix);
 
 			m_shadowPasses.push_back(*pass++);
 		}
