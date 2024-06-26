@@ -27,7 +27,6 @@ void entry() {
 	scene->add(overlay);
 
 	auto dc = overlay->drawList();
-	dc->font = loadFont(Path("C:/windows/fonts/consola.ttf"), 20).result();
 
 	real gravity = -9.81 / 60.0 / 60.0;
 	real vel = 0;

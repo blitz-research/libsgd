@@ -34,7 +34,8 @@ BindGroupDescriptor bindGroupDescriptor( //
 DrawList::DrawList()
 	: m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
 	  m_uniformBuffer(new Buffer(BufferType::uniform, nullptr, sizeof(DrawListUniforms))),
-	  m_vertexBuffer(new Buffer(BufferType::vertex, nullptr, m_vertexCapacity * sizeof(Vertex))) {
+	  m_vertexBuffer(new Buffer(BufferType::vertex, nullptr, m_vertexCapacity * sizeof(Vertex))),
+	font(defaultFont()){
 
 	addDependency(m_bindGroup);
 	addDependency(m_vertexBuffer);

@@ -4,25 +4,6 @@ namespace {
 
 wgpu::BackendType g_backendType = wgpu::BackendType::Undefined;
 
-void createOverlay() {
-	if (!sgdx::g_defaultFont) {
-#if SGD_OS_WINDOWS
-		auto font = sgd::loadFont(sgd::Path("C:/windows/fonts/consola.ttf"), 16);
-		if (font) sgdx::g_defaultFont = font.result();
-#elif SGD_OS_LINUX
-		auto font = sgd::loadFont(sgd::Path("/usr/share/fonts/TTF/Inconsolata-Medium.ttf"), 16);
-		if (font) sgdx::g_defaultFont = font.result();
-#elif SGD_OS_MACOS
-		auto font = sgd::loadFont(sgd::Path("/Library/Fonts/Arial Unicode.ttf"), 16);
-		if (font) sgdx::g_defaultFont = font.result();
-#endif
-	}
-	sgdx::g_overlay = new sgd::Overlay();
-	sgdx::g_mainScene->add(sgdx::g_overlay);
-	sgdx::g_drawList = sgdx::g_overlay->drawList();
-	sgdx::g_drawList->font = sgdx::g_defaultFont;
-}
-
 sgd::Vec3r g_tformed;
 sgd::Vec2f g_projected;
 sgd::Contact g_picked;
@@ -53,7 +34,9 @@ void SGD_DECL sgd_ClearScene() {
 		sgdx::mainScene()->clear();
 		sgdx::destroyAllHandles();
 	}
-	createOverlay();
+	sgdx::g_overlay = new sgd::Overlay();
+	sgdx::g_drawList = sgdx::g_overlay->drawList();
+	sgdx::g_mainScene->add(sgdx::g_overlay);
 }
 
 void SGD_DECL sgd_SetClearColor(float red, float green, float blue, float alpha) {

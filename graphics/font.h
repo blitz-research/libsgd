@@ -45,4 +45,6 @@ public:
 
 Expected<Font*, FileioEx> loadFont(CPath path, float height);
 
+Font* defaultFont();
+
 } // namespace sgd

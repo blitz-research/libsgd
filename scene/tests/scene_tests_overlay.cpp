@@ -7,9 +7,6 @@ void entry() {
 
 	DrawListPtr dc = overlay->drawList();
 
-	float fh = 24;
-	FontPtr font = loadFont(Path("sgd://fonts/FiraCode-Medium.ttf"), fh).result();
-	dc->font = font;
 	ImagePtr image = loadImage(Path("sgd://misc/explode64_vstrip.png"), 16).result();
 
 	auto w = (float)window->size().x;
@@ -26,6 +23,8 @@ void entry() {
 
 	dc->fillColor = Vec4f(0, 0, 0, 1);
 //	dc->addRect({2, 2, w - 2, h - 2});
+
+	auto fh = dc->font()->height;
 
 	dc->fillColor = Vec4f(0, 0, 0, 1);
 	dc->addText("Hello World!", {2, 2});
@@ -45,7 +44,7 @@ void entry() {
 		dc->addImage(image, {64,64}, frame+=.1f);
 
 		auto str = std::to_string(gc->FPS());
-		dc->addText(str,{w - font->textWidth(str),0});
+		dc->addText(str,{w - dc->font()->textWidth(str),0});
 
 		dc->addText(std::to_string(window->mouse()->position().z) + " " + std::to_string(window->mouse()->velocity().z), {0,64});
 

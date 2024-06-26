@@ -37,7 +37,6 @@ void entry() {
 	scene->add(overlay);
 
 	auto dc = overlay->drawList();
-	dc->font = loadFont(Path("C:/windows/fonts/consola.ttf"),16).result();
 
 	for (;;) {
 		pollEvents();

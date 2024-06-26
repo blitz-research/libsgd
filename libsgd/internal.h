@@ -25,7 +25,6 @@ inline GraphicsContextPtr g_mainGC;
 inline ScenePtr g_mainScene;
 inline OverlayPtr g_overlay;
 inline DrawListPtr g_drawList;
-inline FontPtr g_defaultFont;
 
 enum struct HandleType {
 	//	object,

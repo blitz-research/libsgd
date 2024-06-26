@@ -108,4 +108,18 @@ Expected<Font*, FileioEx> loadFont(CPath path, float height) {
 	return new Font{atlas, std::move(glyphs), height, (float)ascent * fscale, (float)descent * fscale, (float)lineGap * fscale};
 }
 
+Font* defaultFont() {
+	static FontPtr font;
+	if (font) return font;
+
+#if SGD_OS_WINDOWS
+	font = loadFont(sgd::Path("C:/windows/fonts/consola.ttf"), 16).result();
+#elif SGD_OS_LINUX
+	font = loadFont(sgd::Path("/usr/share/fonts/TTF/Inconsolata-Medium.ttf"), 16).result();
+#elif SGD_OS_MACOS
+	font = loadFont(sgd::Path("/Library/Fonts/Arial Unicode.ttf"), 16).result();
+#endif
+	return font;
+}
+
 } // namespace sgd

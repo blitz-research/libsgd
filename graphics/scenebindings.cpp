@@ -323,7 +323,6 @@ void SceneBindings::onValidate(GraphicsContext* gc) const {
 		uniforms.csmDepthBias = csmDepthBias();
 		uniforms.psmClipNear = psmClipNear();
 		uniforms.psmDepthBias = psmDepthBias();
-		SGD_LOG << uniforms.psmDepthBias;
 		m_shadowUniforms->update(&uniforms,0,sizeof(uniforms));
 		m_uniformsDirty = false;
 	}
