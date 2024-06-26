@@ -35,8 +35,8 @@ void SGD_DECL sgd_ClearScene() {
 		sgdx::destroyAllHandles();
 	}
 	sgdx::g_overlay = new sgd::Overlay();
-	sgdx::g_drawList = sgdx::g_overlay->drawList();
 	sgdx::g_mainScene->add(sgdx::g_overlay);
+	sgdx::g_drawList = sgdx::g_overlay->drawList();
 }
 
 void SGD_DECL sgd_SetClearColor(float red, float green, float blue, float alpha) {
