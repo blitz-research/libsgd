@@ -96,6 +96,19 @@ fn evaluatePBR(normal: vec3f, diffuse: vec3f, specular: vec3f, glossiness: f32, 
     return (diffuse + fspecular) * illum;
 }
 
+fn isNan(tz:f32) ->bool {
+    if tz > 0.0 {
+        if tz <= 0.0 {return true;}
+    }else if tz < 0.0 {
+        if tz >= 0.0 {return true;}
+    }else if tz == 0.0 {
+        if tz != 0.0 {return true;}
+    }else{
+        return true;
+    }
+    return false;
+}
+
 fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec3f, metallic: f32, roughness: f32, occlusion: f32) -> vec4f {
 
 	let black = vec3(0.04 * albedo.a);
@@ -120,6 +133,10 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	var color = (fdiffuse + fspecular) * occlusion;
 
+    //return vec4f(1,.5,0,1);
+
+#if !OS_MACOS
+
 	for(var i: u32 = 0; i < lightingUniforms.numDirectionalLights; i += 1) {
 
 	    let light = lightingUniforms.directionalLights[i];
@@ -130,6 +147,7 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 	        let vpos = (cameraUniforms.viewMatrix * vec4f(position, 1.0)).xyz;
 	        if vpos.z >= shadowUniforms.csmSplitDistances.w {continue;}
 //	        if vpos.z >= shadowUniforms.csmSplitDistances.w {return vec4f(1,1,0,1);}
+
             var split = i * 4;
             if vpos.z >= shadowUniforms.csmSplitDistances.x {
                 if vpos.z < shadowUniforms.csmSplitDistances.y {
@@ -140,6 +158,9 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
                     split += 3;
                 }
             }
+
+            if isNan(lighting_csmMatrices[split][0].x) {return vec4f(1,0,.5,1);}
+
             let wpos = lighting_csmMatrices[split] * vec4f(position, 1);
             let spos = wpos.xyz / wpos.w;
 
@@ -149,7 +170,6 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
             atten = textureSampleCompareLevel(lighting_csmTexture, lighting_csmSampler, tcoords, split, spos.z - shadowUniforms.csmDepthBias);
             if atten == 0.0 {continue;}
 	    }
-
     	let lvec = -light.worldMatrix[2].xyz;
 
 	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten, light.color);
@@ -199,6 +219,7 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten * coneAtten, light.color);
 	}
+#endif
 
 	return vec4f(color + emissive, albedo.a);
 }

@@ -26,16 +26,16 @@ template<class T> Vec2<T>& Vec4<T>::xy() {
 	return (Vec2<T>&)(*this);
 }
 
-template<class T> CVec2<T> Vec4<T>::xy() const {
-	return (CVec2<T>)(*this);
+template<class T> Vec2<T> Vec4<T>::xy() const {
+	return *(Vec2<T>*)this;
 }
 
 template<class T> Vec3<T>& Vec4<T>::xyz() {
 	return (Vec3<T>&)(*this);
 }
 
-template<class T> CVec3<T> Vec4<T>::xyz() const {
-	return (CVec3<T>)(*this);
+template<class T> Vec3<T> Vec4<T>::xyz() const {
+	return *(Vec3<T>*)this;
 }
 
 template<class T> Vec4<T>::operator Vec3<T>() const {

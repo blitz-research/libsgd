@@ -30,9 +30,9 @@ template <class T> struct Vec4 {
 	static Vec4 rgba(uint32_t rgba);
 
 	Vec2<T>& xy();
-	CVec2<T> xy() const;
+	Vec2<T> xy() const;
 	Vec3<T>& xyz();
-	CVec3<T> xyz() const;
+	Vec3<T> xyz() const;
 
 	explicit operator Vec3<T>() const;
 

@@ -20,8 +20,8 @@ template <class T> Vec2<T>& Vec3<T>::xy() {
 	return (Vec2<T>&)(*this);
 }
 
-template <class T> CVec2<T> Vec3<T>::xy() const {
-	return (CVec2<T>)(*this);
+template <class T> Vec2<T> Vec3<T>::xy() const {
+	return *(Vec2<T>*)this;
 }
 
 template <class T> Vec3<T>::operator Vec2<T>() const {

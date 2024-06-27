@@ -14,9 +14,9 @@ void entry() {
 
 	{
 		float sz = 330;
-		MeshPtr mesh = loadStaticMesh(Path("~/dev/assets/eiffel_tower.glb")).result();
+		MeshPtr mesh = loadStaticMesh(Path("sgd://models/eiffel_tower.glb")).result();
 		fit(mesh, {{-sz/2, 0, -sz/2}, {sz/2, sz, sz/2}}, true);
-		mesh->shadowsEnabled = true;
+//		mesh->shadowsEnabled = true;
 		ModelPtr model = new Model(mesh);
 		scene->add(model);
 	}
@@ -25,7 +25,7 @@ void entry() {
 	move(player, {0, 1, -2});
 
 	light->setWorldPosition({0,0,0});
-	light->shadowsEnabled = true;
+//	light->shadowsEnabled = true;
 	setRotation(light, {-30,0,0});
 
 	camera->far = 1024;

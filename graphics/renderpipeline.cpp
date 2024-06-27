@@ -86,7 +86,18 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc,		 //
 		};
 
 		String header;
-		header = "#define RENDER_PASS_" + renderPassName(rpassType) + " 1\n";
+
+#if SGD_OS_WINDOWS
+		header += "#define OS_WINDOWS 1\n";
+#elif SGD_OS_LINUX
+		header += "#define OS_LINUX 1\n";
+#elif SGD_OS_MACOS
+		header += "#define OS_MACOS 1\n";
+#elif SGD_OS_EMSCRIPTEN
+		header += "#define OS_EMSCRIPTEN 1\n";
+#endif
+
+		header += "#define RENDER_PASS_" + renderPassName(rpassType) + " 1\n";
 		header += "#define BLEND_MODE_" + blendModeName(blendMode) + " 1\n";
 
 		tcpp::Lexer lexer(std::make_unique<tcpp::StringInputStream>(header + source));

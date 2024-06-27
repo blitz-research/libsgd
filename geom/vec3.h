@@ -26,7 +26,7 @@ template <class T> struct Vec3 {
 	constexpr Vec3(T x, T y, T z);
 
 	Vec2<T>& xy();
-	CVec2<T> xy() const;
+	Vec2<T> xy() const;
 
 	explicit operator Vec2<T>() const;
 
