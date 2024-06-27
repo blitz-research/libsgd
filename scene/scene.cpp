@@ -326,20 +326,20 @@ void Scene::renderASync() const {
 
 		m_timeStampsEnabled = false;
 
-		m_timeStampResults.MapAsync(
-			wgpu::MapMode::Read, 0, timeStampCount * 8,
-			[](WGPUBufferMapAsyncStatus status, void* userdata) {
-				if (status != WGPUBufferMapAsyncStatus_Success) {
+		m_timeStampResults.MapAsync(								   //
+			wgpu::MapMode::Read, 0, timeStampCount * 8,				   //
+			wgpu::CallbackMode::AllowProcessEvents,					   //
+			[this](wgpu::MapAsyncStatus status, char const* message) { //
+				if (status != wgpu::MapAsyncStatus::Success) {
 					return;
 				}
-				auto scene = (Scene*)userdata;
+				auto scene = (Scene*)this;
 				std::memcpy(scene->m_timeStamps, scene->m_timeStampResults.GetConstMappedRange(), timeStampCount * 8);
 				scene->m_timeStampResults.Unmap();
-				scene->m_timeStampsEnabled = true;
-				auto elapsed = scene->m_timeStamps[3] - scene->m_timeStamps[1];
+				auto elapsed = scene->m_timeStamps[3] - scene->m_timeStamps[0];
 				scene->m_rps = (float)(1e9 / (double)elapsed);
-			},
-			(void*)this);
+				scene->m_timeStampsEnabled = true;
+			});
 	}
 }
 

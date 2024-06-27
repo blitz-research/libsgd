@@ -77,11 +77,20 @@ GraphicsContext::GraphicsContext(Window* window, const wgpu::BackendType wgpuBac
 						m_colorBuffer = m_depthBuffer = {};
 						return;
 					}
+
+					wgpu::SurfaceCapabilities surfCaps{};
+					if(!m_wgpuSurface.GetCapabilities(m_wgpuDevice.GetAdapter(), &surfCaps)) {
+						SGD_PANIC("wgpu::Surface::GetCapabilities failed");
+					}
+					if(!surfCaps.formatCount) {
+						SGD_PANIC("wgpu::SurfaceCapabilities.formats == 0");
+					}
+
 					wgpu::SurfaceConfiguration config{};
 					config.device = m_wgpuDevice;
 					config.width = size.x;
 					config.height = size.y;
-					config.format = m_wgpuSurface.GetPreferredFormat(m_wgpuDevice.GetAdapter());
+					config.format = surfCaps.formats[0];
 					config.usage = wgpu::TextureUsage::RenderAttachment;
 					config.presentMode = wgpu::PresentMode::Fifo;
 					config.viewFormatCount = 0;
