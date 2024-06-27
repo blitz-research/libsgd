@@ -750,19 +750,19 @@ SGD_API void SGD_DECL sgd_DestroyEntity(SGD_Entity entity);
 //! Copy entity and children recursively.
 SGD_API SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity entity);
 
-//! Set entity parent.
+//! Set entity's parent.
 SGD_API void SGD_DECL sgd_SetEntityParent(SGD_Entity entity, SGD_Entity parent);
 
-//! Get entity parent.
+//! Get entity's parent.
 SGD_API SGD_Entity SGD_DECL sgd_GetEntityParent(SGD_Entity entity);
 
-//! Set entity position in world space.
+//! Set entity's world space position.
 SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity entity, SGD_Real tx, SGD_Real ty, SGD_Real tz);
 
-//! Set entity rotation in world space.
+//! Set entity's world space rotation.
 SGD_API void SGD_DECL sgd_SetEntityRotation(SGD_Entity entity, SGD_Real rx, SGD_Real ry, SGD_Real rz);
 
-//! Set entity scale in world space.
+//! Set entity world space scale.
 SGD_API void SGD_DECL sgd_SetEntityScale(SGD_Entity entity, SGD_Real sx, SGD_Real sy, SGD_Real sz);
 
 //! Translate entity in world space.
@@ -774,64 +774,64 @@ SGD_API void SGD_DECL sgd_RotateEntity(SGD_Entity entity, SGD_Real rx, SGD_Real 
 //! Scale entity in world space.
 SGD_API void SGD_DECL sgd_ScaleEntity(SGD_Entity entity, SGD_Real sx, SGD_Real sy, SGD_Real sz);
 
-//! Move an entity relative to it's current orientation.
+//! Move entity relative to it's current orientation.
 SGD_API void SGD_DECL sgd_MoveEntity(SGD_Entity entity, SGD_Real tx, SGD_Real ty, SGD_Real tz);
 
-//! Turn an entity relative to it's current orientation.
+//! Turn entity relative to it's current orientation.
 SGD_API void SGD_DECL sgd_TurnEntity(SGD_Entity entity, SGD_Real rx, SGD_Real ry, SGD_Real rz);
 
-//! Get the X component of an entity's position in world space.
+//! Get the X component of entity's world space position.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityX(SGD_Entity entity);
 
-//! Get the Y component of an entity's position in world space.
+//! Get the Y component of entity's world space position.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityY(SGD_Entity entity);
 
-//! Get the Z component of an entity's position in world space.
+//! Get the Z component of entity's world space position.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityZ(SGD_Entity entity);
 
-//! Get the X rotation component (ie: 'pitch') of an entity's orientation in world space.
+//! Get the X rotation component (ie: 'pitch') of entity's world space orientation.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityRX(SGD_Entity entity);
 
-//! Get the Y rotation component (ie: 'yaw') of an entity's orientation in world space.
+//! Get the Y rotation component (ie: 'yaw') of entity's world space orientation.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityRY(SGD_Entity entity);
 
-//! Get the Z rotation component (ie: 'roll') of an entity's orientation in world space.
+//! Get the Z rotation component (ie: 'roll') of entity's world space orientation.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityRZ(SGD_Entity entity);
 
-//! Get the X rotation component (ie: 'pitch') of an entity's orientation in world space.
+//! Get the X component of entity's world space scale factor.
 SGD_API SGD_Real SGD_DECL sgd_GetEntitySX(SGD_Entity entity);
 
-//! Get the Y rotation component (ie: 'yaw') of an entity's orientation in world space.
+//! Get the Y component of entity's world space scale factor.
 SGD_API SGD_Real SGD_DECL sgd_GetEntitySY(SGD_Entity entity);
 
-//! Get the Z rotation component (ie: 'roll') of an entity's orientation in world space.
+//! Get the Z component of entity's world space scale factor.
 SGD_API SGD_Real SGD_DECL sgd_GetEntitySZ(SGD_Entity entity);
 
-//! Get the X component of an entity's basis matrix right vector.
+//! Get the X component of entity's world space basis matrix right vector.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityIX(SGD_Entity entity);
 
-//! Get the Y component of an entity's basis matrix right vector.
+//! Get the Y component of entity's world space basis matrix right vector.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityIY(SGD_Entity entity);
 
-//! Get the Z component of an entity's basis matrix right vector.
+//! Get the Z component of entity's world space basis matrix right vector.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityIZ(SGD_Entity entity);
 
-//! Get the X component of an entity's basis matrix up vector.
+//! Get the X component of entity's world space basis matrix up vector.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityJX(SGD_Entity entity);
 
-//! Get the Y component of an entity's basis matrix up vector.
+//! Get the Y component of entity's world space basis matrix up vector.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityJY(SGD_Entity entity);
 
-//! Get the Z component of an entity's basis matrix up vector.
+//! Get the Z component of entity's world space basis matrix up vector.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityJZ(SGD_Entity entity);
 
-//! Get the X component of an entity's basis matrix forward vector.
+//! Get the X component of entity's world space basis matrix forward vector.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityKX(SGD_Entity entity);
 
-//! Get the Y component of an entity's basis matrix forward vector.
+//! Get the Y component of entity's world space basis matrix forward vector.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityKY(SGD_Entity entity);
 
-//! Get the Z component of an entity's basis matrix forward vector.
+//! Get the Z component of entity's world space basis matrix forward vector.
 SGD_API SGD_Real SGD_DECL sgd_GetEntityKZ(SGD_Entity entity);
 
 //! Aim entity at entity.
