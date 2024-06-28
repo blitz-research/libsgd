@@ -133,10 +133,6 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	var color = (fdiffuse + fspecular) * occlusion;
 
-    //return vec4f(1,.5,0,1);
-
-#if !OS_MACOS
-
 	for(var i: u32 = 0; i < lightingUniforms.numDirectionalLights; i += 1) {
 
 	    let light = lightingUniforms.directionalLights[i];
@@ -146,7 +142,6 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 	    if light.shadowsEnabled!= 0 {
 	        let vpos = (cameraUniforms.viewMatrix * vec4f(position, 1.0)).xyz;
 	        if vpos.z >= shadowUniforms.csmSplitDistances.w {continue;}
-//	        if vpos.z >= shadowUniforms.csmSplitDistances.w {return vec4f(1,1,0,1);}
 
             var split = i * 4;
             if vpos.z >= shadowUniforms.csmSplitDistances.x {
@@ -158,8 +153,6 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
                     split += 3;
                 }
             }
-
-            if isNan(lighting_csmMatrices[split][0].x) {return vec4f(1,0,.5,1);}
 
             let wpos = lighting_csmMatrices[split] * vec4f(position, 1);
             let spos = wpos.xyz / wpos.w;
@@ -219,9 +212,11 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten * coneAtten, light.color);
 	}
-#endif
 
 	return vec4f(color + emissive, albedo.a);
+#if OS_MACOS
+	return vec4f(color + emissive, albedo.a);
+#endif
 }
 
 )"
