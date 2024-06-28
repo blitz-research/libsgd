@@ -2,39 +2,49 @@
 
 void entry() {
 
+	float groundSize = 500.0f;
+	MaterialPtr groundMaterial = loadPBRMaterial(Path("sgd://materials/Ground037_1K-JPG")).result();
+	groundMaterial->setTexture("roughnessTexture", whiteTexture());
+	groundMaterial->setFloat("roughnessFactor1f", .75f);
+	MeshPtr groundMesh =
+		createBoxMesh({{-groundSize / 2, -1, -groundSize / 2}, {groundSize / 2, 0, groundSize / 2}}, groundMaterial);
+	transformTexCoords(groundMesh, {groundSize, groundSize}, {0, 0});
 
-	{
-		float sz = 1000;
-//		MaterialPtr material = loadPBRMaterial(Path("sgd://misc/brownish-grass.jpg")).result();
-		MaterialPtr material = loadPBRMaterial(Path("sgd://materials/Ground037_1K-JPG")).result();
-		material->setTexture("roughnessTexture"	,whiteTexture());
-		material->setFloat("roughnessFactor1f", .75f);
-		MeshPtr mesh = createBoxMesh({{-sz/5, -1, -sz/5}, {sz/5, 0, sz/5}}, material);
-		transformTexCoords(mesh, {sz, sz}, {0, 0});
-		ModelPtr model = new Model(mesh);
-		scene->add(model);
-	}
+	float towerSize = 330.0f;
+	MeshPtr towerMesh = loadStaticMesh(Path("sgd://models/eiffel_tower.glb")).result();
+	fit(towerMesh, {{-towerSize, 0, -towerSize}, {towerSize / 2, towerSize, towerSize / 2}}, true);
+	towerMesh->shadowsEnabled = true;
 
-	{
-		float sz = 330;
-		MeshPtr mesh = loadStaticMesh(Path("sgd://models/eiffel_tower.glb")).result();
-		fit(mesh, {{-sz/2, 0, -sz/2}, {sz/2, sz, sz/2}}, true);
-		mesh->shadowsEnabled = true;
-		ModelPtr model = new Model(mesh);
-		scene->add(model);
+	for (int ix = -2; ix <= 2; ++ix) {
+		for (int iz = -2; iz <= 2; ++iz) {
+			ModelPtr groundModel = new Model(groundMesh);
+			ModelPtr towerModel = new Model(towerMesh);
+			towerModel->setParent(groundModel);
+			move(groundModel, {(float)ix * groundSize, 0, (float)iz * groundSize});
+			scene->add(groundModel);
+		}
 	}
 
 	createPlayer(nullptr);
 	move(player, {0, 1, -2});
 
-	light->setWorldPosition({0,0,0});
+	light->setWorldPosition({0, 0, 0});
 	light->shadowsEnabled = true;
-	setRotation(light, {-30,0,0});
+	setRotation(light, {-30, 0, 0});
 
+	camera->near = .125f;
+	camera->far = 8192;
+	scene->sceneBindings()->csmSplitDistances = {128, 512, 2048, 8192};
+	scene->sceneBindings()->csmTextureSize = 4096;
+	scene->sceneBindings()->csmDepthBias = .0001f;
+
+#if 0
+	camera->near = .125f;
 	camera->far = 1024;
-	scene->sceneBindings()->csmSplitDistances={16,64,256,1024};
-	scene->sceneBindings()->csmTextureSize = 2048;
-	scene->sceneBindings()->csmDepthBias=.0001f;
+	scene->sceneBindings()->csmSplitDistances={16, 64, 256, 1024};
+	scene->sceneBindings()->csmTextureSize = 4096;
+	scene->sceneBindings()->csmDepthBias = .0001f;
+#endif
 
 	auto overlay = new Overlay();
 	scene->add(overlay);
@@ -48,10 +58,11 @@ void entry() {
 
 		light->setWorldPosition({});
 
-		rotate(light,{0,.025f,0});
+		rotate(light, {0, .025f, 0});
 
 		dc->clear();
-		dc->addText("RPS:"+std::to_string(scene->RPS()), {0,0});
+		dc->addText("FPS:" + std::to_string(gc->FPS()), {0, 0});
+		dc->addText("RPS:" + std::to_string(scene->RPS()), {0, 16});
 
 		render();
 	}

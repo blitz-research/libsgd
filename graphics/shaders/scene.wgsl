@@ -215,6 +215,7 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	return vec4f(color + emissive, albedo.a);
 #if OS_MACOS
+    // WTF?
 	return vec4f(color + emissive, albedo.a);
 #endif
 }

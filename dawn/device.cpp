@@ -32,16 +32,16 @@ wgpu::FeatureName requiredFeatures[]{wgpu::FeatureName::TimestampQuery};
 const char* enabledToggles[] = {"allow_unsafe_apis"};
 //, "float32-filterable"
 
-void dawnDeviceLostCallback(WGPUDevice const * device, WGPUDeviceLostReason reason, char const * message, void * userdata) {
-	static const char* names[] = {"Undefined", "Unknown", "Destroyed","InstanceDropped","FailedCreation"};
+void dawnDeviceLostCallback(WGPUDevice const* device, WGPUDeviceLostReason reason, char const* message, void* userdata) {
+	static const char* names[] = {"Undefined", "Unknown", "Destroyed", "InstanceDropped", "FailedCreation"};
 
-	if(reason==WGPUDeviceLostReason_InstanceDropped) return;
+	if (reason == WGPUDeviceLostReason_InstanceDropped) return;
 
 	auto rname = (uint32_t)reason < std::size(names) ? names[(uint32_t)reason] : "OOPS";
 
-//	SGD_LOG << "Dawn device lost:" << rname;
-//	SGD_LOG << message;
-	SGD_PANIC(String("Dawn device lost: ") + rname + "\n"+ message);
+	//	SGD_LOG << "Dawn device lost:" << rname;
+	//	SGD_LOG << message;
+	SGD_PANIC(String("Dawn device lost: ") + rname + "\n" + message);
 }
 
 void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
@@ -49,18 +49,18 @@ void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
 
 	auto tname = (uint32_t)type < std::size(names) ? names[(uint32_t)type] : "OOPS";
 
-	SGD_LOG << "Dawn device error message:"<<tname;
+	SGD_LOG << "Dawn device error message:" << tname;
 	SGD_LOG << message;
 	alert(String("Dawn Device error:\n") + tname + "\n" + message);
 	SGD_ABORT();
 }
 
 void dawnLoggingCallback(WGPULoggingType type, const char* message, void*) {
-	static const char* names[]= {"???", "Verbose", "Info", "Warning", "Error"};
+	static const char* names[] = {"???", "Verbose", "Info", "Warning", "Error"};
 
 	auto tname = (uint32_t)type < std::size(names) ? names[(uint32_t)type] : "OOPS";
 
-	switch(type) {
+	switch (type) {
 	case WGPULoggingType_Verbose:
 #if SGD_CONFIG_DEBUG
 		SGD_LOG << "Dawn:" << message;
@@ -71,9 +71,6 @@ void dawnLoggingCallback(WGPULoggingType type, const char* message, void*) {
 		break;
 	case WGPULoggingType_Warning:
 		SGD_LOG << "Dawn warning:" << message;
-#if SGD_CONFIG_DEBUG
-		alert(String("Dawn warning: ") + message);
-#endif
 		break;
 	case WGPULoggingType_Error:
 		SGD_LOG << "Dawn error:" << message;
