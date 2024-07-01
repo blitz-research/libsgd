@@ -5,13 +5,16 @@
 namespace sgd {
 
 inline Signal<> appIniting;
+inline Signal<> appExiting;
+
+inline Signal<> appSuspending;
+inline Signal<> appResuming;
 
 inline Signal<> beginPollEvents;
 inline Signal<> endPollEvents;
-inline Signal<> appSuspended;
-inline Signal<> appResumed;
 
 void initApp();
+void exitApp();
 
 void suspendApp();
 void resumeApp();

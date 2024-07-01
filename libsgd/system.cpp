@@ -5,8 +5,6 @@
 #include <clocale>
 #endif
 
-#include <GLFW/glfw3.h>
-
 namespace {
 
 void(SGD_DECL* g_errorHandler)(SGD_String error, void* context);
@@ -27,28 +25,25 @@ void SGD_DECL sgd_Init() {
 
 	sgd::initApp();
 
-	sgd::appSuspended.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_SUSPENDED}); });
+	sgd::appSuspending.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_SUSPENDED}); });
 
-	sgd::appResumed.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_RESUMED}); });
+	sgd::appResuming.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_RESUMED}); });
 }
 
 void SGD_DECL sgd_Terminate() {
-	if (!sgdx::g_started) return;
-	sgdx::g_started = false;
+	if (sgdx::g_terminated || !sgdx::g_started) return;
+	sgdx::g_terminated = true;
 
-	sgd::appSuspended.disconnectAll();
-
-	sgd::appResumed.disconnectAll();
-
-	if (!sgdx::g_mainWindow) return;
-
-	if (sgdx::g_mainScene) {
-		sgdx::g_mainScene = nullptr;
-		sgdx::g_mainGC->wgpuDevice().Destroy();
-		sgdx::g_mainGC = nullptr;
+	if(sgdx::g_mainWindow) {
+		if (sgdx::g_mainGC) {
+			sgdx::g_mainGC->wgpuDevice().Destroy();
+			sgdx::g_mainGC = nullptr;
+		}
+		sgdx::g_mainWindow->close();
+		sgdx::g_mainWindow = nullptr;
 	}
-	sgdx::g_mainWindow->close();
-	sgdx::g_mainWindow = nullptr;
+
+	sgd::exitApp();
 }
 
 void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(SGD_String error, void* context), void* context) {

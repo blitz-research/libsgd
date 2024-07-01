@@ -15,7 +15,7 @@ SGD_SHARED(Sound);
 struct Sound : Shared {
 	SGD_OBJECT_TYPE(Sound, Shared);
 
-	SoLoud::Wav* const wav;
+	SoLoud::Wav* const wav;	// Should be value, ala b3d.
 
 	Property<bool> looping;
 
@@ -29,6 +29,8 @@ Expected<Sound*, FileioEx> loadSound(CPath path);
 
 uint32_t playSound(Sound* sound);
 uint32_t cueSound(Sound* sound);
+
+uint32_t playMusic(CPath path);
 
 void setAudioVolume(uint32_t audio, float pan);
 float audioVolume(uint32_t audio);
@@ -50,7 +52,5 @@ bool audioPaused(uint32_t audio);
 
 bool audioValid(uint32_t audio);
 void stopAudio(uint32_t audio);
-
-uint32_t playMusic(CPath path);
 
 } // namespace sgd
