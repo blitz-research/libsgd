@@ -32,8 +32,8 @@ struct SceneBindings : GraphicsResource {
 	Property<float> csmClipRange{1000.0f};
 	Property<float> csmDepthBias{.0001f};
 
-	Property<float> psmClipNear{.1f};
-	Property<float> psmDepthBias{.00001f};
+	Property<float> psmClipNear{.01f};
+	Property<float> psmDepthBias{.0001f};
 
 	void setCameraUniforms(CCameraUniforms uniforms);
 	CCameraUniforms cameraUniforms() const {

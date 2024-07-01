@@ -279,7 +279,7 @@ void SceneBindings::addPSMPasses() const {
 				 {{+1, 0, 0}, {0, +1, 0}, {0, 0, +1}},	// 4: +Z
 				 {{-1, 0, 0}, {0, +1, 0}, {0, 0, -1}}}; // 5: -Z
 
-			float near = .1f;
+			float near = psmClipNear();
 			float far = light.range;
 
 			auto projMatrix = Mat4f::frustum(-near, near, -near, near, near, far);

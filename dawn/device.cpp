@@ -29,7 +29,7 @@ wgpu::FeatureName requiredFeatures[]{wgpu::FeatureName::TimestampQuery};
 //, wgpu::FeatureName::Float32Filterable};
 //, wgpu::FeatureName::TimestampQueryInsidePasses};
 
-const char* enabledToggles[] = {"allow_unsafe_apis"};
+//const char* enabledToggles[] = {"allow_unsafe_apis"};
 //, "float32-filterable"
 
 void dawnDeviceLostCallback(WGPUDevice const* device, WGPUDeviceLostReason reason, char const* message, void* userdata) {
@@ -45,7 +45,7 @@ void dawnDeviceLostCallback(WGPUDevice const* device, WGPUDeviceLostReason reaso
 }
 
 void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
-	static const char* names[] = {"NoError", "Validation", "Out of memory", "Internal", "Unknown", "Device lost"};
+	static const char* names[] = {"Undefined", "NoError", "Validation", "Out of memory", "Internal", "Unknown", "Device lost"};
 
 	auto tname = (uint32_t)type < std::size(names) ? names[(uint32_t)type] : "OOPS";
 
@@ -139,17 +139,20 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 			logAdapterProps(adapter);
 
 			wgpu::DeviceDescriptor devDesc{};
+			wgpu::DawnTogglesDescriptor togglesDesc{};
+			const char* enabledToggles[]{"allow_unsafe_apis"};
+			//, "float32-filterable"
+
 			devDesc.deviceLostCallbackInfo.callback = &dawnDeviceLostCallback;
 			devDesc.uncapturedErrorCallbackInfo.callback = &dawnErrorCallback;
 
-			wgpu::DawnTogglesDescriptor togglesDesc{};
 			auto feature = wgpu::FeatureName::TimestampQuery;
 			if (adapter.HasFeature(feature)) {
+				togglesDesc.enabledToggleCount = std::size(enabledToggles);
+				togglesDesc.enabledToggles = enabledToggles;
 				devDesc.nextInChain = &togglesDesc;
 				devDesc.requiredFeatureCount = 1;
 				devDesc.requiredFeatures = &feature;
-				togglesDesc.enabledToggleCount = std::size(enabledToggles);
-				togglesDesc.enabledToggles = enabledToggles;
 			}
 
 			adapter.RequestDevice(

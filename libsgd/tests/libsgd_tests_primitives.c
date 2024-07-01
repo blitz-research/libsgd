@@ -9,9 +9,9 @@ start:;	// Need semi-colon for Macos?!?
 	SGD_Camera camera = sgd_CreatePerspectiveCamera();
 	sgd_MoveEntity(camera, 0, 2, tz - 5.0);
 
-	// Nice high res shadow maps!
 	sgd_SetMaxPSMLights(5);
-	sgd_SetPSMTextureSize(4096);
+	sgd_SetPSMTextureSize(4096); // Nice high res shadow maps!
+	sgd_SetPSMDepthBias(.0001f);
 
 	SGD_Light light0 = sgd_CreatePointLight();
 	sgd_SetLightShadowMappingEnabled(light0, SGD_TRUE);
@@ -61,9 +61,9 @@ start:;	// Need semi-colon for Macos?!?
 	while (!(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)) {
 
 		if (sgd_IsKeyDown(SGD_KEY_A)) {
-			sgd_MoveEntity(camera, 0, 0, .3);
+			sgd_MoveEntity(camera, 0, 0, .1);
 		} else if (sgd_IsKeyDown(SGD_KEY_Z)) {
-			sgd_MoveEntity(camera, 0, 0, -.3);
+			sgd_MoveEntity(camera, 0, 0, -.1);
 		}
 
 		if (sgd_IsKeyDown(SGD_KEY_LEFT)) {

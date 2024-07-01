@@ -178,18 +178,21 @@ void Scene::updateLightingBindings() {
 
 	// Directional lights
 	{
-		auto cmp = [=](const Light* lhs, const Light* rhs) { return lhs->priority() > rhs->priority(); };
+		auto cmp = [=](const Light* lhs, const Light* rhs) { //
+			return lhs->priority() > rhs->priority();
+		};
 		std::sort(m_directionalLights.begin(), m_directionalLights.end(), cmp);
 
-		uniforms.directionalLightCount = std::min((int)m_directionalLights.size(), LightingUniforms::maxDirectionalLights);
-		for (int i = 0, n = 0; i < uniforms.directionalLightCount; ++i) {
-			auto light = m_directionalLights[i];
-			auto& ulight = uniforms.directionalLights[i];
+		int n = 0;
+		for (auto light : m_directionalLights) {
+			if (!light->visible()) continue;
+			auto& ulight = uniforms.directionalLights[n];
 			ulight.worldMatrix = light->worldMatrix();
 			ulight.color = light->color();
 			ulight.shadowsEnabled = light->shadowsEnabled() && n < m_sceneBindings->maxCSMLights();
-			n += ulight.shadowsEnabled;
+			if (++n == LightingUniforms::maxDirectionalLights) break;
 		}
+		uniforms.directionalLightCount = n;
 	}
 
 	// Point lights
@@ -200,17 +203,18 @@ void Scene::updateLightingBindings() {
 		};
 		std::sort(m_pointLights.begin(), m_pointLights.end(), cmp);
 
-		uniforms.pointLightCount = std::min((int)m_pointLights.size(), LightingUniforms::maxPointLights);
-		for (int i = 0, n = 0; i < uniforms.pointLightCount; ++i) {
-			auto light = m_pointLights[i];
-			auto& ulight = uniforms.pointLights[i];
+		int n = 0;
+		for (auto light : m_pointLights) {
+			if (!light->visible()) continue;
+			auto& ulight = uniforms.pointLights[n];
 			ulight.position = light->worldPosition() - m_eye;
 			ulight.color = light->color();
 			ulight.range = light->range();
 			ulight.falloff = light->falloff();
 			ulight.shadowsEnabled = light->shadowsEnabled() && n < m_sceneBindings->maxPSMLights();
-			n += ulight.shadowsEnabled;
+			if (++n == LightingUniforms::maxPointLights) break;
 		}
+		uniforms.pointLightCount = n;
 	}
 
 	// Spot lights
@@ -221,17 +225,20 @@ void Scene::updateLightingBindings() {
 		};
 		std::sort(m_spotLights.begin(), m_spotLights.end(), cmp);
 
-		uniforms.spotLightCount = std::min((int)m_spotLights.size(), LightingUniforms::maxSpotLights);
-		for (int i = 0; i < uniforms.spotLightCount; ++i) {
-			auto light = m_spotLights[i];
-			auto& ulight = uniforms.spotLights[i];
+		int n = 0;
+		for (auto light : m_spotLights) {
+			if (!light->visible()) continue;
+			auto& ulight = uniforms.spotLights[n];
+			ulight.position = light->worldPosition() - m_eye;
 			ulight.position = light->worldPosition() - m_eye;
 			ulight.color = light->color();
 			ulight.range = light->range();
 			ulight.falloff = light->falloff();
 			ulight.innerConeAngle = light->innerConeAngle();
 			ulight.outerConeAngle = light->outerConeAngle();
+			if (++n == LightingUniforms::maxSpotLights) break;
 		}
+		uniforms.spotLightCount = n;
 	}
 
 	m_sceneBindings->setLightingUniforms(uniforms);

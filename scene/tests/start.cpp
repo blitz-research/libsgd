@@ -154,9 +154,9 @@ void start(void (*entry)()) {
 	scene->add(skybox);
 	skybox->skyTexture = skyTexture;
 
-	light = new Light(LightType::directional);
-	scene->add(light);
-	turn(light, {-45, 45, 0});
+//	light = new Light(LightType::directional);
+//	scene->add(light);
+//	turn(light, {-45, 45, 0});
 
 	entry();
 }

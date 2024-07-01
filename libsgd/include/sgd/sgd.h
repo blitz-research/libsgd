@@ -703,10 +703,10 @@ SGD_API void SGD_DECL sgd_SetMaxPSMLights(int maxLights);
 //! Set split distances for CSM shadow, last value should match camera far. Defaults to 16, 64, 256, 1024.
 SGD_API void SGD_DECL sgd_SetCSMSplitDistances(float sklit0, float split1, float split2, float split3);
 
-//! Set max range to render potential CSM obscurers at. Defaults to 1024.
+//! Set max range of potential CSM obscurers. Defaults to 1000.
 SGD_API void SGD_DECL sgd_SetCSMClipRange(float range);
 
-//! Set depth bia for CSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.001.
+//! Set depth bia for CSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.0001.
 SGD_API void SGD_DECL sgd_SetCSMDepthBias(float bias);
 
 //! Set near clip plane distance for PSM shadows. Default to .01.

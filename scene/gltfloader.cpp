@@ -189,9 +189,12 @@ Material* GLTFLoader::loadMaterial(int id) {
 	{
 		auto& texInfo = gltfMat.normalTexture;
 		if (texInfo.index >= 0) {
-			SGD_ASSERT(texInfo.texCoord == 0);
-			SGD_ASSERT(texInfo.scale == 1.0f);
-			material->setTexture("normalTexture", loadTexture(texInfo.index, false, false));
+			if(texInfo.texCoord==0) {
+				SGD_ASSERT(texInfo.scale == 1.0f);
+				material->setTexture("normalTexture", loadTexture(texInfo.index, false, false));
+			}else{
+				SGD_LOG << "TODO: Skipping normal map: texInfo.texCoord=" <<texInfo.texCoord;
+			}
 		}
 	}
 	{
