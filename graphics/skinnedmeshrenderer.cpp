@@ -35,8 +35,9 @@ BindGroupDescriptor bindGroupDescriptor( //
 		bufferBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 								   wgpu::BufferBindingType::ReadOnlyStorage),
 	},
+	shaderSource,		  //
 	{vertexBufferLayout}, //
-	shaderSource);
+	wgpu::PrimitiveTopology::TriangleList);
 
 } // namespace
 
@@ -96,11 +97,9 @@ void SkinnedMeshRenderer::onValidate(GraphicsContext* gc) const {
 		for (Surface* surf : m_mesh->surfaces()) {
 			addRenderOp(gc,						   //
 						surf->material(),		   //
-						nullptr,				   //
 						m_mesh->vertexBuffer(),	   //
 						surf->triangleBuffer(),	   //
 						m_bindGroup,			   //
-						DrawMode::triangleList,	   //
 						surf->triangleCount() * 3, //
 						m_instanceCount,		   //
 						0,						   //

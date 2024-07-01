@@ -13,15 +13,17 @@ struct BindGroupDescriptor {
 	const char* const label;
 	BindGroupType const bindGroupType;
 	Vector<wgpu::BindGroupLayoutEntry> const wgpuBindGroupLayoutEntries;
-	Vector<wgpu::VertexBufferLayout> const wgpuVertexBufferLayouts;
 	String const wgpuShaderSource;
+	Vector<wgpu::VertexBufferLayout> const wgpuVertexBufferLayouts;
+	wgpu::PrimitiveTopology const wgpuTopology;
 	uint32_t const hash;
 
-	BindGroupDescriptor(const char* label,										   //
-						BindGroupType bindGroupType,							   //
-						Vector<wgpu::BindGroupLayoutEntry> bindGroupLayoutEntries, //
-						Vector<wgpu::VertexBufferLayout> vertexBufferLayouts,	   //
-						String wgpuShaderSource);								   //
+	BindGroupDescriptor(const char* label,														//
+						BindGroupType bindGroupType,											//
+						Vector<wgpu::BindGroupLayoutEntry> bindGroupLayoutEntries,				//
+						String wgpuShaderSource,												//
+						Vector<wgpu::VertexBufferLayout> vertexBufferLayouts = {},				//
+						wgpu::PrimitiveTopology topology = wgpu::PrimitiveTopology::Undefined); //
 
 	wgpu::BindGroupLayout wgpuBindGroupLayout(GraphicsContext* gc) const;
 };

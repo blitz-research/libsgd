@@ -20,7 +20,7 @@ BindGroupDescriptor bindGroupDescriptor( //
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::e2DArray), //
 		samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment),									   //
 	},
-	{}, shaderSource);
+	shaderSource);
 
 const MaterialDescriptor materialDescriptor(									   //
 	"image",																	   //

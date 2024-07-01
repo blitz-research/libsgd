@@ -18,11 +18,10 @@ RenderPassType renderPassType(BlendMode blendMode) {
 
 void Renderer::addRenderOp(GraphicsContext* gc,		//
 						   CMaterial* material,		//
-						   CBuffer* instanceBuffer, //
+//						   CBuffer* instanceBuffer, //
 						   CBuffer* vertexBuffer,	//
 						   CBuffer* indexBuffer,	//
 						   CBindGroup* renderer,	//
-						   DrawMode drawMode,		//
 						   uint32_t elementCount,	//
 						   uint32_t instanceCount,	//
 						   uint32_t firstElement,	//
@@ -30,9 +29,8 @@ void Renderer::addRenderOp(GraphicsContext* gc,		//
 
 	{
 		auto rpassType = renderPassType(material->blendMode());
-		auto pipeline = getOrCreateRenderPipeline(gc, rpassType, material, renderer, drawMode);
+		auto pipeline = getOrCreateRenderPipeline(gc, rpassType, material, renderer);
 		m_renderOps[(int)rpassType].emplace_back( //
-			instanceBuffer,						  //
 			vertexBuffer,						  //
 			indexBuffer,						  //
 			material->bindGroup(),				  //
@@ -46,9 +44,8 @@ void Renderer::addRenderOp(GraphicsContext* gc,		//
 	if (material->blendMode() == BlendMode::alphaMask) {
 #if 0
 		auto rpassType = RenderPassType::blend;
-		auto pipeline = getOrCreateRenderPipeline(gc, rpassType, material, renderer, drawMode);
+		auto pipeline = getOrCreateRenderPipeline(gc, rpassType, material, renderer);
 		m_renderOps[(int)rpassType].emplace_back( //
-			instanceBuffer,						  //
 			vertexBuffer,						  //
 			indexBuffer,						  //
 			material->bindGroup(),				  //
@@ -63,9 +60,8 @@ void Renderer::addRenderOp(GraphicsContext* gc,		//
 	if (shadowsEnabled) {
 		SGD_ASSERT(material->blendMode() == BlendMode::opaque); // TODO: || material->blendMode() == BlendMode::alphaMask);
 		auto rpassType = RenderPassType::shadow;
-		auto spipeline = getOrCreateRenderPipeline(gc, rpassType, material, renderer, drawMode);
+		auto spipeline = getOrCreateRenderPipeline(gc, rpassType, material, renderer);
 		m_renderOps[(int)rpassType].emplace_back( //
-			instanceBuffer,						  //
 			vertexBuffer,						  //
 			indexBuffer,						  //
 			material->bindGroup(),				  //

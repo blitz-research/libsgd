@@ -19,7 +19,9 @@ BindGroupDescriptor bindGroupDescriptor( //
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::Cube),
 		samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment),
 	},
-	{}, shaderSource);
+	shaderSource,
+	{},
+	wgpu::PrimitiveTopology::TriangleStrip);
 
 } // namespace
 
@@ -61,7 +63,7 @@ void SkyboxRenderer::onValidate(GraphicsContext* gc) const {
 
 	if (m_rebuildRenderOps) {
 		m_material->validate(gc);
-		addRenderOp(gc, m_material, nullptr, nullptr, nullptr, m_bindGroup, DrawMode::triangleStrip, 4, 1, 0, false);
+		addRenderOp(gc, m_material, nullptr, nullptr, m_bindGroup, 4, 1, 0, false);
 		m_rebuildRenderOps = false;
 	}
 

@@ -19,7 +19,7 @@ BindGroupDescriptor bindGroupDescriptor( //
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment),								  // albedoTexture
 		samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment),								  // albedoSampler
 	},
-	{}, shaderSource);
+	shaderSource);
 } // namespace
 
 const MaterialDescriptor prelitMaterialDescriptor( //

@@ -29,7 +29,7 @@ BindGroupDescriptor bindGroupDescriptor( //
 		textureBindGroupLayoutEntry(11, wgpu::ShaderStage::Fragment),								  // normalTexture
 		samplerBindGroupLayoutEntry(12, wgpu::ShaderStage::Fragment),								  // normalSampler
 	},
-	{}, shaderSource);
+	shaderSource);
 } // namespace
 
 const MaterialDescriptor pbrMaterialDescriptor( //

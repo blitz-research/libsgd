@@ -22,20 +22,22 @@ wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(DrawList::Vertex), wgpu
 												  std::size(vertexBufferAttribs), vertexBufferAttribs};
 
 BindGroupDescriptor bindGroupDescriptor( //
-	"drawListRenderer", BindGroupType::renderer,
+	"drawListRenderer",					 //
+	BindGroupType::renderer,			 //
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 								   wgpu::BufferBindingType::Uniform),
 	},
+	shaderSource,		  //
 	{vertexBufferLayout}, //
-	shaderSource);
+	wgpu::PrimitiveTopology::TriangleList);
+
 } // namespace
 
 DrawList::DrawList()
 	: m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
 	  m_uniformBuffer(new Buffer(BufferType::uniform, nullptr, sizeof(DrawListUniforms))),
-	  m_vertexBuffer(new Buffer(BufferType::vertex, nullptr, m_vertexCapacity * sizeof(Vertex))),
-	font(defaultFont()){
+	  m_vertexBuffer(new Buffer(BufferType::vertex, nullptr, m_vertexCapacity * sizeof(Vertex))), font(defaultFont()) {
 
 	addDependency(m_bindGroup);
 	addDependency(m_vertexBuffer);
@@ -324,9 +326,9 @@ void DrawList::onValidate(GraphicsContext* gc) const {
 		auto cmaterial = drawOp.material ? drawOp.material : m_whiteMaterial;
 		cmaterial->validate(gc);
 
-		addRenderOp(gc, cmaterial,						 //
-					nullptr, m_vertexBuffer, nullptr,	 //
-					m_bindGroup, DrawMode::triangleList, //
+		addRenderOp(gc, cmaterial,			 //
+					m_vertexBuffer, nullptr, //
+					m_bindGroup,			 //
 					drawOp.triangleCount * 3, 1, firstElement, false);
 
 		firstElement += drawOp.triangleCount * 3;

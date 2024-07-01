@@ -19,14 +19,14 @@ auto shaderSource{
 };
 
 BindGroupDescriptor bindGroupDescriptor( //
-	"fontMaterial",
-	BindGroupType::material,
+	"fontMaterial", //
+	BindGroupType::material, //
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform), // PrelitMaterialUniforms
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment),								  // albedoTexture
 		samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment),								  // albedoSampler
 	},
-	{}, shaderSource);
+	shaderSource);
 
 const MaterialDescriptor fontMaterialDescriptor( //
 	"font",										 //

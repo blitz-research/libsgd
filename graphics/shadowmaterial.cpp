@@ -14,7 +14,6 @@ BindGroupDescriptor bindGroupDescriptor( //
 	"shadowMaterial",					 //
 	BindGroupType::material,			 //
 	{},									 //
-	{},									 //
 	shaderSource);
 
 } // namespace

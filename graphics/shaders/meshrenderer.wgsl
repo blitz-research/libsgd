@@ -5,11 +5,12 @@ R"(
 struct MeshInstance {
     worldMatrix: mat4x4f,
     color: vec4f,
-};
+}
 
 struct MeshUniforms {
     tangentsEnabled: i32,
 }
+
 @group(2) @binding(0) var<uniform> meshUniforms: MeshUniforms;
 @group(2) @binding(1) var<storage> meshInstances: array<MeshInstance>;
 

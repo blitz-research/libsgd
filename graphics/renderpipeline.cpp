@@ -47,8 +47,7 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc,		 //
 											   BlendMode blendMode,		 //
 											   DepthFunc depthFunc,		 //
 											   CullMode cullMode,		 //
-											   CBindGroup* renderer,	 //
-											   DrawMode drawMode) {
+											   CBindGroup* renderer) {
 
 	static Map<uint64_t, wgpu::RenderPipeline> cache;
 
@@ -63,8 +62,7 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc,		 //
 					((uint64_t)rpassType << 16) |					 // 4
 					((uint64_t)blendMode << 12) |					 // 4
 					((uint64_t)depthFunc << 8) |					 // 4
-					((uint64_t)cullMode << 4) |						 // 4
-					((uint64_t)drawMode << 0);						 // 4
+					((uint64_t)cullMode << 4);
 
 	auto& pipeline = cache[hash];
 	if (pipeline) return pipeline;
@@ -181,7 +179,7 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc,		 //
 	pipelineDescriptor.layout = gc->wgpuDevice().CreatePipelineLayout(&pipelineLayoutDesc);
 
 	// Primitive state
-	pipelineDescriptor.primitive.topology = (wgpu::PrimitiveTopology)drawMode;
+	pipelineDescriptor.primitive.topology = renderer->descriptor()->wgpuTopology;
 	pipelineDescriptor.primitive.cullMode = (wgpu::CullMode)cullMode;
 
 	return pipeline = gc->wgpuDevice().CreateRenderPipeline(&pipelineDescriptor);
@@ -190,14 +188,13 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc,		 //
 wgpu::RenderPipeline getOrCreateRenderPipeline(GraphicsContext* gc,		 //
 											   RenderPassType rpassType, //
 											   CMaterial* material,		 //
-											   CBindGroup* renderer,	 //
-											   DrawMode drawMode) {
+											   CBindGroup* renderer) {
 
 //	auto cullMode = (rpassType==RenderPassType::shadow) ? CullMode::front : material->cullMode();
 	auto cullMode = material->cullMode();
 
 	return getOrCreateRenderPipeline(gc, rpassType, material->bindGroup(), material->blendMode(), material->depthFunc(),
-									 cullMode, renderer, drawMode);
+									 cullMode, renderer);
 }
 
 } // namespace sgd

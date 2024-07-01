@@ -45,9 +45,9 @@ const BindGroupDescriptor sceneBindingsDescriptor( //
 	 textureBindGroupLayoutEntry(8, wgpu::ShaderStage::Fragment,		   // binding(8) PSM texture_depth_cube_array
 								 wgpu::TextureViewDimension::CubeArray,	   //
 								 wgpu::TextureSampleType::Depth),		   //
-	 samplerBindGroupLayoutEntry(9, wgpu::ShaderStage::Fragment,
-								 wgpu::SamplerBindingType::Comparison)}, // binding(9) PSM sampler
-	{}, shaderSource);
+	 samplerBindGroupLayoutEntry(9, wgpu::ShaderStage::Fragment,		   //
+								 wgpu::SamplerBindingType::Comparison)},   // binding(9) PSM sampler
+	shaderSource);
 
 SceneBindings::SceneBindings() {
 
@@ -284,7 +284,7 @@ void SceneBindings::addPSMPasses() const {
 
 			auto projMatrix = Mat4f::frustum(-near, near, -near, near, near, far);
 
-			auto biasMatrix = AffineMat4f::TRS({0,0,0});
+			auto biasMatrix = AffineMat4f::TRS({0, 0, 0});
 			auto faceMatrix = AffineMat4f(faceTransforms[face], {}) * biasMatrix * invLightMatrix;
 
 			CameraUniforms uniforms;
@@ -317,11 +317,12 @@ void SceneBindings::onValidate(GraphicsContext* gc) const {
 	}
 	if (m_uniformsDirty) {
 		ShadowUniforms uniforms;
-		uniforms.csmSplitDistances = {csmSplitDistances()[0], csmSplitDistances()[1], csmSplitDistances()[2], csmSplitDistances()[3]};
+		uniforms.csmSplitDistances = {csmSplitDistances()[0], csmSplitDistances()[1], csmSplitDistances()[2],
+									  csmSplitDistances()[3]};
 		uniforms.csmDepthBias = csmDepthBias();
 		uniforms.psmClipNear = psmClipNear();
 		uniforms.psmDepthBias = psmDepthBias();
-		m_shadowUniforms->update(&uniforms,0,sizeof(uniforms));
+		m_shadowUniforms->update(&uniforms, 0, sizeof(uniforms));
 		m_uniformsDirty = false;
 	}
 }

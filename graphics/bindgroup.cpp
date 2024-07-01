@@ -11,18 +11,20 @@ uint32_t nextHash(BindGroupType type) {
 
 } // namespace
 
-BindGroupDescriptor::BindGroupDescriptor(
+BindGroupDescriptor::BindGroupDescriptor(							 //
 	const char* label,												 //
-	BindGroupType bindGroupType,//
+	BindGroupType bindGroupType,									 //
 	Vector<wgpu::BindGroupLayoutEntry> bindGroupLayoutEntries,		 //
+	String shaderSource,											 //
 	Vector<wgpu::VertexBufferLayout> vertexBufferLayouts,			 // Only for geometry shaders right now...
-	String shaderSource)											 //
-	: label(label), //
-	  bindGroupType(bindGroupType), //
+	wgpu::PrimitiveTopology topology)								 //
+	: label(label),													 //
+	  bindGroupType(bindGroupType),									 //
 	  wgpuBindGroupLayoutEntries(std::move(bindGroupLayoutEntries)), //
-	  wgpuVertexBufferLayouts(std::move(vertexBufferLayouts)),		 //
 	  wgpuShaderSource(std::move(shaderSource)),					 //
-	  hash(nextHash(bindGroupType)) {
+	  wgpuVertexBufferLayouts(std::move(vertexBufferLayouts)),		 //
+	  wgpuTopology(topology),										 //
+	  hash(nextHash(bindGroupType)) {								 //
 }
 
 wgpu::BindGroupLayout BindGroupDescriptor::wgpuBindGroupLayout(GraphicsContext* gc) const {
@@ -118,7 +120,7 @@ BindGroup* emptyBindGroup(uint32_t index) {
 
 	if (bindGroups[index]) return bindGroups[index];
 
-	static const BindGroupDescriptor descs[]{{"emptyBindGroup0", BindGroupType::scene, {}, {}, {}}, //
+	static const BindGroupDescriptor descs[]{{"emptyBindGroup0", BindGroupType::scene, {}, {}, {}},	   //
 											 {"emptyBindGroup1", BindGroupType::material, {}, {}, {}}, //
 											 {"emptyBindGroup2", BindGroupType::renderer, {}, {}, {}}};
 

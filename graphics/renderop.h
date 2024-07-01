@@ -7,7 +7,6 @@
 namespace sgd {
 
 struct RenderOp {
-	wgpu::Buffer instanceBuffer;
 	wgpu::Buffer vertexBuffer;
 	wgpu::Buffer indexBuffer;
 	wgpu::BindGroup materialBindings;
@@ -21,7 +20,6 @@ struct RenderOp {
 
 	// clang-format off
 	RenderOp(
-		wgpu::Buffer instanceBuffer,
 		wgpu::Buffer vertexBuffer,
 		wgpu::Buffer indexBuffer,
 		wgpu::BindGroup materialBindings,
@@ -30,7 +28,6 @@ struct RenderOp {
 		uint32_t elementCount,
 		uint32_t instanceCount,
 		uint32_t firstElement):
-		instanceBuffer(std::move(instanceBuffer)),
 		vertexBuffer(std::move(vertexBuffer)),
 		indexBuffer(std::move(indexBuffer)),
 		materialBindings(std::move(materialBindings)),
@@ -41,7 +38,6 @@ struct RenderOp {
 		firstElement(firstElement){}
 
 	RenderOp(
-		const Buffer* instanceBuffer,
 		const Buffer* vertexBuffer,
 		const Buffer* indexBuffer,
 		const BindGroup* materialBindings,
@@ -50,7 +46,6 @@ struct RenderOp {
 		uint32_t elementCount,
 		uint32_t instanceCount,
 		uint32_t firstElement):
-		instanceBuffer(instanceBuffer ? instanceBuffer->wgpuBuffer() : nullptr),
 		vertexBuffer(vertexBuffer ? vertexBuffer->wgpuBuffer() : nullptr),
 		indexBuffer(indexBuffer ? indexBuffer->wgpuBuffer() : nullptr),
 		materialBindings(materialBindings->wgpuBindGroup()),
@@ -61,5 +56,6 @@ struct RenderOp {
 		firstElement(firstElement){}
 	// clang-format on
 };
+using CRenderOp = const RenderOp&;
 
 } // namespace sgd

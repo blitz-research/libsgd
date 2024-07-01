@@ -33,11 +33,10 @@ protected:
 
 	void addRenderOp(GraphicsContext* gc,	  //
 					 CMaterial* material,	  //
-					 CBuffer* instanceBuffer, //
+//					 CBuffer* instanceBuffer, //
 					 CBuffer* vertexBuffer,	  //
 					 CBuffer* indexBuffer,	  //
 					 CBindGroup* renderer,	  //
-					 DrawMode drawMode,		  //
 					 uint32_t elementCount,	  //
 					 uint32_t instanceCount,  //
 					 uint32_t firstElement,	  //
