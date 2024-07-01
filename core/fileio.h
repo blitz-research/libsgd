@@ -18,6 +18,10 @@ struct FileioEx {
 		return m_message;
 	}
 
+	friend std::ostream& operator<<(std::ostream& os, CFileioEx ex) {
+		return os << ex.m_message;
+	}
+
 private:
 	String m_message;
 };

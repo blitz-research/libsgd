@@ -27,40 +27,31 @@ struct ObjectType {
 	}
 
 	int instanceCount() const {
-#if SGD_CONFIG_DEBUG
 		return m_instanceCount;
-#else
-		return 0;
-#endif
 	}
 
 private:
 	static inline ObjectType* g_allTypes;
-#if SGD_CONFIG_DEBUG
-	friend struct DebugInstanceCounter;
+	template <class T> friend struct InstanceCounter;
+
 	int m_instanceCount{};
-#endif
 };
 
-#if SGD_CONFIG_DEBUG
-struct DebugInstanceCounter {
-	ObjectType* const type;
-	explicit DebugInstanceCounter(ObjectType* type) : type(type) {
-		++type->m_instanceCount;
+template <class T> struct InstanceCounter {
+	InstanceCounter() {
+		++T::staticType()->m_instanceCount;
 	}
-	~DebugInstanceCounter() {
-		--type->m_instanceCount;
+	~InstanceCounter() {
+		--T::staticType()->m_instanceCount;
 	}
 };
-#define SGD_DEBUG_INSTANCE_COUNTER DebugInstanceCounter _sgdDebugInstanceCounter{&_sgdStaticType};
-#else
-#define SGD_DEBUG_INSTANCE_COUNTER
-#endif
+
+#define SGD_INSTANCE_COUNTER(T) InstanceCounter<T> p_sgdInstanceCounter;
 
 // clang-format off
 #define SGD_OBJECT_TYPE(NAME, SUPER) \
 	static inline ObjectType _sgdStaticType{#NAME, SUPER::staticType()}; \
-	SGD_DEBUG_INSTANCE_COUNTER \
+	SGD_INSTANCE_COUNTER(NAME) \
 	static inline constexpr ObjectType* staticType(){return &_sgdStaticType;} \
 	ObjectType* dynamicType() const override {return &_sgdStaticType;}      \
 	using Super = SUPER;
@@ -72,7 +63,7 @@ using CObject = const Object;
 struct Object {
 	// clang-format off
 	static inline ObjectType _sgdStaticType{"Object", nullptr};
-	SGD_DEBUG_INSTANCE_COUNTER
+	SGD_INSTANCE_COUNTER(Object)
 	// clang-format on
 
 	Object() = default;
@@ -114,5 +105,7 @@ inline std::ostream& operator<<(std::ostream& os, const Object* object) {
 	if (object) return os << object->dynamicType()->name << "@" << (const void*)object;
 	return os << "<nullptr>";
 }
+
+void debugObjects(bool diffsOnly);
 
 } // namespace sgd

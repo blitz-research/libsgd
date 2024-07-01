@@ -20,6 +20,7 @@ struct SGD_Event {
 };
 
 inline bool g_started;
+inline bool g_terminated;
 inline WindowPtr g_mainWindow;
 inline GraphicsContextPtr g_mainGC;
 inline ScenePtr g_mainScene;

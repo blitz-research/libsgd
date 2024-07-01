@@ -6,8 +6,6 @@
 
 namespace sgd {
 
-struct StreamBuffer;
-
 Expected<String, FileioEx> fetchString(CString url);
 
 Expected<Data, FileioEx> fetchData(CString url);

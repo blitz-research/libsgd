@@ -50,6 +50,10 @@ template <class T, class E> struct Expected {
 		return m_error;
 	}
 
+	friend std::ostream& operator<<(std::ostream& os, const Expected& ex ) {
+		return ex.m_isResult ? os << "Result: " << ex.m_result : os << "Error: " << ex.m_error;
+	}
+
 private:
 	union {
 		T m_result;

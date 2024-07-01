@@ -6,33 +6,43 @@ namespace sgd {
 
 namespace {
 
-int g_suspended;
+bool g_inited;
+bool g_exited;
 
+int g_suspended;
 }
 
 void initApp() {
-	static bool done;
-	if (done) return;
-	done = true;
+	if(g_inited) return;
+	g_inited = true;
 
 	if (!glfwInit()) {
 		SGD_LOG << "glfwInit() failed - aborting";
 		SGD_ABORT();
 	}
 
-	SGD_LOG << "App initialized";
+	appIniting.emit();
+}
+
+void exitApp() {
+	if(g_exited || !g_inited) return;
+	g_exited = true;
+
+	appExiting.emit();
+
+	glfwTerminate();
 }
 
 void suspendApp() {
 	if (++g_suspended == 1) {
-		appSuspended.emit();
+		appSuspending.emit();
 		SGD_LOG << "App suspended";
 	}
 }
 
 void resumeApp() {
 	if (--g_suspended == 0) {
-		appResumed.emit();
+		appResuming.emit();
 		SGD_LOG << "App resumed";
 	}
 }
