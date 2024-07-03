@@ -8,14 +8,14 @@ void entry() {
 	image->spriteViewMode = SpriteViewMode::fixed;
 	image->spriteRect = Rectf{-1, 0, 1, 1};
 
-	for (int i = 0; i < 20000; ++i) {
+	for (int i = 0; i < 60000; ++i) {
 
 		SpritePtr sprite = new Sprite();
 		sprite->image = image;
 		scene->add(sprite);
 
-		turn(sprite, {0, rnd(360), 0});
-		move(sprite, {0, -1.5, rnd(100)});
+		turn(sprite, {0, rnd(360), 0});		// 59
+		move(sprite, {0, -1.5, rnd(100)});	// 1017
 
 		if(i==0){
 			SGD_LOG << "Trans, Rot, Scale"<<sprite->worldPosition() << sprite->worldBasis().k << sprite->worldScale();
@@ -62,6 +62,9 @@ void entry() {
 		if(window->keyboard()->key(KeyCode::SPACE).hit()) {
 			image->spriteViewMode = (mode==SpriteViewMode::upright) ? SpriteViewMode::fixed : (SpriteViewMode)((int)mode+1);
 		}
+
+		dc->addText("FPS:"+toString(gc->FPS()),{0,16});
+		dc->addText("RPS:"+toString(scene->RPS()),{0,32});
 
 		render();
 	}

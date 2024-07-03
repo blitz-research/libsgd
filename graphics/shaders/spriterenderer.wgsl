@@ -16,12 +16,12 @@ struct Varying {
     @location(3) color: vec4f,
 }
 
-@vertex fn vertexMain(@builtin(vertex_index) vertexId : u32) -> Varying {
+@vertex fn vertexMain(@builtin(vertex_index) vertexId : u32, @builtin(instance_index) instanceId : u32) -> Varying {
 
     const vertices = array<vec2f, 6>(vec2f(0, 1), vec2f(1, 0), vec2f(1, 1), vec2f(0, 1), vec2f(0, 0), vec2f(1, 0));
 
-    let instance = spriteInstances[vertexId / 6];
-    let vcoords = vertices[vertexId % 6];
+    let instance = spriteInstances[instanceId];
+    let vcoords = vertices[vertexId];
 
     // Very cheeky! Will only work with imagematerial...
     let rect = material_uniforms.rect;

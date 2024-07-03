@@ -17,8 +17,8 @@ BindGroupDescriptor bindGroupDescriptor( //
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 								   wgpu::BufferBindingType::ReadOnlyStorage),
 	},
-	shaderSource,//
-	{},//
+	shaderSource, //
+	{},			  //
 	wgpu::PrimitiveTopology::TriangleList);
 
 } // namespace
@@ -84,10 +84,10 @@ void SpriteRenderer::onValidate(GraphicsContext* gc) const {
 		auto& ops = m_renderOps[(int)renderPassType(material->blendMode())];
 		auto first = ops.empty() ? 0 : ops.back().firstElement + ops.back().elementCount;
 
-		addRenderOp(gc, material,							  //
-					nullptr, nullptr,				  //
-					m_bindGroup,//
-					count * 6, 1, first, false);
+		addRenderOp(gc, material,	  //
+					nullptr, nullptr, //
+					m_bindGroup,	  //
+					6, count, first, false);
 	};
 
 	Image* image{};
