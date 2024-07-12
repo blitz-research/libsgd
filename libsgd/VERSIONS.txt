@@ -1,4 +1,11 @@
 
+***** V0.10 *****
+
+Removed SetWebGPUBackendType, use SetConfigVar("dawn.backendType", "D3D12") instead.
+
+Added SetConfigVar(SGD_String name, SGD_String value)
+
+
 ***** V0.09 *****
 
 Merge dawn fork with upstream.

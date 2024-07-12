@@ -226,7 +226,7 @@ FetchContent_Declare(tinygltf
 	EXCLUDE_FROM_ALL
 )
 
-#set(TINYGLTF_HEADER_ONLY ON)
+set(TINYGLTF_HEADER_ONLY ON)
 set(TINYGLTF_BUILD_LOADER_EXAMPLE OFF)
 
 FetchContent_MakeAvailable(tinygltf)

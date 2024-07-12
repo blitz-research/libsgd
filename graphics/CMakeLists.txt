@@ -5,70 +5,81 @@ cmake_minimum_required(VERSION 3.16)
 project(graphics)
 
 add_library(graphics
-	bindgroup.cpp
-	bindgroup.h
-	buffer.cpp
-	buffer.h
-	drawlist.cpp
-	drawlist.h
-	font.cpp
-	font.h
-	graphics.cpp
-	graphics.h
-	image.cpp
-	image.h
-	imageutil.cpp
-	imageutil.h
-	material.cpp
-	material.h
-	materialutil.cpp
-	materialutil.h
-	mesh.cpp
-	mesh.h
-	meshprimitives.cpp
-	meshprimitives.h
-	meshrenderer.cpp
-	meshrenderer.h
-	meshutil.cpp
-	meshutil.h
-	pbrmaterial.cpp
-	pbrmaterial.h
-	prelitmaterial.cpp
-	prelitmaterial.h
-	rendercontext.cpp
-	rendercontext.h
-	renderer.cpp
-	renderer.h
-	renderop.cpp
-	renderop.h
-	renderpipeline.cpp
-	renderpipeline.h
-	scenebindings.cpp
-	scenebindings.h
-	shadowmaterial.cpp
-	shadowmaterial.h
-	skinnedmeshrenderer.cpp
-	skinnedmeshrenderer.h
-	skyboxrenderer.cpp
-	skyboxrenderer.h
-	texture.cpp
-	texture.h
-	textureutil.cpp
-	textureutil.h
 
-	shaders/drawlistrenderer.wgsl
-	shaders/meshrenderer.wgsl
-	shaders/pbrmaterial.wgsl
-	shaders/prelitmaterial.wgsl
-	shaders/scene.wgsl
-	shaders/skinnedmeshrenderer.wgsl
-	shaders/skyboxrenderer.wgsl
-	shaders/spriterenderer.wgsl
-	shaders/uniforms.h
+    exports.h
 
-	exports.h
+	core/bindgroup.cpp
+	core/bindgroup.h
+	core/buffer.cpp
+	core/buffer.h
+	core/graphics.cpp
+	core/graphics.h
+	core/texture.cpp
+	core/texture.h
+	core/textureutil.cpp
+	core/textureutil.h
+    
+	drawlist/drawlist.cpp
+	drawlist/drawlist.h
+	drawlist/drawlistrenderer.wgsl
+	drawlist/font.cpp
+	drawlist/font.h
+    drawlist/fontmaterial.wgsl
+    
+	image/image.cpp
+	image/image.h
+	image/imagerenderer.cpp
+	image/imagerenderer.h
+	image/imagerenderer.wgsl
+	image/imageutil.cpp
+	image/imageutil.h
+    
+	material/material.cpp
+	material/material.h
+	material/materialutil.cpp
+	material/materialutil.h
+	material/nullmaterial.cpp
+	material/nullmaterial.h
+	material/nullmaterial.wgsl
+	material/pbrmaterial.cpp
+	material/pbrmaterial.h
+	material/pbrmaterial.wgsl
+	material/prelitmaterial.cpp
+	material/prelitmaterial.h
+	material/prelitmaterial.wgsl
+    
+	mesh/mesh.cpp
+	mesh/mesh.h
+	mesh/meshprimitives.cpp
+	mesh/meshprimitives.h
+	mesh/meshrenderer.cpp
+	mesh/meshrenderer.h
+    mesh/meshrenderer.wgsl
+	mesh/meshutil.cpp
+	mesh/meshutil.h
+	mesh/skinnedmeshrenderer.cpp
+	mesh/skinnedmeshrenderer.h
+    mesh/skinnedmeshrenderer.wgsl
+    
+	render/rendercontext.cpp
+	render/rendercontext.h
+	render/renderop.cpp
+	render/renderop.h
+	render/renderpipeline.cpp
+	render/renderpipeline.h
+	render/renderqueue.cpp
+	render/renderqueue.h
+    render/scene.wgsl
+	render/scenebindings.cpp
+	render/scenebindings.h
+	render/sceneconfig.cpp
+	render/sceneconfig.h
+
+	skybox/skyboxgeometry.cpp
+	skybox/skyboxgeometry.h
+	skybox/skyboxrenderer.wgsl
 )
 
-target_link_libraries(graphics window dawn tinygltf stb tcpp)
+target_link_libraries(graphics window dawn stb tcpp)
 
 add_subdirectory(tests)

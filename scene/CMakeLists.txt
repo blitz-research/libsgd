@@ -5,56 +5,68 @@ cmake_minimum_required(VERSION 3.16)
 project(scene)
 
 add_library(scene
-	animation.cpp
-	animation.h
-	camera.cpp
-	camera.h
-	collider.cpp
-	collider.h
-	collisionspace.cpp
-	collisionspace.h
-	collisionutil.cpp
-	collisionutil.h
-	contact.cpp
-	contact.h
-	ellipsoidcollider.cpp
-	ellipsoidcollider.h
-	entity.cpp
-	entity.h
-	entityutil.cpp
-	entityutil.h
-	gltfloader.cpp
-	gltfloader.h
-	intersect.cpp
-	intersect.h
-	light.cpp
-	light.h
-	meshcollider.cpp
-	meshcollider.h
-	meshcolliderdata.cpp
-	meshcolliderdata.h
-	model.cpp
-	model.h
-	modelrenderer.cpp
-	modelrenderer.h
-	overlay.cpp
-	overlay.h
-	scene.cpp
-	scene.h
-	skinnedmodelrenderer.cpp
-	skinnedmodelrenderer.h
-	skybox.cpp
-	skybox.h
-	spherecollider.cpp
-	spherecollider.h
-	sprite.cpp
-	sprite.h
-	spriterenderer.cpp
-	spriterenderer.h
+
+	model/animation.cpp
+	model/animation.h
+	model/gltfloader.cpp
+	model/gltfloader.h
+	model/model.cpp
+	model/model.h
+	model/modelrenderer.cpp
+	model/modelrenderer.h
+	model/skinnedmodelrenderer.cpp
+	model/skinnedmodelrenderer.h
+
+	overlay/overlay.cpp
+	overlay/overlay.h
+	overlay/overlayrenderer.cpp
+	overlay/overlayrenderer.h
+
+	physics/collider.cpp
+	physics/collider.h
+	physics/collisionspace.cpp
+	physics/collisionspace.h
+	physics/collisionutil.cpp
+	physics/collisionutil.h
+	physics/contact.cpp
+	physics/contact.h
+	physics/ellipsoidcollider.cpp
+	physics/ellipsoidcollider.h
+	physics/intersect.cpp
+	physics/intersect.h
+	physics/meshcollider.cpp
+	physics/meshcollider.h
+	physics/meshcolliderdata.cpp
+	physics/meshcolliderdata.h
+	physics/spherecollider.cpp
+	physics/spherecollider.h
+
+	scene/camera.cpp
+	scene/camera.h
+	scene/entity.cpp
+	scene/entity.h
+	scene/entityutil.cpp
+	scene/entityutil.h
+	scene/light.cpp
+	scene/light.h
+	scene/scene.cpp
+	scene/scene.h
+	scene/scenerenderer.cpp
+	scene/scenerenderer.h
+
+	skybox/skybox.cpp
+	skybox/skybox.h
+	skybox/skyboxrenderer.cpp
+	skybox/skyboxrenderer.h
+
+	sprite/sprite.cpp
+	sprite/sprite.h
+	sprite/spriterenderer.cpp
+	sprite/spriterenderer.h
 
 	exports.h
 )
 
-target_link_libraries(scene graphics)
+target_link_libraries(scene graphics tinygltf)
  
 add_subdirectory(tests)

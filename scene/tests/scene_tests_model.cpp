@@ -32,15 +32,14 @@ void entry() {
 	light->shadowsEnabled = true;
 	setRotation(light, {-30, 0, 0});
 
+#if 0
 	camera->near = .125f;
 	camera->far = 1024;
 	scene->sceneBindings()->csmSplitDistances = {16, 64, 256, 1024};
 	scene->sceneBindings()->csmTextureSize = 2048;
 	scene->sceneBindings()->csmDepthBias = .0001f;
 	scene->sceneBindings()->csmClipRange = 330.0f;
-
-	auto overlay = new Overlay();
-	scene->add(overlay);
+#endif
 
 	auto dc = overlay->drawList();
 
@@ -54,13 +53,15 @@ void entry() {
 		rotate(light, {0, .025f, 0});
 
 		dc->clear();
-		dc->addText("FPS:" + std::to_string(gc->FPS()), {0, 0});
-		dc->addText("RPS:" + std::to_string(scene->RPS()), {0, 16});
+		dc->addText("FPS:" + std::to_string(currentGC()->FPS()), {0, 0});
+		dc->addText("RPS:" + std::to_string(scene->sceneRenderer()->RPS()), {0, 16});
 
 		render();
 	}
 }
 
 int main() {
+	setConfigVar("dawn.backendType","Vulkan");
+	setConfigVar("dawn.presentMode","Mailbox");
 	start(entry);
 }

@@ -5,10 +5,10 @@
 using namespace sgd;
 
 WindowPtr window;
-GraphicsContextPtr gc;
 ScenePtr scene;
 SkyboxPtr skybox;
 LightPtr light;
+OverlayPtr overlay;
 
 ModelPtr player;
 float player_vx;
@@ -22,7 +22,47 @@ float camera_rx;
 
 void render() {
 	scene->render();
+	auto gc = currentGC();
 	gc->present(gc->colorBuffer());
+}
+
+void start(void (*entry)()) {
+
+	window = new Window({1024, 768}, "Hello world!", sgd::WindowFlags::resizable | sgd::WindowFlags::centered);
+
+	//	window = new Window({768,768}, "Hello world!", sgd::WindowFlags::none);//resizable);
+
+	SGD_LOG << "Window size" << window->size();
+
+	window->closeClicked.connect(nullptr, [] { std::exit(0); });
+
+	window->sizeChanged.connect(nullptr, [](CVec2u) {
+		if (scene) render();
+	});
+
+	new GraphicsContext(window);
+
+	scene = new Scene();
+	scene->sceneRenderer()->ambientLightColor = Vec4f(1, .9, .8, .1);
+
+	auto skyTexture = loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8,
+								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
+						  .result();
+
+	scene->sceneRenderer()->envTexture = skyTexture;
+
+	skybox = new Skybox();
+	scene->add(skybox);
+	skybox->skyTexture = skyTexture;
+
+	light = new Light(LightType::directional);
+	scene->add(light);
+	turn(light, {-45, 45, 0});
+
+	overlay = new Overlay();
+	scene->add(overlay);
+
+	entry();
 }
 
 void createPlayer(Mesh* mesh) {
@@ -123,40 +163,4 @@ void playerFly(float speed) {
 		player_vx *= .9f;
 	}
 	move(player, {player_vx, 0, 0});
-}
-
-void start(void (*entry)()) {
-
-	window = new Window({1024, 768}, "Hello world!", sgd::WindowFlags::resizable | sgd::WindowFlags::centered);
-
-	//	window = new Window({768,768}, "Hello world!", sgd::WindowFlags::none);//resizable);
-
-	SGD_LOG << "Window size" << window->size();
-
-	window->closeClicked.connect(nullptr, [] { std::exit(0); });
-
-	window->sizeChanged.connect(nullptr, [](CVec2u) {
-		if (scene) render();
-	});
-
-	gc = new GraphicsContext(window);
-
-	scene = new Scene(gc);
-	scene->ambientLightColor = {1, .9, .8, .1};
-
-	auto skyTexture = loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8,
-								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
-						  .result();
-
-	scene->envTexture = skyTexture;
-
-	skybox = new Skybox();
-	scene->add(skybox);
-	skybox->skyTexture = skyTexture;
-
-	light = new Light(LightType::directional);
-	scene->add(light);
-	turn(light, {-45, 45, 0});
-
-	entry();
 }
