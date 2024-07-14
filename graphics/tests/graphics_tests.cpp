@@ -9,7 +9,6 @@
 using namespace sgd;
 
 WindowPtr window;
-GraphicsContextPtr gc;
 SceneBindingsPtr sceneBindings;
 RenderContextPtr renderContext;
 RenderQueuePtr renderQueue;
@@ -41,12 +40,14 @@ void render() {
 
 	runOnMainThread([] {
 
+		auto gc = currentGC();
+
 		GraphicsResource::validateAll();
 
 		renderQueue->clear();
 
 #if SKYBOX
-//		skyboxGeometry->render(renderQueue);
+		skyboxGeometry->render(renderQueue);
 #endif
 
 #if MESH
@@ -75,9 +76,9 @@ void render() {
 			renderContext->endRenderPass();
 		}
 		renderContext->endRender();
-	});
 
-	gc->present(gc->colorBuffer());
+		gc->present(gc->colorBuffer());
+	});
 }
 
 int main() {
@@ -85,29 +86,28 @@ int main() {
 	window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::resizable);
 
 	window->closeClicked.connect(nullptr, [] { std::exit(0); });
-
 	window->sizeChanged.connect(nullptr, [](CVec2u) { render(); });
 
-	gc = new GraphicsContext(window, wgpu::BackendType::Undefined);
+	createGC(window);
 
 	sceneBindings = new SceneBindings();
-	{
 
-		CameraUniforms uniforms;
-		float near = .1f, far = 100.0f;
+	{
+		float near = .125f, far = 1024.0f;
+		auto& uniforms = sceneBindings->lockCameraUniforms();
 		uniforms.projectionMatrix = Mat4f::frustum(-near, near, -near, near, near, far);
 		uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
 		uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
 		uniforms.clipNear = near;
 		uniforms.clipFar = far;
-		sceneBindings->setCameraUniforms(uniforms);
+		sceneBindings->unlockCameraUniforms();
 	}
 
 	{
-		LightingUniforms uniforms;
-		uniforms.directionalLightCount = 1;
-		sceneBindings->setLightingUniforms(uniforms);
-	};
+		auto& uniforms = sceneBindings->lockLightingUniforms();
+		uniforms.numDirectionalLights = 1;
+		sceneBindings->unlockLightingUniforms();
+	}
 
 	renderContext = new RenderContext();
 

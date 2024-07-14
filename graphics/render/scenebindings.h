@@ -1,11 +1,36 @@
 #pragma once
 
-#include "../core/graphics.h"
 #include "../core/bindgroup.h"
-
-// Should maybe be Environment?
+#include "../core/graphics.h"
 
 namespace sgd {
+
+constexpr int maxDirectionalLights = 4;
+constexpr int maxPointLights = 16;
+constexpr int maxSpotLights = 64;
+
+struct alignas(16) ConfigUniforms {
+
+	// CSM settings
+	Vec4f csmSplitDistances{};
+	uint32_t csmTextureSize{2048};
+	uint32_t maxCSMLights{4};  // max = 256, ie: max array index.
+	float csmClipRange{};
+	float csmDepthBias{};
+
+	// PSM Settings
+	uint32_t psmTextureSize{1024};
+	uint32_t maxPSMLights{8};  // max = 256/6
+	float psmClipNear{};
+	float psmDepthBias{};
+
+	// SSM Settings
+	uint32_t ssmTextureSize{1024};
+	uint32_t maxSSMLights{16}; // max = 256
+	float ssmClipNear{};
+	float ssmDepthBias{};
+};
+using CConfigUniforms = const ConfigUniforms&;
 
 struct alignas(16) CameraUniforms {
 	Mat4f projectionMatrix;
@@ -13,67 +38,54 @@ struct alignas(16) CameraUniforms {
 	Mat4f viewProjectionMatrix;
 	Mat4f worldMatrix;
 	Mat4f viewMatrix;
-	float clipNear{.1};
-	float clipFar{100};
+	float clipNear{.125};
+	float clipFar{1024};
 };
 using CCameraUniforms = const CameraUniforms&;
 
+struct alignas(16) DirectionalLightUniforms {
+	Mat4f worldMatrix;
+	Vec4f color{1};
+};
+
+struct alignas(16) PointLightUniforms {
+	Vec4f position;
+	Vec4f color;
+	float range{100};
+	float falloff{1};
+};
+
+struct alignas(16) SpotLightUniforms {
+	Vec4f position;
+	Vec4f direction;
+	Vec4f color{1};
+	float range{100};
+	float falloff{1};
+	float innerConeAngle{0};
+	float outerConeAngle{halfPi}; // 45 degrees
+};
+
 struct alignas(16) LightingUniforms {
-	static constexpr int maxDirectionalLights = 4;
-	static constexpr int maxPointLights = 32;
-	static constexpr int maxSpotLights = 16;
+	Vec4f ambientLightColor;
 
-	struct alignas(16) DirectionalLight {
-		Mat4f worldMatrix;
-		Vec4f color{1};
-		int shadowsEnabled{0};
-	};
-	static_assert(sizeof(DirectionalLight) == 96);
+	uint32_t numDirectionalLights{};
+	uint32_t numPointLights{};
+	uint32_t numSpotLights{};
 
-	struct alignas(16) PointLight {
-		Vec3f position;
-		alignas(16) Vec4f color{1};
-		float range{100};
-		float falloff{1};
-		int shadowsEnabled{0};
-	};
-	static_assert(sizeof(PointLight) == 48);
+	uint32_t numCSMLights{};
+	uint32_t numPSMLights{};
+	uint32_t numSSMLights{};
 
-	struct alignas(16) SpotLight {
-		alignas(16) Vec3f position{0, 0, 0};
-		alignas(16) Vec3f direction{0, 0, 0};
-		alignas(16) Vec4f color{1};
-		float range{100};
-		float falloff{1};
-		float innerConeAngle{0};
-		float outerConeAngle{halfPi}; // 45 degrees
-	};
-
-	Vec4f ambientLightColor{1, 1, 1, 0};
-
-	uint32_t directionalLightCount{};
-	DirectionalLight directionalLights[maxDirectionalLights];
-
-	uint32_t pointLightCount{};
-	PointLight pointLights[maxPointLights];
-
-	uint32_t spotLightCount{};
-	SpotLight spotLights[maxSpotLights];
+	DirectionalLightUniforms directionalLights[maxDirectionalLights];
+	PointLightUniforms pointLights[maxPointLights];
+	SpotLightUniforms spotLights[maxSpotLights];
 };
 using CLightingUniforms = const LightingUniforms&;
 
-struct alignas(16) ShadowUniforms {
-	Array<float, 4> csmSplitDistances{};
-	float csmClipRange{1000.0f};
-	float csmDepthBias{0.0001f};
-	float psmClipNear{0.1f};
-	float psmDepthBias{0.0001f};
-};
-using CShadowUniforms = const ShadowUniforms&;
+extern const BindGroupDescriptor sceneBindingsDescriptor;
+extern const BindGroupDescriptor sceneShadowBindingsDescriptor;
 
 SGD_SHARED(SceneBindings);
-
-extern const BindGroupDescriptor sceneBindingsDescriptor;
 
 struct SceneBindings : GraphicsResource {
 	SGD_OBJECT_TYPE(SceneBindings, GraphicsResource);
@@ -85,34 +97,25 @@ struct SceneBindings : GraphicsResource {
 
 	SceneBindings();
 
-	Property<CTexturePtr> envTexture;
+	CConfigUniforms configUniforms() const {
+		return *(ConfigUniforms*)m_configUniforms->data();
+	}
+	ConfigUniforms& lockConfigUniforms();
+	void unlockConfigUniforms();
 
-	Property<uint32_t> csmTextureSize{2048};
-	Property<uint32_t> maxCSMLights{1};
-	Property<uint32_t> psmTextureSize{1024};
-	Property<uint32_t> maxPSMLights{8};
-
-	Property<Array<float, 4>> csmSplitDistances{{16, 64, 256, 1024}};
-	Property<float> csmClipRange{1000.0f};
-	Property<float> csmDepthBias{.0001f};
-
-	Property<float> psmClipNear{.01f};
-	Property<float> psmDepthBias{.0001f};
-
-	void setCameraUniforms(CCameraUniforms uniforms);
 	CCameraUniforms cameraUniforms() const {
-		return *(const CameraUniforms*)m_cameraUniforms->data();
+		return *(CameraUniforms*)m_cameraUniforms->data();
 	}
+	CameraUniforms& lockCameraUniforms();
+	void unlockCameraUniforms();
 
-	void setLightingUniforms(CLightingUniforms uniforms);
 	CLightingUniforms lightingUniforms() const {
-		return *(const LightingUniforms*)m_lightingUniforms->data();
+		return *(LightingUniforms*)m_lightingUniforms->data();
 	}
+	LightingUniforms& lockLightingUniforms();
+	void unlockLightingUniforms();
 
-	void setShadowUniforms(CShadowUniforms uniforms);
-	CShadowUniforms shadowUniforms()const {
-		return *(const ShadowUniforms*)m_shadowUniforms->data();
-	}
+	Property<CTexturePtr> envTexture;
 
 	CVector<ShadowPass> shadowPasses() const {
 		return m_shadowPasses;
@@ -123,32 +126,38 @@ struct SceneBindings : GraphicsResource {
 	}
 
 private:
+	enum struct Dirty {
+		shadowConfigs = 1,
+		shadowPasses = 2,
+	};
+
 	BindGroupPtr m_bindGroup;
+	BufferPtr m_configUniforms;
+	BufferPtr m_sceneUniforms;
 	BufferPtr m_cameraUniforms;
 	BufferPtr m_lightingUniforms;
-	BufferPtr m_shadowUniforms;
 
-	// Config
 	mutable TexturePtr m_csmTexture;
-	mutable Vector<ShadowPass> m_csmShadowPasses;
-
 	mutable TexturePtr m_psmTexture;
-	mutable Vector<ShadowPass> m_psmShadowPasses;
+	mutable TexturePtr m_ssmTexture;
 
-	// Passes
+	mutable Vector<ShadowPass> m_csmShadowPasses;
+	mutable Vector<ShadowPass> m_psmShadowPasses;
+	mutable Vector<ShadowPass> m_ssmShadowPasses;
 	mutable Vector<ShadowPass> m_shadowPasses;
 
-	mutable bool m_configDirty{true};
-	mutable bool m_passesDirty{true};
-	mutable bool m_uniformsDirty{true};
+	mutable Dirty m_dirty{Dirty::shadowConfigs | Dirty::shadowPasses};
 
-	static BindGroup* createShadowPassBindings();
+	BindGroup* createShadowPassBindings() const;
 
 	void updateCSMConfig() const;
-	void updatePSMConfig() const;
-
 	void addCSMPasses() const;
+
+	void updatePSMConfig() const;
 	void addPSMPasses() const;
+
+	void updateSSMConfig() const;
+	void addSSMPasses() const;
 
 	void onValidate() const override;
 };

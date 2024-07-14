@@ -5,7 +5,7 @@ R"(
 struct DrawListUniforms {
     matrix: mat4x4f,
 }
-@group(2) @binding(0) var<uniform> renderer_uniforms: DrawListUniforms;
+@group(2) @binding(0) var<uniform> geometry_uniforms: DrawListUniforms;
 
 struct Vertex {
 	@location(0) position: vec3f,
@@ -24,7 +24,7 @@ struct Varying {
 
     var out:Varying;
 
-    out.clipPosition = renderer_uniforms.matrix * vec4f(vertex.position, 1);
+    out.clipPosition = geometry_uniforms.matrix * vec4f(vertex.position, 1);
     out.position = vertex.position;
     out.texCoords = vertex.texCoords;
     out.color = vertex.color;

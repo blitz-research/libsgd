@@ -32,6 +32,5 @@
 #include "render/renderpipeline.h"
 #include "render/renderqueue.h"
 #include "render/scenebindings.h"
-#include "render/sceneconfig.h"
 
 #include "skybox/skyboxgeometry.h"

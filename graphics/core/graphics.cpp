@@ -13,6 +13,17 @@ namespace sgd {
 
 // ***** GraphicsContext *****
 
+GraphicsContext* createGC(Window* window) {
+	if (GraphicsContext::g_currentGC) SGD_ABORT();
+	return GraphicsContext::g_currentGC = new GraphicsContext(window);
+}
+
+void destroyGC() {
+	if (!GraphicsContext::g_currentGC) return;
+	delete GraphicsContext::g_currentGC;
+	GraphicsContext::g_currentGC = nullptr;
+}
+
 GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 	if (g_currentGC) SGD_ABORT();
 
@@ -91,11 +102,11 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 
 					auto pm = getConfigVar("dawn.presentMode");
 
-					if(pm=="Immediate") {
+					if (pm == "Immediate") {
 						config.presentMode = wgpu::PresentMode::Immediate;
-					}else if(pm=="Mailbox") {
+					} else if (pm == "Mailbox") {
 						config.presentMode = wgpu::PresentMode::Mailbox;
-					}else if(pm=="FifoRelaxed") {
+					} else if (pm == "FifoRelaxed") {
 						config.presentMode = wgpu::PresentMode::FifoRelaxed;
 					}
 
@@ -121,6 +132,12 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 		true);
 
 	ready.waiteq(true);
+}
+
+GraphicsContext::~GraphicsContext() {
+	runOnMainThread([=]{
+		m_wgpuDevice.Destroy();
+	},true);
 }
 
 void GraphicsContext::present(Texture* texture) {

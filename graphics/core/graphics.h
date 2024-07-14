@@ -13,7 +13,8 @@ SGD_SHARED(GraphicsResource);
 struct GraphicsContext : Shared {
 	SGD_OBJECT_TYPE(GraphicsContext, Shared);
 
-	explicit GraphicsContext(Window* window);
+	friend GraphicsContext* createGC(Window* window);
+	friend void destroyGC();
 
 	inline friend GraphicsContext* currentGC() {
 		return g_currentGC;
@@ -61,8 +62,13 @@ private:
 	int64_t m_micros{};
 	int m_frames{};
 	float m_fps{};
+
+	explicit GraphicsContext(Window* window);
+	~GraphicsContext();
 };
 
+GraphicsContext* createGC(Window* window);
+void destroyGC();
 GraphicsContext* currentGC();
 
 struct GraphicsResource : Shared {

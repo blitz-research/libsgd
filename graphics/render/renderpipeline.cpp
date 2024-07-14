@@ -48,7 +48,7 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType, //
 	static Map<uint64_t, wgpu::RenderPipeline> cache;
 
 	auto gc = currentGC();
-	auto sceneDesc = &sceneBindingsDescriptor;
+	auto sceneDesc = rpassType!=RenderPassType::shadow ? &sceneBindingsDescriptor : &sceneShadowBindingsDescriptor;
 	auto materialDesc = material->bindGroup()->descriptor();
 	auto geometryDesc = geometry->descriptor();
 	auto rendererDesc = renderer->descriptor();

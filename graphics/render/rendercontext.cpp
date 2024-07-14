@@ -21,6 +21,7 @@ void RenderContext::endRender() {
 
 wgpu::RenderPassEncoder RenderContext::beginRenderPass(RenderPassType type, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
 									float clearDepth, const wgpu::BindGroup& sceneBindings) {
+
 	SGD_ASSERT(isMainThread() && m_wgpuCommandEncoder && !m_wgpuRenderPassEncoder);
 
 	m_renderPassType = type;

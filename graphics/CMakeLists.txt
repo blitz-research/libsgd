@@ -72,8 +72,6 @@ add_library(graphics
     render/scene.wgsl
 	render/scenebindings.cpp
 	render/scenebindings.h
-	render/sceneconfig.cpp
-	render/sceneconfig.h
 
 	skybox/skyboxgeometry.cpp
 	skybox/skyboxgeometry.h

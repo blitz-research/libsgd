@@ -5,17 +5,13 @@ R"(
 struct MeshUniforms {
     tangentsEnabled: i32,
 }
-
-// Geometry
-@group(2) @binding(0) var<uniform> geometry_meshUniforms: MeshUniforms;
+@group(2) @binding(0) var<uniform> geometry_uniforms: MeshUniforms;
 
 struct MeshInstance {
     worldMatrix: mat4x4f,
     color: vec4f,
 }
-
-// Renderer
-@group(3) @binding(0) var<storage> geometry_meshInstances: array<MeshInstance>;
+@group(3) @binding(0) var<storage> renderer_instances: array<MeshInstance>;
 
 struct Vertex {
 	@location(0) position: vec3f,
@@ -37,17 +33,17 @@ struct Varying {
 
 @vertex fn vertexMain(vertex: Vertex, @builtin(instance_index) instanceId : u32) -> Varying {
 
-    let instance = &geometry_meshInstances[instanceId];
+    let instance = &renderer_instances[instanceId];
 
 	let worldMatrix = (*instance).worldMatrix;
 	let normalMatrix = mat3x3f(worldMatrix[0].xyz, worldMatrix[1].xyz, worldMatrix[2].xyz);
-	let mvpMatrix = cameraUniforms.viewProjectionMatrix * worldMatrix;
+	let mvpMatrix = scene_camera.viewProjectionMatrix * worldMatrix;
 
 	var out: Varying;
 
 	out.clipPosition = mvpMatrix * vec4f(vertex.position, 1.0);
 	out.position = (worldMatrix * vec4f(vertex.position, 1.0)).xyz;
-	if geometry_meshUniforms.tangentsEnabled != 0 {
+	if geometry_uniforms.tangentsEnabled != 0 {
         out.tanMatrix2 = normalMatrix * vertex.normal;
         out.tanMatrix0 = normalMatrix * vertex.tangent.xyz;
         out.tanMatrix1 = cross(out.tanMatrix0, out.tanMatrix2) * vertex.tangent.w;
@@ -65,7 +61,7 @@ struct Varying {
 
     var tanMatrix: mat3x3f;
 
-    if geometry_meshUniforms.tangentsEnabled != 0 {
+    if geometry_uniforms.tangentsEnabled != 0 {
         tanMatrix = mat3x3f(normalize(in.tanMatrix0), normalize(in.tanMatrix1), normalize(in.tanMatrix2));
     }else{
         tanMatrix[2] = in.tanMatrix2;

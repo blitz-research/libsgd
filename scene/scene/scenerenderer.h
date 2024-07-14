@@ -76,7 +76,6 @@ private:
 	SpriteRendererPtr m_spriteRenderer;
 	OverlayRendererPtr m_overlayRenderer;
 
-	Vec2u m_viewportSize{};
 	CCamera* m_camera{};
 	Vec3r m_eye;
 
@@ -91,8 +90,8 @@ private:
 	uint64_t m_timeStamps[timeStampCount]{};
 	float m_rps = 0;
 
-	void updateCameraBindings();
-	void updateLightingBindings();
+	void updateCameraUniforms();
+	void updateLightingUniforms();
 
 	void renderGeometry(RenderPassType rpassType, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
 						float clearDepth, BindGroup* sceneBindings);

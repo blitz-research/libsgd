@@ -63,7 +63,7 @@ void SceneRenderer::remove(CLight* light) {
 	}
 }
 
-void SceneRenderer::updateCameraBindings() {
+void SceneRenderer::updateCameraUniforms() {
 	AffineMat4f worldMatrix;
 	Mat4f projMatrix;
 	if (!m_camera) {
@@ -77,7 +77,7 @@ void SceneRenderer::updateCameraBindings() {
 		worldMatrix = m_camera->worldMatrix();
 		projMatrix = m_camera->projectionMatrix();
 	}
-	CameraUniforms uniforms;
+	auto& uniforms = m_sceneBindings->lockCameraUniforms();
 	uniforms.worldMatrix.i = {worldMatrix.r.i, 0};
 	uniforms.worldMatrix.j = {worldMatrix.r.j, 0};
 	uniforms.worldMatrix.k = {worldMatrix.r.k, 0};
@@ -86,86 +86,90 @@ void SceneRenderer::updateCameraBindings() {
 	uniforms.viewMatrix = inverse(uniforms.worldMatrix);
 	uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
 	uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
-	m_sceneBindings->setCameraUniforms(uniforms);
+	m_sceneBindings->unlockCameraUniforms();
 }
 
-void SceneRenderer::updateLightingBindings() {
+void SceneRenderer::updateLightingUniforms() {
 
-	LightingUniforms uniforms;
+	auto& config = m_sceneBindings->configUniforms();
+	auto& uniforms = m_sceneBindings->lockLightingUniforms();
+
 	uniforms.ambientLightColor = ambientLightColor();
 
-	// Directional lights
+	// ***** Directional lights *****
 	{
 		auto& lights = m_directionalLights;
-
 		auto cmp = [=](const Light* lhs, const Light* rhs) { //
 			return lhs->priority() > rhs->priority();
 		};
 		std::sort(lights.begin(), lights.end(), cmp);
-
+		uniforms.numDirectionalLights = std::min((int)lights.size(), maxDirectionalLights);
 		int n = 0;
-		for (auto light : lights) {
-			if (!light->visible()) continue;
-			auto& ulight = uniforms.directionalLights[n];
-			ulight.worldMatrix = light->worldMatrix();
-			ulight.color = light->color();
-			ulight.shadowsEnabled = light->shadowsEnabled() && n < m_sceneBindings->maxCSMLights();
-			if (++n == LightingUniforms::maxDirectionalLights) break;
+		for (bool shadow : {true, false}) {
+			uniforms.numCSMLights = n;
+			for (int i = 0; i < uniforms.numDirectionalLights; ++i) {
+				auto light = lights[i];
+				if (light->shadowsEnabled() != shadow) continue;
+				auto& ulight = uniforms.directionalLights[n++];
+				ulight.worldMatrix = light->worldMatrix();
+				ulight.color = light->color();
+			}
 		}
-		uniforms.directionalLightCount = n;
+		SGD_ASSERT(uniforms.numDirectionalLights == n);
 	}
 
-	// Point lights
+	// ***** Point lights *****
 	{
 		auto& lights = m_pointLights;
-
 		auto cmp = [=](const Light* lhs, const Light* rhs) {
 			if (lhs->priority() != rhs->priority()) return lhs->priority() > rhs->priority();
 			return lengthsq(lhs->worldMatrix().t - m_eye) < lengthsq(rhs->worldMatrix().t - m_eye);
 		};
 		std::sort(lights.begin(), lights.end(), cmp);
-
+		uniforms.numPointLights = std::min((int)lights.size(), maxPointLights);
 		int n = 0;
-		for (auto light : lights) {
-			if (!light->visible()) continue;
-			auto& ulight = uniforms.pointLights[n];
-			ulight.position = light->worldPosition() - m_eye;
-			ulight.color = light->color();
-			ulight.range = light->range();
-			ulight.falloff = light->falloff();
-			ulight.shadowsEnabled = light->shadowsEnabled() && n < m_sceneBindings->maxPSMLights();
-			if (++n == LightingUniforms::maxPointLights) break;
+		for (bool shadow : {true, false}) {
+			uniforms.numPSMLights = n;
+			for (int i = 0; i < uniforms.numDirectionalLights; ++i) {
+				auto light = lights[i];
+				if (light->shadowsEnabled() != shadow) continue;
+				auto& ulight = uniforms.pointLights[n++];
+				ulight.position = Vec4f(light->worldPosition() - m_eye, 1);
+				ulight.color = light->color();
+				ulight.range = light->range();
+				ulight.falloff = light->falloff();
+			}
 		}
-		uniforms.pointLightCount = n;
+		SGD_ASSERT(uniforms.numPointLights == n);
 	}
 
-	// Spot lights
+	// ***** Spot lights *****
 	{
 		auto& lights = m_spotLights;
-
 		auto cmp = [=](const Light* lhs, const Light* rhs) {
 			if (lhs->priority() != rhs->priority()) return lhs->priority() > rhs->priority();
 			return lengthsq(lhs->worldMatrix().t - m_eye) < lengthsq(rhs->worldMatrix().t - m_eye);
 		};
 		std::sort(lights.begin(), lights.end(), cmp);
-
+		uniforms.numSpotLights = std::min((int)lights.size(), maxSpotLights);
 		int n = 0;
-		for (auto light : lights) {
-			if (!light->visible()) continue;
-			auto& ulight = uniforms.spotLights[n];
-			ulight.position = light->worldPosition() - m_eye;
-			ulight.position = light->worldPosition() - m_eye;
-			ulight.color = light->color();
-			ulight.range = light->range();
-			ulight.falloff = light->falloff();
-			ulight.innerConeAngle = light->innerConeAngle();
-			ulight.outerConeAngle = light->outerConeAngle();
-			if (++n == LightingUniforms::maxSpotLights) break;
+		for (bool shadow : {true, false}) {
+			uniforms.numSSMLights = n;
+			for (int i = 0; i < uniforms.numDirectionalLights; ++i) {
+				auto light = lights[i];
+				if (light->shadowsEnabled() != shadow) continue;
+				auto& ulight = uniforms.spotLights[n++];
+				ulight.position = Vec4f(light->worldPosition() - m_eye, 1);
+				ulight.color = light->color();
+				ulight.range = light->range();
+				ulight.falloff = light->falloff();
+				ulight.innerConeAngle = light->innerConeAngle();
+				ulight.outerConeAngle = light->outerConeAngle();
+			}
 		}
-		uniforms.spotLightCount = n;
+		SGD_ASSERT(uniforms.numSpotLights == n);
 	}
-	m_sceneBindings->setLightingUniforms(uniforms);
-	m_sceneBindings->envTexture = envTexture();
+	m_sceneBindings->unlockLightingUniforms();
 }
 
 void SceneRenderer::render(CCamera* camera) {
@@ -175,8 +179,9 @@ void SceneRenderer::render(CCamera* camera) {
 
 	m_renderQueue->clear();
 
-	updateCameraBindings();
-	updateLightingBindings();
+	updateCameraUniforms();
+	updateLightingUniforms();
+	m_sceneBindings->envTexture = envTexture();
 
 	m_skyboxRenderer->update(m_eye);
 	m_modelRenderer->update(m_eye);

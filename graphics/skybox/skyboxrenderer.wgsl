@@ -4,8 +4,6 @@ struct SkyboxUniforms {
     worldMatrix: mat4x4f,
     mipmapBias: f32
 }
-
-// Geometry bindings
 @group(2) @binding(0) var<uniform> geometry_uniforms: SkyboxUniforms;
 @group(2) @binding(1) var geometry_skyboxTexture: texture_cube<f32>;
 @group(2) @binding(2) var geometry_skyboxSampler: sampler;
@@ -31,9 +29,9 @@ struct Varying {
 
 @fragment fn fragmentMain(in: Varying) -> @location(0) vec4<f32> {
 
-    let tv = cameraUniforms.inverseProjectionMatrix * vec4f(in.clipCoords, 0, 1);
+    let tv = scene_camera.inverseProjectionMatrix * vec4f(in.clipCoords, 0, 1);
 
-    let wv = cameraUniforms.worldMatrix * geometry_uniforms.worldMatrix * vec4f(tv.xyz / tv.w, 0);
+    let wv = scene_camera.worldMatrix * geometry_uniforms.worldMatrix * vec4f(tv.xyz / tv.w, 0);
 
     return textureSampleBias(geometry_skyboxTexture, geometry_skyboxSampler, wv.xyz, geometry_uniforms.mipmapBias);
 }

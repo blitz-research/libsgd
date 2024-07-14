@@ -36,7 +36,7 @@ void SGD_DECL sgd_Terminate() {
 
 	if(sgdx::g_mainWindow) {
 		if (sgdx::g_mainGC) {
-			sgdx::g_mainGC->wgpuDevice().Destroy();
+			sgd::destroyGC();
 			sgdx::g_mainGC = nullptr;
 		}
 		sgdx::g_mainWindow->close();

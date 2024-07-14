@@ -3,17 +3,18 @@ R"(
 // ***** SkinnedMeshRenderer *****
 
 const maxJoints: u32 = 256;
+
 struct SkinnedMeshInstance {
     worldMatrix: mat4x4f,
     color: vec4f,
     jointMatrices: array<mat4x4f, maxJoints>,
 };
+@group(2) @binding(0) var<uniform> geometry_uniforms: SkinnedMeshUniforms;
 
 struct SkinnedMeshUniforms {
     tangentsEnabled: i32,
 }
-@group(2) @binding(0) var<uniform> meshUniforms: SkinnedMeshUniforms;
-@group(2) @binding(1) var<storage> meshInstances: array<SkinnedMeshInstance>;
+@group(3) @binding(1) var<storage> renderer_instances: array<SkinnedMeshInstance>;
 
 struct Vertex {
 	@location(0) position: vec3f,
@@ -38,7 +39,7 @@ struct Varying {
 
 @vertex fn vertexMain(vertex: Vertex, @builtin(instance_index) instanceId : u32) -> Varying {
 
-    let instance = &meshInstances[instanceId];
+    let instance = &geometry_uniformsInstances[instanceId];
 
     let joints = vertex.joints;
     let weights = vertex.weights;
@@ -68,9 +69,9 @@ struct Varying {
 
 	var out: Varying;
 
-	out.clipPosition = cameraUniforms.viewProjectionMatrix * vec4f(position, 1);
+	out.clipPosition = scene_camera.viewProjectionMatrix * vec4f(position, 1);
 	out.position = position;
-	if meshUniforms.tangentsEnabled != 0 {
+	if geometry_uniforms.tangentsEnabled != 0 {
         out.tanMatrix2 = normal;
         out.tanMatrix0 = tangent.xyz;
         out.tanMatrix1 = cross(out.tanMatrix0, out.tanMatrix2) * tangent.a;
@@ -88,7 +89,7 @@ struct Varying {
 
     var tanMatrix: mat3x3f;
 
-    if meshUniforms.tangentsEnabled != 0 {
+    if geometry_uniforms.tangentsEnabled != 0 {
         tanMatrix = mat3x3f(normalize(in.tanMatrix0), normalize(in.tanMatrix1), normalize(in.tanMatrix2));
     }else{
         tanMatrix[2] = in.tanMatrix2;
