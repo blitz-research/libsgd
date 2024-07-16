@@ -99,9 +99,9 @@ void RenderContext::render(CVector<RenderOp>& ops) {
 			encoder.SetPipeline(m_rop.pipeline = op.pipeline);
 		}
 		if (m_rop.ibuffer) {
-			encoder.DrawIndexed(op.elementCount, op.instanceCount, op.firstElement);
+			encoder.DrawIndexed(op.elementCount, op.instanceCount, op.firstElement, 0, 0);
 		} else {
-			encoder.Draw(op.elementCount, op.instanceCount, op.firstElement);
+			encoder.Draw(op.elementCount, op.instanceCount, op.firstElement, 0);
 		}
 	}
 }

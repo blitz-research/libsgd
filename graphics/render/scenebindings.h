@@ -5,30 +5,32 @@
 
 namespace sgd {
 
-constexpr int maxDirectionalLights = 4;
-constexpr int maxPointLights = 16;
+// Note: Must sync with scene.wgsl
+
+constexpr int maxDirectionalLights = 8;
+constexpr int maxPointLights = 32;
 constexpr int maxSpotLights = 64;
 
 struct alignas(16) ConfigUniforms {
 
 	// CSM settings
-	Vec4f csmSplitDistances{};
+	Vec4f csmSplitDistances{Vec4f(16, 64, 256, 1024)};
 	uint32_t csmTextureSize{2048};
-	uint32_t maxCSMLights{4};  // max = 256, ie: max array index.
-	float csmClipRange{};
-	float csmDepthBias{};
+	uint32_t maxCSMLights{4}; // max = 256/4, ie: max array index.
+	float csmClipRange{330.0f};
+	float csmDepthBias{.0001f};
 
 	// PSM Settings
 	uint32_t psmTextureSize{1024};
-	uint32_t maxPSMLights{8};  // max = 256/6
-	float psmClipNear{};
-	float psmDepthBias{};
+	uint32_t maxPSMLights{8}; // max = 256/6
+	float psmClipNear{.25f};
+	float psmDepthBias{.0001f};
 
 	// SSM Settings
 	uint32_t ssmTextureSize{1024};
-	uint32_t maxSSMLights{16}; // max = 256
-	float ssmClipNear{};
-	float ssmDepthBias{};
+	uint32_t maxSSMLights{4}; // max = 256
+	float ssmClipNear{.25f};
+	float ssmDepthBias{.0001f};
 };
 using CConfigUniforms = const ConfigUniforms&;
 
@@ -56,8 +58,7 @@ struct alignas(16) PointLightUniforms {
 };
 
 struct alignas(16) SpotLightUniforms {
-	Vec4f position;
-	Vec4f direction;
+	Mat4f worldMatrix;
 	Vec4f color{1};
 	float range{100};
 	float falloff{1};

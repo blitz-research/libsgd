@@ -1,6 +1,12 @@
 
 ***** V0.10 *****
 
+Renamed SetImageDraw2DHandle to SetImage2DHandle.
+
+Renamed SetImageSpriteRect to SetImageRect.
+
+Renamed SetImageSpriteViewMode to SetImageViewMode.
+
 Removed SetWebGPUBackendType, use SetConfigVar("dawn.backendType", "D3D12") instead.
 
 Added SetConfigVar(SGD_String name, SGD_String value)

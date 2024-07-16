@@ -1,35 +1,33 @@
 R"(
 
-struct ImageUniforms {
-    spriteRect: vec4f,
-    spriteViewMode: u32,
+struct ImageGeometryUniforms {
+    rect: vec4f,
+    viewMode: u32,
 }
-@group(2) @binding(0) var<uniform> geometry_uniforms: ImageUniforms;
-@group(2) @binding(1) var geometry_albedoTexture: texture_2d_array<f32>;
-@group(2) @binding(2) var geometry_albedoSampler: sampler;
+
+@group(2) @binding(0) var<uniform> geometry_uniforms: ImageGeometryUniforms;
 
 struct ImageInstance {
-    matrix: mat4x4f,
+    worldMatrix: mat4x4f,
     color: vec4f,
     frame: f32,
 }
 
-@group(3) @binding(0) var<storage> renderer_instances: array<RendererInstance>;
+@group(3) @binding(0) var<storage> renderer_instances: array<ImageInstance>;
 
 struct Varying {
     @builtin(position) clipPosition : vec4f,
     @location(0) position: vec3f,
-    @location(1) normal: vec3f,
-    @location(2) texCoords: vec2f,
-    @location(3) color: vec4f,
+    @location(1) texCoords: vec3f,
+    @location(2) color: vec4f,
 }
 
-@vertex fn vertexMain(@builtin(vertex_index) vertexId : u32, @builtin(instance_index) instanceId : u32) -> Varying {
+@vertex fn vertexMain(@builtin(vertex_index) vertexId : u32) -> Varying {
 
     const vertices = array<vec2f, 6>(vec2f(0, 1), vec2f(1, 0), vec2f(1, 1), vec2f(0, 1), vec2f(0, 0), vec2f(1, 0));
 
-    let instance = spriteInstances[instanceId];
-    let vcoords = vertices[vertexId];
+    let instance = renderer_instances[vertexId / 6];
+    let vcoords = vertices[vertexId % 6];
 
     // Very cheeky! Will only work with imagematerial...
     let rect = geometry_uniforms.rect;
@@ -40,37 +38,37 @@ struct Varying {
 
     // Note: Might be better to just store trans/basis/scle
 
-    if geometry_uniforms.spriteViewMode == 1 {  // fixed, locked to camera
+    if geometry_uniforms.viewMode == 1 {  // fixed, locked to camera
 
-        let scale = vec3f(length(instance.matrix[0]), length(instance.matrix[1]), length(instance.matrix[2]));
+        let scale = vec3f(length(instance.worldMatrix[0]), length(instance.worldMatrix[1]), length(instance.worldMatrix[2]));
 
-        position = (cameraUniforms.worldMatrix * vec4f(scale * vertex, 0)).xyz + instance.matrix[3].xyz;
+        position = (scene_camera.worldMatrix * vec4f(scale * vertex, 0)).xyz + instance.worldMatrix[3].xyz;
 
-    } else if geometry_uniforms.spriteViewMode == 2 {   // free, billboard style
+    } else if geometry_uniforms.viewMode == 2 {   // free, billboard style
 
-        position = (instance.matrix * vec4f(vertex, 1)).xyz;
+        position = (instance.worldMatrix * vec4f(vertex, 1)).xyz;
 
-    } else if geometry_uniforms.spriteViewMode == 3 {   // upright, tree style
+    } else if geometry_uniforms.viewMode == 3 {   // upright, tree style
 
-        let scale = vec3f(length(instance.matrix[0]), length(instance.matrix[1]), length(instance.matrix[2]));
+        let scale = vec3f(length(instance.worldMatrix[0]), length(instance.worldMatrix[1]), length(instance.worldMatrix[2]));
 
         var basis: mat3x3f;
-        basis[1] = instance.matrix[1].xyz / scale[1];
-        basis[0] = normalize(cross(cameraUniforms.worldMatrix[3].xyz - instance.matrix[3].xyz, basis[1]));
+        basis[1] = vec3f(0, 1, 0);//instance.worldMatrix[1].xyz / scale[1];
+        basis[0] = normalize(cross(scene_camera.worldMatrix[3].xyz - instance.worldMatrix[3].xyz, basis[1]));
         basis[2] = normalize(cross(basis[0], basis[1]));
 
-        position = (basis * (scale * vertex)) + instance.matrix[3].xyz;
+        position = (basis * (scale * vertex)) + instance.worldMatrix[3].xyz;
 
     } else {    // default to billboard style
 
-        position = (instance.matrix * vec4f(vertex, 1)).xyz;
+        position = (instance.worldMatrix * vec4f(vertex, 1)).xyz;
     }
 
     var out: Varying;
 
-    out.clipPosition = cameraUniforms.viewProjectionMatrix * vec4(position, 1);
+    out.clipPosition = scene_camera.viewProjectionMatrix * vec4(position, 1);
     out.position = position;
-    out.texCoords = 1 - vcoords;
+    out.texCoords = vec3f(1 - vcoords, instance.frame);
     out.color = instance.color;
 
     return out;
@@ -80,10 +78,9 @@ struct Varying {
 
 #if !RENDER_PASS_SHADOW
 
-    var tanMatrix: mat3x3f;
-    tanMatrix[2] = normalize(in.normal);
+    //return vec4f(1,1,1,0);
 
-    return evaluateMaterial(in.position, tanMatrix, vec3f(in.texCoords, 0), in.color);
+    return evaluateMaterial(in.position, mat3x3f(), in.texCoords, in.color);
 
 #else
 

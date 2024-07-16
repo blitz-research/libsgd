@@ -9,6 +9,10 @@ Light::Light(const Light* that)
 	  color(that->color()),		//
 	  range(that->range()),		//
 	  falloff(that->falloff()), //
+	  innerConeAngle(that->innerConeAngle()),
+	  outerConeAngle(that->outerConeAngle()),
+	  shadowsEnabled(that->shadowsEnabled()),
+	  priority(that->priority()),
 	  m_type(that->m_type) {
 }
 

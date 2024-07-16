@@ -39,9 +39,9 @@ enum struct TextureFlags {
 	msaa = 0x200,
 	compare = 0x400,
 
-	envmapDefault = 0x38,
-	materialDefault = 0x18,
-	imageDefault = 0x1f,
+	env = 0x38,
+	material = 0x18,
+	image= 0x1f,
 };
 
 SGD_SHARED(Texture);

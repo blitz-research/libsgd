@@ -2,19 +2,23 @@
 
 #include "../core/textureutil.h"
 
+#include "imagematerial.h"
+
 namespace sgd {
 
-Expected<Image*, FileioEx> loadImage(CPath path, uint32_t frames) {
-	auto format  = TextureFormat::srgba8;
+Expected<Image*, FileioEx> loadImage(CPath path, uint32_t depth) {
+
+	auto format = TextureFormat::srgba8;
 	auto flags = TextureFlags::array | TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clamp;
 
-	auto r = loadTexture(path, format, flags, frames);
-	if (!r) return r.error();
+	auto texture = loadTexture(path, format, flags, depth);
+	if (!texture) return texture.error();
 
-	auto texture = r.result();
+	auto material = new Material(&imageMaterialDescriptor);
+	material->setTexture("albedoTexture", texture.result());
+	material->blendMode = BlendMode::alphaBlend;
 
-	auto image = new Image();
-	image->frames = texture;
+	auto image = new Image(material);
 
 	return image;
 }

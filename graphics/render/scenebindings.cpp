@@ -128,7 +128,7 @@ CameraUniforms& SceneBindings::lockCameraUniforms() {
 
 void SceneBindings::unlockCameraUniforms() {
 	m_cameraUniforms->unlock();
-	m_dirty |= Dirty::shadowConfigs | Dirty::shadowPasses;
+	m_dirty |= Dirty::shadowPasses;
 	invalidate();
 }
 
@@ -138,7 +138,7 @@ LightingUniforms& SceneBindings::lockLightingUniforms() {
 
 void SceneBindings::unlockLightingUniforms() {
 	m_lightingUniforms->unlock();
-	m_dirty |= Dirty::shadowConfigs | Dirty::shadowPasses;
+	m_dirty |= Dirty::shadowPasses;
 	invalidate();
 }
 
@@ -290,14 +290,13 @@ void SceneBindings::addPSMPasses() const {
 
 			auto projMatrix = Mat4f::frustum(-near, near, -near, near, near, far);
 
-			auto biasMatrix = AffineMat4f::TRS({0, 0, 0});
-			auto faceMatrix = AffineMat4f(faceTransforms[face], {}) * biasMatrix * invLightMatrix;
+			auto faceMatrix = AffineMat4f(faceTransforms[face], {}) * invLightMatrix;
 
 			CameraUniforms uniforms;
 			uniforms.projectionMatrix = projMatrix;
-			uniforms.worldMatrix = Mat4f(inverse(faceMatrix));
+			uniforms.worldMatrix = inverse(faceMatrix);
 			uniforms.inverseProjectionMatrix = inverse(projMatrix);
-			uniforms.viewMatrix = Mat4f(faceMatrix);
+			uniforms.viewMatrix = faceMatrix;
 			uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
 			uniforms.clipNear = near;
 			uniforms.clipFar = far;
@@ -341,6 +340,36 @@ void SceneBindings::updateSSMConfig() const {
 }
 
 void SceneBindings::addSSMPasses() const {
+
+	auto& config = configUniforms();
+	auto& lighting = lightingUniforms();
+
+	auto pass = m_ssmShadowPasses.begin();
+
+	Vector<Mat4f> ssmMatrices;
+
+	for (int i = 0, n = 0; i < lighting.numSSMLights; ++i) {
+
+		auto& light = lighting.spotLights[i];
+
+		float near = config.ssmClipNear;
+		float far = light.range;
+		auto projMatrix = Mat4f::frustum(-near, near, -near, near, near, far);
+
+		CameraUniforms uniforms;
+		uniforms.projectionMatrix = projMatrix;
+		uniforms.worldMatrix = light.worldMatrix;
+		uniforms.inverseProjectionMatrix = inverse(projMatrix);
+		uniforms.viewMatrix = inverse(light.worldMatrix);
+		uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
+		uniforms.clipNear = near;
+		uniforms.clipFar = far;
+
+		((Buffer*)pass->sceneBindings->getBuffer(cameraUniformsBinding))->update(&uniforms, 0, sizeof(uniforms));
+
+		m_shadowPasses.push_back(*pass++);
+	}
+	((Buffer*)m_bindGroup->getBuffer(ssmMatricesBinding))->update(ssmMatrices.data(), 0, ssmMatrices.size() * sizeof(Mat4f));
 }
 
 void SceneBindings::onValidate() const {

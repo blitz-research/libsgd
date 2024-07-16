@@ -21,16 +21,19 @@ CameraPtr camera;
 float camera_rx;
 
 void render() {
-	scene->render();
 	auto gc = currentGC();
+	scene->render();
+
 	gc->present(gc->colorBuffer());
 }
 
 void start(void (*entry)()) {
 
+	initApp();
+
 	window = new Window({1024, 768}, "Hello world!", sgd::WindowFlags::resizable | sgd::WindowFlags::centered);
 
-	//	window = new Window({768,768}, "Hello world!", sgd::WindowFlags::none);//resizable);
+	//window = new Window(desktopSize(), "Hello world!", sgd::WindowFlags::fullscreen);
 
 	SGD_LOG << "Window size" << window->size();
 
@@ -40,12 +43,17 @@ void start(void (*entry)()) {
 		if (scene) render();
 	});
 
-	new GraphicsContext(window);
+	createGC(window);
 
 	scene = new Scene();
 	scene->sceneRenderer()->ambientLightColor = Vec4f(1, .9, .8, .1);
 
+	/*
 	auto skyTexture = loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8,
+								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
+						  .result();
+	*/
+	auto skyTexture = loadTexture(Path("sgd://envmaps/stormy-cube.jpg"), TextureFormat::srgba8,
 								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
 						  .result();
 

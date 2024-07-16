@@ -11,6 +11,8 @@ SGD_SHARED(Sprite);
 struct SpriteRenderer : Shared {
 	SGD_OBJECT_TYPE(SpriteRenderer, Shared);
 
+	SpriteRenderer();
+
 	void add(Sprite* sprite);
 	void remove(Sprite* sprite);
 
@@ -18,7 +20,16 @@ struct SpriteRenderer : Shared {
 	void render(RenderQueue* rq) const;
 
 private:
-	Vector<Sprite*> m_instances;
+	struct Instance {
+		Sprite* sprite;
+		float distance{};
+		explicit Instance(Sprite* sprite) : sprite(sprite) {
+		}
+	};
+
+	ImageRendererPtr m_imageRenderer;
+
+	Vector<Instance> m_instances;
 };
 
-}
+} // namespace sgd

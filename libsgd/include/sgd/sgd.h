@@ -527,34 +527,31 @@ SGD_API float SGD_DECL sgd_GetFontHeight(SGD_Font font);
 //! @name Image
 //! @{
 
-//! Load an image for using with Draw2DImage or with 3D Sprites.
-SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int frames);
-
-//! Set image blend mode. See sgd_SetMaterialBlendMode for valid blend modes.
-SGD_API void SGD_DECL sgd_SetImageBlendMode(SGD_Image image, int blendMode);
+//! Load an image for using with Draw2DImage or with 3D sprites.
+SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int frameCount);
 
 //! @cond
-#define SGD_SPRITE_VIEW_MODE_FIXED 1
-#define SGD_SPRITE_VIEW_MODE_FREE 2
-#define SGD_SPRITE_VIEW_MODE_UPRIGHT 3
+#define SGD_IMAGE_VIEW_MODE_FIXED 1
+#define SGD_IMAGE_VIEW_MODE_FREE 2
+#define SGD_IMAGE_VIEW_MODE_UPRIGHT 3
 //! @endcond
 
-//! Set image sprite view mode.
+//! Set image view mode for use with 3D sprites.
 //!
-//! `spriteViewMode` shuold be one of the following values:
+//! `imageViewMode` should be one of the following values:
 //!
-//! Sprite view mode             | Integer value | Description
-//!------------------------------|---------------|------------
-//! SGD_SPRITE_VIEW_MODE_FIXED   | 1             | Sprite is rotated to face camera when rendered.
-//! SGD_SPRITE_VIEW_MODE_FREE    | 2             | Sprite is rendered without taking camera position into account.
-//! SGD_SPRITE_VIEW_MODE_UPRIGHT | 3             | Sprite is rotated around local Y axis to face camera, useful for tree like sprites.
-SGD_API void SGD_DECL sgd_SetImageSpriteViewMode(SGD_Image image, int spriteViewMode);
+//! Image view mode             | Integer value | Description
+//!-----------------------------|---------------|------------
+//! SGD_IMAGE_VIEW_MODE_FIXED   | 1             | Image is rotated to face camera when rendered.
+//! SGD_IMAGE_VIEW_MODE_FREE    | 2             | Image is rendered without taking camera position into account.
+//! SGD_IMAGE_VIEW_MODE_UPRIGHT | 3             | Image is rotated around local Y axis to face camera, useful for tree like sprites.
+SGD_API void SGD_DECL sgd_SetImageViewMode(SGD_Image image, int viewMode);
 
-//! Set image rect for use with Sprites.
-SGD_API void SGD_DECL sgd_SetImageSpriteRect(SGD_Image image, float minX, float minY, float maxX, float maxY);
+//! Set image rect for use with 3D sprites.
+SGD_API void SGD_DECL sgd_SetImageRect(SGD_Image image, float minX, float minY, float maxX, float maxY);
 
-//! Set image 2D handle. This offset will be be applied when Draw2DImage is used to draw image.
-SGD_API void SGD_DECL sgd_SetImageDraw2DHandle(SGD_Image image, float x, float y);
+//! Set 2D handle for use with Draw2DImage.
+SGD_API void SGD_DECL sgd_SetImage2DHandle(SGD_Image image, float x, float y);
 
 //! Get width of image.
 SGD_API int SGD_DECL sgd_GetImageWidth(SGD_Image image);
@@ -562,8 +559,8 @@ SGD_API int SGD_DECL sgd_GetImageWidth(SGD_Image image);
 //! Get height of image.
 SGD_API int SGD_DECL sgd_GetImageHeight(SGD_Image image);
 
-//! Get number of animation frames in image.
-SGD_API int SGD_DECL sgd_GetImageFrameCount(SGD_Image image);
+//! Get depth (animation frames) of image.
+SGD_API int SGD_DECL sgd_GetImageDepth(SGD_Image image);
 
 //! @}
 

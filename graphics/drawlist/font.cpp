@@ -40,7 +40,7 @@ const MaterialDescriptor fontMaterialDescriptor( //
 	},
 	{
 		{"atlasTexture", {1, whiteTexture()}},
-	});
+	},1);
 
 } // namespace
 

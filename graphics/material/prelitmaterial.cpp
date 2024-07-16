@@ -34,6 +34,6 @@ const MaterialDescriptor prelitMaterialDescriptor( //
 	},
 	{
 		{"albedoTexture", {1, whiteTexture()}},
-	});
+	},1);
 
 } // namespace sgd

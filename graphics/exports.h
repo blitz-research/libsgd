@@ -13,6 +13,7 @@
 #include "drawlist/font.h"
     
 #include "image/image.h"
+#include "image/imagematerial.h"
 #include "image/imagerenderer.h"
 #include "image/imageutil.h"
     

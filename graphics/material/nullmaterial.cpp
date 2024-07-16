@@ -23,6 +23,6 @@ const MaterialDescriptor nullMaterialDescriptor( //
 	&bindGroupDescriptor,						 //
 	4,										     //
 	{},											 //
-	{});										 //
+	{},0);										 //
 
 } // namespace sgd

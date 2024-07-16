@@ -31,4 +31,7 @@ String enquote(CString str);
 //! Remove quotes from string. Noop if not quoted.
 String dequote(CString str);
 
+//! "1", "true", "on"
+bool truthy(CString str);
+
 }

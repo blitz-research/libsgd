@@ -8,12 +8,14 @@ MaterialDescriptor::MaterialDescriptor(String typeName,								   //
 									   const BindGroupDescriptor* bindGroupDescriptor, //
 									   uint32_t uniformsSize,						   //
 									   Map<String, UniformDesc> uniformDescs,		   //
-									   Map<String, TextureDesc> textureDescs)
+									   Map<String, TextureDesc> textureDescs,
+									   uint32_t mainTexture)
 	: typeName(std::move(typeName)),			//
 	  bindGroupDescriptor(bindGroupDescriptor), //
 	  uniformsSize(uniformsSize),				//
 	  uniformDescs(std::move(uniformDescs)),	//
-	  textureDescs(std::move(textureDescs)) {
+	  textureDescs(std::move(textureDescs)),
+	mainTexture(mainTexture){
 }
 
 Material::Material(const MaterialDescriptor* desc)
@@ -44,65 +46,65 @@ Material::Material(const MaterialDescriptor* desc)
 	addDependency(m_bindGroup);
 }
 
-bool Material::setTexture(CString name, CTexture* texture) {
-	auto it = m_desc->textureDescs.find(name);
-	if (it == m_desc->textureDescs.end()) return false;
+void Material::setTexture(CString name, CTexture* texture) {
 
-	if (name == "normalTexture") m_hasNormalTexture = texture;
+	auto it = m_desc->textureDescs.find(name);
+	if (it == m_desc->textureDescs.end()) SGD_PANIC("Material texture \""+name+"\" not found");
+
+	if (name == "normalTexture") m_hasNormalTexture = bool(texture);
 	if (!texture) texture = it->second.defValue;
 
 	m_bindGroup->setTexture(it->second.binding, texture);
-	return true;
 }
 
-bool Material::setVector4f(CString name, CVec4f value) {
+void Material::setVector4f(CString name, CVec4f value) {
 	SGD_ASSERT(endsWith(name, "4f"));
 
 	auto it = m_desc->uniformDescs.find(name);
-	if (it == m_desc->uniformDescs.end() || it->second.type != 4) return false;
+	if(it==m_desc->uniformDescs.end()) SGD_PANIC("Material param \""+name+"\" not found");
+	if(it->second.type != 4) SGD_PANIC("Material param \""+name+"\" has wrong size");
 
 	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
-	return true;
 }
 
-bool Material::setVector3f(CString name, CVec3f value) {
+void Material::setVector3f(CString name, CVec3f value) {
 	SGD_ASSERT(endsWith(name, "3f"));
 
 	auto it = m_desc->uniformDescs.find(name);
-	if (it == m_desc->uniformDescs.end() || it->second.type != 3) return false;
+	if(it==m_desc->uniformDescs.end()) SGD_PANIC("Material param \""+name+"\" not found");
+	if(it->second.type != 3) SGD_PANIC("Material param \""+name+"\" has wrong size");
 
 	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
-	return true;
 }
 
-bool Material::setVector2f(CString name, CVec2f value) {
+void Material::setVector2f(CString name, CVec2f value) {
 	SGD_ASSERT(endsWith(name, "2f"));
 
 	auto it = m_desc->uniformDescs.find(name);
-	if (it == m_desc->uniformDescs.end() || it->second.type != 2) return false;
+	if(it==m_desc->uniformDescs.end()) SGD_PANIC("Material param \""+name+"\" not found");
+	if(it->second.type != 2) SGD_PANIC("Material param \""+name+"\" has wrong size");
 
 	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
-	return true;
 }
 
-bool Material::setFloat(CString name, float value) {
+void Material::setFloat(CString name, float value) {
 	SGD_ASSERT(endsWith(name, "1f"));
 
 	auto it = m_desc->uniformDescs.find(name);
-	if (it == m_desc->uniformDescs.end() || it->second.type != 1) return false;
+	if(it==m_desc->uniformDescs.end()) SGD_PANIC("Material param \""+name+"\" not found");
+	if(it->second.type != 1) SGD_PANIC("Material param \""+name+"\" has wrong size");
 
 	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
-	return true;
 }
 
-bool Material::setInt(CString name, int value) {
+void Material::setInt(CString name, int value) {
 	SGD_ASSERT(endsWith(name, "1i"));
 
 	auto it = m_desc->uniformDescs.find(name);
-	if (it == m_desc->uniformDescs.end() || it->second.type != 1) return false;
+	if(it==m_desc->uniformDescs.end()) SGD_PANIC("Material param \""+name+"\" not found");
+	if(it->second.type != 1) SGD_PANIC("Material param \""+name+"\" has wrong size");
 
 	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
-	return true;
 }
 
 } // namespace sgd

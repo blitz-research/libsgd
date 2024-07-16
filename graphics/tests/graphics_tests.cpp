@@ -5,6 +5,7 @@
 #define SKYBOX 1
 #define MESH 1
 #define DRAWLIST 1
+//#define IMAGE 1
 
 using namespace sgd;
 
@@ -20,26 +21,43 @@ MeshRendererPtr meshRenderer;
 
 DrawListPtr drawList;
 
+#if IMAGE
+ImagePtr image;
+//ImageRendererPtr imageRenderer;
+#endif
+
 void render() {
 
 #if MESH
-	auto inst = meshRenderer->lockInstances(1);
-	inst->worldMatrix = AffineMat4f::TRS({0, 0, 2});
-	inst->color = Vec4f(1,.5,0,1);
-	meshRenderer->unlockInstances();
+	{
+		auto inst = meshRenderer->lockInstances(1);
+		inst->worldMatrix = AffineMat4f::TRS({0, 0, 2});
+		inst->color = Vec4f(1, .5, 0, 1);
+		meshRenderer->unlockInstances();
+	}
 #endif
-
 #if DRAWLIST
-	drawList->clear();
-	drawList->projectionMatrix = Mat4f::ortho(0, 1280, 960, 0, 0, 1);
-	drawList->addText("Hello World!",{0,0});
-	drawList->fillColor = Vec4f(1,.5,0,1);
-	drawList->addRect({0,16,1920,32});
-	drawList->flush();
+	{
+		drawList->clear();
+		drawList->projectionMatrix = Mat4f::ortho(0, 1280, 960, 0, 0, 1);
+		drawList->addText("Hello World!", {0, 0});
+		drawList->fillColor = Vec4f(1, .5, 0, 1);
+		drawList->addRect({0, 16, 1920, 32});
+		drawList->flush();
+	}
+#endif
+#if IMAGE
+	{
+		imageRenderer->beginUpdate();
+		auto instp = imageRenderer->addInstances(image, 1);
+		instp->worldMatrix = AffineMat4f::TRS({0, 0, 1});
+		instp->color=Vec4f(1);
+		instp->frame=0;
+		imageRenderer->endUpdate();
+	}
 #endif
 
 	runOnMainThread([] {
-
 		auto gc = currentGC();
 
 		GraphicsResource::validateAll();
@@ -49,18 +67,19 @@ void render() {
 #if SKYBOX
 		skyboxGeometry->render(renderQueue);
 #endif
-
 #if MESH
 		meshRenderer->render(renderQueue);
 #endif
-
 #if DRAWLIST
 		drawList->render(renderQueue);
+#endif
+#if IMAGE
+		imageRenderer->render(renderQueue);
 #endif
 
 		renderContext->beginRender();
 		{
-			renderContext->beginRenderPass(RenderPassType::opaque, gc->colorBuffer(), gc->depthBuffer(), Vec4f(1,.25,0,1), 1,
+			renderContext->beginRenderPass(RenderPassType::opaque, gc->colorBuffer(), gc->depthBuffer(), Vec4f(1, .25, 0, 1), 1,
 										   sceneBindings->bindGroup()->wgpuBindGroup());
 
 			renderContext->render(renderQueue->renderOps(RenderPassType::opaque));
@@ -114,9 +133,7 @@ int main() {
 	renderQueue = new RenderQueue();
 
 #if SKYBOX
-	auto skyTexture = loadTexture(Path("sgd://envmaps/grimmnight-cube.jpg"), TextureFormat::srgba8,
-								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
-						  .result();
+	auto skyTexture = loadTexture(Path("sgd://envmaps/stormy-cube.jpg"), TextureFormat::srgba8, TextureFlags::env).result();
 	skyboxGeometry = new SkyboxGeometry();
 	skyboxGeometry->skyTexture = skyTexture;
 #endif
@@ -129,6 +146,11 @@ int main() {
 
 #if DRAWLIST
 	drawList = new DrawList();
+#endif
+
+#if IMAGE
+	image = loadImage(Path("sgd://misc/light.png"), 1).result();
+	imageRenderer = new ImageRenderer();
 #endif
 
 	for (;;) {

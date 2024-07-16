@@ -6,8 +6,10 @@ R"(
 
 // ***** Scene *****
 
-const maxDirectionalLights: u32 = 4;
-const maxPointLights: u32 = 16;
+// Note: Must sync with scenebindings.h
+
+const maxDirectionalLights: u32 = 8;
+const maxPointLights: u32 = 32;
 const maxSpotLights: u32 = 64;
 
 const configUniformsBinding = 0;
@@ -69,8 +71,7 @@ struct PointLight {
 }
 
 struct SpotLight {
-	position: vec4f,
-    direction: vec4f,
+    worldMatrix: mat4x4f,
  	color: vec4f,
 	range: f32,
 	falloff: f32,
@@ -120,7 +121,7 @@ fn isNan(tz:f32) ->bool {
 @group(0) @binding(csmMatricesBinding) var<storage> scene_csmMatrices: array<mat4x4f>;
 @group(0) @binding(psmTextureBinding) var scene_psmTexture: texture_depth_cube_array;
 @group(0) @binding(psmSamplerBinding) var scene_psmSampler: sampler_comparison;
-@group(0) @binding(ssmTextureBinding) var scene_ssmTexture: texture_depth_cube_array;
+@group(0) @binding(ssmTextureBinding) var scene_ssmTexture: texture_depth_2d_array;
 @group(0) @binding(ssmSamplerBinding) var scene_ssmSampler: sampler_comparison;
 @group(0) @binding(ssmMatricesBinding) var<storage> scene_ssmMatrices: array<mat4x4f>;
 
@@ -190,7 +191,8 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 	    // Shadow
         let vpos = (scene_camera.viewMatrix * vec4f(position, 1.0)).xyz;
         if vpos.z >= scene_config.csmSplitDistances.w {continue;}
-            var split = i * 4;
+
+        var split = i * 4;
         if vpos.z >= scene_config.csmSplitDistances.x {
             if vpos.z < scene_config.csmSplitDistances.y {
                 split += 1;
@@ -203,18 +205,22 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
         let wpos = scene_csmMatrices[split] * vec4f(position, 1);
         let spos = wpos.xyz / wpos.w;
         let tcoords = spos.xy * vec2f(0.5, -0.5) + 0.5;
-//       let tcoords = spos.xy * vec2f(0.5, -0.5) + 0.5 + 0.5 / 2048.0;
+//       let tcoords = spos.xy * vec2f(0.5, -0.5) + 0.5 + 0.5 / scene_config.csmTextureSize;
         var atten = textureSampleCompareLevel(scene_csmTexture, scene_csmSampler, tcoords, split, spos.z - scene_config.csmDepthBias);
         if atten == 0.0 {continue;}
 
     	let lvec = -light.worldMatrix[2].xyz;
+
 	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten, light.color);
 	}
 
 	// ***** Directional lights without shadows *****
 	for(var i: u32 = scene_lighting.numCSMLights; i < scene_lighting.numDirectionalLights; i += 1) {
+
 	    let light = scene_lighting.directionalLights[i];
+
     	let lvec = -light.worldMatrix[2].xyz;
+
 	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, 1.0, light.color);
 	}
 
@@ -242,6 +248,7 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	// ***** Point lights without shadows *****
 	for(var i: u32 = scene_lighting.numPSMLights; i < scene_lighting.numPointLights; i += 1) {
+
 	    let light = scene_lighting.pointLights[i];
 
 	    var lvec = light.position.xyz - position;
@@ -249,30 +256,56 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 	    if d >= light.range {continue;}
 
 	    lvec /= d;
-	    var atten = pointLightAtten(d, light.range, light.falloff);
+	    let atten = pointLightAtten(d, light.range, light.falloff);
 
 	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten, light.color);
 	}
 
-	// ***** Spot lights *****
-	for(var i: u32 = 0; i < scene_lighting.numSpotLights; i += 1) {
+	// ***** Spot lights with shadows *****
+	for(var i: u32 = 0; i < scene_lighting.numSSMLights; i += 1) {
 
 	    let light = scene_lighting.spotLights[i];
 
-        // vector to light
-	    var lvec = light.position.xyz - position;
+	    var lvec = light.worldMatrix[3].xyz - position;
 	    let d = length(lvec);
 	    if d >= light.range {continue;}
+
+        // Shadow
+        let wpos = scene_ssmMatrices[i] * vec4f(position, 1);
+        let spos = wpos.xyz / wpos.w;
+        let tcoords = spos.xy * vec2f(0.5, -0.5) + 0.5;
+        var atten = textureSampleCompareLevel(scene_ssmTexture, scene_ssmSampler, tcoords, i, spos.z - scene_config.ssmDepthBias);
+        if(atten == 0.0) {continue;}
+
 	    lvec /= d;
-	    let atten = pointLightAtten(d, light.range, light.falloff);
-
-	    let cosangle = dot(lvec, light.direction.xyz);
-	    if(cosangle < 0.0) {continue;}
+	    let cosangle = dot(-lvec, light.worldMatrix[2].xyz);
+	    if cosangle < 0.0 {continue;}
 	    let angle = acos(cosangle);
-	    if(angle>light.outerConeAngle) {continue;}
-	    let coneAtten = 1.0 - max((angle - light.innerConeAngle) / (light.outerConeAngle - light.innerConeAngle), 0.0);
+	    if angle > light.outerConeAngle {continue;}
+	    atten *= 1.0 - max((angle - light.innerConeAngle) / (light.outerConeAngle - light.innerConeAngle), 0.0);
+	    atten *= pointLightAtten(d, light.range, light.falloff);
 
-	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten * coneAtten, light.color);
+	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten, light.color);
+	}
+
+	// ***** Spot lights without shadows *****
+	for(var i: u32 = scene_lighting.numSSMLights; i < scene_lighting.numSpotLights; i += 1) {
+
+	    let light = scene_lighting.spotLights[i];
+
+	    var lvec = light.worldMatrix[3].xyz - position;
+	    let d = length(lvec);
+	    if d >= light.range {continue;}
+
+	    lvec /= d;
+	    let cosangle = dot(-lvec, light.worldMatrix[2].xyz);
+	    if cosangle < 0.0 {continue;}
+	    let angle = acos(cosangle);
+	    if angle > light.outerConeAngle {continue;}
+	    var atten = 1.0 - max((angle - light.innerConeAngle) / (light.outerConeAngle - light.innerConeAngle), 0.0);
+	    atten *= pointLightAtten(d, light.range, light.falloff);
+
+	    color += evaluatePBR(normal, diffuse, specular, glossiness, spower, fnorm, vvec, lvec, atten, light.color);
 	}
 
 	return vec4f(color + emissive, albedo.a);

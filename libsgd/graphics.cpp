@@ -294,39 +294,35 @@ float SGD_DECL sgd_GetFontHeight(SGD_Font hfont) {
 
 // ***** Image *****
 
-SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int frames) {
+SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int depth) {
 	sgdx::started();
-	auto image = sgd::loadImage(sgd::Path(path), frames);
+	auto image = sgd::loadImage(sgd::Path(path), depth);
 	if (!image) sgdx::error("Failed to load image:" + image.error().message());
 	return sgdx::createHandle(image.result());
 }
 
-void SGD_DECL sgd_SetImageBlendMode(SGD_Image himage, int blendMode) {
-	sgdx::resolveHandle<sgd::Image>(himage)->blendMode = (sgd::BlendMode)blendMode;
+void SGD_DECL sgd_SetImageViewMode(SGD_Image himage, int viewMode) {
+	sgdx::resolveHandle<sgd::Image>(himage)->viewMode = (sgd::ImageViewMode)viewMode;
 }
 
-void SGD_DECL sgd_SetImageSpriteViewMode(SGD_Image himage, int spriteViewMode) {
-	sgdx::resolveHandle<sgd::Image>(himage)->spriteViewMode = (sgd::SpriteViewMode)spriteViewMode;
-}
-
-void SGD_DECL sgd_SetImageSpriteRect(SGD_Image himage, float minX, float minY, float maxX, float maxY) {
-	sgdx::resolveHandle<sgd::Image>(himage)->spriteRect = {minX, minY, maxX, maxY};
+void SGD_DECL sgd_SetImageRect(SGD_Image himage, float minX, float minY, float maxX, float maxY) {
+	sgdx::resolveHandle<sgd::Image>(himage)->rect = {minX, minY, maxX, maxY};
 }
 
 void SGD_DECL sgd_SetImageDraw2DHandle(SGD_Image himage, float x, float y) {
-	sgdx::resolveHandle<sgd::Image>(himage)->drawHandle = {x, y};
+	sgdx::resolveHandle<sgd::Image>(himage)->handle = {x, y};
 }
 
 int SGD_DECL sgd_GetImageWidth(SGD_Image himage) {
-	return (int)sgdx::resolveHandle<sgd::Image>(himage)->frames()->size().x;
+	return (int)sgdx::resolveHandle<sgd::Image>(himage)->material()->mainTexture()->size().x;
 }
 
 int SGD_DECL sgd_GetImageHeight(SGD_Image himage) {
-	return (int)sgdx::resolveHandle<sgd::Image>(himage)->frames()->size().y;
+	return (int)sgdx::resolveHandle<sgd::Image>(himage)->material()->mainTexture()->size().y;
 }
 
-int SGD_DECL sgd_GetImageFrameCount(SGD_Image himage) {
-	return (int)sgdx::resolveHandle<sgd::Image>(himage)->frames()->depth();
+int SGD_DECL sgd_GetImageDepth(SGD_Image himage) {
+	return (int)sgdx::resolveHandle<sgd::Image>(himage)->material()->mainTexture()->depth();
 }
 
 // ***** 2D Overlay *****

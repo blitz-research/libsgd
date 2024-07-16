@@ -4,7 +4,7 @@
 
 namespace sgd {
 
-enum struct SpriteViewMode {
+enum struct ImageViewMode {
 	fixed = 1,	 // locked to camera, 2d style
 	free = 2,	 // free of camera, billboard style
 	upright = 3, // upright, tree style
@@ -15,34 +15,24 @@ SGD_SHARED(Image);
 struct Image : GraphicsResource {
 	SGD_OBJECT_TYPE(Image, GraphicsResource);
 
-	Image();
+	explicit Image(CMaterial* material);
 
-	Property<Texture*> frames;
-	Property<BlendMode> blendMode;
-	Property<Rectf> spriteRect{Rectf(-.5f, .5f)};
-	Property<SpriteViewMode> spriteViewMode{SpriteViewMode::fixed};
-	Property<Vec2f> drawHandle{};
+	Property<ImageViewMode> viewMode{ImageViewMode::fixed};
+	Property<Rectf> rect{Rectf(-.5f, .5f)};
+	Property<Vec2f> handle{};
 
-	Vec2u frameSize() const {
-		return frames()->size();
-	}
-
-	Rectf drawRect() const {
-		return m_drawRect;
-	}
-
-	CMaterial* material() const {
+	CMaterial* material()const{
 		return m_material;
 	}
 
-	CBindGroup* bindGroup()const {
+	CBindGroup* bindGroup() const {
 		return m_bindGroup;
 	}
 
 private:
-	MaterialPtr m_material;
+	CMaterialPtr m_material;
 	BindGroupPtr m_bindGroup;
-	Rectf m_drawRect;
+	BufferPtr m_uniforms;
 
 	void onValidate() const override;
 };

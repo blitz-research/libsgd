@@ -8,6 +8,15 @@
 
 namespace sgd {
 
+namespace {
+
+bool g_timeStampsEnabled = false;
+
+auto init =
+	configVarChanged()["render.timeStampsEnabled"].connect(nullptr, [](CString value) { g_timeStampsEnabled = truthy(value); });
+
+} // namespace
+
 SceneRenderer::SceneRenderer()
 	: m_sceneBindings(new SceneBindings()),				  //
 	  m_renderContext(new RenderContext()),				  //
@@ -112,6 +121,7 @@ void SceneRenderer::updateLightingUniforms() {
 				if (light->shadowsEnabled() != shadow) continue;
 				auto& ulight = uniforms.directionalLights[n++];
 				ulight.worldMatrix = light->worldMatrix();
+				ulight.worldMatrix.t = Vec4f(light->worldPosition() - m_eye, 1);
 				ulight.color = light->color();
 			}
 		}
@@ -123,14 +133,14 @@ void SceneRenderer::updateLightingUniforms() {
 		auto& lights = m_pointLights;
 		auto cmp = [=](const Light* lhs, const Light* rhs) {
 			if (lhs->priority() != rhs->priority()) return lhs->priority() > rhs->priority();
-			return lengthsq(lhs->worldMatrix().t - m_eye) < lengthsq(rhs->worldMatrix().t - m_eye);
+			return lengthsq(lhs->worldPosition() - m_eye) < lengthsq(rhs->worldPosition() - m_eye);
 		};
 		std::sort(lights.begin(), lights.end(), cmp);
 		uniforms.numPointLights = std::min((int)lights.size(), maxPointLights);
 		int n = 0;
 		for (bool shadow : {true, false}) {
 			uniforms.numPSMLights = n;
-			for (int i = 0; i < uniforms.numDirectionalLights; ++i) {
+			for (int i = 0; i < uniforms.numPointLights; ++i) {
 				auto light = lights[i];
 				if (light->shadowsEnabled() != shadow) continue;
 				auto& ulight = uniforms.pointLights[n++];
@@ -148,23 +158,24 @@ void SceneRenderer::updateLightingUniforms() {
 		auto& lights = m_spotLights;
 		auto cmp = [=](const Light* lhs, const Light* rhs) {
 			if (lhs->priority() != rhs->priority()) return lhs->priority() > rhs->priority();
-			return lengthsq(lhs->worldMatrix().t - m_eye) < lengthsq(rhs->worldMatrix().t - m_eye);
+			return lengthsq(lhs->worldPosition() - m_eye) < lengthsq(rhs->worldPosition() - m_eye);
 		};
 		std::sort(lights.begin(), lights.end(), cmp);
 		uniforms.numSpotLights = std::min((int)lights.size(), maxSpotLights);
 		int n = 0;
 		for (bool shadow : {true, false}) {
 			uniforms.numSSMLights = n;
-			for (int i = 0; i < uniforms.numDirectionalLights; ++i) {
+			for (int i = 0; i < uniforms.numSpotLights; ++i) {
 				auto light = lights[i];
 				if (light->shadowsEnabled() != shadow) continue;
 				auto& ulight = uniforms.spotLights[n++];
-				ulight.position = Vec4f(light->worldPosition() - m_eye, 1);
+				ulight.worldMatrix = light->worldMatrix();
+				ulight.worldMatrix.t = Vec4f(light->worldPosition() - m_eye, 1);
 				ulight.color = light->color();
 				ulight.range = light->range();
 				ulight.falloff = light->falloff();
-				ulight.innerConeAngle = light->innerConeAngle();
-				ulight.outerConeAngle = light->outerConeAngle();
+				ulight.innerConeAngle = light->innerConeAngle() * degreesToRadians;
+				ulight.outerConeAngle = light->outerConeAngle() * degreesToRadians;
 			}
 		}
 		SGD_ASSERT(uniforms.numSpotLights == n);
@@ -176,8 +187,6 @@ void SceneRenderer::render(CCamera* camera) {
 
 	m_camera = camera;
 	m_eye = camera ? camera->worldPosition() : Vec3r();
-
-	m_renderQueue->clear();
 
 	updateCameraUniforms();
 	updateLightingUniforms();
@@ -192,6 +201,7 @@ void SceneRenderer::render(CCamera* camera) {
 	runOnMainThread(
 		[=] { //
 			GraphicsResource::validateAll();
+			m_renderQueue->clear();
 			m_skyboxRenderer->render(m_renderQueue);
 			m_modelRenderer->render(m_renderQueue);
 			m_skinnedModelRenderer->render(m_renderQueue);
@@ -224,10 +234,10 @@ void SceneRenderer::renderAsync() {
 
 	auto gc = currentGC();
 
-	m_wgpuCommandEncoder = m_renderContext->beginRender();
+	auto timeStampsEnabled = g_timeStampsEnabled && m_timeStampsEnabled;
+	if (timeStampsEnabled) m_timeStampsEnabled = false;
 
-	auto timeStampsEnabled = m_timeStampsEnabled;
-	m_timeStampsEnabled = false;
+	m_wgpuCommandEncoder = m_renderContext->beginRender();
 
 	// Shadows
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 0);
@@ -244,11 +254,23 @@ void SceneRenderer::renderAsync() {
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 2);
 	renderGeometry(RenderPassType::blend, gc->colorBuffer(), gc->depthBuffer(), clearColor(), clearDepth(),
 				   m_sceneBindings->bindGroup());
+
 	if (timeStampsEnabled) {
 		m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 3);
 		m_wgpuCommandEncoder.ResolveQuerySet(m_timeStampQueries, 0, 4, m_timeStampBuffer, 0);
 		m_wgpuCommandEncoder.CopyBufferToBuffer(m_timeStampBuffer, 0, m_timeStampResults, 0, timeStampCount * 8);
 	}
+
+	auto ms = millis();
+	while (m_wgpuWorkDone.id) {
+		currentGC()->wgpuDevice().GetAdapter().GetInstance().WaitAny(m_wgpuWorkDone, 5000000000);
+		m_wgpuWorkDone.id = 0;
+	};
+	ms = millis() - ms;
+	//	SGD_LOG << "Wait for work done ms:"<<ms;
+
+	m_wgpuWorkDone = currentGC()->wgpuDevice().GetQueue().OnSubmittedWorkDone( //
+		wgpu::CallbackMode::WaitAnyOnly, [this](wgpu::QueueWorkDoneStatus status) {});
 
 	m_renderContext->endRender();
 

@@ -45,6 +45,12 @@ struct Entity : Shared {
 		return m_children;
 	}
 
+	void setName(CString name);
+
+	CString name()const {
+		return m_name;
+	}
+
 	void addListener(EntityListener* el);
 
 	CVector<EntityListenerPtr> listeners() const {
@@ -154,6 +160,8 @@ private:
 	bool m_isEnabled{true};
 	bool m_isVisible{true};
 	bool m_invalid{};
+
+	String m_name;
 
 	Entity* m_parent{};
 	Vector<EntityPtr> m_children;

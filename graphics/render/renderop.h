@@ -35,7 +35,7 @@ struct RenderOp {
 		  pipeline(std::move(pipeline)), //
 		  elementCount(elementCount),	 //
 		  instanceCount(instanceCount),	 //
-		  firstElement(firstElement) {	 //
+		  firstElement(firstElement) { //
 	}
 };
 using CRenderOp = const RenderOp&;

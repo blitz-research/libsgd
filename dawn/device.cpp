@@ -124,7 +124,9 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 } // namespace
 
 const wgpu::Instance& getWGPUInstance() {
-	static wgpu::Instance instance = wgpu::CreateInstance();
+	wgpu::InstanceDescriptor desc{};
+	desc.features.timedWaitAnyEnable = true;
+	static wgpu::Instance instance = wgpu::CreateInstance(&desc);
 	return instance;
 }
 

@@ -55,6 +55,6 @@ const MaterialDescriptor pbrMaterialDescriptor( //
 		{"roughnessTexture", {7, whiteTexture()}},
 		{"occlusionTexture", {9, whiteTexture()}},
 		{"normalTexture", {11, flatNormalTexture()}},
-	});
+	},1);
 
 } // namespace sgd

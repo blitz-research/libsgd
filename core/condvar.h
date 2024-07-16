@@ -9,7 +9,12 @@ namespace sgd {
 
 template <class T> struct CondVar {
 
-	CondVar& operator=(const T& value ){
+	CondVar() = default;
+
+	explicit CondVar(const T& value) : m_value(value) {
+	}
+
+	CondVar& operator=(const T& value) {
 		{
 			std::lock_guard<std::mutex> lock(m_mutex);
 			if (value == m_value) return *this;
@@ -19,11 +24,11 @@ template <class T> struct CondVar {
 		return *this;
 	}
 
-	const T& operator()()const {
+	const T& operator()() const {
 		return m_value;
 	}
 
-	template<class F> void wait(F pred) const {
+	template <class F> void wait(F pred) const {
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);
 			m_cv.wait(lock, pred);

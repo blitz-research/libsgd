@@ -13,6 +13,8 @@ int g_suspended;
 
 Map<String, String> g_configVars;
 
+Map<String, Signal<CString>>* g_configVarChanged;
+
 std::mutex g_configMutex;
 
 }
@@ -38,6 +40,11 @@ void exitApp() {
 	glfwTerminate();
 }
 
+Map<String, Signal<CString>>& configVarChanged() {
+	if(!g_configVarChanged) g_configVarChanged = new Map<String, Signal<CString>>();
+	return *g_configVarChanged;
+}
+
 void setConfigVar(CString name, CString value) {
 
 	std::lock_guard<std::mutex> lock(g_configMutex);
@@ -46,7 +53,7 @@ void setConfigVar(CString name, CString value) {
 	if(value==*p) return;
 
 	*p=value;
-	configVarChanged[name].emit(value);
+	configVarChanged()[name].emit(value);
 }
 
 String getConfigVar(CString name) {

@@ -28,7 +28,7 @@ struct SceneRenderer : Shared {
 	Property<Vec4f> clearColor{Vec4f(0, 0, 0, 1)};
 	Property<float> clearDepth{1};
 
-	SceneBindings* seneBindings() const {
+	SceneBindings* sceneBindings() const {
 		return m_sceneBindings;
 	}
 
@@ -89,6 +89,8 @@ private:
 	wgpu::Buffer m_timeStampResults;
 	uint64_t m_timeStamps[timeStampCount]{};
 	float m_rps = 0;
+
+	wgpu::Future m_wgpuWorkDone{};
 
 	void updateCameraUniforms();
 	void updateLightingUniforms();

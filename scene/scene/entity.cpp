@@ -107,6 +107,7 @@ void Entity::setIsVisible(bool isVisible) {
 	}
 }
 
+// TODO: This probably has issues with visbile/enabled state.
 void Entity::setParent(Entity* parent) {
 
 	if (m_parent) {
@@ -126,6 +127,10 @@ void Entity::setParent(Entity* parent) {
 	auto matrix = worldMatrix();
 	m_parent = nullptr;
 	setWorldMatrix(matrix);
+}
+
+void Entity::setName(CString name) {
+	m_name=name;
 }
 
 void Entity::addListener(EntityListener* listener) {

@@ -17,17 +17,19 @@ struct MaterialDescriptor {
 		uint32_t binding;
 		const Texture* defValue;
 	};
-	String typeName;
+	String const typeName;
 	const BindGroupDescriptor* bindGroupDescriptor;
-	uint32_t uniformsSize;
-	Map<String, UniformDesc> uniformDescs;
-	Map<String, TextureDesc> textureDescs;
+	uint32_t const uniformsSize;
+	Map<String, UniformDesc> const uniformDescs;
+	Map<String, TextureDesc> const textureDescs;
+	uint32_t const mainTexture;
 
 	MaterialDescriptor(String typeName,							   //
 					   const BindGroupDescriptor* bindGroupDescriptor, //
 					   uint32_t uniformsSize,						   //
 					   Map<String, UniformDesc> uniformDescs,			   //
-					   Map<String, TextureDesc> textureDescs);
+					   Map<String, TextureDesc> textureDescs,
+					   uint32_t mainTexture);
 };
 using CMaterialDescriptor = const MaterialDescriptor;
 
@@ -42,17 +44,21 @@ struct Material : GraphicsResource {
 
 	Property<CullMode> cullMode{CullMode::back};
 
-	bool setVector4f(CString name, CVec4f value);
-	bool setVector3f(CString name, CVec3f value);
-	bool setVector2f(CString name, CVec2f value);
-	bool setFloat(CString name, float value);
-	bool setInt(CString name, int value);
-
-	bool setTexture(CString name, CTexture* value);
+	CTexture* mainTexture() const {
+		return m_desc->mainTexture ? m_bindGroup->getTexture(m_desc->mainTexture) : nullptr;
+	}
 
 	bool hasNormalTexture() const {
 		return m_hasNormalTexture;
 	}
+
+	void setTexture(CString name, CTexture* value);
+
+	void setVector4f(CString name, CVec4f value);
+	void setVector3f(CString name, CVec3f value);
+	void setVector2f(CString name, CVec2f value);
+	void setFloat(CString name, float value);
+	void setInt(CString name, int value);
 
 	wgpu::BindGroup wgpuBindGroup() const {
 		return m_bindGroup->wgpuBindGroup();

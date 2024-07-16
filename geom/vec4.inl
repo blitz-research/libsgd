@@ -42,6 +42,38 @@ template<class T> Vec4<T>::operator Vec3<T>() const {
 	return {x,y,z};
 }
 
+template <class T> Vec4<T>& Vec4<T>::operator*=(CVec4<T> v) {
+	return *this = *this * v;
+}
+
+template <class T> Vec4<T>& Vec4<T>::operator/=(CVec4<T> v) {
+	return *this = *this / v;
+}
+
+template <class T> Vec4<T>& Vec4<T>::operator+=(CVec4<T> v) {
+	return *this = *this + v;
+}
+
+template <class T> Vec4<T>& Vec4<T>::operator-=(CVec4<T> v) {
+	return *this = *this - v;
+}
+
+template <class T> Vec4<T>& Vec4<T>::operator*=(T s) {
+	return *this = *this * s;
+}
+
+template <class T> Vec4<T>& Vec4<T>::operator/=(T s) {
+	return *this = *this / s;
+}
+
+template <class T> Vec4<T>& Vec4<T>::operator+=(T s) {
+	return *this = *this + s;
+}
+
+template <class T> Vec4<T>& Vec4<T>::operator-=(T s) {
+	return *this = *this - s;
+}
+
 // ***** Non-members *****
 
 template <class T> Vec4<T> operator-(CVec4<T> v) {

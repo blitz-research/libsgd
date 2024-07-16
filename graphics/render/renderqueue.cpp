@@ -13,7 +13,8 @@ void RenderQueue::addRenderOp(CBuffer* vbuffer,		  //
 							  CBindGroup* renderer,	  //
 							  uint32_t elementCount,  //
 							  uint32_t instanceCount, //
-							  uint32_t firstElement, bool shadows) {
+							  uint32_t firstInstance, //
+							  bool shadows) {
 
 	auto blendMode = material->blendMode();
 	auto rpassType =
@@ -28,7 +29,7 @@ void RenderQueue::addRenderOp(CBuffer* vbuffer,		  //
 		getOrCreateRenderPipeline(rpassType, material, geometry, renderer), //
 		elementCount,														//
 		instanceCount,														//
-		firstElement);														//
+		firstInstance);														//
 
 	if (shadows && rpassType == RenderPassType::opaque) {
 		m_renderOps[(int)RenderPassType::shadow].emplace_back(m_renderOps[(int)RenderPassType::opaque].back());

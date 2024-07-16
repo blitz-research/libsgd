@@ -155,6 +155,7 @@ void DrawList::addRect(CRectf r) {
 }
 
 void DrawList::addImage(CImage* image, CVec2f v, float frame) {
+	/*
 	auto r = image->drawRect() + v;
 	Vec4f color(1);
 	auto vp = allocTriangles(2, image->material());
@@ -171,6 +172,7 @@ void DrawList::addImage(CImage* image, CVec2f v, float frame) {
 		addOutline(bottomRight(r), bottomLeft(r));
 		addOutline(bottomLeft(r), topLeft(r));
 	}
+	 */
 }
 
 void DrawList::addOutline(CVec2f v0, CVec2f v1) {
@@ -315,20 +317,20 @@ void DrawList::addText(CString text, CVec2f v) {
 
 void DrawList::render(RenderQueue* rq) const {
 
-	uint32_t firstElement = 0;
+	uint32_t first = 0;
 
 	auto renderer= emptyBindGroup(BindGroupType::renderer);
 
 	for (auto& drawOp : m_drawOps) {
 
-		auto elementCount = drawOp.triangleCount * 3;
+		auto count = drawOp.triangleCount * 3;
 		auto material = drawOp.material ? drawOp.material : m_whiteMaterial;
 
 		rq->addRenderOp(m_vertexBuffer, nullptr,			   //
 						material, m_bindGroup, renderer,	   //
-						elementCount, 1, firstElement, false); //
+						count, 1, first, false); //
 
-		firstElement += elementCount;
+		first += count;
 	}
 }
 

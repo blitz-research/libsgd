@@ -5,38 +5,34 @@
 namespace sgd {
 
 struct alignas(16) ImageInstance {
-	Mat4f matrix;
+	Mat4f worldMatrix;
 	Vec4f color;
 	float frame{};
 };
 
-SGD_SHARED(RenderContext);
+SGD_SHARED(RenderQueue);
 
 SGD_SHARED(ImageRenderer);
 
 struct ImageRenderer : Shared {
 	SGD_OBJECT_TYPE(ImageRenderer, Shared);
 
-#if 0
-	void clearInstances();
+	ImageRenderer();
 
-	ImageInstance* lockInstances(Image* image, uint32_t count);
+	ImageInstance* lockInstances(uint32_t count);
 
 	void unlockInstances();
 
-	void render(RenderContext* rc) const;
-#endif
+	void render(RenderQueue* rq, CImage* image, uint32_t first, uint32_t count);
+
+	BindGroup* bindGroup()const{
+		return m_bindGroup;
+	}
 
 private:
-	struct InstOp {
-		Image* image;
-		uint32_t count;
-	};
-
-	InstOp m_instOps;
-
+	BindGroupPtr m_bindGroup;
+	uint32_t m_instanceCapacity{};
 	BufferPtr m_instanceBuffer;
-	uint32_t m_instanceCapacity;
 };
 
 }

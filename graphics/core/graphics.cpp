@@ -101,7 +101,6 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 					config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
 
 					auto pm = getConfigVar("dawn.presentMode");
-
 					if (pm == "Immediate") {
 						config.presentMode = wgpu::PresentMode::Immediate;
 					} else if (pm == "Mailbox") {
@@ -114,12 +113,7 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 
 					m_colorBuffer = new Texture(size, 1, TextureFormat::rgba16f, TextureFlags::renderTarget);
 					m_depthBuffer = new Texture(size, 1, TextureFormat::depth32f, TextureFlags::renderTarget);
-
-					m_colorBuffer->validate();
-					m_depthBuffer->validate();
 				};
-
-				if (!g_currentGC) g_currentGC = this;
 
 				m_window->sizeChanged0.connect(this, [=](CVec2u size) { //
 					configureSurface(size);
@@ -153,27 +147,26 @@ void GraphicsContext::present(Texture* texture) {
 		m_frames = 0;
 	}
 
-	auto& wgpuTexture = texture->wgpuTexture();
-
 	requestRender([=] {
-#if !SGD_OS_EMSCRIPTEN
-		m_wgpuDevice.GetAdapter().GetInstance().ProcessEvents();
-#endif
 		struct wgpu::SurfaceTexture surfaceTexture {};
 		m_wgpuSurface.GetCurrentTexture(&surfaceTexture);
+
 		if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::Success) {
 			SGD_PANIC("wgpu::Surface::GetCurrentTexture() failed.");
 			return;
 		}
+
 		if (!surfaceTexture.texture) {
 			SGD_PANIC("surface.texture is nullptr.");
 			return;
 		}
-		copyTexture(m_wgpuDevice, wgpuTexture, surfaceTexture.texture);
+
+		copyTexture(m_wgpuDevice, texture->wgpuTexture(), surfaceTexture.texture);
+
 #if !SGD_OS_EMSCRIPTEN
 		m_wgpuSurface.Present();
-		m_wgpuDevice.GetAdapter().GetInstance().ProcessEvents();
 #endif
+		m_wgpuDevice.GetAdapter().GetInstance().ProcessEvents();
 	});
 }
 

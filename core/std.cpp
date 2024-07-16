@@ -54,15 +54,6 @@ int64_t micros() {
 int64_t millis() {
 	return nanos() / 1000000;
 }
-String toLower(String str) {
-	for (int i = 0; i < str.size(); ++i) str[i] = tolower(str[i]);
-	return str;
-}
-
-String toUpper(String str) {
-	for (int i = 0; i < str.size(); ++i) str[i] = tolower(str[i]);
-	return str;
-}
 
 bool isMainThread() {
 	return std::this_thread::get_id() == g_mainThreadId;

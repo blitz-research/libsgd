@@ -2,34 +2,26 @@
 
 namespace {
 
-wgpu::BackendType g_backendType = wgpu::BackendType::Undefined;
-
 sgd::Vec3r g_tformed;
 sgd::Vec2f g_projected;
 sgd::Contact g_picked;
+
+sgd::ConfigUniforms& lockConfigUniforms() {
+	return sgdx::mainScene()->sceneRenderer()->sceneBindings()->lockConfigUniforms();
+}
+
+void unlockConfigUniforms() {
+	sgdx::mainScene()->sceneRenderer()->sceneBindings()->unlockConfigUniforms();
+}
 
 } // namespace
 
 // ***** Scene *****
 
-void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend) {
-	if (sgdx::g_mainWindow) sgdx::error("Backend type must be selected before Window is created");
-
-	sgdx::Map<sgdx::String, wgpu::BackendType> types{
-		{"D3D12", wgpu::BackendType::D3D12},   {"D3D11", wgpu::BackendType::D3D11},		  {"Vulkan", wgpu::BackendType::Vulkan},
-		{"OpenGL", wgpu::BackendType::OpenGL}, {"OpenGLES", wgpu::BackendType::OpenGLES}, {"Metal", wgpu::BackendType::Metal},
-		{"WebGPU", wgpu::BackendType::WebGPU},
-	};
-	auto it = types.find(backend);
-	if (it == types.end()) sgdx::error(sgdx::String("Unrecognized backend: '") + backend + "'");
-
-	g_backendType = it->second;
-}
-
 void SGD_DECL sgd_ClearScene() {
 	if (!sgdx::g_mainScene) {
-		sgdx::g_mainGC = new sgdx::GraphicsContext(sgdx::mainWindow(), g_backendType);
-		sgdx::g_mainScene = new sgdx::Scene(sgdx::g_mainGC);
+		sgdx::g_mainGC = sgd::createGC(sgdx::mainWindow());
+		sgdx::g_mainScene = new sgd::Scene();
 	} else {
 		sgdx::mainScene()->clear();
 		sgdx::destroyAllHandles();
@@ -40,56 +32,65 @@ void SGD_DECL sgd_ClearScene() {
 }
 
 void SGD_DECL sgd_SetClearColor(float red, float green, float blue, float alpha) {
-	sgdx::mainScene()->clearColor = sgdx::Vec4f(red, green, blue, alpha);
+	sgdx::mainScene()->sceneRenderer()->clearColor = sgdx::Vec4f(red, green, blue, alpha);
 }
 
 void SGD_DECL sgd_SetClearDepth(float depth) {
-	sgdx::mainScene()->clearDepth = depth;
+	sgdx::mainScene()->sceneRenderer()->clearDepth = depth;
 }
 
 SGD_API void SGD_DECL sgd_SetAmbientLightColor(float red, float green, float blue, float alpha) {
-	sgdx::mainScene()->ambientLightColor = sgdx::Vec4f(red, green, blue, alpha);
+	sgdx::mainScene()->sceneRenderer()->ambientLightColor = sgdx::Vec4f(red, green, blue, alpha);
 }
 
 void SGD_DECL sgd_SetEnvTexture(SGD_Texture htexture) {
 	auto texture = sgdx::resolveHandle<sgdx::Texture>(htexture);
-	sgdx::mainScene()->sceneBindings()->envTexture = texture;
+	sgdx::mainScene()->sceneRenderer()->envTexture = texture;
 }
 
 void SGD_DECL sgd_SetCSMTextureSize(int textureSize) {
-	sgdx::mainScene()->sceneBindings()->csmTextureSize = textureSize;
+	lockConfigUniforms().csmTextureSize = textureSize;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetMaxCSMLights(int maxLights) {
-	sgdx::mainScene()->sceneBindings()->maxCSMLights = maxLights;
+	lockConfigUniforms().maxCSMLights = maxLights;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetPSMTextureSize(int textureSize) {
-	sgdx::mainScene()->sceneBindings()->psmTextureSize = textureSize;
+	lockConfigUniforms().psmTextureSize = textureSize;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetMaxPSMLights(int maxLights) {
-	sgdx::mainScene()->sceneBindings()->maxPSMLights = maxLights;
+	lockConfigUniforms().maxPSMLights = maxLights;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetCSMSplitDistances(float split0, float split1, float split2, float split3) {
-	sgdx::mainScene()->sceneBindings()->csmSplitDistances = {split0, split1, split2, split3};
+	lockConfigUniforms().csmSplitDistances = {split0, split1, split2, split3};
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetCSMClipRange(float range) {
-	sgdx::mainScene()->sceneBindings()->csmClipRange = range;
+	lockConfigUniforms().csmClipRange = range;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetCSMDepthBias(float bias) {
-	sgdx::mainScene()->sceneBindings()->csmDepthBias = bias;
+	lockConfigUniforms().csmDepthBias = bias;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetPSMClipNear(float near) {
-	sgdx::mainScene()->sceneBindings()->psmClipNear = near;
+	lockConfigUniforms().psmClipNear = near;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetPSMDepthBias(float bias) {
-	sgdx::mainScene()->sceneBindings()->psmDepthBias = bias;
+	lockConfigUniforms().psmDepthBias = bias;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_RenderScene() {
@@ -105,7 +106,7 @@ float SGD_DECL sgd_GetFPS() {
 }
 
 float SGD_DECL sgd_GetRPS() {
-	return sgdx::mainScene()->RPS();
+	return sgdx::mainScene()->sceneRenderer()->RPS();
 }
 
 // ***** Entity *****

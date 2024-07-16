@@ -13,7 +13,7 @@ inline Signal<> appResuming;
 inline Signal<> beginPollEvents;
 inline Signal<> endPollEvents;
 
-inline Map<String, Signal<CString>> configVarChanged;
+Map<String, Signal<CString>>& configVarChanged();
 
 void initApp();
 void exitApp();

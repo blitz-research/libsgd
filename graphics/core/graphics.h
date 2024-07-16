@@ -43,11 +43,12 @@ struct GraphicsContext : Shared {
 	}
 
 	const wgpu::Device& wgpuDevice() const {
+		SGD_ASSERT(isMainThread());
 		return m_wgpuDevice;
 	}
 
 private:
-	inline static thread_local GraphicsContextPtr g_currentGC;
+	inline static GraphicsContextPtr g_currentGC;
 
 	WindowPtr m_window;
 	wgpu::Device m_wgpuDevice;

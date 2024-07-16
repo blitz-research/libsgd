@@ -27,7 +27,10 @@ add_library(graphics
     drawlist/fontmaterial.wgsl
     
 	image/image.cpp
-	image/image.h
+    image/image.h
+	image/imagematerial.cpp
+	image/imagematerial.h
+	image/imagematerial.wgsl
 	image/imagerenderer.cpp
 	image/imagerenderer.h
 	image/imagerenderer.wgsl
