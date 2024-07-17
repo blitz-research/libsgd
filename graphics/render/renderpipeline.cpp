@@ -18,6 +18,8 @@ String renderPassName(RenderPassType rpassType) {
 		return "OPAQUE";
 	case RenderPassType::blend:
 		return "BLEND";
+	case RenderPassType::effect:
+		return "EFFECT";
 	default:
 		SGD_ABORT();
 	}
@@ -40,21 +42,21 @@ String blendModeName(BlendMode blendMode) {
 
 } // namespace
 
-wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType, //
-											   CMaterial* material,		 //
-											   CBindGroup* geometry,	 //
-											   CBindGroup* renderer) {
+wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
+											   BlendMode blendMode,	 //
+											   DepthFunc depthFunc,	 //
+											   CullMode cullMode,	 //
+											   CBindGroup* bindings1, //
+											   CBindGroup* bindings2, //
+											   CBindGroup* bindings3) {
 
 	static Map<uint64_t, wgpu::RenderPipeline> cache;
 
 	auto gc = currentGC();
-	auto sceneDesc = rpassType!=RenderPassType::shadow ? &sceneBindingsDescriptor : &sceneShadowBindingsDescriptor;
-	auto materialDesc = material->bindGroup()->descriptor();
-	auto geometryDesc = geometry->descriptor();
-	auto rendererDesc = renderer->descriptor();
-	auto blendMode = material->blendMode();
-	auto depthFunc = material->depthFunc();
-	auto cullMode = material->cullMode();
+	auto sceneDesc = rpassType != RenderPassType::shadow ? &sceneBindingsDescriptor : &sceneShadowBindingsDescriptor;
+	auto materialDesc = bindings1->descriptor();
+	auto geometryDesc = bindings2->descriptor();
+	auto rendererDesc = bindings3->descriptor();
 
 	// TODO: Include colorBuffer/depthBuffer format in hash
 	uint64_t hash = ((uint64_t)rpassType << 24) |		   // 3
@@ -93,7 +95,7 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType, //
 		header += "#define OS_EMSCRIPTEN 1\n";
 #endif
 		header += "#define RENDER_PASS_" + renderPassName(rpassType) + " 1\n";
-		header += "#define BLEND_MODE_" + blendModeName(material->blendMode()) + " 1\n";
+		header += "#define BLEND_MODE_" + blendModeName(blendMode) + " 1\n";
 
 		tcpp::Lexer lexer(std::make_unique<tcpp::StringInputStream>(header + source));
 		tcpp::Preprocessor preprocessor(lexer, {errorCallback});
@@ -107,6 +109,13 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType, //
 	auto module = createShaderModule(currentGC()->wgpuDevice(), source, label);
 
 	wgpu::RenderPipelineDescriptor pipelineDescriptor;
+
+	// Vertex state
+	auto& vertexState = pipelineDescriptor.vertex;
+	vertexState.module = module;
+	vertexState.entryPoint = "vertexMain";
+	vertexState.bufferCount = geometryDesc->wgpuVertexBufferLayouts.size();
+	vertexState.buffers = geometryDesc->wgpuVertexBufferLayouts.data();
 
 	// Fragment state
 	wgpu::FragmentState fragmentState{};
@@ -122,6 +131,7 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType, //
 	} else {
 		switch (rpassType) {
 		case RenderPassType::opaque:
+		case RenderPassType::effect:
 			SGD_ASSERT(blendMode == BlendMode::opaque || blendMode == BlendMode::alphaMask);
 			blendState.color.srcFactor = wgpu::BlendFactor::One;
 			blendState.color.dstFactor = wgpu::BlendFactor::Zero;
@@ -134,50 +144,43 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType, //
 		default:
 			SGD_ABORT();
 		}
-		colorTargetState.format = gc->colorBuffer()->wgpuTexture().GetFormat();
+		colorTargetState.format = wgpu::TextureFormat::RGBA16Float;
 		colorTargetState.blend = &blendState;
 		fragmentState.targetCount = 1;
 		fragmentState.targets = &colorTargetState;
 	}
 
-	// Vertex state
-	auto& vertexState = pipelineDescriptor.vertex;
-	vertexState.module = module;
-	vertexState.entryPoint = "vertexMain";
-	vertexState.bufferCount = geometryDesc->wgpuVertexBufferLayouts.size();
-	vertexState.buffers = geometryDesc->wgpuVertexBufferLayouts.data();
-
 	// Depth stencil state
 	wgpu::DepthStencilState depthStencilState;
-	depthStencilState.format = gc->depthBuffer()->wgpuTexture().GetFormat();
-	depthStencilState.depthCompare = (wgpu::CompareFunction)depthFunc;
-	switch (rpassType) {
-	case RenderPassType::shadow:
-		depthStencilState.depthWriteEnabled = true; //(depthFunc != DepthFunc::undefined);
-		break;
-	case RenderPassType::opaque:
-		depthStencilState.depthWriteEnabled = (depthFunc != DepthFunc::undefined);
-		break;
-	case RenderPassType::blend:
-		depthStencilState.depthWriteEnabled = false;
-		break;
-	case RenderPassType::effect:
-		depthStencilState.depthWriteEnabled = false;
-		break;
+	if(rpassType == RenderPassType::effect) {
+		SGD_ASSERT(blendMode == BlendMode::opaque);
+	}else {
+		switch (rpassType) {
+		case RenderPassType::shadow:
+			depthStencilState.depthWriteEnabled = true;
+			break;
+		case RenderPassType::opaque:
+			depthStencilState.depthWriteEnabled = (depthFunc != DepthFunc::undefined);
+			break;
+		case RenderPassType::blend:
+		case RenderPassType::effect:
+			depthStencilState.depthWriteEnabled = false;
+			break;
+		}
+		depthStencilState.format = wgpu::TextureFormat::Depth32Float;
+		depthStencilState.depthCompare = (wgpu::CompareFunction)depthFunc;
+		pipelineDescriptor.depthStencil = &depthStencilState;
 	}
-	pipelineDescriptor.depthStencil = &depthStencilState;
 
 	// Pipeline layout
 	wgpu::BindGroupLayout bindGroupLayouts[]{sceneDesc->wgpuBindGroupLayout(gc),	//
 											 materialDesc->wgpuBindGroupLayout(gc), //
 											 geometryDesc->wgpuBindGroupLayout(gc), //
 											 rendererDesc->wgpuBindGroupLayout(gc)};
-
 	wgpu::PipelineLayoutDescriptor pipelineLayoutDesc{};
 	pipelineLayoutDesc.bindGroupLayoutCount = std::size(bindGroupLayouts);
 	pipelineLayoutDesc.bindGroupLayouts = bindGroupLayouts;
 	pipelineLayoutDesc.label = label;
-
 	pipelineDescriptor.layout = gc->wgpuDevice().CreatePipelineLayout(&pipelineLayoutDesc);
 
 	// Primitive state
@@ -185,6 +188,15 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType, //
 	pipelineDescriptor.primitive.cullMode = (wgpu::CullMode)cullMode;
 
 	return pipeline = gc->wgpuDevice().CreateRenderPipeline(&pipelineDescriptor);
+}
+
+wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType, //
+											   CMaterial* material,		 //
+											   CBindGroup* geometry,	 //
+											   CBindGroup* renderer) {
+
+	return getOrCreateRenderPipeline(rpassType, material->blendMode(), material->depthFunc(), material->cullMode(),
+									 material->bindGroup(), geometry, renderer);
 }
 
 } // namespace sgd

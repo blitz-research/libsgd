@@ -41,6 +41,12 @@ add_library(scene
 	physics/spherecollider.cpp
 	physics/spherecollider.h
 
+	rendereffect/rendereffect.cpp
+	rendereffect/rendereffect.h
+	rendereffect/grayscaleeffect.cpp
+	rendereffect/grayscaleeffect.h
+	rendereffect/grayscaleeffect.wgsl
+
 	scene/camera.cpp
 	scene/camera.h
 	scene/entity.cpp

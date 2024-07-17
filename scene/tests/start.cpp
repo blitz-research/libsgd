@@ -24,7 +24,7 @@ void render() {
 	auto gc = currentGC();
 	scene->render();
 
-	gc->present(gc->colorBuffer());
+	gc->present(scene->sceneRenderer()->outputTexture());
 }
 
 void start(void (*entry)()) {

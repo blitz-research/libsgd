@@ -19,7 +19,6 @@ Scene::Scene() {
 	gc->window()->sizeChanged1.connect(this, [=](CVec2u size) {
 		auto gc = currentGC();
 		if (!gc->canRender()) return;
-		SGD_ASSERT(size == gc->colorBuffer()->size());
 		m_viewportSize = size;
 		viewportSizeChanged.emit(size);
 	});

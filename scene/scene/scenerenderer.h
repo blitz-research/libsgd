@@ -15,6 +15,8 @@ SGD_SHARED(SpriteRenderer);
 SGD_SHARED(Sprite);
 SGD_SHARED(OverlayRenderer);
 SGD_SHARED(Overlay);
+SGD_SHARED(RenderEffect);
+SGD_SHARED(RenderEffectStack);
 
 SGD_SHARED(SceneRenderer);
 
@@ -23,6 +25,7 @@ struct SceneRenderer : Shared {
 
 	SceneRenderer();
 
+	Property<Vec2u> renderTargetSize;
 	Property<Vec4f> ambientLightColor{Vec4f(1, 1, 1, 0)};
 	Property<CTexturePtr> envTexture;
 	Property<Vec4f> clearColor{Vec4f(0, 0, 0, 1)};
@@ -59,9 +62,16 @@ struct SceneRenderer : Shared {
 	void add(CLight* light);
 	void remove(CLight* light);
 
+	void add(RenderEffect* effect);
+
 	void render(CCamera* camera);
 
+	Texture* outputTexture()const;
+
 private:
+	TexturePtr m_renderTarget;
+	TexturePtr m_depthBuffer;
+
 	Vector<CLight*> m_directionalLights;
 	Vector<CLight*> m_pointLights;
 	Vector<CLight*> m_spotLights;
@@ -76,12 +86,14 @@ private:
 	SpriteRendererPtr m_spriteRenderer;
 	OverlayRendererPtr m_overlayRenderer;
 
+	RenderEffectStackPtr m_renderEffectStack;
+
 	CCamera* m_camera{};
 	Vec3r m_eye;
 
 	wgpu::CommandEncoder m_wgpuCommandEncoder;
 
-	static constexpr int timeStampCount = 4;
+	static constexpr int timeStampCount = 5;
 
 	mutable bool m_timeStampsEnabled{false};
 	wgpu::QuerySet m_timeStampQueries;

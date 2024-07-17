@@ -24,13 +24,13 @@ struct GraphicsContext : Shared {
 		return m_window;
 	}
 
-	Texture* colorBuffer() const {
-		return m_colorBuffer;
-	}
+//	Texture* colorBuffer() const {
+//		return m_colorBuffer;
+//	}
 
-	Texture* depthBuffer() const {
-		return m_depthBuffer;
-	}
+//	Texture* depthBuffer() const {
+//		return m_depthBuffer;
+//	}
 
 	bool canRender() const {
 		return m_canRender;

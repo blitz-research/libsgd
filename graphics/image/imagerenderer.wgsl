@@ -78,13 +78,11 @@ struct Varying {
 
 #if !RENDER_PASS_SHADOW
 
-    //return vec4f(1,1,1,0);
-
     return evaluateMaterial(in.position, mat3x3f(), in.texCoords, in.color);
 
 #else
 
-    // Sprite shouldn't cast shadows yet, so this should be unreachable.
+    // Sprite can't cast shadows yet, so this should be unreachable.
     // return vec4f(0);
 
 #endif

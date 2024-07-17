@@ -19,7 +19,10 @@
 #include "physics/meshcollider.h"
 #include "physics/meshcolliderdata.h"
 #include "physics/spherecollider.h"
-    
+
+#include "rendereffect/rendereffect.h"
+#include "rendereffect/grayscaleeffect.h"
+
 #include "scene/camera.h"
 #include "scene/entity.h"
 #include "scene/entityutil.h"

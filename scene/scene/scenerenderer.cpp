@@ -1,5 +1,7 @@
 #include "scenerenderer.h"
 
+#include "../rendereffect/rendereffect.h"
+
 #include "../model/modelrenderer.h"
 #include "../model/skinnedmodelrenderer.h"
 #include "../overlay/overlayrenderer.h"
@@ -10,7 +12,7 @@ namespace sgd {
 
 namespace {
 
-bool g_timeStampsEnabled = false;
+bool g_timeStampsEnabled = true;
 
 auto init =
 	configVarChanged()["render.timeStampsEnabled"].connect(nullptr, [](CString value) { g_timeStampsEnabled = truthy(value); });
@@ -26,7 +28,24 @@ SceneRenderer::SceneRenderer()
 	  m_skinnedModelRenderer(new SkinnedModelRenderer()), //
 	  m_spriteRenderer(new SpriteRenderer()),			  //
 	  m_overlayRenderer(new OverlayRenderer()),			  //
+	  m_renderEffectStack(new RenderEffectStack()),
 	  envTexture(blackTexture(TextureFlags::cube)) {	  //
+
+	renderTargetSize.changed.connect(nullptr, [=](CVec2u size) {
+
+		if(m_renderTarget && m_renderTarget->size()==size) return;
+
+		m_renderTarget={};
+		m_depthBuffer={};
+		if(!size.x || !size.y) return;
+
+		m_renderTarget = new Texture(size, 1, TextureFormat::rgba16f, TextureFlags::renderTarget);
+		m_depthBuffer = new Texture(size, 1, TextureFormat::depth32f, TextureFlags::renderTarget);
+
+		m_renderEffectStack->setRenderTarget(m_renderTarget, m_depthBuffer);
+	});
+	renderTargetSize = currentGC()->window()->size();
+	currentGC()->window()->sizeChanged.connect(this,[=](CVec2u size){renderTargetSize = size;});
 
 	auto gc = currentGC();
 	m_timeStampsEnabled = gc->wgpuDevice().GetAdapter().HasFeature(wgpu::FeatureName::TimestampQuery);
@@ -70,6 +89,10 @@ void SceneRenderer::remove(CLight* light) {
 		sgd::remove(m_spotLights, light);
 		break;
 	}
+}
+
+void SceneRenderer::add(RenderEffect* effect) {
+	m_renderEffectStack->add(effect);
 }
 
 void SceneRenderer::updateCameraUniforms() {
@@ -197,6 +220,7 @@ void SceneRenderer::render(CCamera* camera) {
 	m_skinnedModelRenderer->update(m_eye);
 	m_spriteRenderer->update(m_eye);
 	m_overlayRenderer->update(m_eye);
+	m_renderEffectStack->validate();
 
 	runOnMainThread(
 		[=] { //
@@ -217,13 +241,17 @@ void SceneRenderer::render(CCamera* camera) {
 		isMainThread());
 }
 
+Texture* SceneRenderer::outputTexture() const {
+	return m_renderEffectStack->outputTexture();
+}
+
 // ***** Async rendering *****
 
 void SceneRenderer::renderGeometry(RenderPassType rpassType, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
 								   float clearDepth, BindGroup* sceneBindings) {
 
 	m_renderContext->beginRenderPass(rpassType, colorBuffer, depthBuffer, clearColor, clearDepth,
-									 sceneBindings->wgpuBindGroup());
+									 sceneBindings);
 
 	m_renderContext->render(m_renderQueue->renderOps(rpassType));
 
@@ -247,17 +275,21 @@ void SceneRenderer::renderAsync() {
 
 	// Opaque
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 1);
-	renderGeometry(RenderPassType::opaque, gc->colorBuffer(), gc->depthBuffer(), clearColor(), clearDepth(),
+	renderGeometry(RenderPassType::opaque, m_renderTarget, m_depthBuffer, clearColor(), clearDepth(),
 				   m_sceneBindings->bindGroup());
 
 	// Blend
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 2);
-	renderGeometry(RenderPassType::blend, gc->colorBuffer(), gc->depthBuffer(), clearColor(), clearDepth(),
+	renderGeometry(RenderPassType::blend, m_renderTarget, m_depthBuffer, clearColor(), clearDepth(),
 				   m_sceneBindings->bindGroup());
 
+	// Effects
+	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 3);
+	m_renderEffectStack->render(m_renderContext, m_sceneBindings->bindGroup());
+
 	if (timeStampsEnabled) {
-		m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 3);
-		m_wgpuCommandEncoder.ResolveQuerySet(m_timeStampQueries, 0, 4, m_timeStampBuffer, 0);
+		m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 4);
+		m_wgpuCommandEncoder.ResolveQuerySet(m_timeStampQueries, 0, timeStampCount, m_timeStampBuffer, 0);
 		m_wgpuCommandEncoder.CopyBufferToBuffer(m_timeStampBuffer, 0, m_timeStampResults, 0, timeStampCount * 8);
 	}
 
@@ -285,7 +317,7 @@ void SceneRenderer::renderAsync() {
 				auto scene = (SceneRenderer*)this;
 				std::memcpy(scene->m_timeStamps, scene->m_timeStampResults.GetConstMappedRange(), timeStampCount * 8);
 				scene->m_timeStampResults.Unmap();
-				auto elapsed = scene->m_timeStamps[3] - scene->m_timeStamps[0];
+				auto elapsed = scene->m_timeStamps[timeStampCount-1] - scene->m_timeStamps[0];
 				scene->m_rps = (float)(1e9 / (double)elapsed);
 				scene->m_timeStampsEnabled = true;
 			});

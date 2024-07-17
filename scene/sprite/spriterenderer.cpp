@@ -38,7 +38,7 @@ void SpriteRenderer::update(CVec3r eye) {
 
 	for (auto& inst : m_instances) {
 		instp->worldMatrix = inst.sprite->worldMatrix();
-		instp->worldMatrix.t -= Vec4f(eye, 0);
+		instp->worldMatrix.t.xyz() -= eye;
 		instp->color = inst.sprite->color();
 		instp->frame = inst.sprite->frame();
 		++instp;

@@ -14,7 +14,7 @@ struct RenderContext : Shared {
 	wgpu::CommandEncoder beginRender();
 
 	wgpu::RenderPassEncoder beginRenderPass(RenderPassType type, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
-											float clearDepth, const wgpu::BindGroup& sceneBindings);
+											float clearDepth, BindGroup* sceneBindings);
 
 	RenderPassType renderPassType() const {
 		return m_renderPassType;

@@ -20,7 +20,7 @@ void RenderContext::endRender() {
 }
 
 wgpu::RenderPassEncoder RenderContext::beginRenderPass(RenderPassType type, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
-									float clearDepth, const wgpu::BindGroup& sceneBindings) {
+									float clearDepth, BindGroup* sceneBindings) {
 
 	SGD_ASSERT(isMainThread() && m_wgpuCommandEncoder && !m_wgpuRenderPassEncoder);
 
@@ -61,7 +61,7 @@ wgpu::RenderPassEncoder RenderContext::beginRenderPass(RenderPassType type, Text
 
 	m_wgpuRenderPassEncoder = m_wgpuCommandEncoder.BeginRenderPass(&renderPassDescriptor);
 
-	m_wgpuRenderPassEncoder.SetBindGroup(0, sceneBindings);
+	m_wgpuRenderPassEncoder.SetBindGroup(0, sceneBindings->wgpuBindGroup());
 
 	m_rop = {};
 
