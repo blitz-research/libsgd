@@ -39,8 +39,8 @@ SceneRenderer::SceneRenderer()
 		m_depthBuffer={};
 		if(!size.x || !size.y) return;
 
-		m_renderTarget = new Texture(size, 1, TextureFormat::rgba16f, TextureFlags::renderTarget);
-		m_depthBuffer = new Texture(size, 1, TextureFormat::depth32f, TextureFlags::renderTarget);
+		m_renderTarget = new Texture(size, 1, TextureFormat::rgba16f, TextureFlags::renderTarget|TextureFlags::filter|TextureFlags::clamp);
+		m_depthBuffer = new Texture(size, 1, TextureFormat::depth32f, TextureFlags::renderTarget|TextureFlags::filter|TextureFlags::clamp);
 
 		m_renderEffectStack->setRenderTarget(m_renderTarget, m_depthBuffer);
 	});

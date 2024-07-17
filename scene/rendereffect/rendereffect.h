@@ -36,6 +36,8 @@ protected:
 
 	virtual void onRender(RenderContext* rc, BindGroup* sceneBindings) const = 0;
 
+	void invalidate();
+
 private:
 	friend class RenderEffectStack;
 
@@ -51,6 +53,7 @@ struct RenderEffectStack : GraphicsResource {
 
 	void setRenderTarget(Texture* renderTarget, Texture* depthBuffer);
 
+#if 0
 	Texture* renderTarget() const {
 		return m_renderTarget;
 	}
@@ -58,6 +61,7 @@ struct RenderEffectStack : GraphicsResource {
 	Texture* depthBuffer() const {
 		return m_depthBuffer;
 	}
+#endif
 
 	Texture* outputTexture() const {
 		return !m_effects.empty() ? m_effects.back()->renderTarget() : m_renderTarget.get();
@@ -65,9 +69,7 @@ struct RenderEffectStack : GraphicsResource {
 
 	void add(RenderEffect* effect);
 
-	void validate();
-
-	void render(RenderContext* rc, BindGroup* sceneBindings);
+	void render(RenderContext* rc, BindGroup* sceneBindings) const;
 
 private:
 	friend class RenderEffect;
@@ -75,12 +77,13 @@ private:
 	TexturePtr m_renderTarget;
 	TexturePtr m_depthBuffer;
 
-	Vector<TexturePtr> m_renderTargets;
 	Vector<RenderEffectPtr> m_effects;
 
-	bool m_dirty{};
+	mutable Vector<TexturePtr> m_renderTargets;
 
 	Texture* getOrCreateRenderTarget(CVec2u size, TextureFormat format, RenderEffect* effect);
+
+	void onValidate() const override;
 };
 
 inline Texture* RenderEffect::sourceTexture() const {

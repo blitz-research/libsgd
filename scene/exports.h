@@ -20,6 +20,8 @@
 #include "physics/meshcolliderdata.h"
 #include "physics/spherecollider.h"
 
+#include "rendereffect/bloomeffect.h"
+#include "rendereffect/blureffect.h"
 #include "rendereffect/rendereffect.h"
 #include "rendereffect/grayscaleeffect.h"
 

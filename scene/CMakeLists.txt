@@ -41,6 +41,12 @@ add_library(scene
 	physics/spherecollider.cpp
 	physics/spherecollider.h
 
+	rendereffect/bloomeffect.cpp
+	rendereffect/bloomeffect.h
+	rendereffect/bloomeffect.wgsl
+	rendereffect/blureffect.cpp
+	rendereffect/blureffect.h
+	rendereffect/blureffect.wgsl
 	rendereffect/rendereffect.cpp
 	rendereffect/rendereffect.h
 	rendereffect/grayscaleeffect.cpp

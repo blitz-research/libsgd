@@ -17,6 +17,7 @@ Expected<Image*, FileioEx> loadImage(CPath path, uint32_t depth) {
 	auto material = new Material(&imageMaterialDescriptor);
 	material->setTexture("albedoTexture", texture.result());
 	material->blendMode = BlendMode::alphaBlend;
+	material->cullMode = CullMode::none;
 
 	auto image = new Image(material);
 

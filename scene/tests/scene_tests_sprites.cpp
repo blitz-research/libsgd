@@ -4,8 +4,12 @@ void entry() {
 
 	createPlayer(nullptr);
 
-	GrayscaleEffectPtr gseffect = new GrayscaleEffect();
-	scene->sceneRenderer()->add(gseffect);
+//	GrayscaleEffectPtr grayscaleEffect = new GrayscaleEffect();
+//	scene->sceneRenderer()->add(grayscaleEffect);
+
+	BlurEffectPtr blurEffect = new BlurEffect();
+	blurEffect->kernelSize = 63;
+	scene->sceneRenderer()->add(blurEffect);
 
 	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), 1).result();
 	image->viewMode = ImageViewMode::fixed;
@@ -19,15 +23,7 @@ void entry() {
 		turn(sprite, {0, rnd(360), 0});
 		move(sprite, {0, -1.5, rnd(100)});
 
-		if (i == 0) {
-			SGD_LOG << "Trans, Rot, Scale" << sprite->worldPosition() << sprite->worldBasis().k << sprite->worldScale();
-		}
-
 		setScale(sprite, {.25f, .25f, .25f});
-
-		if (i == 0) {
-			SGD_LOG << "Trans, Rot, Scale" << sprite->worldPosition() << sprite->worldBasis().k << sprite->worldScale();
-		}
 	}
 
 	auto dc = overlay->drawList();

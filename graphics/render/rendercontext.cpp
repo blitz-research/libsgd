@@ -50,6 +50,7 @@ wgpu::RenderPassEncoder RenderContext::beginRenderPass(RenderPassType type, Text
 	switch (m_renderPassType) {
 	case RenderPassType::shadow:
 	case RenderPassType::opaque:
+	case RenderPassType::effect:
 		break;
 	case RenderPassType::blend:
 		colorAttachment.loadOp = wgpu::LoadOp::Load;
@@ -62,6 +63,9 @@ wgpu::RenderPassEncoder RenderContext::beginRenderPass(RenderPassType type, Text
 	m_wgpuRenderPassEncoder = m_wgpuCommandEncoder.BeginRenderPass(&renderPassDescriptor);
 
 	m_wgpuRenderPassEncoder.SetBindGroup(0, sceneBindings->wgpuBindGroup());
+	m_wgpuRenderPassEncoder.SetBindGroup(1, emptyBindGroup(BindGroupType::material)->wgpuBindGroup());
+	m_wgpuRenderPassEncoder.SetBindGroup(2, emptyBindGroup(BindGroupType::geometry)->wgpuBindGroup());
+	m_wgpuRenderPassEncoder.SetBindGroup(3, emptyBindGroup(BindGroupType::renderer)->wgpuBindGroup());
 
 	m_rop = {};
 
