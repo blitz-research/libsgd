@@ -4,12 +4,14 @@
 
 namespace sgd {
 
-SGD_SHARED(GrayscaleEffect);
+SGD_SHARED(MonocolorEffect);
 
-struct GrayscaleEffect : RenderEffect {
-	SGD_OBJECT_TYPE(GrayscaleEffect, RenderEffect);
+struct MonocolorEffect : RenderEffect {
+	SGD_OBJECT_TYPE(MonocolorEffect, RenderEffect);
 
-	GrayscaleEffect();
+	MonocolorEffect();
+
+	Property<Vec4f> color{Vec4f(1)};
 
 private:
 	BindGroupPtr m_bindGroup;

@@ -11,7 +11,7 @@ struct BlurEffect : RenderEffect {
 
 	BlurEffect();
 
-	Property<uint32_t> kernelSize{5};
+	Property<uint32_t> radius{2};
 
 private:
 	TexturePtr m_renderTargets[2];

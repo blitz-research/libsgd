@@ -22,8 +22,8 @@
 
 #include "rendereffect/bloomeffect.h"
 #include "rendereffect/blureffect.h"
+#include "rendereffect/monocoloreffect.h"
 #include "rendereffect/rendereffect.h"
-#include "rendereffect/grayscaleeffect.h"
 
 #include "scene/camera.h"
 #include "scene/entity.h"

@@ -49,9 +49,9 @@ add_library(scene
 	rendereffect/blureffect.wgsl
 	rendereffect/rendereffect.cpp
 	rendereffect/rendereffect.h
-	rendereffect/grayscaleeffect.cpp
-	rendereffect/grayscaleeffect.h
-	rendereffect/grayscaleeffect.wgsl
+	rendereffect/monocoloreffect.cpp
+	rendereffect/monocoloreffect.h
+	rendereffect/monocoloreffect.wgsl
 
 	scene/camera.cpp
 	scene/camera.h

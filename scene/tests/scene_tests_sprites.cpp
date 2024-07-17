@@ -4,11 +4,12 @@ void entry() {
 
 	createPlayer(nullptr);
 
-//	GrayscaleEffectPtr grayscaleEffect = new GrayscaleEffect();
-//	scene->sceneRenderer()->add(grayscaleEffect);
+	MonocolorEffectPtr monocolorEffect = new MonocolorEffect();
+	monocolorEffect->color=Vec4f(1,1,.75f,1);
+	scene->sceneRenderer()->add(monocolorEffect);
 
 	BlurEffectPtr blurEffect = new BlurEffect();
-	blurEffect->kernelSize = 63;
+	blurEffect->radius = 15;
 	scene->sceneRenderer()->add(blurEffect);
 
 	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), 1).result();

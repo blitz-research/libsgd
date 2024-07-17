@@ -49,7 +49,7 @@ BlurEffect::BlurEffect() {
 		bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(BlurEffectUniforms)));
 	}
 
-	kernelSize.changed.connect(nullptr, [=](uint32_t size) { invalidate(); });
+	radius.changed.connect(nullptr, [=](uint32_t) { invalidate(); });
 }
 
 void BlurEffect::onValidate() {
@@ -58,12 +58,14 @@ void BlurEffect::onValidate() {
 	m_renderTargets[1] = sourceTexture();
 	m_renderTarget = m_renderTargets[1];
 
-	auto kernelSize = std::max(std::min(this->kernelSize(), 63u), 3u); // NOLINT
+	auto r = std::min(std::max(this->radius(), 1u), 31u);
+
+	auto kernelSize = r * 2 + 1;
 
 	// https://dsp.stackexchange.com/a/74157
-	float sigma = (float)(kernelSize - 1) / 4;
+	float sigma = (float)r / 2;
 
-//	SGD_LOG << "Validating blur effect, kernalSize:" << kernelSize << "sigma:" << sigma;
+	SGD_LOG << "Validating blur effect, kernalSize:" << kernelSize << "sigma:" << sigma;
 
 	auto kernel = generateKernel(kernelSize, sigma);
 	BlurEffectUniforms uniforms{};
@@ -84,13 +86,14 @@ void BlurEffect::onValidate() {
 void BlurEffect::onRender(RenderContext* rc, BindGroup* sceneBindings) const {
 
 	if (!m_pipeline) {
-		m_pipeline = getOrCreateRenderPipeline(RenderPassType::effect,					 //
-											   BlendMode::opaque,						 //
-											   DepthFunc::undefined,					 //
-											   CullMode::none,							 //
-											   emptyBindGroup(BindGroupType::material),	 //
-											   m_bindGroups[0],							 //
-											   emptyBindGroup(BindGroupType::renderer)); //
+		m_pipeline = getOrCreateRenderPipeline(		  //
+			RenderPassType::effect,					  //
+			BlendMode::opaque,						  //
+			DepthFunc::undefined,					  //
+			CullMode::none,							  //
+			emptyBindGroup(BindGroupType::material),  //
+			m_bindGroups[0],						  //
+			emptyBindGroup(BindGroupType::renderer)); //
 	}
 
 	for (int i = 0; i < 2; ++i) {
