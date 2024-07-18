@@ -4,17 +4,18 @@ R"(
 
 const maxJoints: u32 = 256;
 
+// Shared with static mesh
+struct MeshUniforms {
+    tangentsEnabled: i32,
+}
+@group(2) @binding(0) var<uniform> geometry_uniforms: MeshUniforms;
+
 struct SkinnedMeshInstance {
     worldMatrix: mat4x4f,
     color: vec4f,
     jointMatrices: array<mat4x4f, maxJoints>,
 };
-@group(2) @binding(0) var<uniform> geometry_uniforms: SkinnedMeshUniforms;
-
-struct SkinnedMeshUniforms {
-    tangentsEnabled: i32,
-}
-@group(3) @binding(1) var<storage> renderer_instances: array<SkinnedMeshInstance>;
+@group(3) @binding(0) var<storage> renderer_instances: array<SkinnedMeshInstance>;
 
 struct Vertex {
 	@location(0) position: vec3f,
@@ -39,7 +40,7 @@ struct Varying {
 
 @vertex fn vertexMain(vertex: Vertex, @builtin(instance_index) instanceId : u32) -> Varying {
 
-    let instance = &geometry_uniformsInstances[instanceId];
+    let instance = &renderer_instances[instanceId];
 
     let joints = vertex.joints;
     let weights = vertex.weights;

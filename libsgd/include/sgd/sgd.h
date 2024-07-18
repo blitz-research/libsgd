@@ -31,12 +31,12 @@
 #define SGD_API SGD_EXTERN
 #endif
 
-#if _MSC_VER && !_WIN64 // Cheeky hack for 32 bit blitz3d support which needs __stdcall
+#if _MSC_VER && !_WIN64 // 32 bit blitz3d support needs __stdcall
 #define SGD_DECL __stdcall
 #elif _MSC_VER
 #define SGD_DECL __cdecl
 #else
-#define SGD_DECL //__attribute__((__cdecl__)) - ignored?!?
+#define SGD_DECL
 #endif
 
 #define SGD_TRUE 1
@@ -71,6 +71,7 @@ typedef SGD_Handle SGD_Model;
 typedef SGD_Handle SGD_Sprite;
 typedef SGD_Handle SGD_Skybox;
 typedef SGD_Handle SGD_Collider;
+typedef SGD_Handle SGD_RenderEffect;
 
 #if UINTPTR_MAX == 0xffffffffffffffff
 typedef double SGD_Real;
@@ -89,8 +90,11 @@ SGD_API void SGD_DECL sgd_Init();
 //! Shut down libsgd.
 SGD_API void SGD_DECL sgd_Terminate();
 
-//! Set WebGPU backend: D3D12, D3D11, Vulkan. Must be called before sgd_CreateWindow().
-SGD_API void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend);
+//! Set global configuration variable.
+SGD_API void SGD_DECL sgd_SetConfigVar(SGD_String name, SGD_String value);
+
+//! Set global configuration variable.
+//SGD_API SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name);
 
 //! Set error handler callback.
 SGD_API void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(SGD_String error, void* context), void* context);
@@ -428,10 +432,10 @@ SGD_API SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int seg
 //! Create a new torus mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs, SGD_Material material);
 
-//! Set mesh casts shadow flag, defaults to true.
+//! Set mesh shadow casting enabled, defaults to true.
 SGD_API void SGD_DECL sgd_SetMeshShadowCastingEnabled(SGD_Mesh mesh, SGD_Bool enabled);
 
-//! Get mesh casts shadow flag.
+//! Get mesh shadow casting enabled.
 SGD_API SGD_Bool SGD_DECL sgd_IsMeshShadowCastingEnabled(SGD_Mesh mesh);
 
 //! Copy mesh.
@@ -527,8 +531,8 @@ SGD_API float SGD_DECL sgd_GetFontHeight(SGD_Font font);
 //! @name Image
 //! @{
 
-//! Load an image for using with Draw2DImage or with 3D sprites.
-SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int frameCount);
+//! Load an image for use with 3D sprites or Draw2DImage.
+SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int depth);
 
 //! @cond
 #define SGD_IMAGE_VIEW_MODE_FIXED 1
@@ -536,7 +540,7 @@ SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int frameCount);
 #define SGD_IMAGE_VIEW_MODE_UPRIGHT 3
 //! @endcond
 
-//! Set image view mode for use with 3D sprites.
+//! Set view mode for use with 3D sprites.
 //!
 //! `imageViewMode` should be one of the following values:
 //!
@@ -547,11 +551,14 @@ SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int frameCount);
 //! SGD_IMAGE_VIEW_MODE_UPRIGHT | 3             | Image is rotated around local Y axis to face camera, useful for tree like sprites.
 SGD_API void SGD_DECL sgd_SetImageViewMode(SGD_Image image, int viewMode);
 
-//! Set image rect for use with 3D sprites.
+//! Set rect for use with 3D sprites.
 SGD_API void SGD_DECL sgd_SetImageRect(SGD_Image image, float minX, float minY, float maxX, float maxY);
 
 //! Set 2D handle for use with Draw2DImage.
 SGD_API void SGD_DECL sgd_SetImage2DHandle(SGD_Image image, float x, float y);
+
+//! Set image blend mode.
+SGD_API void SGD_DECL sgd_SetImageBlendMode(SGD_Image image, int blendMode);
 
 //! Get width of image.
 SGD_API int SGD_DECL sgd_GetImageWidth(SGD_Image image);
@@ -913,10 +920,10 @@ SGD_API void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light light, float angle);
 //! Set a spot light's outer cone angle in degrees.
 SGD_API void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light light, float angle);
 
-//! Set light casts shadow flag, defaults to true.
-SGD_API void SGD_DECL sgd_SetLightShadowMappingEnabled(SGD_Light light, SGD_Bool castShadow);
+//! Set light shadow mapping enabled, defaults to false.
+SGD_API void SGD_DECL sgd_SetLightShadowMappingEnabled(SGD_Light light, SGD_Bool enabled);
 
-//! Get light castsShadow flag.
+//! Get light shadow mapping enabled.
 SGD_API SGD_Bool SGD_DECL sgd_IsLightShadowMappingEnabled(SGD_Light light);
 
 //! Set light priority.
@@ -1058,6 +1065,11 @@ SGD_API SGD_Real SGD_DECL sgd_GetCollisionNY(SGD_Collider collider, int index);
 //! Get collision normal Z component.
 SGD_API SGD_Real SGD_DECL sgd_GetCollisionNZ(SGD_Collider collider, int index);
 
+//! @}
+
+//! @name Collider picking
+//! @{
+
 //! Pick first collider along ray passing from camera eye through window coordinates.
 SGD_API SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera camera, float windowX, float windowY, int colliderMask);
 
@@ -1081,6 +1093,29 @@ SGD_API SGD_Real SGD_DECL sgd_GetPickedNY();
 
 //! Z component of pick contact normal in world space.
 SGD_API SGD_Real SGD_DECL sgd_GetPickedNZ();
+
+//! @}
+
+//! @name Render effects
+//! @{
+
+//! Create a new blur render effect and add it to the scene.
+SGD_API SGD_RenderEffect SGD_DECL sgd_CreateBlurEffect();
+
+// Set blur render effect radius, should be in the range 1 to 31 inclusive, defaults to 2.
+SGD_API void SGD_DECL sgd_SetBlurEffectRadius(SGD_RenderEffect effect, int radius);
+
+//! Create a new monocolor render effect and add it to the scene.
+SGD_API SGD_RenderEffect SGD_DECL sgd_CreateMonocolorEffect();
+
+//! Set monocolor render effect color, defaults to 1,1,1,1.
+SGD_API void SGD_DECL sgd_SetMonocolorEffectColor(SGD_RenderEffect effect, float red, float green, float blue, float alpha);
+
+//! Set render effect enabled.
+SGD_API void SGD_DECL sgd_SetRenderEffectEnabled(SGD_RenderEffect effect, SGD_Bool enabled);
+
+//! Is render effect enabled.
+SGD_API SGD_Bool SGD_DECL sgd_IsRenderEffectEnabled(SGD_RenderEffect effect);
 
 //! @}
 

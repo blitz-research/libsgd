@@ -127,10 +127,10 @@ BindGroup* emptyBindGroup(BindGroupType type) {
 
 	if (bindGroups[index]) return bindGroups[index];
 
-	static const BindGroupDescriptor descs[]{{"emptyScene", BindGroupType::scene, {}, {}, {}},		 //
-											 {"emptyMaterial", BindGroupType::material, {}, {}, {}}, //
-											 {"emptyGeometry", BindGroupType::geometry, {}, {}, {}}, //
-											 {"emptyRenderer", BindGroupType::renderer, {}, {}, {}}};
+	static const BindGroupDescriptor descs[]{{"emptyScene", BindGroupType::scene, {}},		 //
+											 {"emptyMaterial", BindGroupType::material, {}}, //
+											 {"emptyGeometry", BindGroupType::geometry, {}}, //
+											 {"emptyRenderer", BindGroupType::renderer, {}}};
 
 	bindGroups[index] = new BindGroup(&descs[index]);
 

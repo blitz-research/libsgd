@@ -2,6 +2,7 @@ R"(
 
 // ***** MeshRenderer *****
 
+// Shared with skinned mesh
 struct MeshUniforms {
     tangentsEnabled: i32,
 }

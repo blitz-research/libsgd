@@ -37,6 +37,9 @@ private:
 	void init();
 
 	Entity* onCopy() const override;
+
+	void onShow() override;
+	void onHide() override;
 };
 
 Expected<Vec2f, bool> project(Camera* camera, CVec3r p);

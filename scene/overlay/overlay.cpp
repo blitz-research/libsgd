@@ -16,10 +16,14 @@ Overlay* Overlay::onCopy() const {
 }
 
 void Overlay::onShow() {
-	scene()->viewportSizeChanged.connect(
-		this, [=](CVec2u size) { m_drawList->projectionMatrix = Mat4f::ortho(0, (float)size.x, (float)size.y, 0, 0, 1); });
 
-	m_drawList->projectionMatrix = Mat4f::ortho(0, (float)scene()->viewportSize().x, (float)scene()->viewportSize().y, 0, 0, 1);
+	auto resize = [=](CVec2u size){ //
+		m_drawList->projectionMatrix = Mat4f::ortho(0, (float)size.x, (float)size.y, 0, 0, 1);
+	};
+
+	scene()->sceneRenderer()->renderTargetSizeChanged.connect(this, [=](CVec2u size) { resize(size);});
+
+	resize(scene()->sceneRenderer()->renderTargetSize());
 
 	scene()->sceneRenderer()->overlayRenderer()->add(this);
 }
@@ -27,7 +31,7 @@ void Overlay::onShow() {
 void Overlay::onHide() {
 	scene()->sceneRenderer()->overlayRenderer()->remove(this);
 
-	scene()->viewportSizeChanged.disconnect(this);
+	scene()->sceneRenderer()->renderTargetSizeChanged.disconnect(this);
 }
 
 } // namespace sgd

@@ -20,32 +20,38 @@ auto init =
 } // namespace
 
 SceneRenderer::SceneRenderer()
-	: m_sceneBindings(new SceneBindings()),				  //
-	  m_renderContext(new RenderContext()),				  //
-	  m_renderQueue(new RenderQueue()),					  //
-	  m_skyboxRenderer(new SkyboxRenderer()),			  //
-	  m_modelRenderer(new ModelRenderer()),				  //
-	  m_skinnedModelRenderer(new SkinnedModelRenderer()), //
-	  m_spriteRenderer(new SpriteRenderer()),			  //
-	  m_overlayRenderer(new OverlayRenderer()),			  //
-	  m_renderEffectStack(new RenderEffectStack()),
-	  envTexture(blackTexture(TextureFlags::cube)) {	  //
+	: m_sceneBindings(new SceneBindings()),														   //
+	  m_renderContext(new RenderContext()),														   //
+	  m_renderQueue(new RenderQueue()),															   //
+	  m_skyboxRenderer(new SkyboxRenderer()),													   //
+	  m_modelRenderer(new ModelRenderer()),														   //
+	  m_skinnedModelRenderer(new SkinnedModelRenderer()),										   //
+	  m_spriteRenderer(new SpriteRenderer()),													   //
+	  m_overlayRenderer(new OverlayRenderer()),													   //
+	  m_renderEffectStack(new RenderEffectStack()), envTexture(blackTexture(TextureFlags::cube)) { //
 
-	renderTargetSize.changed.connect(nullptr, [=](CVec2u size) {
+	auto resize = [=](CVec2u size) { //
+		if (size == m_renderTargetSize) return;
 
-		if(m_renderTarget && m_renderTarget->size()==size) return;
+		m_renderTargetSize = size;
+		m_renderTarget = {};
+		m_depthBuffer = {};
+		if (!size.x || !size.y) return;
 
-		m_renderTarget={};
-		m_depthBuffer={};
-		if(!size.x || !size.y) return;
-
-		m_renderTarget = new Texture(size, 1, TextureFormat::rgba16f, TextureFlags::renderTarget|TextureFlags::filter|TextureFlags::clamp);
-		m_depthBuffer = new Texture(size, 1, TextureFormat::depth32f, TextureFlags::renderTarget|TextureFlags::filter|TextureFlags::clamp);
+		m_renderTarget = new Texture(size, 1, TextureFormat::rgba16f,
+									 TextureFlags::renderTarget | TextureFlags::filter | TextureFlags::clamp);
+		m_depthBuffer = new Texture(size, 1, TextureFormat::depth32f,
+									TextureFlags::renderTarget | TextureFlags::filter | TextureFlags::clamp);
 
 		m_renderEffectStack->setRenderTarget(m_renderTarget, m_depthBuffer);
+
+		renderTargetSizeChanged.emit(m_renderTargetSize);
+	};
+
+	currentGC()->swapChainSizeChanged.connect(this, [=](CVec2u size) { //
+		resize(size);
 	});
-	renderTargetSize = currentGC()->window()->size();
-	currentGC()->window()->sizeChanged.connect(this,[=](CVec2u size){renderTargetSize = size;});
+	resize(currentGC()->swapChainSize());
 
 	auto gc = currentGC();
 	m_timeStampsEnabled = gc->wgpuDevice().GetAdapter().HasFeature(wgpu::FeatureName::TimestampQuery);
@@ -61,6 +67,14 @@ SceneRenderer::SceneRenderer()
 		bufDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::MapRead;
 		m_timeStampResults = gc->wgpuDevice().CreateBuffer(&bufDesc);
 	}
+}
+
+void SceneRenderer::add(CCamera* camera) {
+	m_cameras.emplace_back(camera);
+}
+
+void SceneRenderer::remove(CCamera* camera) {
+	sgd::remove(m_cameras, camera);
 }
 
 void SceneRenderer::add(CLight* light) {
@@ -206,10 +220,10 @@ void SceneRenderer::updateLightingUniforms() {
 	m_sceneBindings->unlockLightingUniforms();
 }
 
-void SceneRenderer::render(CCamera* camera) {
+void SceneRenderer::render() {
 
-	m_camera = camera;
-	m_eye = camera ? camera->worldPosition() : Vec3r();
+	m_camera = !m_cameras.empty() ? m_cameras.front() : nullptr;
+	m_eye = m_camera ? m_camera->worldPosition() : Vec3r();
 
 	updateCameraUniforms();
 	updateLightingUniforms();
@@ -250,8 +264,7 @@ Texture* SceneRenderer::outputTexture() const {
 void SceneRenderer::renderGeometry(RenderPassType rpassType, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
 								   float clearDepth, BindGroup* sceneBindings) {
 
-	m_renderContext->beginRenderPass(rpassType, colorBuffer, depthBuffer, clearColor, clearDepth,
-									 sceneBindings);
+	m_renderContext->beginRenderPass(rpassType, colorBuffer, depthBuffer, clearColor, clearDepth, sceneBindings);
 
 	m_renderContext->render(m_renderQueue->renderOps(rpassType));
 
@@ -317,7 +330,7 @@ void SceneRenderer::renderAsync() {
 				auto scene = (SceneRenderer*)this;
 				std::memcpy(scene->m_timeStamps, scene->m_timeStampResults.GetConstMappedRange(), timeStampCount * 8);
 				scene->m_timeStampResults.Unmap();
-				auto elapsed = scene->m_timeStamps[timeStampCount-1] - scene->m_timeStamps[0];
+				auto elapsed = scene->m_timeStamps[timeStampCount - 1] - scene->m_timeStamps[0];
 				scene->m_rps = (float)(1e9 / (double)elapsed);
 				scene->m_timeStampsEnabled = true;
 			});

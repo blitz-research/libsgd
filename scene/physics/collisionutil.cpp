@@ -115,7 +115,7 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, CVec3f radii
 
 Collider* intersectRay(Camera* camera, CVec2f windowCoords, int colliderMask, Contact& rcontact) {
 
-	auto wCoords = windowCoords / Vec2f(camera->scene()->viewportSize()) * 2.0f - 1.0f;
+	auto wCoords = windowCoords / Vec2f(camera->viewportSize()) * 2.0f - 1.0f;
 
 	auto clipCoords = camera->inverseProjectionMatrix() * Vec4f(wCoords.x, -wCoords.y, 0, 1);
 

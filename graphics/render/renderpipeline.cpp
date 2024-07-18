@@ -43,9 +43,9 @@ String blendModeName(BlendMode blendMode) {
 } // namespace
 
 wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
-											   BlendMode blendMode,	 //
-											   DepthFunc depthFunc,	 //
-											   CullMode cullMode,	 //
+											   BlendMode blendMode,	  //
+											   DepthFunc depthFunc,	  //
+											   CullMode cullMode,	  //
 											   CBindGroup* bindings1, //
 											   CBindGroup* bindings2, //
 											   CBindGroup* bindings3) {
@@ -110,12 +110,16 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
 
 	wgpu::RenderPipelineDescriptor pipelineDescriptor;
 
-	// Vertex state
+	// Vertex state - should probably always be in renderer?
+	auto& vertexBufferLayouts = //
+		!geometryDesc->wgpuVertexBufferLayouts.empty() ? geometryDesc->wgpuVertexBufferLayouts
+													   : rendererDesc->wgpuVertexBufferLayouts;
+
 	auto& vertexState = pipelineDescriptor.vertex;
 	vertexState.module = module;
 	vertexState.entryPoint = "vertexMain";
-	vertexState.bufferCount = geometryDesc->wgpuVertexBufferLayouts.size();
-	vertexState.buffers = geometryDesc->wgpuVertexBufferLayouts.data();
+	vertexState.bufferCount = vertexBufferLayouts.size();
+	vertexState.buffers = vertexBufferLayouts.data();
 
 	// Fragment state
 	wgpu::FragmentState fragmentState{};
@@ -152,9 +156,9 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
 
 	// Depth stencil state
 	wgpu::DepthStencilState depthStencilState;
-	if(rpassType == RenderPassType::effect) {
+	if (rpassType == RenderPassType::effect) {
 		SGD_ASSERT(blendMode == BlendMode::opaque);
-	}else {
+	} else {
 		switch (rpassType) {
 		case RenderPassType::shadow:
 			depthStencilState.depthWriteEnabled = true;
@@ -184,7 +188,13 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
 	pipelineDescriptor.layout = gc->wgpuDevice().CreatePipelineLayout(&pipelineLayoutDesc);
 
 	// Primitive state
-	pipelineDescriptor.primitive.topology = geometryDesc->wgpuTopology;
+	// topology - should probably always be in renderer?
+	auto topology = //
+		geometryDesc->wgpuTopology != wgpu::PrimitiveTopology::Undefined ? geometryDesc->wgpuTopology
+																		 : rendererDesc->wgpuTopology;
+	SGD_ASSERT(topology != wgpu::PrimitiveTopology::Undefined);
+
+	pipelineDescriptor.primitive.topology = topology;
 	pipelineDescriptor.primitive.cullMode = (wgpu::CullMode)cullMode;
 
 	return pipeline = gc->wgpuDevice().CreateRenderPipeline(&pipelineDescriptor);

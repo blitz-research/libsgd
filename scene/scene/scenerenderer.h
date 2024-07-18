@@ -25,11 +25,16 @@ struct SceneRenderer : Shared {
 
 	SceneRenderer();
 
-	Property<Vec2u> renderTargetSize;
 	Property<Vec4f> ambientLightColor{Vec4f(1, 1, 1, 0)};
 	Property<CTexturePtr> envTexture;
 	Property<Vec4f> clearColor{Vec4f(0, 0, 0, 1)};
 	Property<float> clearDepth{1};
+
+	Signal<CVec2u> renderTargetSizeChanged;
+
+	CVec2u renderTargetSize() const {
+		return m_renderTargetSize;
+	}
 
 	SceneBindings* sceneBindings() const {
 		return m_sceneBindings;
@@ -59,18 +64,25 @@ struct SceneRenderer : Shared {
 		return m_rps;
 	}
 
+	void add(CCamera* camera);
+	void remove(CCamera* camera);
+
 	void add(CLight* light);
 	void remove(CLight* light);
 
 	void add(RenderEffect* effect);
 
-	void render(CCamera* camera);
+	void render();
 
 	Texture* outputTexture()const;
 
 private:
+	Vec2u m_renderTargetSize;
+
 	TexturePtr m_renderTarget;
 	TexturePtr m_depthBuffer;
+
+	Vector<CCamera*> m_cameras;
 
 	Vector<CLight*> m_directionalLights;
 	Vector<CLight*> m_pointLights;

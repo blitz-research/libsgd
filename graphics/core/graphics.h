@@ -20,27 +20,21 @@ struct GraphicsContext : Shared {
 		return g_currentGC;
 	}
 
+	Signal<CVec2u> swapChainSizeChanged;
+
+	CVec2u swapChainSize() const {
+		return m_swapChainSize;
+	}
+
 	Window* window() const {
 		return m_window;
 	}
 
-//	Texture* colorBuffer() const {
-//		return m_colorBuffer;
-//	}
-
-//	Texture* depthBuffer() const {
-//		return m_depthBuffer;
-//	}
-
-	bool canRender() const {
-		return m_canRender;
-	}
-
-	void present(Texture* colorBuffer);
-
 	float FPS() const {
 		return m_fps;
 	}
+
+	void present(CTexture* texture);
 
 	const wgpu::Device& wgpuDevice() const {
 		SGD_ASSERT(isMainThread());
@@ -53,19 +47,15 @@ private:
 	WindowPtr m_window;
 	wgpu::Device m_wgpuDevice;
 	wgpu::Surface m_wgpuSurface;
-	wgpu::SwapChain m_wgpuSwapChain;
 
-	TexturePtr m_colorBuffer;
-	TexturePtr m_depthBuffer;
-
-	bool m_canRender{};
+	Vec2u m_swapChainSize;
 
 	int64_t m_micros{};
 	int m_frames{};
 	float m_fps{};
 
 	explicit GraphicsContext(Window* window);
-	~GraphicsContext();
+	~GraphicsContext() override;
 };
 
 GraphicsContext* createGC(Window* window);

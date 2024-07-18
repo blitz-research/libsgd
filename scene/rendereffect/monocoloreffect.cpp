@@ -30,11 +30,16 @@ MonocolorEffect::MonocolorEffect() : m_bindGroup(new BindGroup(&bindGroupDesc)) 
 	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(MonocolorEffectUniforms)));
 }
 
-void MonocolorEffect::onValidate() {
-	m_renderTarget = getOrCreateRenderTarget(sourceTexture()->size(), sourceTexture()->format());
+Texture* MonocolorEffect::onValidate(Texture* sourceTexture) {
+
+	m_renderTarget = getOrCreateRenderTarget(sourceTexture->size(), sourceTexture->format());
+
 	MonocolorEffectUniforms uniforms{color()};
 	((Buffer*)m_bindGroup->getBuffer(0))->update(&uniforms, 0, sizeof(uniforms));
-	m_bindGroup->setTexture(1, sourceTexture());
+
+	m_bindGroup->setTexture(1, sourceTexture);
+
+	return m_renderTarget;
 }
 
 void MonocolorEffect::onRender(RenderContext* rc, BindGroup* sceneBindings) const {

@@ -155,8 +155,11 @@ void DrawList::addRect(CRectf r) {
 }
 
 void DrawList::addImage(CImage* image, CVec2f v, float frame) {
-	/*
-	auto r = image->drawRect() + v;
+
+	auto size = Vec2f(image->material()->mainTexture()->size());
+	auto org = v - image->handle();
+	auto r = Rectf(org, org + size);
+
 	Vec4f color(1);
 	auto vp = allocTriangles(2, image->material());
 	vp[0] = {{topLeft(r), depth()}, {0, 0, frame}, color};
@@ -172,7 +175,6 @@ void DrawList::addImage(CImage* image, CVec2f v, float frame) {
 		addOutline(bottomRight(r), bottomLeft(r));
 		addOutline(bottomLeft(r), topLeft(r));
 	}
-	 */
 }
 
 void DrawList::addOutline(CVec2f v0, CVec2f v1) {

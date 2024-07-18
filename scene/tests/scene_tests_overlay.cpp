@@ -4,7 +4,7 @@ void entry() {
 
 	DrawListPtr dc = overlay->drawList();
 
-//	ImagePtr image = loadImage(Path("sgd://misc/explode64_vstrip.png"), 16).result();
+	ImagePtr image = loadImage(Path("sgd://misc/explode64_vstrip.png"), 16).result();
 
 	auto w = (float)window->size().x;
 	auto h = (float)window->size().y;
@@ -38,7 +38,7 @@ void entry() {
 
 		dc->clear();
 
-//		dc->addImage(image, {64,64}, frame+=.1f);
+		dc->addImage(image, Vec2f(window->mouse()->position()), frame+=.1f);
 
 		auto str = std::to_string(currentGC()->FPS());
 		dc->addText(str,{w - dc->font()->textWidth(str),0});

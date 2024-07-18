@@ -10,6 +10,9 @@ target_link_libraries(scene_tests scene)
 add_executable(scene_tests_model scene_tests_model.cpp)
 target_link_libraries(scene_tests_model scene)
 
+add_executable(scene_tests_skinned_model scene_tests_skinned_model.cpp)
+target_link_libraries(scene_tests_skinned_model scene)
+
 add_executable(scene_tests_sprites scene_tests_sprites.cpp)
 target_link_libraries(scene_tests_sprites scene)
 

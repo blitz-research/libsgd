@@ -27,19 +27,19 @@ BloomEffect::BloomEffect() {
 	}
 }
 
-void BloomEffect::onValidate() {
+Texture* BloomEffect::onValidate(Texture* sourceTexture) {
 
-	m_renderTargets[0] = getOrCreateRenderTarget(sourceTexture()->size() / 2u, sourceTexture()->format());
-	m_renderTargets[1] = getOrCreateRenderTarget(sourceTexture()->size() / 4u, sourceTexture()->format());
-	m_renderTargets[2] = getOrCreateRenderTarget(sourceTexture()->size() / 8u, sourceTexture()->format());
+	m_renderTargets[0] = getOrCreateRenderTarget(sourceTexture->size() / 2u, sourceTexture->format());
+	m_renderTargets[1] = getOrCreateRenderTarget(sourceTexture->size() / 4u, sourceTexture->format());
+	m_renderTargets[2] = getOrCreateRenderTarget(sourceTexture->size() / 8u, sourceTexture->format());
 
-	m_renderTarget = m_renderTargets[1];
-
-	m_bindGroups[0]->setTexture(0, sourceTexture());
+	m_bindGroups[0]->setTexture(0, sourceTexture);
 	m_bindGroups[1]->setTexture(0, m_renderTargets[0]);
 	m_bindGroups[2]->setTexture(0, m_renderTargets[1]);
 
 	m_pipeline = {};
+
+	return m_renderTargets[1];
 }
 
 void BloomEffect::onRender(RenderContext* rc, BindGroup* sceneBindings) const {

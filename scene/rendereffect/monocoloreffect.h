@@ -15,9 +15,10 @@ struct MonocolorEffect : RenderEffect {
 
 private:
 	BindGroupPtr m_bindGroup;
+	TexturePtr m_renderTarget;
 	mutable wgpu::RenderPipeline m_pipeline;
 
-	void onValidate() override;
+	Texture* onValidate(Texture* sourceTexture) override;
 
 	void onRender(RenderContext* rc, BindGroup* sceneBindings) const override;
 };

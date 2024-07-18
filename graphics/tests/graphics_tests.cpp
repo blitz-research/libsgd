@@ -5,11 +5,15 @@
 #define SKYBOX 1
 #define MESH 1
 #define DRAWLIST 1
-//#define IMAGE 1
+// #define IMAGE 1
 
 using namespace sgd;
 
 WindowPtr window;
+
+TexturePtr renderTarget;
+TexturePtr depthBuffer;
+
 SceneBindingsPtr sceneBindings;
 RenderContextPtr renderContext;
 RenderQueuePtr renderQueue;
@@ -23,7 +27,7 @@ DrawListPtr drawList;
 
 #if IMAGE
 ImagePtr image;
-//ImageRendererPtr imageRenderer;
+// ImageRendererPtr imageRenderer;
 #endif
 
 void render() {
@@ -51,8 +55,8 @@ void render() {
 		imageRenderer->beginUpdate();
 		auto instp = imageRenderer->addInstances(image, 1);
 		instp->worldMatrix = AffineMat4f::TRS({0, 0, 1});
-		instp->color=Vec4f(1);
-		instp->frame=0;
+		instp->color = Vec4f(1);
+		instp->frame = 0;
 		imageRenderer->endUpdate();
 	}
 #endif
@@ -79,16 +83,15 @@ void render() {
 
 		renderContext->beginRender();
 		{
-			renderContext->beginRenderPass(RenderPassType::opaque, gc->colorBuffer(), gc->depthBuffer(), Vec4f(1, .25, 0, 1), 1,
-										   sceneBindings->bindGroup()->wgpuBindGroup());
+			renderContext->beginRenderPass(RenderPassType::opaque, renderTarget, depthBuffer, Vec4f(1, .25, 0, 1), 1,
+										   sceneBindings->bindGroup());
 
 			renderContext->render(renderQueue->renderOps(RenderPassType::opaque));
 
 			renderContext->endRenderPass();
 		}
 		{
-			renderContext->beginRenderPass(RenderPassType::blend, gc->colorBuffer(), gc->depthBuffer(), {}, 1,
-										   sceneBindings->bindGroup()->wgpuBindGroup());
+			renderContext->beginRenderPass(RenderPassType::blend, renderTarget, depthBuffer, {}, 1, sceneBindings->bindGroup());
 
 			renderContext->render(renderQueue->renderOps(RenderPassType::blend));
 
@@ -96,7 +99,7 @@ void render() {
 		}
 		renderContext->endRender();
 
-		gc->present(gc->colorBuffer());
+		gc->present(renderTarget);
 	});
 }
 
@@ -104,8 +107,20 @@ int main() {
 
 	window = new Window({1280, 960}, "Hello world!", sgd::WindowFlags::resizable);
 
+	auto resize = [](CVec2u size) {
+		if (renderTarget && renderTarget->size() == size) return;
+		renderTarget = new Texture(size, 1, TextureFormat::rgba16f,
+								   TextureFlags::renderTarget | TextureFlags::filter | TextureFlags::clamp);
+		depthBuffer = new Texture(size, 1, TextureFormat::depth32f, TextureFlags::renderTarget);
+	};
+
 	window->closeClicked.connect(nullptr, [] { std::exit(0); });
-	window->sizeChanged.connect(nullptr, [](CVec2u) { render(); });
+
+	window->sizeChanged.connect(nullptr, [=](CVec2u size) {
+		resize(size);
+		render();
+	});
+	resize(window->size());
 
 	createGC(window);
 

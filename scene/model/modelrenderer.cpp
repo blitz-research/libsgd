@@ -38,11 +38,8 @@ void ModelRenderer::update(CVec3r eye) {
 		auto list = kv.second.get();
 		auto inst = list->meshRenderer->lockInstances(list->models.size());
 		for (CModel* model : list->models) {
-			auto& worldMatrix = model->worldMatrix();
-			inst->worldMatrix.i = {worldMatrix.r.i, 0};
-			inst->worldMatrix.j = {worldMatrix.r.j, 0};
-			inst->worldMatrix.k = {worldMatrix.r.k, 0};
-			inst->worldMatrix.t = {worldMatrix.t - eye, 1};
+			inst->worldMatrix = model->worldMatrix();
+			inst->worldMatrix.t.xyz() -= eye;
 			inst->color = model->color();
 			++inst;
 		}

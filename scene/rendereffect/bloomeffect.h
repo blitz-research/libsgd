@@ -11,11 +11,11 @@ struct BloomEffect : RenderEffect {
 	BloomEffect();
 
 private:
-	TexturePtr m_renderTargets[3];
 	BindGroupPtr m_bindGroups[3];
+	TexturePtr m_renderTargets[3];
 	mutable wgpu::RenderPipeline m_pipeline;
 
-	void onValidate() override;
+	Texture* onValidate(Texture* sourceTexture) override;
 
 	void onRender(RenderContext* rc, BindGroup* sceneBindings) const override;
 };

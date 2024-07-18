@@ -15,13 +15,13 @@ SGD_SHARED(Image);
 struct Image : GraphicsResource {
 	SGD_OBJECT_TYPE(Image, GraphicsResource);
 
-	explicit Image(CMaterial* material);
+	explicit Image(Material* material);
 
 	Property<ImageViewMode> viewMode{ImageViewMode::fixed};
 	Property<Rectf> rect{Rectf(-.5f, .5f)};
 	Property<Vec2f> handle{};
 
-	CMaterial* material()const{
+	Material* material()const{
 		return m_material;
 	}
 
@@ -30,7 +30,7 @@ struct Image : GraphicsResource {
 	}
 
 private:
-	CMaterialPtr m_material;
+	MaterialPtr m_material;
 	BindGroupPtr m_bindGroup;
 	BufferPtr m_uniforms;
 

@@ -74,12 +74,11 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 				m_wgpuDevice = device;
 				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
 
-				auto configureSurface = [=](CVec2u size) {
-					m_canRender = size.x && size.y;
-					if (!m_canRender) {
-						m_colorBuffer = m_depthBuffer = {};
-						return;
-					}
+				auto resize = [=](CVec2u size) {
+					if(size==m_swapChainSize) return;
+
+					m_swapChainSize = size;
+					if (!size.x || !size.y) return;
 
 					wgpu::SurfaceCapabilities surfCaps{};
 					if (!m_wgpuSurface.GetCapabilities(m_wgpuDevice.GetAdapter(), &surfCaps)) {
@@ -91,8 +90,8 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 
 					wgpu::SurfaceConfiguration config{};
 					config.device = m_wgpuDevice;
-					config.width = size.x;
-					config.height = size.y;
+					config.width = m_swapChainSize.x;
+					config.height = m_swapChainSize.y;
 					config.format = surfCaps.formats[0];
 					config.usage = wgpu::TextureUsage::RenderAttachment;
 					config.presentMode = wgpu::PresentMode::Fifo;
@@ -111,14 +110,13 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 
 					m_wgpuSurface.Configure(&config);
 
-					m_colorBuffer = new Texture(size, 1, TextureFormat::rgba16f, TextureFlags::renderTarget);
-					m_depthBuffer = new Texture(size, 1, TextureFormat::depth32f, TextureFlags::renderTarget);
+					swapChainSizeChanged.emit(m_swapChainSize);
 				};
 
 				m_window->sizeChanged0.connect(this, [=](CVec2u size) { //
-					configureSurface(size);
+					resize(size);
 				});
-				configureSurface(m_window->size());
+				resize(m_window->size());
 
 				ready = true;
 			});
@@ -129,14 +127,11 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 }
 
 GraphicsContext::~GraphicsContext() {
-	runOnMainThread([=]{
-		m_wgpuDevice.Destroy();
-	},true);
+	runOnMainThread([=] { m_wgpuDevice.Destroy(); }, true);
 }
 
-void GraphicsContext::present(Texture* texture) {
-
-	if (!m_canRender) return;
+void GraphicsContext::present(CTexture* texture) {
+	if(!m_swapChainSize.x || !m_swapChainSize.y) return;
 
 	++m_frames;
 	auto elapsed = sgd::micros() - m_micros;

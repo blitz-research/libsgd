@@ -11,41 +11,27 @@ SGD_SHARED(RenderEffect);
 struct RenderEffect : Shared {
 	SGD_OBJECT_TYPE(RenderEffect, Shared);
 
-	RenderEffect() = default;
+	RenderEffect();
+
+	Property<bool> enabled{true};
 
 	RenderEffectStack* stack() const {
 		return m_stack;
 	}
 
-	RenderEffect* source() const {
-		return m_source;
-	}
-
-	Texture* renderTarget() const {
-		return m_renderTarget;
-	}
-
-	Texture* sourceTexture() const;
-
 protected:
-	mutable TexturePtr m_renderTarget;
+	void invalidate();
 
 	Texture* getOrCreateRenderTarget(CVec2u size, TextureFormat format);
 
-	virtual void onValidate() = 0;
+	virtual Texture* onValidate(Texture* sourceTexture) = 0;
 
 	virtual void onRender(RenderContext* rc, BindGroup* sceneBindings) const = 0;
-
-	void invalidate();
 
 private:
 	friend class RenderEffectStack;
 
 	RenderEffectStack* m_stack{};
-
-	RenderEffect* m_source{};
-
-	void create(RenderEffectStack* stack, RenderEffect* source);
 };
 
 struct RenderEffectStack : GraphicsResource {
@@ -53,23 +39,14 @@ struct RenderEffectStack : GraphicsResource {
 
 	void setRenderTarget(Texture* renderTarget, Texture* depthBuffer);
 
-#if 0
-	Texture* renderTarget() const {
-		return m_renderTarget;
-	}
-
-	Texture* depthBuffer() const {
-		return m_depthBuffer;
-	}
-#endif
-
-	Texture* outputTexture() const {
-		return !m_effects.empty() ? m_effects.back()->renderTarget() : m_renderTarget.get();
-	}
-
 	void add(RenderEffect* effect);
 
 	void render(RenderContext* rc, BindGroup* sceneBindings) const;
+
+	Texture* outputTexture() const {
+		SGD_ASSERT(valid());
+		return m_outputTexture;
+	}
 
 private:
 	friend class RenderEffect;
@@ -77,7 +54,10 @@ private:
 	TexturePtr m_renderTarget;
 	TexturePtr m_depthBuffer;
 
+	mutable Texture* m_outputTexture{};
+
 	Vector<RenderEffectPtr> m_effects;
+	mutable Vector<RenderEffect*> m_enabledEffects;
 
 	mutable Vector<TexturePtr> m_renderTargets;
 
@@ -85,9 +65,5 @@ private:
 
 	void onValidate() const override;
 };
-
-inline Texture* RenderEffect::sourceTexture() const {
-	return m_source ? m_source->m_renderTarget : m_stack->m_renderTarget;
-}
 
 } // namespace sgd

@@ -6,15 +6,11 @@ namespace sgd {
 
 namespace {
 
-struct alignas(16) SkinnedMeshUniforms {
-	int32_t tangentsEnabled{0};
-};
-
 auto shaderSource{
 #include "skinnedmeshrenderer.wgsl"
 };
 
-wgpu::VertexAttribute vertexBufferAttribs[]{
+wgpu::VertexAttribute vertexAttribs[]{
 	{wgpu::VertexFormat::Float32x3, 0, 0},	// Vec3f position
 	{wgpu::VertexFormat::Float32x3, 12, 1}, // Vec3f normal
 	{wgpu::VertexFormat::Float32x4, 24, 2}, // Vec4f tangent
@@ -25,16 +21,14 @@ wgpu::VertexAttribute vertexBufferAttribs[]{
 };
 static_assert(sizeof(Vertex) == 88);
 
-wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(Vertex), wgpu::VertexStepMode::Vertex, std::size(vertexBufferAttribs),
-												  vertexBufferAttribs};
+wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(Vertex), wgpu::VertexStepMode::Vertex, std::size(vertexAttribs),
+												  vertexAttribs};
 
-BindGroupDescriptor bindGroupDescriptor( //
+BindGroupDescriptor rendererDescriptor( //
 	"skinnedMeshRenderer",				 //
 	BindGroupType::renderer,
 	{
-		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
-								   wgpu::BufferBindingType::Uniform),
-		bufferBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
+		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex, // renderer_instances: SkinnedMeshInstance[]
 								   wgpu::BufferBindingType::ReadOnlyStorage),
 	},
 	shaderSource,		  //
@@ -43,19 +37,13 @@ BindGroupDescriptor bindGroupDescriptor( //
 
 } // namespace
 
-} // namespace sgd
-namespace sgd {
-
 SkinnedMeshRenderer::SkinnedMeshRenderer(CMesh* mesh)
 	: m_mesh(mesh),										//
-	  m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
+	  m_bindGroup(new BindGroup(&rendererDescriptor)), //
 	  m_instanceCapacity(8),							//
 	  m_instanceBuffer(new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(SkinnedMeshInstance))) {
 
-	SkinnedMeshUniforms meshUniforms;
-	meshUniforms.tangentsEnabled = int(bool(m_mesh->flags() & MeshFlags::tangentsEnabled));
-	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, &meshUniforms, sizeof(meshUniforms)));
-	m_bindGroup->setBuffer(1, m_instanceBuffer);
+	m_bindGroup->setBuffer(0, m_instanceBuffer);
 }
 
 SkinnedMeshInstance* SkinnedMeshRenderer::lockInstances(uint32_t count) {

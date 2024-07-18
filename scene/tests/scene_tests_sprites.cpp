@@ -8,9 +8,9 @@ void entry() {
 	monocolorEffect->color=Vec4f(1,1,.75f,1);
 	scene->sceneRenderer()->add(monocolorEffect);
 
-	BlurEffectPtr blurEffect = new BlurEffect();
-	blurEffect->radius = 15;
-	scene->sceneRenderer()->add(blurEffect);
+//	BlurEffectPtr blurEffect = new BlurEffect();
+//	blurEffect->radius = 15;
+//	scene->sceneRenderer()->add(blurEffect);
 
 	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), 1).result();
 	image->viewMode = ImageViewMode::fixed;

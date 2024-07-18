@@ -52,11 +52,10 @@ BlurEffect::BlurEffect() {
 	radius.changed.connect(nullptr, [=](uint32_t) { invalidate(); });
 }
 
-void BlurEffect::onValidate() {
+Texture* BlurEffect::onValidate(Texture* sourceTexture) {
 
-	m_renderTargets[0] = getOrCreateRenderTarget(sourceTexture()->size(), sourceTexture()->format());
-	m_renderTargets[1] = sourceTexture();
-	m_renderTarget = m_renderTargets[1];
+	m_renderTargets[0] = getOrCreateRenderTarget(sourceTexture->size(), sourceTexture->format());
+	m_renderTargets[1] = sourceTexture;
 
 	auto r = std::min(std::max(this->radius(), 1u), 31u);
 
@@ -72,15 +71,17 @@ void BlurEffect::onValidate() {
 	uniforms.kernelSize = kernelSize;
 	std::memcpy(&uniforms.kernel, kernel.data(), sizeof(Vec4f) * kernelSize);
 
-	uniforms.texCoordScale = Vec2f(1.0f / (float)sourceTexture()->size().x, 0.0f);
+	uniforms.texCoordScale = Vec2f(1.0f / (float)sourceTexture->size().x, 0.0f);
 	((Buffer*)m_bindGroups[0]->getBuffer(0))->update(&uniforms, 0, sizeof(uniforms));
-	m_bindGroups[0]->setTexture(1, sourceTexture());
+	m_bindGroups[0]->setTexture(1, sourceTexture);
 
-	uniforms.texCoordScale = Vec2f(0.0f, 1.0f / (float)sourceTexture()->size().y);
+	uniforms.texCoordScale = Vec2f(0.0f, 1.0f / (float)sourceTexture->size().y);
 	((Buffer*)m_bindGroups[1]->getBuffer(0))->update(&uniforms, 0, sizeof(uniforms));
 	m_bindGroups[1]->setTexture(1, m_renderTargets[0]);
 
 	m_pipeline = {};
+
+	return m_renderTargets[1];
 }
 
 void BlurEffect::onRender(RenderContext* rc, BindGroup* sceneBindings) const {

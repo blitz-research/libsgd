@@ -39,7 +39,7 @@ void SGD_DECL sgd_SetClearDepth(float depth) {
 	sgdx::mainScene()->sceneRenderer()->clearDepth = depth;
 }
 
-SGD_API void SGD_DECL sgd_SetAmbientLightColor(float red, float green, float blue, float alpha) {
+void SGD_DECL sgd_SetAmbientLightColor(float red, float green, float blue, float alpha) {
 	sgdx::mainScene()->sceneRenderer()->ambientLightColor = sgdx::Vec4f(red, green, blue, alpha);
 }
 
@@ -98,7 +98,7 @@ void SGD_DECL sgd_RenderScene() {
 }
 
 void SGD_DECL sgd_Present() {
-	sgdx::mainGC()->present(sgdx::mainGC()->colorBuffer());
+	sgdx::mainGC()->present(sgdx::mainScene()->sceneRenderer()->outputTexture());
 }
 
 float SGD_DECL sgd_GetFPS() {
@@ -371,11 +371,11 @@ SGD_Bool SGD_DECL sgd_CameraProject(SGD_Camera hcamera, SGD_Real x, SGD_Real y, 
 	return r;
 }
 
-SGD_API float SGD_DECL sgd_GetProjectedX() {
+float SGD_DECL sgd_GetProjectedX() {
 	return g_projected.x;
 }
 
-SGD_API float SGD_DECL sgd_GetProjectedY() {
+float SGD_DECL sgd_GetProjectedY() {
 	return g_projected.y;
 }
 
@@ -703,4 +703,42 @@ SGD_Real SGD_DECL sgd_GetPickedNY() {
 
 SGD_Real SGD_DECL sgd_GetPickedNZ() {
 	return g_picked.normal.z;
+}
+
+// ***** Render effects *****
+
+SGD_RenderEffect SGD_DECL sgd_CreateBlurEffect() {
+	auto effect = new sgd::BlurEffect();
+	sgdx::mainScene()->sceneRenderer()->add(effect);
+	return sgdx::createHandle(effect);
+}
+
+void SGD_DECL sgd_SetBlurEffectRadius(SGD_RenderEffect heffect, int radius) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	if (!effect->is<sgd::BlurEffect>()) sgdx::error("Effect is not a blur effect");
+	if (radius < 1 || radius > 31) sgdx::error("Blur radius must be in the range 1 to 31 inclusive");
+	effect->as<sgd::BlurEffect>()->radius = radius;
+}
+
+SGD_RenderEffect SGD_DECL sgd_CreateMonocolorEffect() {
+	auto effect = new sgd::MonocolorEffect();
+	sgdx::mainScene()->sceneRenderer()->add(effect);
+	return sgdx::createHandle(effect);
+}
+
+void SGD_DECL sgd_SetMonocolorEffectColor(SGD_RenderEffect heffect, float red, float green, float blue, float alpha) {
+	auto effect = sgdx::resolveHandle<sgd::MonocolorEffect>(heffect);
+	if (!effect->is<sgd::MonocolorEffect>()) sgdx::error("Effect is not a monocolor effect");
+	effect->as<sgd::MonocolorEffect>()->color = sgd::Vec4f(red, green, blue, alpha);
+}
+
+void SGD_DECL sgd_SetRenderEffectEnabled(SGD_RenderEffect heffect, SGD_Bool enabled) {
+	auto effect = sgdx::resolveHandle<sgd::MonocolorEffect>(heffect);
+	effect->enabled = enabled;
+}
+
+//! Is render effect enabled.
+SGD_Bool SGD_DECL sgd_IsRenderEffectEnabled(SGD_RenderEffect heffect) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	return effect->enabled();
 }

@@ -16,9 +16,7 @@ BindGroupDescriptor bindGroupDesc( //
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::ReadOnlyStorage),
 	},
-	shaderSource,							//
-	{},										//
-	wgpu::PrimitiveTopology::TriangleList); //
+	shaderSource);
 
 } // namespace
 

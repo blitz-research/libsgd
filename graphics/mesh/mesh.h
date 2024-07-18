@@ -144,12 +144,12 @@ struct Mesh : GraphicsResource {
 	}
 
 private:
+	BindGroupPtr m_bindGroup;
 	BufferPtr m_vertexBuffer;
 	uint32_t m_vertexCount;
 	MeshFlags m_flags;
 	Vector<SurfacePtr> m_surfaces;
 
-	BindGroupPtr m_bindGroup;
 };
 
 } // namespace sgd

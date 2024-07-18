@@ -1,6 +1,6 @@
 #include "camera.h"
 
-#include "scene.h"
+#include "scenerenderer.h"
 
 namespace sgd {
 
@@ -27,6 +27,19 @@ Camera::Camera(const Camera* that)
 
 Entity* Camera::onCopy() const {
 	return new Camera(this);
+}
+
+void Camera::onShow() {
+	scene()->sceneRenderer()->renderTargetSizeChanged.connect(this, [=](CVec2u size) { //
+		viewportSize = size;
+	});
+	viewportSize = scene()->sceneRenderer()->renderTargetSize();
+	scene()->sceneRenderer()->add(this);
+}
+
+void Camera::onHide() {
+	scene()->sceneRenderer()->remove(this);
+	scene()->sceneRenderer()->renderTargetSizeChanged.disconnect(this);
 }
 
 Mat4f Camera::projectionMatrix() const {
@@ -63,7 +76,7 @@ Expected<Vec2f, bool> project(Camera* camera, CVec3r p) {
 	auto wCoords = clipCoords.xy() / clipCoords.w;
 
 	// NDC space -> window coords
-	return (wCoords * Vec2f(.5f, -.5f) + .5f) * Vec2f(camera->scene()->viewportSize());
+	return (wCoords * Vec2f(.5f, -.5f) + .5f) * Vec2f(camera->viewportSize());
 }
 
 } // namespace sgd

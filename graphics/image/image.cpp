@@ -17,13 +17,13 @@ BindGroupDescriptor bindGroupDesc( //
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform),
 	},
-	"",										//
+	{},										//
 	{},										//
 	wgpu::PrimitiveTopology::TriangleList); //
 
 } // namespace
 
-Image::Image(CMaterial* material)
+Image::Image(Material* material)
 	: m_material(material),																	//
 	  m_bindGroup(new BindGroup(&bindGroupDesc)),											//
 	  m_uniforms(new Buffer(BufferType::uniform, nullptr, sizeof(ImageGeometryUniforms))) { //

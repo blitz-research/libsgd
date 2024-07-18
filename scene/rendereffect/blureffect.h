@@ -14,11 +14,11 @@ struct BlurEffect : RenderEffect {
 	Property<uint32_t> radius{2};
 
 private:
-	TexturePtr m_renderTargets[2];
 	BindGroupPtr m_bindGroups[2];
+	TexturePtr m_renderTargets[2];
 	mutable wgpu::RenderPipeline m_pipeline;
 
-	void onValidate() override;
+	Texture* onValidate(Texture* sourceTexture) override;
 
 	void onRender(RenderContext* rc, BindGroup* sceneBindings) const override;
 };

@@ -74,7 +74,6 @@ void entry() {
 		dc->clear();
 		dc->addText("FPS:" + std::to_string(currentGC()->FPS()), {0, 0});
 		dc->addText("RPS:" + std::to_string(scene->sceneRenderer()->RPS()), {0, 16});
-		//		dc->addText("Pitch:" + std::to_string(pitch(headLight->worldBasis())), {0,32});
 
 		render();
 	}
@@ -82,7 +81,7 @@ void entry() {
 
 int main() {
 	setConfigVar("dawn.backendType", "Vulkan");
-//	setConfigVar("dawn.presentMode", "Fifo");
+	setConfigVar("dawn.presentMode", "Fifo");
 	setConfigVar("render.timeStampsEnabled", "1");
 	start(entry);
 }
