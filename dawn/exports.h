@@ -1,6 +1,6 @@
 #pragma once
 
-#include <app/exports.h>
+#include <core/exports.h>
 
 #include "copytexture.h"
 #include "device.h"

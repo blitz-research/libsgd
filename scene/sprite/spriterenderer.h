@@ -23,6 +23,7 @@ private:
 	struct Instance {
 		Sprite* sprite;
 		float distance{};
+		Instance() = default;
 		explicit Instance(Sprite* sprite) : sprite(sprite) {
 		}
 	};

@@ -7,15 +7,18 @@ Local light = CreateDirectionalLight()
 SetLightShadowMappingEnabled light,True
 SetEntityRotation light,-30,0,0
 
-SetCSMDepthBias .0005
-
 Local env =  LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
 SetEnvTexture env
 
+CreateFogEffect()
+
+;SetClearColor .8,.9,1,1
 Local skybox = CreateSkybox(env)
 
 ; Height of eiffel tower, fact fans!
 Local sz#=330
+
+SetCSMClipRange sz * 2
 
 Local groundMaterial = LoadPBRMaterial("sgd://misc/brownish-grass.jpg")
 Local groundMesh = CreateBoxMesh(-sz,0,-sz,sz,0,sz,groundMaterial)

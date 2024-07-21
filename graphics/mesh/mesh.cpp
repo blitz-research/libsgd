@@ -4,12 +4,12 @@ namespace sgd {
 
 namespace {
 
-BindGroupDescriptor geometryDescriptor( //
-	"meshGeometry",					   //
-	BindGroupType::geometry,		   //
+BindGroupDescriptor bindGroupDescriptor( //
+	"meshGeometry",						//
+	BindGroupType::geometry,			//
 	{
-		bufferBindGroupLayoutEntry(0,
-								   wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex, // geometry_uniforms: MeshUniforms
+		// geometry_uniforms: MeshUniforms
+		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
 								   wgpu::BufferBindingType::Uniform),
 	});
 
@@ -30,7 +30,7 @@ void Surface::resizeTriangles(uint32_t count) {
 // ***** Mesh *****
 
 Mesh::Mesh(uint32_t vertexCount, MeshFlags flags)											 //
-	: m_bindGroup(new BindGroup(&geometryDescriptor)),										 //
+	: m_bindGroup(new BindGroup(&bindGroupDescriptor)),										 //
 	  m_vertexBuffer(new Buffer(BufferType::vertex, nullptr, vertexCount * sizeof(Vertex))), //
 	  m_vertexCount(vertexCount),															 //
 	  m_flags(flags) {

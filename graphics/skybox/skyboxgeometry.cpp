@@ -35,7 +35,7 @@ SkyboxGeometry::SkyboxGeometry() {
 	// Clear material
 	m_material = new Material(&nullMaterialDescriptor);
 	m_material->blendMode = BlendMode::opaque;
-	m_material->depthFunc = DepthFunc::undefined;
+	m_material->depthFunc = DepthFunc::always;//undefined;
 	m_material->cullMode = CullMode::none;
 
 	SkyboxUniforms uniforms{};

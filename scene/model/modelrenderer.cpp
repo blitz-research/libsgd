@@ -18,30 +18,30 @@ void ModelRenderer::add(CModel* model) {
 	auto list = it->second.get();
 	list->models.emplace_back(model);
 	model->mesh.changed.connect(this, [=](CMesh*) {
+		model->mesh.changed.disconnect(this);
 		sgd::remove(list->models, model);
 		add(model);
 	});
 }
 
 void ModelRenderer::remove(CModel* model) {
-	auto mesh = model->mesh();
-	auto it = m_instanceLists.find(mesh);
+	auto it = m_instanceLists.find(model->mesh());
 	SGD_ASSERT(it != m_instanceLists.end());
-	sgd::remove(it->second->models, model);
+	auto list = it->second.get();
 	model->mesh.changed.disconnect(this);
+	sgd::remove(list->models, model);
 }
 
 void ModelRenderer::update(CVec3r eye) {
 	for (auto& kv : m_instanceLists) {
-		CMesh* mesh = kv.first;
-		if (!mesh) continue;
+		if (!kv.first) continue;
 		auto list = kv.second.get();
-		auto inst = list->meshRenderer->lockInstances(list->models.size());
+		auto instp = list->meshRenderer->lockInstances(list->models.size());
 		for (CModel* model : list->models) {
-			inst->worldMatrix = model->worldMatrix();
-			inst->worldMatrix.t.xyz() -= eye;
-			inst->color = model->color();
-			++inst;
+			instp->worldMatrix = model->worldMatrix();
+			instp->worldMatrix.t.xyz() -= eye;
+			instp->color = model->color();
+			++instp;
 		}
 		list->meshRenderer->unlockInstances();
 	}

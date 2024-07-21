@@ -22,7 +22,7 @@ BindGroupDescriptor bindGroupDesc( //
 
 ImageRenderer::ImageRenderer()
 	: m_bindGroup(new BindGroup(&bindGroupDesc)), //
-	  m_instanceCapacity(1024),					  //
+	  m_instanceCapacity(256),					  //
 	  m_instanceBuffer(new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(ImageInstance))) {
 
 	m_bindGroup->setBuffer(0, m_instanceBuffer);

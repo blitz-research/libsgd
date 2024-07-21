@@ -18,8 +18,6 @@ String renderPassName(RenderPassType rpassType) {
 		return "OPAQUE";
 	case RenderPassType::blend:
 		return "BLEND";
-	case RenderPassType::effect:
-		return "EFFECT";
 	default:
 		SGD_ABORT();
 	}
@@ -133,20 +131,18 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
 	if (rpassType == RenderPassType::shadow) {
 		SGD_ASSERT(blendMode == BlendMode::opaque || blendMode == BlendMode::alphaMask);
 	} else {
-		switch (rpassType) {
-		case RenderPassType::opaque:
-		case RenderPassType::effect:
-			SGD_ASSERT(blendMode == BlendMode::opaque || blendMode == BlendMode::alphaMask);
+		switch(blendMode) {
+		case BlendMode::undefined:
+			SGD_ABORT();
+		case BlendMode::opaque:
+		case BlendMode::alphaMask:
 			blendState.color.srcFactor = wgpu::BlendFactor::One;
 			blendState.color.dstFactor = wgpu::BlendFactor::Zero;
 			break;
-		case RenderPassType::blend:
-			SGD_ASSERT(blendMode == BlendMode::alphaMask || blendMode == BlendMode::alphaBlend);
+		case BlendMode::alphaBlend:
 			blendState.color.srcFactor = wgpu::BlendFactor::One;
 			blendState.color.dstFactor = wgpu::BlendFactor::OneMinusSrcAlpha;
 			break;
-		default:
-			SGD_ABORT();
 		}
 		colorTargetState.format = wgpu::TextureFormat::RGBA16Float;
 		colorTargetState.blend = &blendState;
@@ -156,23 +152,18 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
 
 	// Depth stencil state
 	wgpu::DepthStencilState depthStencilState;
-	if (rpassType == RenderPassType::effect) {
-		SGD_ASSERT(blendMode == BlendMode::opaque);
-	} else {
+	if(depthFunc != DepthFunc::undefined) {	// hack for no depth buffer
+		depthStencilState.format = wgpu::TextureFormat::Depth32Float;
+		depthStencilState.depthCompare = (wgpu::CompareFunction)depthFunc;
 		switch (rpassType) {
 		case RenderPassType::shadow:
-			depthStencilState.depthWriteEnabled = true;
-			break;
 		case RenderPassType::opaque:
-			depthStencilState.depthWriteEnabled = (depthFunc != DepthFunc::undefined);
+			depthStencilState.depthWriteEnabled = depthFunc != DepthFunc::always;	// hack for no depth write
 			break;
 		case RenderPassType::blend:
-		case RenderPassType::effect:
 			depthStencilState.depthWriteEnabled = false;
 			break;
 		}
-		depthStencilState.format = wgpu::TextureFormat::Depth32Float;
-		depthStencilState.depthCompare = (wgpu::CompareFunction)depthFunc;
 		pipelineDescriptor.depthStencil = &depthStencilState;
 	}
 

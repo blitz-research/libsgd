@@ -31,7 +31,7 @@ Next
 CreatePlayer(0)
 
 viewMode = 1 
-SetImageSpriteViewMode grassImage, viewMode
+SetImageViewMode grassImage, viewMode
 
 While Not PollEvents()
 	PlayerFly(.1)
@@ -40,7 +40,7 @@ While Not PollEvents()
 	If IsKeyHit(KEY_SPACE)
 		viewMode = viewMode + 1
 		If viewMode=4 viewMode=1
-		SetImageSpriteViewMode grassImage, viewMode
+		SetImageViewMode grassImage, viewMode
 	EndIf
 	Draw2DText "Sprite View mode:" + viewMode + " (space to toggle)", 0, 0
 	

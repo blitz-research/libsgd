@@ -4,14 +4,17 @@
 
 namespace sgd {
 
-SGD_SHARED(MonocolorEffect);
+SGD_SHARED(FogEffect);
 
-struct MonocolorEffect : RenderEffect {
-	SGD_OBJECT_TYPE(MonocolorEffect, RenderEffect);
+struct FogEffect : RenderEffect {
+	SGD_OBJECT_TYPE(FogEffect, RenderEffect);
 
-	MonocolorEffect();
+	FogEffect();
 
-	Property<Vec4f> color{Vec4f(1)};
+	Property<Vec4f> color{Vec4f(.8f, .9f, 1, 1)};
+	Property<float> near{0};
+	Property<float> far{1024.0f};
+	Property<float> power{2.0f};
 
 private:
 	BindGroupPtr m_bindGroup;

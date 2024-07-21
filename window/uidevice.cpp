@@ -21,6 +21,7 @@ void UIDevice::setButtonDown(uint32_t index, bool down) {
 
 	auto& b = m_buttons[index];
 	if (b.m_down == down) return;
+
 	b.m_down = down;
 	if (!down) return;
 

@@ -18,7 +18,7 @@ private:
 	TexturePtr m_renderTargets[2];
 	mutable wgpu::RenderPipeline m_pipeline;
 
-	Texture* onValidate(Texture* sourceTexture) override;
+	Texture* onValidate(Texture* sourceTexture, Texture* depthBuffer) override;
 
 	void onRender(RenderContext* rc, BindGroup* sceneBindings) const override;
 };

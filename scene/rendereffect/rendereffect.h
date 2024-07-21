@@ -24,7 +24,7 @@ protected:
 
 	Texture* getOrCreateRenderTarget(CVec2u size, TextureFormat format);
 
-	virtual Texture* onValidate(Texture* sourceTexture) = 0;
+	virtual Texture* onValidate(Texture* sourceTexture, Texture* depthBuffer) = 0;
 
 	virtual void onRender(RenderContext* rc, BindGroup* sceneBindings) const = 0;
 
@@ -59,9 +59,10 @@ private:
 	Vector<RenderEffectPtr> m_effects;
 	mutable Vector<RenderEffect*> m_enabledEffects;
 
-	mutable Vector<TexturePtr> m_renderTargets;
+	mutable Vector<TexturePtr> m_availRenderTargets;
+	mutable Vector<Texture*> m_newRenderTargets;
 
-	Texture* getOrCreateRenderTarget(CVec2u size, TextureFormat format, RenderEffect* effect);
+	Texture* getOrCreateRenderTarget(CVec2u size, TextureFormat format);
 
 	void onValidate() const override;
 };

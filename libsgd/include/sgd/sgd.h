@@ -1105,6 +1105,18 @@ SGD_API SGD_RenderEffect SGD_DECL sgd_CreateBlurEffect();
 // Set blur render effect radius, should be in the range 1 to 31 inclusive, defaults to 2.
 SGD_API void SGD_DECL sgd_SetBlurEffectRadius(SGD_RenderEffect effect, int radius);
 
+//! Create a new fog render effect and add it to the scene.
+SGD_API SGD_RenderEffect SGD_DECL sgd_CreateFogEffect();
+
+// Set fog render effect color. Defaults to .8, .9, 1, 1
+SGD_API void SGD_DECL sgd_SetFogEffectColor(SGD_RenderEffect effect, float red, float green, float blue, float alpha);
+
+// Set fog render effect range. Defaults to 0, 1024.
+SGD_API void SGD_DECL sgd_SetFogEffectRange(SGD_RenderEffect effect, float near, float far);
+
+// Set fog render effect power. Defaults to 2.
+SGD_API void SGD_DECL sgd_SetFogEffectPower(SGD_RenderEffect effect, float power);
+
 //! Create a new monocolor render effect and add it to the scene.
 SGD_API SGD_RenderEffect SGD_DECL sgd_CreateMonocolorEffect();
 

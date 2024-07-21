@@ -26,23 +26,9 @@ void entry() {
 	createPlayer(nullptr);
 	move(player, {0, 10, -100});
 
-#if 0
-	LightPtr headLight = new Light(LightType::spot);
-	scene->add(headLight);
-	move(headLight, {0,5,0});
-	turn(headLight, {-90,0,0});
-	headLight->shadowsEnabled = true;
-	headLight->setParent(player);
-	headLight->range = 120;
-	headLight->falloff = 0;
-	headLight->innerConeAngle = 15;
-	headLight->outerConeAngle = 30;
-#endif
-
 	light->setWorldPosition({0, 0, 0});
 	light->shadowsEnabled = true;
 	setRotation(light, {-30, 0, 0});
-	//	light->setIsVisible(false);
 
 	auto& config = scene->sceneRenderer()->sceneBindings()->lockConfigUniforms();
 	config.csmTextureSize = 4096;
@@ -51,6 +37,12 @@ void entry() {
 	scene->sceneRenderer()->sceneBindings()->unlockConfigUniforms();
 
 	scene->sceneRenderer()->ambientLightColor = Vec4f(0, 0, 0, 0);
+
+//	FogEffectPtr fog = new FogEffect();
+//	scene->sceneRenderer()->add(fog);
+
+	BloomEffectPtr bloom = new BloomEffect();
+	scene->sceneRenderer()->add(bloom);
 
 #if 0
 	camera->near = .125f;

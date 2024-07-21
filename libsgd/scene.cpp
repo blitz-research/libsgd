@@ -720,6 +720,31 @@ void SGD_DECL sgd_SetBlurEffectRadius(SGD_RenderEffect heffect, int radius) {
 	effect->as<sgd::BlurEffect>()->radius = radius;
 }
 
+SGD_RenderEffect SGD_DECL sgd_CreateFogEffect() {
+	auto effect = new sgd::FogEffect();
+	sgdx::mainScene()->sceneRenderer()->add(effect);
+	return sgdx::createHandle(effect);
+}
+
+void SGD_DECL sgd_SetFogEffectColor(SGD_RenderEffect heffect, float red, float green, float blue, float alpha) {
+	auto effect = sgdx::resolveHandle<sgd::MonocolorEffect>(heffect);
+	if (!effect->is<sgd::FogEffect>()) sgdx::error("Effect is not a fog effect");
+	effect->as<sgd::FogEffect>()->color = {red, green, blue, alpha};
+}
+
+void SGD_DECL sgd_SetFogEffectRange(SGD_RenderEffect heffect, float near, float far) {
+	auto effect = sgdx::resolveHandle<sgd::MonocolorEffect>(heffect);
+	if (!effect->is<sgd::FogEffect>()) sgdx::error("Effect is not a fog effect");
+	effect->as<sgd::FogEffect>()->near = near;
+	effect->as<sgd::FogEffect>()->far = far;
+}
+
+void SGD_DECL sgd_SetFogEffectPower(SGD_RenderEffect heffect, float power) {
+	auto effect = sgdx::resolveHandle<sgd::MonocolorEffect>(heffect);
+	if (!effect->is<sgd::FogEffect>()) sgdx::error("Effect is not a fog effect");
+	effect->as<sgd::FogEffect>()->power = power;
+}
+
 SGD_RenderEffect SGD_DECL sgd_CreateMonocolorEffect() {
 	auto effect = new sgd::MonocolorEffect();
 	sgdx::mainScene()->sceneRenderer()->add(effect);

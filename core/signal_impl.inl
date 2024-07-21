@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "object.h"
-#include "signal.h"
+#include "signal.h"	// NOLINT (header name)
 
 #include <new>
 

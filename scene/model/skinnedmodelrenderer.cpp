@@ -18,6 +18,7 @@ void SkinnedModelRenderer::add(CModel* model) {
 	auto list = it->second.get();
 	list->models.emplace_back(model);
 	model->mesh.changed.connect(this, [=](CMesh*) {
+		model->mesh.changed.disconnect(this);
 		sgd::remove(list->models, model);
 		add(model);
 	});
@@ -27,8 +28,9 @@ void SkinnedModelRenderer::remove(CModel* model) {
 	auto mesh = model->mesh();
 	auto it = m_instanceLists.find(mesh);
 	SGD_ASSERT(it != m_instanceLists.end());
-	sgd::remove(it->second->models, model);
+	auto list = it->second.get();
 	model->mesh.changed.disconnect(this);
+	sgd::remove(list->models, model);
 }
 
 void SkinnedModelRenderer::update(CVec3r eye) {
@@ -36,23 +38,18 @@ void SkinnedModelRenderer::update(CVec3r eye) {
 		CMesh* mesh = kv.first;
 		if (!mesh) continue;
 		auto list = kv.second.get();
-		auto inst = list->meshRenderer->lockInstances(list->models.size());
+		auto instp = list->meshRenderer->lockInstances(list->models.size());
 		for (CModel* model : list->models) {
-			auto& worldMatrix = model->worldMatrix();
-			inst->matrix.i = {worldMatrix.r.i, 0};
-			inst->matrix.j = {worldMatrix.r.j, 0};
-			inst->matrix.k = {worldMatrix.r.k, 0};
-			inst->matrix.t = {worldMatrix.t - eye, 1};
-			inst->color = model->color();
-			auto mp = inst->jointMatrices;
+			instp->worldMatrix = model->worldMatrix();
+			instp->worldMatrix.t.xyz() -= eye;
+			instp->color = model->color();
+			auto mp = instp->jointMatrices;
 			for (auto& matrix : model->jointMatrices()) {
-				mp->i = {matrix.r.i, 0};
-				mp->j = {matrix.r.j, 0};
-				mp->k = {matrix.r.k, 0};
-				mp->t = {matrix.t - eye, 1};
+				(*mp) = matrix;
+				(*mp).t.xyz() -= eye;
 				++mp;
 			}
-			++inst;
+			++instp;
 		}
 		list->meshRenderer->unlockInstances();
 	}

@@ -47,6 +47,9 @@ add_library(scene
 	rendereffect/blureffect.cpp
 	rendereffect/blureffect.h
 	rendereffect/blureffect.wgsl
+	rendereffect/fogeffect.cpp
+	rendereffect/fogeffect.h
+	rendereffect/fogeffect.wgsl
 	rendereffect/rendereffect.cpp
 	rendereffect/rendereffect.h
 	rendereffect/monocoloreffect.cpp

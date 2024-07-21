@@ -23,7 +23,7 @@ void Buffer::resize(uint32_t size) {
 	if (size == m_size) return;
 
 	if (size > m_capacity) {
-		m_capacity = std::max(std::max(m_capacity * 3 / 2, size), 10u);
+		m_capacity = std::max(std::max(m_capacity * 3 / 2, size), 16u);
 		auto data = (uint8_t*)std::malloc(m_capacity);
 		std::memcpy(data, m_data, m_size);
 		std::swap(m_data, data);
@@ -49,8 +49,6 @@ void Buffer::onValidate() const {
 			{BufferType::storage, wgpu::BufferUsage::Storage}, //
 			{BufferType::vertex, wgpu::BufferUsage::Vertex},   //
 			{BufferType::index, wgpu::BufferUsage::Index},	   //
-			{BufferType::instance, wgpu::BufferUsage::Vertex}, //
-			{BufferType::indirect, wgpu::BufferUsage::Indirect},
 		};
 		wgpu::BufferDescriptor desc{};
 		desc.usage = usages.find(m_type)->second | wgpu::BufferUsage::CopyDst;

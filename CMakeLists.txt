@@ -191,7 +191,7 @@ add_subdirectory(external EXCLUDE_FROM_ALL)
 add_subdirectory(core)      # [libcurl json11]
 add_subdirectory(geom)      # core
 add_subdirectory(app)       # geom [glfw]
-add_subdirectory(dawn)      # app [lib-dawn]
+add_subdirectory(dawn)      # geom [glfw lib-dawn]
 add_subdirectory(window)    # app
 add_subdirectory(audio)     # app [soloud]
 add_subdirectory(graphics)	# window dawn [stb]

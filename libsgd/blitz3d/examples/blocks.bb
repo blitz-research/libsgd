@@ -18,6 +18,8 @@ End Type
 Global bulletImage
 Global slimeball
 
+SetConfigVar "dawn.backendType", "D3D12"
+
 CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "スノー Blocks", 4)
 
 LoadScene()

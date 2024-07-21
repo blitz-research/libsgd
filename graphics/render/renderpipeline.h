@@ -7,8 +7,8 @@ namespace sgd {
 SGD_SHARED(Material);
 SGD_SHARED(BindGroup);
 
-enum struct RenderPassType {shadow, opaque, blend, effect};
-constexpr int numRenderPassTypes = 4;
+enum struct RenderPassType {shadow, opaque, blend};
+constexpr int numRenderPassTypes = 3;
 
 enum struct BlendMode { undefined, opaque, alphaMask, alphaBlend };
 

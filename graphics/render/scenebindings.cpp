@@ -193,7 +193,7 @@ void SceneBindings::addCSMPasses() const {
 
 	Vector<Mat4f> csmMatrices;
 
-	for (int i = 0, n = 0; i < lighting.numCSMLights; ++i) {
+	for (int i = 0, n = 0; i < std::min(lighting.numCSMLights, config.maxCSMLights); ++i) {
 
 		auto& light = lighting.directionalLights[i];
 
@@ -268,7 +268,7 @@ void SceneBindings::addPSMPasses() const {
 
 	auto pass = m_psmShadowPasses.begin();
 
-	for (int i = 0, n = 0; i < lighting.numPSMLights; ++i) {
+	for (int i = 0, n = 0; i < std::min(lighting.numPSMLights, config.maxPSMLights); ++i) {
 
 		auto& light = lighting.pointLights[i];
 
@@ -348,7 +348,7 @@ void SceneBindings::addSSMPasses() const {
 
 	Vector<Mat4f> ssmMatrices;
 
-	for (int i = 0, n = 0; i < lighting.numSSMLights; ++i) {
+	for (int i = 0, n = 0; i < std::min(lighting.numSSMLights, config.maxSSMLights); ++i) {
 
 		auto& light = lighting.spotLights[i];
 

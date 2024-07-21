@@ -24,22 +24,22 @@ static_assert(sizeof(Vertex) == 88);
 wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(Vertex), wgpu::VertexStepMode::Vertex, std::size(vertexAttribs),
 												  vertexAttribs};
 
-BindGroupDescriptor rendererDescriptor( //
+BindGroupDescriptor bindGroupDescriptor( //
 	"skinnedMeshRenderer",				 //
 	BindGroupType::renderer,
 	{
-		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex, // renderer_instances: SkinnedMeshInstance[]
-								   wgpu::BufferBindingType::ReadOnlyStorage),
+		// renderer_instances: SkinnedMeshInstance[]
+		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::ReadOnlyStorage),
 	},
-	shaderSource,		  //
-	{vertexBufferLayout}, //
-	wgpu::PrimitiveTopology::TriangleList);
+	shaderSource,							//
+	{vertexBufferLayout},					//
+	wgpu::PrimitiveTopology::TriangleList); //
 
 } // namespace
 
 SkinnedMeshRenderer::SkinnedMeshRenderer(CMesh* mesh)
 	: m_mesh(mesh),										//
-	  m_bindGroup(new BindGroup(&rendererDescriptor)), //
+	  m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
 	  m_instanceCapacity(8),							//
 	  m_instanceBuffer(new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(SkinnedMeshInstance))) {
 

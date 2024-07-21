@@ -22,51 +22,48 @@ struct Varying {
     return out;
 }
 
-@fragment fn fragmentMain(in: Varying) -> @location(0) vec4<f32> {
+@fragment fn fragmentMain(in: Varying) -> @location(0) vec4f {
 
-    let color = textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords, 0);
+#if BLOOM_PASS_0
 
-#if BLOOM_PASS0
+	let color = textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords, 0);
+	return vec4f(max(color.rgb - vec3(1.0), vec3(0.0)), color.a);
 
-	fragColor = texture(sourceTexture, texCoords);
-	fragColor.rgb = max(fragColor.rgb - vec3(1.0), vec3(0.0));
+#elif BLOOM_PASS_1
 
-#elif BLOOM_PASS1
+	return textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords, 0);
 
-	fragColor = texture(sourceTexture, texCoords);
+#elif BLOOM_PASS_2 || BLOOM_PASS_3
 
-#elif BLOOM_PASS2 || BLOOM_PASS3
+	const kernelSize = 2u;
+	const offsets = array<f32, kernelSize>(0.53805, 2.06278);
+	const weights = array<f32, kernelSize>(0.44908, 0.05092);
 
-	const int size = 2;
-	const float[size] offsets = float[size](0.53805, 2.06278);
-	const float[size] weights = float[size](0.44908, 0.05092);
+//	const kernelSize = 9u;
+// 	const offsets = array<f32, kernelSize>(0.66293, 2.47904, 4.46232, 6.44568, 8.42917, 10.41281, 12.39664, 14.38070, 16.36501);
+// 	const weights = array<f32, kernelSize>(0.10855, 0.13135, 0.10406, 0.07216, 0.04380,  0.02328,  0.01083,  0.00441,  0.00157);
 
-//	const int size = 9;
-//	const float[size] offsets = float[size](0.66293, 2.47904, 4.46232, 6.44568, 8.42917, 10.41281, 12.39664, 14.38070, 16.36501);
-//	const float[size] weights = float[size](0.10855, 0.13135, 0.10406, 0.07216, 0.04380, 0.02328, 0.01083, 0.00441, 0.00157);
-
-#if BLOOM_PASS2
-	vec2 halfTexelSize = vec2(1.0 / float(textureSize(sourceTexture, 0).x), 0.0);
+#if BLOOM_PASS_2
+	let halfTexelSize = vec2f(1.0 / f32(textureDimensions(effect_sourceTexture).x), 0.0);
 #else
-	vec2 halfTexelSize = vec2(0.0, 1.0 / float(textureSize(sourceTexture, 0).y));
+	let halfTexelSize = vec2f(0.0, 1.0 / f32(textureDimensions(effect_sourceTexture).y));
 #endif
 
+	var color = vec3f(0.0);
 
-	vec3 color = vec3(0.0);
+	for(var i=0u; i < kernelSize; i+=1) {
 
-	for(int i=0; i < size; ++i) {
+		let offset = halfTexelSize * offsets[i];
 
-		vec2 offset = halfTexelSize * offsets[i];
-
-		color += texture(sourceTexture, texCoords + offset).rgb * weights[i];
-		color += texture(sourceTexture, texCoords - offset).rgb * weights[i];
+		color += textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords + offset, 0).rgb * weights[i];
+		color += textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords - offset, 0).rgb * weights[i];
 	}
 
-	fragColor=vec4(color, 1.0);
+	return vec4f(color, 0.0);   // 0.0 alpha for additive blending
 
-#elif BLOOM_PASS4
+#elif BLOOM_PASS_4
 
-	fragColor = texture(sourceTexture, texCoords);
+	return textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords, 0.0);
 
 #endif
 }

@@ -116,7 +116,8 @@ void SGD_DECL sgd_ImGui_ImplSGD_NewFrame() {
 
 SGD_API void SGD_DECL sgd_ImGui_ImplSGD_RenderDrawData(void* imguiDrawData) {
 
-	if (!sgdx::mainGC()->canRender()) return;
+	auto size = sgdx::mainScene()->sceneRenderer()->renderTargetSize();
+	if(!size.x || !size.y) return;
 
 	auto device = sgdx::mainGC()->wgpuDevice().Get();
 	auto renderTarget = sgdx::mainScene()->sceneRenderer()->outputTexture()->wgpuTexture().Get();

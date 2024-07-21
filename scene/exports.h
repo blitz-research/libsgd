@@ -22,6 +22,7 @@
 
 #include "rendereffect/bloomeffect.h"
 #include "rendereffect/blureffect.h"
+#include "rendereffect/fogeffect.h"
 #include "rendereffect/monocoloreffect.h"
 #include "rendereffect/rendereffect.h"
 

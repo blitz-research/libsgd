@@ -16,9 +16,6 @@ Local light0 = CreatePointLight()
 SetEntityPosition light0,0,5,-2.5
 SetLightRange light0, 10
 SetLightShadowMappingEnabled light0,True
-;Local light = CreatePointLight()
-;SetEntityParent light, player
-;'SetLightRange light, 50
 
 Local groundMaterial = CreatePBRMaterial()
 SetMaterialVector4f groundMaterial, "albedoColor4f",.6,.5,.5,1

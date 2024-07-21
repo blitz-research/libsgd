@@ -1,77 +1,44 @@
 #include "config.h"
-#include "log.h"
 
-#include "json11.hpp"
+#include <mutex>
 
 namespace sgd {
 
+//template struct Signal<CString>;
+
 namespace {
 
-Config* g_appConfig = new Config("{}");
+Map<String, String> g_configVars;
 
-Any toAny(const json11::Json& jv) {
-	if (jv.is_null()) return {};
-	if (jv.is_bool()) return jv.bool_value();
-	if (jv.is_string()) return jv.string_value();
-	if (jv.is_number()) return jv.number_value();
-	if (jv.is_array()) {
-		auto& js = jv.array_items();
-		Vector<Any> vs(js.size());
-		for (int i = 0; i < js.size(); ++i) {
-			vs[i] = toAny(js[i]);
-		}
-		return vs;
-	}
-	if (jv.is_object()) {
-		auto& js = jv.object_items();
-		Map<String, Any> vs;
-		for (auto kv : js) {
-			vs[kv.first] = toAny(kv.second);
-		}
-		return vs;
-	}
-	SGD_ABORT();
-}
+Map<String, Signal<CString>>* g_configVarChanged;
+
+std::mutex g_configMutex;
 
 } // namespace
 
-Config::Config(CString jsonSrc) {
+Map<String, Signal<CString>>& configVarChanged() {
 
-	String err;
-	auto json = json11::Json::parse(jsonSrc, err, json11::JsonParse::COMMENTS);
-	if (!json.is_object()) {
-		log() << "Error parsing json:" << err;
-		SGD_ABORT();
-		return;
-	}
-	g_config = toAny(json.object_items());
+	if (!g_configVarChanged) g_configVarChanged = new Map<String, Signal<CString>>();
+
+	return *g_configVarChanged;
 }
 
-Any Config::get(CString name, CAny defaultValue) const {
+void setConfigVar(CString name, CString value) {
 
-	auto obj = as<AnyMap>(&g_config);
+	std::lock_guard<std::mutex> lock(g_configMutex);
 
-	for (size_t i = 0; i < name.size();) {
-		auto e = name.find('.', i);
-		auto f = name.substr(i, e != String::npos ? e - i : e);
-		auto it = obj->find(f);
-		if (it == obj->end()) {
-			// Can't find field
-			return defaultValue;
-		}
-		if (e == String::npos) return it->second;
-		obj = as<AnyMap>(&it->second);
-		i = e + 1;
-	}
-	return defaultValue;
+	auto* p = &g_configVars[name];
+	if (value == *p) return;
+
+	*p = value;
+	configVarChanged()[name].emit(value);
 }
 
-void setAppConfig(Config* config) {
-	g_appConfig = config;
-}
+String getConfigVar(CString name) {
 
-Config* appConfig() {
-	return g_appConfig;
+	std::lock_guard<std::mutex> lock(g_configMutex);
+
+	return g_configVars[name];
 }
 
 } // namespace sgd

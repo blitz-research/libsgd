@@ -55,9 +55,9 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 #if SGD_OS_WINDOWS
 				OSVERSIONINFO info{sizeof(OSVERSIONINFO)};
 				GetVersionEx((OSVERSIONINFO*)&info);
-				if (info.dwMajorVersion == 6 && info.dwMinorVersion >= 2) { // 6.2 is windows 8
+				if (info.dwMajorVersion == 6 && info.dwMinorVersion >= 2) { // 6.2 is >= windows 8
 					backendType = (sizeof(void*) == 8) ? wgpu::BackendType::D3D12 : wgpu::BackendType::D3D11; // NOLINT
-				} else {
+				} else {	// <= windows 7
 					backendType = wgpu::BackendType::Vulkan;
 				}
 #elif SGD_OS_LINUX

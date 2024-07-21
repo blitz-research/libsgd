@@ -24,8 +24,8 @@ static_assert(sizeof(Vertex) == 88);
 wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(Vertex), wgpu::VertexStepMode::Vertex, std::size(vertexAttribs),
 												  vertexAttribs};
 BindGroupDescriptor bindGroupDescriptor( //
-	"meshRenderer",						 //
-	BindGroupType::renderer,			 //
+	"meshRenderer",						//
+	BindGroupType::renderer,			//
 	{
 		// renderer_instances: MeshInstance[]
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::ReadOnlyStorage),
@@ -36,10 +36,10 @@ BindGroupDescriptor bindGroupDescriptor( //
 
 } // namespace
 
-MeshRenderer::MeshRenderer(CMesh* mesh)					//
-	: m_mesh(mesh),										//
+MeshRenderer::MeshRenderer(CMesh* mesh)				   //
+	: m_mesh(mesh),									   //
 	  m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
-	  m_instanceCapacity(8),							//
+	  m_instanceCapacity(8),						   //
 	  m_instanceBuffer(new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(MeshInstance))) {
 
 	m_bindGroup->setBuffer(0, m_instanceBuffer);

@@ -6,7 +6,7 @@ namespace sgd {
 
 struct alignas(16) SkinnedMeshInstance {
 	static constexpr int maxJoints = 256;
-	Mat4f matrix;
+	Mat4f worldMatrix;
 	Vec4f color;
 	Mat4f jointMatrices[maxJoints];
 };

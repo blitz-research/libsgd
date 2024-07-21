@@ -4,7 +4,7 @@
 
 #define SKYBOX 1
 #define MESH 1
-#define DRAWLIST 1
+//#define DRAWLIST 1
 // #define IMAGE 1
 
 using namespace sgd;

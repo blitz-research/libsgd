@@ -140,6 +140,7 @@ SGD_HANDLE_TYPE_INFO(EllipsoidCollider, HandleType::collider);
 SGD_HANDLE_TYPE_INFO(MeshCollider, HandleType::collider);
 SGD_HANDLE_TYPE_INFO(RenderEffect, HandleType::renderEffect);
 SGD_HANDLE_TYPE_INFO(BlurEffect, HandleType::renderEffect);
+SGD_HANDLE_TYPE_INFO(FogEffect, HandleType::renderEffect);
 SGD_HANDLE_TYPE_INFO(MonocolorEffect, HandleType::renderEffect);
 
 } // namespace sgdx

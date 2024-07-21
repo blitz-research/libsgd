@@ -1,24 +1,29 @@
-#include "monocoloreffect.h"
+#include "fogeffect.h"
 
 namespace sgd {
 
 namespace {
 
-struct alignas(16) MonocolorEffectUniforms {
+struct alignas(16) FogEffectUniforms {
 	Vec4f color;
+	float near{};
+	float range{};
+	float power{};
 };
 
 auto shaderSource{
-#include "monocoloreffect.wgsl"
+#include "fogeffect.wgsl"
 };
 
 BindGroupDescriptor bindGroupDesc( //
-	"monocolorEffect",			   //
+	"fogEffect",				   //
 	BindGroupType::geometry,	   //
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform),
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::e2D),
 		samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment),
+		textureBindGroupLayoutEntry(3, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::e2D,wgpu::TextureSampleType::Depth),
+		samplerBindGroupLayoutEntry(4, wgpu::ShaderStage::Fragment),
 	},
 	shaderSource, //
 	{},			  //
@@ -26,23 +31,24 @@ BindGroupDescriptor bindGroupDesc( //
 
 } // namespace
 
-MonocolorEffect::MonocolorEffect() : m_bindGroup(new BindGroup(&bindGroupDesc)) {
-	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(MonocolorEffectUniforms)));
+FogEffect::FogEffect() : m_bindGroup(new BindGroup(&bindGroupDesc)) {
+
+	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(FogEffectUniforms)));
 }
 
-Texture* MonocolorEffect::onValidate(Texture* sourceTexture, Texture* depthBuffer) {
+Texture* FogEffect::onValidate(Texture* sourceTexture, Texture* depthBuffer) {
 
 	m_renderTarget = getOrCreateRenderTarget(sourceTexture->size(), sourceTexture->format());
 
-	MonocolorEffectUniforms uniforms{color()};
+	FogEffectUniforms uniforms{color(), near(), far() - near(), power()};
 	((Buffer*)m_bindGroup->getBuffer(0))->update(&uniforms, 0, sizeof(uniforms));
-
 	m_bindGroup->setTexture(1, sourceTexture);
+	m_bindGroup->setTexture(3, depthBuffer);
 
 	return m_renderTarget;
 }
 
-void MonocolorEffect::onRender(RenderContext* rc, BindGroup* sceneBindings) const {
+void FogEffect::onRender(RenderContext* rc, BindGroup* sceneBindings) const {
 
 	if (!m_pipeline) {
 		m_pipeline = getOrCreateRenderPipeline(		  //

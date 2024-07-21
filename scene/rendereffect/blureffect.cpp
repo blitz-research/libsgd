@@ -52,7 +52,7 @@ BlurEffect::BlurEffect() {
 	radius.changed.connect(nullptr, [=](uint32_t) { invalidate(); });
 }
 
-Texture* BlurEffect::onValidate(Texture* sourceTexture) {
+Texture* BlurEffect::onValidate(Texture* sourceTexture, Texture* depthBuffer) {
 
 	m_renderTargets[0] = getOrCreateRenderTarget(sourceTexture->size(), sourceTexture->format());
 	m_renderTargets[1] = sourceTexture;
@@ -88,7 +88,7 @@ void BlurEffect::onRender(RenderContext* rc, BindGroup* sceneBindings) const {
 
 	if (!m_pipeline) {
 		m_pipeline = getOrCreateRenderPipeline(		  //
-			RenderPassType::effect,					  //
+			RenderPassType::opaque,					  //
 			BlendMode::opaque,						  //
 			DepthFunc::undefined,					  //
 			CullMode::none,							  //
@@ -99,7 +99,7 @@ void BlurEffect::onRender(RenderContext* rc, BindGroup* sceneBindings) const {
 
 	for (int i = 0; i < 2; ++i) {
 
-		auto pass = rc->beginRenderPass(RenderPassType::effect, m_renderTargets[i], nullptr, {}, 1, sceneBindings);
+		auto pass = rc->beginRenderPass(RenderPassType::opaque, m_renderTargets[i], nullptr, {}, 1, sceneBindings);
 
 		pass.SetBindGroup(1, emptyBindGroup(BindGroupType::material)->wgpuBindGroup());
 		pass.SetBindGroup(2, m_bindGroups[i]->wgpuBindGroup());

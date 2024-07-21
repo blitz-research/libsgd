@@ -8,12 +8,10 @@ namespace sgd {
 
 //! BufferType enum
 enum struct BufferType {
-	vertex,
-	index,
-	instance,
 	uniform,
 	storage,
-	indirect,
+	vertex,
+	index,
 };
 
 SGD_SHARED(Buffer);

@@ -96,7 +96,7 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 				});
 				int w, h;
 				glfwGetWindowSize(m_glfwWindow, &w, &h);
-//				g_suspended = !w || !h;
+				if(!w || !h) suspendApp();
 				m_size = Vec2u(w, h);
 			}
 			{

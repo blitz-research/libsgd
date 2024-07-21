@@ -9,7 +9,7 @@ RenderEffect::RenderEffect() {
 }
 
 Texture* RenderEffect::getOrCreateRenderTarget(CVec2u size, TextureFormat format) {
-	return m_stack->getOrCreateRenderTarget(size, format, this);
+	return m_stack->getOrCreateRenderTarget(size, format);
 }
 
 void RenderEffect::invalidate() {
@@ -31,29 +31,34 @@ void RenderEffectStack::add(RenderEffect* effect) {
 	invalidate();
 }
 
-Texture* RenderEffectStack::getOrCreateRenderTarget(CVec2u size, TextureFormat format, RenderEffect* effect) {
-	for (Texture* target : m_renderTargets) {
-		if (target == m_outputTexture) continue;
-		if (size == target->size() && format == target->format()) return target;
+Texture* RenderEffectStack::getOrCreateRenderTarget(CVec2u size, TextureFormat format) {
+	for (Texture* target : m_availRenderTargets) {
+//		if (target == m_outputTexture) continue;
+//		if (size == target->size() && format == target->format()) return target;
 	}
 	auto target = new Texture(size, 1, format, TextureFlags::renderTarget | TextureFlags::filter | TextureFlags::clamp);
-	m_renderTargets.emplace_back(target);
+	m_newRenderTargets.emplace_back(target);
 	return target;
 }
 
 void RenderEffectStack::onValidate() const {
 
-	auto prevTargets = m_renderTargets;
+	// Don't free from vidmem yet
+	auto oldTargets = m_availRenderTargets;
 
-	m_renderTargets.clear();
-	m_renderTargets.push_back(m_renderTarget);
-
+	m_availRenderTargets.clear();
 	m_enabledEffects.clear();
+
 	m_outputTexture = m_renderTarget;
+
 	for (RenderEffect* effect : m_effects) {
 		if (!effect->enabled()) continue;
-		m_outputTexture = effect->onValidate(m_outputTexture);
+
+		m_outputTexture = effect->onValidate(m_outputTexture, m_depthBuffer);
 		m_enabledEffects.push_back(effect);
+
+		m_availRenderTargets.insert(m_availRenderTargets.end(), m_newRenderTargets.begin(), m_newRenderTargets.end());
+		m_newRenderTargets.clear();
 	}
 }
 

@@ -24,7 +24,7 @@ void SpriteRenderer::remove(Sprite* sprite) {
 
 void SpriteRenderer::update(CVec3r eye) {
 
-	if(m_instances.empty()) return;
+	if (m_instances.empty()) return;
 
 	for (auto& inst : m_instances) {
 		inst.distance = (float)length(inst.sprite->worldPosition() - eye);
@@ -54,16 +54,18 @@ void SpriteRenderer::render(RenderQueue* rq) const {
 	CImage* image = m_instances.front().sprite->image();
 	uint32_t first = 0;
 	uint32_t count = 0;
+
 	for (auto& inst : m_instances) {
 		if (inst.sprite->image() != image) {
 			m_imageRenderer->render(rq, image, first, count);
-			image = inst.sprite->image();
 			first += count;
-			count = 6;
+			image = inst.sprite->image();
+			count = 1;
 		} else {
-			count += 6;
+			++count;
 		}
 	}
+
 	if (count) m_imageRenderer->render(rq, image, first, count);
 }
 

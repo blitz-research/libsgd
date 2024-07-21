@@ -6,6 +6,9 @@ CreateWindow(1280, 720, "Cesium Man", 0)
 
 LoadScene()
 
+Local monocolor = CreateMonocolorEffect()
+SetMonocolorEffectColor monocolor, 1,1,.75,1
+
 atime#=0
 While Not PollEvents()
 	If IsKeyDown(263)

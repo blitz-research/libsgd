@@ -50,7 +50,6 @@ wgpu::RenderPassEncoder RenderContext::beginRenderPass(RenderPassType type, Text
 	switch (m_renderPassType) {
 	case RenderPassType::shadow:
 	case RenderPassType::opaque:
-	case RenderPassType::effect:
 		break;
 	case RenderPassType::blend:
 		colorAttachment.loadOp = wgpu::LoadOp::Load;

@@ -1,6 +1,16 @@
 
 ***** V0.10 *****
 
+Added CreateFogEffect, SetFogEffectColor, SetFogEffectRange, SetFogEffectPower - see tower.bb for some simple FOG. Note fog will not
+affect the skybox. If you want a solid fadeout, set fog color and clear color to the same values and dont use a skybox. 'Fade to skybox'
+is not possible yet.
+
+Added SetRenderEffectEnabled, IsRenderEffectEnabled.
+
+Added CreateBlurEffect, SetBlurEffectRadius.
+
+Added CreateMonoColorEffect, SetMonoColorEffectColor - see cesiumman.bb for cheesy sepia tone effect using this effect.
+
 Renamed SetImageSpriteViewMode to SetImageViewMode.
 
 Renamed SetImageSpriteRect to SetImageRect.
@@ -10,6 +20,8 @@ Renamed SetImageDraw2DHandle to SetImage2DHandle.
 Removed SetWebGPUBackendType, use SetConfigVar("dawn.backendType", "D3D12") instead.
 
 Added SetConfigVar(SGD_String name, SGD_String value).
+
+Major source code tidy up.
 
 
 ***** V0.09 *****
