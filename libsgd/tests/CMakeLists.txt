@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Convert these to scene tests!
+
 ##### libsgd_tests #####
 
 project(libsgd_tests)
@@ -9,12 +11,9 @@ function(add name)
 	target_link_libraries(${name} libsgd)
 endfunction()
 
-add(libsgd_tests_skinnedmesh)
 add(libsgd_tests_directionallight)
 add(libsgd_tests_pointlight)
 add(libsgd_tests_spotlight)
-add(libsgd_tests_sprites)
-add(libsgd_tests_primitives)
 add(libsgd_tests_createmesh)
 
 add_executable(libsgd_tests_imgui libsgd_tests_imgui.cpp)

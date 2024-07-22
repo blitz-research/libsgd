@@ -12,10 +12,17 @@ namespace sgd {
 
 namespace {
 
+bool g_vsyncEnabled = true;
+
+auto init0 = configVarChanged()["render.vsyncEnabled"].connect(nullptr, [](CString value) { //
+	g_vsyncEnabled = truthy(value);
+});
+
 bool g_timeStampsEnabled = true;
 
-auto init =
-	configVarChanged()["render.timeStampsEnabled"].connect(nullptr, [](CString value) { g_timeStampsEnabled = truthy(value); });
+auto init = configVarChanged()["render.timeStampsEnabled"].connect(nullptr, [](CString value) { //
+	g_timeStampsEnabled = truthy(value);
+});
 
 } // namespace
 
@@ -306,16 +313,19 @@ void SceneRenderer::renderAsync() {
 		m_wgpuCommandEncoder.CopyBufferToBuffer(m_timeStampBuffer, 0, m_timeStampResults, 0, timeStampCount * 8);
 	}
 
-	auto ms = millis();
-	while (m_wgpuWorkDone.id) {
-		currentGC()->wgpuDevice().GetAdapter().GetInstance().WaitAny(m_wgpuWorkDone, 5000000000);
-		m_wgpuWorkDone.id = 0;
-	};
-	ms = millis() - ms;
-	//	SGD_LOG << "Wait for work done ms:"<<ms;
+	if (g_vsyncEnabled) {
 
-	m_wgpuWorkDone = currentGC()->wgpuDevice().GetQueue().OnSubmittedWorkDone( //
-		wgpu::CallbackMode::WaitAnyOnly, [this](wgpu::QueueWorkDoneStatus status) {});
+		auto ms = millis();
+		while (m_wgpuWorkDone.id) {
+			currentGC()->wgpuDevice().GetAdapter().GetInstance().WaitAny(m_wgpuWorkDone, 5000000000);
+			m_wgpuWorkDone.id = 0;
+		};
+		ms = millis() - ms;
+		//	SGD_LOG << "Wait for work done ms:"<<ms;
+
+		m_wgpuWorkDone = currentGC()->wgpuDevice().GetQueue().OnSubmittedWorkDone( //
+			wgpu::CallbackMode::WaitAnyOnly, [this](wgpu::QueueWorkDoneStatus status) {});
+	}
 
 	m_renderContext->endRender();
 

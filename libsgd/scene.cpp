@@ -4,6 +4,7 @@ namespace {
 
 sgd::Vec3r g_tformed;
 sgd::Vec2f g_projected;
+sgd::Vec3r g_unprojected;
 sgd::Contact g_picked;
 
 sgd::ConfigUniforms& lockConfigUniforms() {
@@ -141,6 +142,11 @@ void SGD_DECL sgd_DestroyEntity(SGD_Entity hentity) {
 	destroyHandles(entity);
 
 	sgdx::mainScene()->remove(entity);
+}
+
+void SGD_DECL sgd_ResetEntity(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	entity->reset();
 }
 
 SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
@@ -377,6 +383,24 @@ float SGD_DECL sgd_GetProjectedX() {
 
 float SGD_DECL sgd_GetProjectedY() {
 	return g_projected.y;
+}
+
+SGD_Bool SGD_DECL sgd_CameraUnproject(SGD_Camera hcamera, float windowX, float windowY, float viewZ) {
+	auto camera = sgdx::resolveHandle<sgdx::Camera>(hcamera);
+	g_unprojected = unproject(camera, {windowX, windowY}, viewZ);
+	return true;
+}
+
+SGD_Real SGD_DECL sgd_GetUnprojectedX() {
+	return g_unprojected.x;
+}
+
+SGD_Real SGD_DECL sgd_GetUnprojectedY() {
+	return g_unprojected.y;
+}
+
+SGD_Real SGD_DECL sgd_GetUnprojectedZ() {
+	return g_unprojected.z;
 }
 
 // ***** Light *****
@@ -706,6 +730,12 @@ SGD_Real SGD_DECL sgd_GetPickedNZ() {
 }
 
 // ***** Render effects *****
+
+SGD_RenderEffect SGD_DECL sgd_CreateBloomEffect() {
+	auto effect = new sgd::BloomEffect();
+	sgdx::mainScene()->sceneRenderer()->add(effect);
+	return sgdx::createHandle(effect);
+}
 
 SGD_RenderEffect SGD_DECL sgd_CreateBlurEffect() {
 	auto effect = new sgd::BlurEffect();

@@ -18,8 +18,8 @@ void ModelRenderer::add(CModel* model) {
 	auto list = it->second.get();
 	list->models.emplace_back(model);
 	model->mesh.changed.connect(this, [=](CMesh*) {
-		model->mesh.changed.disconnect(this);
 		sgd::remove(list->models, model);
+		model->mesh.changed.disconnect(this);
 		add(model);
 	});
 }

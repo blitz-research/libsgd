@@ -751,6 +751,9 @@ SGD_API SGD_Bool SGD_DECL sgd_IsEntityVisible(SGD_Entity entity);
 //! Destroy entity and children recursively.
 SGD_API void SGD_DECL sgd_DestroyEntity(SGD_Entity entity);
 
+//! Reset entity collision state.
+SGD_API void SGD_DECL sgd_ResetEntity(SGD_Entity entity);
+
 //! Copy entity and children recursively.
 SGD_API SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity entity);
 
@@ -890,6 +893,18 @@ SGD_API float SGD_DECL sgd_GetProjectedX();
 
 //! Y coordinate of projected point in window coordinates.
 SGD_API float SGD_DECL sgd_GetProjectedY();
+
+//! Unproject 3d point in wndow coordinates to world coordinates.
+SGD_API SGD_Bool SGD_DECL sgd_CameraUnproject(SGD_Camera camera, float windowX, float windowY, float viewZ);
+
+//! X coordinate of projected point in window coordinates.
+SGD_API SGD_Real SGD_DECL sgd_GetUnprojectedX();
+
+//! Y coordinate of projected point in window coordinates.
+SGD_API SGD_Real SGD_DECL sgd_GetUnprojectedY();
+
+//! Z coordinate of projected point in window coordinates.
+SGD_API SGD_Real SGD_DECL sgd_GetUnprojectedZ();
 
 //! @}
 
@@ -1098,6 +1113,9 @@ SGD_API SGD_Real SGD_DECL sgd_GetPickedNZ();
 
 //! @name Render effects
 //! @{
+
+//! Create a new bloom effect and add it to the scene.
+SGD_API SGD_RenderEffect SGD_DECL sgd_CreateBloomEffect();
 
 //! Create a new blur render effect and add it to the scene.
 SGD_API SGD_RenderEffect SGD_DECL sgd_CreateBlurEffect();

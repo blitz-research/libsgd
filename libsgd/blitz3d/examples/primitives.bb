@@ -66,6 +66,10 @@ Local collider4=CreateMeshCollider(model4,0,0)
 
 Set2DTextColor 0,0,0,1
 
+Local cursorMesh = CreateSphereMesh(.01, 32,16,CreatePBRMaterial())
+Local cursor= CreateModel(cursorMesh)
+SetModelColor cursor, 0, 1, 0, 1
+
 While (PollEvents() And 1) <> 1
 
 	TurnEntity model0, .3, .4, .5
@@ -86,6 +90,9 @@ While (PollEvents() And 1) <> 1
 	
 	Clear2D()
 	Draw2DText "Picked collider:" + collider,0,0
+	
+	CameraUnproject camera, GetMouseX(), GetMouseY(), 1
+	SetEntityPosition cursor, GetUnprojectedX(), GetUnprojectedY(), GetUnprojectedZ()
 	
 	RenderScene()
 	Present()

@@ -44,4 +44,6 @@ private:
 
 Expected<Vec2f, bool> project(Camera* camera, CVec3r p);
 
+Vec3r unproject(Camera* camera, CVec2f p, float d);
+
 } // namespace sgd

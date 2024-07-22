@@ -22,16 +22,13 @@ SetConfigVar "dawn.backendType", "D3D12"
 
 CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "スノー Blocks", 4)
 
-LoadScene()
+ResetScene()
 
 While (PollEvents() And 1) <> 1
 
 	If IsKeyHit(KEY_ESCAPE)
 		End
-		Delete Each Bullet
-		Delete Each Block
-		ClearScene()
-		LoadScene()
+		ResetScene()
 	EndIf
 	
 	PlayerFly(1)
@@ -49,7 +46,13 @@ While (PollEvents() And 1) <> 1
 	Present()
 Wend
 
-Function LoadScene() 
+Function ResetScene() 
+
+	Delete Each Bullet
+	Delete Each Block
+	ClearScene()
+	
+	CreateBloomEffect()
 
 	Local env =  LoadTexture("sgd://envmaps/stormy-cube.jpg", 4, 56)
 	SetEnvTexture env

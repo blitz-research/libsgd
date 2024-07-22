@@ -10,7 +10,7 @@ namespace sgd {
 Model::Model(Mesh* mmesh) : mesh(mmesh) {
 }
 
-Model::Model(const Model* that)
+Model::Model(CModel* that)
 	: Entity(that),					   //													//
 	  mesh(that->mesh()),			   //
 	  color(that->color()),			   //
@@ -53,6 +53,7 @@ void Model::onShow() {
 	if (m_skinned) {
 		scene()->sceneRenderer()->skinnedModelRenderer()->add(this);
 	} else {
+		SGD_LOG << "Show";
 		scene()->sceneRenderer()->modelRenderer()->add(this);
 	}
 }
@@ -61,6 +62,7 @@ void Model::onHide() {
 	if (m_skinned) {
 		scene()->sceneRenderer()->skinnedModelRenderer()->remove(this);
 	} else {
+		SGD_LOG << "Hide";
 		scene()->sceneRenderer()->modelRenderer()->remove(this);
 	}
 }

@@ -79,4 +79,19 @@ Expected<Vec2f, bool> project(Camera* camera, CVec3r p) {
 	return (wCoords * Vec2f(.5f, -.5f) + .5f) * Vec2f(camera->viewportSize());
 }
 
+Vec3r unproject(Camera* camera, CVec2f p, float d) {
+
+	// NDC space on near plane
+	auto ndc = Vec4f((p / Vec2f(camera->viewportSize()) - 0.5f) * Vec2f(2.0f, -2.0f), 0, 1);
+
+	// To 3d view space coords
+	auto tv = camera->inverseProjectionMatrix() * ndc;
+	auto vsCoords = tv.xyz() / tv.w;
+
+	// to z=d
+	vsCoords *= d / vsCoords.z;
+
+	return camera->worldMatrix() * Vec3r(vsCoords);
+}
+
 } // namespace sgd
