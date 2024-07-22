@@ -18,12 +18,14 @@ private:
 	friend SignalTy;
 
 	Object* context;
-	Slot<>* deleter = nullptr;
+	Slot<>* deleter{};
 
 	Slot(const SignalTy* signal, Object* context);
 	virtual ~Slot();
 
 	virtual void invoke(ArgTys&&... args) = 0;
+
+	void disconnect();
 };
 
 template <class... ArgTys> struct Signal {
@@ -61,6 +63,7 @@ private:
 	struct SlotList {
 		uint32_t size;
 		uint32_t capacity;
+		SlotTy* emitting{};
 		SlotTy* slots[1];
 	};
 
