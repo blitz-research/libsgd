@@ -53,7 +53,6 @@ void Model::onShow() {
 	if (m_skinned) {
 		scene()->sceneRenderer()->skinnedModelRenderer()->add(this);
 	} else {
-		SGD_LOG << "Show";
 		scene()->sceneRenderer()->modelRenderer()->add(this);
 	}
 }
@@ -62,7 +61,6 @@ void Model::onHide() {
 	if (m_skinned) {
 		scene()->sceneRenderer()->skinnedModelRenderer()->remove(this);
 	} else {
-		SGD_LOG << "Hide";
 		scene()->sceneRenderer()->modelRenderer()->remove(this);
 	}
 }

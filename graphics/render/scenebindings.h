@@ -6,10 +6,9 @@
 namespace sgd {
 
 // Note: Must sync with scene.wgsl
-
-constexpr int maxDirectionalLights = 8;
+constexpr int maxDirectionalLights = 4;
 constexpr int maxPointLights = 32;
-constexpr int maxSpotLights = 64;
+constexpr int maxSpotLights = 16;
 
 struct alignas(16) ConfigUniforms {
 
@@ -22,13 +21,13 @@ struct alignas(16) ConfigUniforms {
 
 	// PSM Settings
 	uint32_t psmTextureSize{1024};
-	uint32_t maxPSMLights{8}; // max = 256/6
+	uint32_t maxPSMLights{32}; // max = 256/6
 	float psmClipNear{.25f};
 	float psmDepthBias{.0001f};
 
 	// SSM Settings
 	uint32_t ssmTextureSize{1024};
-	uint32_t maxSSMLights{4}; // max = 256
+	uint32_t maxSSMLights{16}; // max = 256
 	float ssmClipNear{.25f};
 	float ssmDepthBias{.0001f};
 };

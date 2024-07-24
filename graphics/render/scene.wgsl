@@ -8,9 +8,9 @@ R"(
 
 // Note: Must sync with scenebindings.h
 
-const maxDirectionalLights: u32 = 8;
+const maxDirectionalLights: u32 = 4;
 const maxPointLights: u32 = 32;
-const maxSpotLights: u32 = 64;
+const maxSpotLights: u32 = 16;
 
 const configUniformsBinding = 0;
 const cameraUniformsBinding = 1;

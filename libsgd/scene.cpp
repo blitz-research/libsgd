@@ -59,16 +59,6 @@ void SGD_DECL sgd_SetMaxCSMLights(int maxLights) {
 	unlockConfigUniforms();
 }
 
-void SGD_DECL sgd_SetPSMTextureSize(int textureSize) {
-	lockConfigUniforms().psmTextureSize = textureSize;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetMaxPSMLights(int maxLights) {
-	lockConfigUniforms().maxPSMLights = maxLights;
-	unlockConfigUniforms();
-}
-
 void SGD_DECL sgd_SetCSMSplitDistances(float split0, float split1, float split2, float split3) {
 	lockConfigUniforms().csmSplitDistances = {split0, split1, split2, split3};
 	unlockConfigUniforms();
@@ -84,6 +74,16 @@ void SGD_DECL sgd_SetCSMDepthBias(float bias) {
 	unlockConfigUniforms();
 }
 
+void SGD_DECL sgd_SetPSMTextureSize(int textureSize) {
+	lockConfigUniforms().psmTextureSize = textureSize;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetMaxPSMLights(int maxLights) {
+	lockConfigUniforms().maxPSMLights = maxLights;
+	unlockConfigUniforms();
+}
+
 void SGD_DECL sgd_SetPSMClipNear(float near) {
 	lockConfigUniforms().psmClipNear = near;
 	unlockConfigUniforms();
@@ -91,6 +91,26 @@ void SGD_DECL sgd_SetPSMClipNear(float near) {
 
 void SGD_DECL sgd_SetPSMDepthBias(float bias) {
 	lockConfigUniforms().psmDepthBias = bias;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetSSMTextureSize(int textureSize) {
+	lockConfigUniforms().ssmTextureSize = textureSize;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetMaxSSMLights(int maxLights) {
+	lockConfigUniforms().maxSSMLights = maxLights;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetSSMClipNear(float near) {
+	lockConfigUniforms().ssmClipNear = near;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetSSMDepthBias(float bias) {
+	lockConfigUniforms().ssmDepthBias = bias;
 	unlockConfigUniforms();
 }
 
@@ -757,20 +777,20 @@ SGD_RenderEffect SGD_DECL sgd_CreateFogEffect() {
 }
 
 void SGD_DECL sgd_SetFogEffectColor(SGD_RenderEffect heffect, float red, float green, float blue, float alpha) {
-	auto effect = sgdx::resolveHandle<sgd::MonocolorEffect>(heffect);
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
 	if (!effect->is<sgd::FogEffect>()) sgdx::error("Effect is not a fog effect");
 	effect->as<sgd::FogEffect>()->color = {red, green, blue, alpha};
 }
 
 void SGD_DECL sgd_SetFogEffectRange(SGD_RenderEffect heffect, float near, float far) {
-	auto effect = sgdx::resolveHandle<sgd::MonocolorEffect>(heffect);
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
 	if (!effect->is<sgd::FogEffect>()) sgdx::error("Effect is not a fog effect");
 	effect->as<sgd::FogEffect>()->near = near;
 	effect->as<sgd::FogEffect>()->far = far;
 }
 
 void SGD_DECL sgd_SetFogEffectPower(SGD_RenderEffect heffect, float power) {
-	auto effect = sgdx::resolveHandle<sgd::MonocolorEffect>(heffect);
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
 	if (!effect->is<sgd::FogEffect>()) sgdx::error("Effect is not a fog effect");
 	effect->as<sgd::FogEffect>()->power = power;
 }
@@ -782,13 +802,13 @@ SGD_RenderEffect SGD_DECL sgd_CreateMonocolorEffect() {
 }
 
 void SGD_DECL sgd_SetMonocolorEffectColor(SGD_RenderEffect heffect, float red, float green, float blue, float alpha) {
-	auto effect = sgdx::resolveHandle<sgd::MonocolorEffect>(heffect);
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
 	if (!effect->is<sgd::MonocolorEffect>()) sgdx::error("Effect is not a monocolor effect");
 	effect->as<sgd::MonocolorEffect>()->color = sgd::Vec4f(red, green, blue, alpha);
 }
 
 void SGD_DECL sgd_SetRenderEffectEnabled(SGD_RenderEffect heffect, SGD_Bool enabled) {
-	auto effect = sgdx::resolveHandle<sgd::MonocolorEffect>(heffect);
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
 	effect->enabled = enabled;
 }
 

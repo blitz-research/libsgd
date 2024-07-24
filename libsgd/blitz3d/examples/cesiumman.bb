@@ -6,6 +6,7 @@ CreateWindow(1280, 720, "Cesium Man", 0)
 
 LoadScene()
 
+;Cheesy sepia-tone render effect!
 Local monocolor = CreateMonocolorEffect()
 SetMonocolorEffectColor monocolor, 1,1,.75,1
 

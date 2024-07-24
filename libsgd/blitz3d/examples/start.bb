@@ -32,10 +32,8 @@ Function CreatePlayer(mesh)
 
 	player = CreateModel(mesh)
 	
-	camera=CreatePerspectiveCamera()
+	camera = CreatePerspectiveCamera()
 	SetEntityParent camera,player
-	SetCameraNear camera, .1
-	SetCameraFar camera, 1000
 	
 End Function
 

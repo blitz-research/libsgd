@@ -41,6 +41,7 @@ struct Varying {
     // Depth buffer depth
     let tz = textureSampleLevel(effect_depthTexture, effect_depthSampler, in.texCoords, 0);
 
+    // Hack to show skybox
     if tz == 1.0 {return color;}
 
     let far = scene_camera.clipFar;
@@ -49,7 +50,7 @@ struct Varying {
     // View Z coordinate
     let vz = (far * near) / (near * tz - far * tz + far);
 
-    let alpha = pow( min(max(vz - effect_uniforms.near, 0.0) / effect_uniforms.range, 1.0), effect_uniforms.power);
+    let alpha = pow(min(max(vz - effect_uniforms.near, 0.0) / effect_uniforms.range, 1.0), effect_uniforms.power);
 
     return mix(color, effect_uniforms.color, alpha);
 }

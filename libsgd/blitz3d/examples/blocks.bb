@@ -1,7 +1,7 @@
 
 Include "start.bb"
 
-Const NUM_BLOCKS = 20000
+Const NUM_BLOCKS = 50000
 Const WORLD_SIZE = 100
 
 Type Block
@@ -18,9 +18,9 @@ End Type
 Global bulletImage
 Global slimeball
 
-SetConfigVar "dawn.backendType", "D3D12"
-
 CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "スノー Blocks", 4)
+
+SetMaxPSMLights 8
 
 ResetScene()
 
@@ -52,7 +52,7 @@ Function ResetScene()
 	Delete Each Block
 	ClearScene()
 	
-	CreateBloomEffect()
+;	CreateBloomEffect()	; 'meh...
 
 	Local env =  LoadTexture("sgd://envmaps/stormy-cube.jpg", 4, 56)
 	SetEnvTexture env

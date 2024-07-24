@@ -3,6 +3,11 @@ Include "start.bb"
 
 CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "La Tour Eiffel!", 4)
 
+;Create fog
+Local fog = CreateFogEffect()
+SetFogEffectColor fog,.3,.6,1,1
+SetFogEffectPower fog,2
+
 Local light = CreateDirectionalLight()
 SetLightShadowMappingEnabled light,True
 SetEntityRotation light,-30,0,0
@@ -10,10 +15,8 @@ SetEntityRotation light,-30,0,0
 Local env =  LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
 SetEnvTexture env
 
-CreateFogEffect()
-
-;SetClearColor .8,.9,1,1
-Local skybox = CreateSkybox(env)
+SetClearColor .3,.6,1,1
+;Local skybox = CreateSkybox(env)
 
 ; Height of eiffel tower, fact fans!
 Local sz#=330

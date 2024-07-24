@@ -695,14 +695,8 @@ SGD_API void SGD_DECL sgd_SetEnvTexture(SGD_Texture texture);
 //! Set cascading shadow map texture size. Defaults to 2048, must be a power of 2.
 SGD_API void SGD_DECL sgd_SetCSMTextureSize(int textureSize);
 
-//! Set max shadow casting directional lights. Defaults to 1, must be <= max directional lights (4).
+//! Set max shadow casting directional lights. Defaults to 4, must be <= max directional lights (4).
 SGD_API void SGD_DECL sgd_SetMaxCSMLights(int maxLights);
-
-//! Set point lint shadow map texture size. Defaults to 1024, must be a power of 2.
-SGD_API void SGD_DECL sgd_SetPSMTextureSize(int textureSize);
-
-//! Set max shadow casting point lights. Defaults to 4, mus be <= max points lights (32).
-SGD_API void SGD_DECL sgd_SetMaxPSMLights(int maxLights);
 
 //! Set split distances for CSM shadow, last value should match camera far. Defaults to 16, 64, 256, 1024.
 SGD_API void SGD_DECL sgd_SetCSMSplitDistances(float sklit0, float split1, float split2, float split3);
@@ -713,11 +707,31 @@ SGD_API void SGD_DECL sgd_SetCSMClipRange(float range);
 //! Set depth bia for CSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.0001.
 SGD_API void SGD_DECL sgd_SetCSMDepthBias(float bias);
 
+//! Set point light shadow map texture size. Defaults to 1024, must be a power of 2.
+SGD_API void SGD_DECL sgd_SetPSMTextureSize(int textureSize);
+
+//! Set max shadow casting point lights. Defaults to 32, mus be <= max points lights (32).
+SGD_API void SGD_DECL sgd_SetMaxPSMLights(int maxLights);
+
 //! Set near clip plane distance for PSM shadows. Default to .01.
 SGD_API void SGD_DECL sgd_SetPSMClipNear(float near);
 
 //! Set depth bias for PSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.0001.
 SGD_API void SGD_DECL sgd_SetPSMDepthBias(float bias);
+
+//! Set spot light shadow map texture size. Defaults to 1024, must be a power of 2.
+SGD_API void SGD_DECL sgd_SetSSMTextureSize(int textureSize);
+
+//! Set max shadow casting spot lights. Defaults to 16, must be <= max directional lights (16).
+SGD_API void SGD_DECL sgd_SetMaxSSMLights(int maxLights);
+
+//! Set near clip plane distance for SSM shadows. Default to .01.
+SGD_API void SGD_DECL sgd_SetSSMClipNear(float near);
+
+//! Set depth bias for SSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.0001.
+SGD_API void SGD_DECL sgd_SetSSMDepthBias(float bias);
+
+
 
 //! Render scene.
 SGD_API void SGD_DECL sgd_RenderScene();

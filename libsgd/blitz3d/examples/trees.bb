@@ -1,7 +1,7 @@
 
 Include "start.bb"
 
-CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "Some nice tree", 4)
+CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "Some nice trees", 4)
 
 Local light = CreateDirectionalLight()
 RotateEntity light,-45,0,0

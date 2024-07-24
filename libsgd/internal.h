@@ -126,18 +126,21 @@ SGD_HANDLE_TYPE_INFO(Sound, HandleType::sound);
 SGD_HANDLE_TYPE_INFO(Texture, HandleType::texture);
 SGD_HANDLE_TYPE_INFO(Material, HandleType::material);
 SGD_HANDLE_TYPE_INFO(Image, HandleType::image);
-SGD_HANDLE_TYPE_INFO(Surface, HandleType::surface);
 SGD_HANDLE_TYPE_INFO(Mesh, HandleType::mesh);
+SGD_HANDLE_TYPE_INFO(Surface, HandleType::surface);
+
 SGD_HANDLE_TYPE_INFO(Entity, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Camera, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Light, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Model, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Sprite, HandleType::entity);
 SGD_HANDLE_TYPE_INFO(Skybox, HandleType::entity);
+
 SGD_HANDLE_TYPE_INFO(Collider, HandleType::collider);
 SGD_HANDLE_TYPE_INFO(SphereCollider, HandleType::collider);
 SGD_HANDLE_TYPE_INFO(EllipsoidCollider, HandleType::collider);
 SGD_HANDLE_TYPE_INFO(MeshCollider, HandleType::collider);
+
 SGD_HANDLE_TYPE_INFO(RenderEffect, HandleType::renderEffect);
 SGD_HANDLE_TYPE_INFO(BloomEffect, HandleType::renderEffect);
 SGD_HANDLE_TYPE_INFO(BlurEffect, HandleType::renderEffect);

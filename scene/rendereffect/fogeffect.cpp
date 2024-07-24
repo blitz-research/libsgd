@@ -34,6 +34,11 @@ BindGroupDescriptor bindGroupDesc( //
 FogEffect::FogEffect() : m_bindGroup(new BindGroup(&bindGroupDesc)) {
 
 	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(FogEffectUniforms)));
+
+	color.changed.connect(nullptr,[=](CVec4f){invalidate();});
+	near.changed.connect(nullptr,[=](float){invalidate();});
+	far.changed.connect(nullptr,[=](float){invalidate();});
+	power.changed.connect(nullptr,[=](float){invalidate();});
 }
 
 Texture* FogEffect::onValidate(Texture* sourceTexture, Texture* depthBuffer) {
