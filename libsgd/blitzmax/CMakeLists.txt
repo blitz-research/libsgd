@@ -14,6 +14,8 @@ if (SGD2BMX STREQUAL SGD2BMX-NOTFOUND)
 	return()
 endif ()
 
+message("### Found SGD2BMX: ${SGD2BMX}")
+
 message("### Configuring blitzmax target...")
 
 set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/sgd.bmx)

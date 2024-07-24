@@ -2,7 +2,7 @@
 
 void entry() {
 
-	float sz=32;
+	float sz = 1000;
 
 	{
 		MaterialPtr material = loadPBRMaterial(Path("sgd://misc/brownish-grass.jpg")).result();
@@ -17,10 +17,12 @@ void entry() {
 	meshes[1] = loadStaticMesh(Path("sgd://models/palm_tree1.glb")).result();
 	meshes[2] = loadStaticMesh(Path("sgd://models/birch_tree1.glb")).result();
 
-	for(int i=0;i<50;++i) {
+	int n = 1000;
+
+	for (int i = 0; i < n; ++i) {
 		ModelPtr model = new Model();
 		scene->add(model);
-		move(model, {rnd(-sz,sz),0,rnd(-sz,sz)});
+		move(model, {rnd(-sz, sz), 0, rnd(-sz, sz)});
 		model->mesh = meshes[(int)rnd(3)];
 	}
 

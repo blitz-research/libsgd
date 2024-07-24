@@ -18,7 +18,8 @@ enum struct WindowFlags {
 	none = 0,
 	fullscreen = 1,
 	resizable = 2,
-	centered = 4
+	centered = 4,
+	fullscreen60hz = 8,
 };
 
 struct Window : Shared {

@@ -1,7 +1,7 @@
 
 Include "start.bb"
 
-Const NUM_BLOCKS = 20000
+Const NUM_BLOCKS = 50000
 Const WORLD_SIZE = 100
 
 Type Block
@@ -20,16 +20,15 @@ Global slimeball
 
 CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "スノー Blocks", 4)
 
-LoadScene()
+SetMaxPSMLights 8
+
+ResetScene()
 
 While (PollEvents() And 1) <> 1
 
 	If IsKeyHit(KEY_ESCAPE)
 		End
-		Delete Each Bullet
-		Delete Each Block
-		ClearScene()
-		LoadScene()
+		ResetScene()
 	EndIf
 	
 	PlayerFly(1)
@@ -47,7 +46,13 @@ While (PollEvents() And 1) <> 1
 	Present()
 Wend
 
-Function LoadScene() 
+Function ResetScene() 
+
+	Delete Each Bullet
+	Delete Each Block
+	ClearScene()
+	
+;	CreateBloomEffect()	; 'meh...
 
 	Local env =  LoadTexture("sgd://envmaps/stormy-cube.jpg", 4, 56)
 	SetEnvTexture env

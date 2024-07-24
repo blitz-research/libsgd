@@ -58,11 +58,10 @@ void entry() {
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://misc/test-texture.png");
 	sgd_SetMaterialFloat(material, "roughnessFactor1f", .5f);
 
-//	SGD_Mesh mesh = sgd_CreateSphereMesh(1, 96, 48, material);
+	SGD_Mesh mesh = sgd_CreateSphereMesh(1, 96, 48, material);
 
-	SGD_Mesh mesh = createSphereMesh(1, 96, 48, material);
-
-	SGD_Model model = sgd_CreateModel(mesh);
+	SGD_Model model = sgd_CreateModel(0);
+	sgd_SetModelMesh(model,mesh);
 
 	while (!(sgd_PollEvents() & SGD_EVENT_MASK_CLOSE_CLICKED)) {
 

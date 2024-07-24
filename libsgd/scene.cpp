@@ -2,34 +2,27 @@
 
 namespace {
 
-wgpu::BackendType g_backendType = wgpu::BackendType::Undefined;
-
 sgd::Vec3r g_tformed;
 sgd::Vec2f g_projected;
+sgd::Vec3r g_unprojected;
 sgd::Contact g_picked;
+
+sgd::ConfigUniforms& lockConfigUniforms() {
+	return sgdx::mainScene()->sceneRenderer()->sceneBindings()->lockConfigUniforms();
+}
+
+void unlockConfigUniforms() {
+	sgdx::mainScene()->sceneRenderer()->sceneBindings()->unlockConfigUniforms();
+}
 
 } // namespace
 
 // ***** Scene *****
 
-void SGD_DECL sgd_SetWebGPUBackend(SGD_String backend) {
-	if (sgdx::g_mainWindow) sgdx::error("Backend type must be selected before Window is created");
-
-	sgdx::Map<sgdx::String, wgpu::BackendType> types{
-		{"D3D12", wgpu::BackendType::D3D12},   {"D3D11", wgpu::BackendType::D3D11},		  {"Vulkan", wgpu::BackendType::Vulkan},
-		{"OpenGL", wgpu::BackendType::OpenGL}, {"OpenGLES", wgpu::BackendType::OpenGLES}, {"Metal", wgpu::BackendType::Metal},
-		{"WebGPU", wgpu::BackendType::WebGPU},
-	};
-	auto it = types.find(backend);
-	if (it == types.end()) sgdx::error(sgdx::String("Unrecognized backend: '") + backend + "'");
-
-	g_backendType = it->second;
-}
-
 void SGD_DECL sgd_ClearScene() {
 	if (!sgdx::g_mainScene) {
-		sgdx::g_mainGC = new sgdx::GraphicsContext(sgdx::mainWindow(), g_backendType);
-		sgdx::g_mainScene = new sgdx::Scene(sgdx::g_mainGC);
+		sgdx::g_mainGC = sgd::createGC(sgdx::mainWindow());
+		sgdx::g_mainScene = new sgd::Scene();
 	} else {
 		sgdx::mainScene()->clear();
 		sgdx::destroyAllHandles();
@@ -40,56 +33,85 @@ void SGD_DECL sgd_ClearScene() {
 }
 
 void SGD_DECL sgd_SetClearColor(float red, float green, float blue, float alpha) {
-	sgdx::mainScene()->clearColor = sgdx::Vec4f(red, green, blue, alpha);
+	sgdx::mainScene()->sceneRenderer()->clearColor = sgdx::Vec4f(red, green, blue, alpha);
 }
 
 void SGD_DECL sgd_SetClearDepth(float depth) {
-	sgdx::mainScene()->clearDepth = depth;
+	sgdx::mainScene()->sceneRenderer()->clearDepth = depth;
 }
 
-SGD_API void SGD_DECL sgd_SetAmbientLightColor(float red, float green, float blue, float alpha) {
-	sgdx::mainScene()->ambientLightColor = sgdx::Vec4f(red, green, blue, alpha);
+void SGD_DECL sgd_SetAmbientLightColor(float red, float green, float blue, float alpha) {
+	sgdx::mainScene()->sceneRenderer()->ambientLightColor = sgdx::Vec4f(red, green, blue, alpha);
 }
 
 void SGD_DECL sgd_SetEnvTexture(SGD_Texture htexture) {
 	auto texture = sgdx::resolveHandle<sgdx::Texture>(htexture);
-	sgdx::mainScene()->sceneBindings()->envTexture = texture;
+	sgdx::mainScene()->sceneRenderer()->envTexture = texture;
 }
 
 void SGD_DECL sgd_SetCSMTextureSize(int textureSize) {
-	sgdx::mainScene()->sceneBindings()->csmTextureSize = textureSize;
+	lockConfigUniforms().csmTextureSize = textureSize;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetMaxCSMLights(int maxLights) {
-	sgdx::mainScene()->sceneBindings()->maxCSMLights = maxLights;
-}
-
-void SGD_DECL sgd_SetPSMTextureSize(int textureSize) {
-	sgdx::mainScene()->sceneBindings()->psmTextureSize = textureSize;
-}
-
-void SGD_DECL sgd_SetMaxPSMLights(int maxLights) {
-	sgdx::mainScene()->sceneBindings()->maxPSMLights = maxLights;
+	lockConfigUniforms().maxCSMLights = maxLights;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetCSMSplitDistances(float split0, float split1, float split2, float split3) {
-	sgdx::mainScene()->sceneBindings()->csmSplitDistances = {split0, split1, split2, split3};
+	lockConfigUniforms().csmSplitDistances = {split0, split1, split2, split3};
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetCSMClipRange(float range) {
-	sgdx::mainScene()->sceneBindings()->csmClipRange = range;
+	lockConfigUniforms().csmClipRange = range;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetCSMDepthBias(float bias) {
-	sgdx::mainScene()->sceneBindings()->csmDepthBias = bias;
+	lockConfigUniforms().csmDepthBias = bias;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetPSMTextureSize(int textureSize) {
+	lockConfigUniforms().psmTextureSize = textureSize;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetMaxPSMLights(int maxLights) {
+	lockConfigUniforms().maxPSMLights = maxLights;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetPSMClipNear(float near) {
-	sgdx::mainScene()->sceneBindings()->psmClipNear = near;
+	lockConfigUniforms().psmClipNear = near;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_SetPSMDepthBias(float bias) {
-	sgdx::mainScene()->sceneBindings()->psmDepthBias = bias;
+	lockConfigUniforms().psmDepthBias = bias;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetSSMTextureSize(int textureSize) {
+	lockConfigUniforms().ssmTextureSize = textureSize;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetMaxSSMLights(int maxLights) {
+	lockConfigUniforms().maxSSMLights = maxLights;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetSSMClipNear(float near) {
+	lockConfigUniforms().ssmClipNear = near;
+	unlockConfigUniforms();
+}
+
+void SGD_DECL sgd_SetSSMDepthBias(float bias) {
+	lockConfigUniforms().ssmDepthBias = bias;
+	unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_RenderScene() {
@@ -97,7 +119,7 @@ void SGD_DECL sgd_RenderScene() {
 }
 
 void SGD_DECL sgd_Present() {
-	sgdx::mainGC()->present(sgdx::mainGC()->colorBuffer());
+	sgdx::mainGC()->present(sgdx::mainScene()->sceneRenderer()->outputTexture());
 }
 
 float SGD_DECL sgd_GetFPS() {
@@ -105,7 +127,7 @@ float SGD_DECL sgd_GetFPS() {
 }
 
 float SGD_DECL sgd_GetRPS() {
-	return sgdx::mainScene()->RPS();
+	return sgdx::mainScene()->sceneRenderer()->RPS();
 }
 
 // ***** Entity *****
@@ -140,6 +162,11 @@ void SGD_DECL sgd_DestroyEntity(SGD_Entity hentity) {
 	destroyHandles(entity);
 
 	sgdx::mainScene()->remove(entity);
+}
+
+void SGD_DECL sgd_ResetEntity(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	entity->reset();
 }
 
 SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
@@ -370,12 +397,30 @@ SGD_Bool SGD_DECL sgd_CameraProject(SGD_Camera hcamera, SGD_Real x, SGD_Real y, 
 	return r;
 }
 
-SGD_API float SGD_DECL sgd_GetProjectedX() {
+float SGD_DECL sgd_GetProjectedX() {
 	return g_projected.x;
 }
 
-SGD_API float SGD_DECL sgd_GetProjectedY() {
+float SGD_DECL sgd_GetProjectedY() {
 	return g_projected.y;
+}
+
+SGD_Bool SGD_DECL sgd_CameraUnproject(SGD_Camera hcamera, float windowX, float windowY, float viewZ) {
+	auto camera = sgdx::resolveHandle<sgdx::Camera>(hcamera);
+	g_unprojected = unproject(camera, {windowX, windowY}, viewZ);
+	return true;
+}
+
+SGD_Real SGD_DECL sgd_GetUnprojectedX() {
+	return g_unprojected.x;
+}
+
+SGD_Real SGD_DECL sgd_GetUnprojectedY() {
+	return g_unprojected.y;
+}
+
+SGD_Real SGD_DECL sgd_GetUnprojectedZ() {
+	return g_unprojected.z;
 }
 
 // ***** Light *****
@@ -702,4 +747,73 @@ SGD_Real SGD_DECL sgd_GetPickedNY() {
 
 SGD_Real SGD_DECL sgd_GetPickedNZ() {
 	return g_picked.normal.z;
+}
+
+// ***** Render effects *****
+
+SGD_RenderEffect SGD_DECL sgd_CreateBloomEffect() {
+	auto effect = new sgd::BloomEffect();
+	sgdx::mainScene()->sceneRenderer()->add(effect);
+	return sgdx::createHandle(effect);
+}
+
+SGD_RenderEffect SGD_DECL sgd_CreateBlurEffect() {
+	auto effect = new sgd::BlurEffect();
+	sgdx::mainScene()->sceneRenderer()->add(effect);
+	return sgdx::createHandle(effect);
+}
+
+void SGD_DECL sgd_SetBlurEffectRadius(SGD_RenderEffect heffect, int radius) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	if (!effect->is<sgd::BlurEffect>()) sgdx::error("Effect is not a blur effect");
+	if (radius < 1 || radius > 31) sgdx::error("Blur radius must be in the range 1 to 31 inclusive");
+	effect->as<sgd::BlurEffect>()->radius = radius;
+}
+
+SGD_RenderEffect SGD_DECL sgd_CreateFogEffect() {
+	auto effect = new sgd::FogEffect();
+	sgdx::mainScene()->sceneRenderer()->add(effect);
+	return sgdx::createHandle(effect);
+}
+
+void SGD_DECL sgd_SetFogEffectColor(SGD_RenderEffect heffect, float red, float green, float blue, float alpha) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	if (!effect->is<sgd::FogEffect>()) sgdx::error("Effect is not a fog effect");
+	effect->as<sgd::FogEffect>()->color = {red, green, blue, alpha};
+}
+
+void SGD_DECL sgd_SetFogEffectRange(SGD_RenderEffect heffect, float near, float far) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	if (!effect->is<sgd::FogEffect>()) sgdx::error("Effect is not a fog effect");
+	effect->as<sgd::FogEffect>()->near = near;
+	effect->as<sgd::FogEffect>()->far = far;
+}
+
+void SGD_DECL sgd_SetFogEffectPower(SGD_RenderEffect heffect, float power) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	if (!effect->is<sgd::FogEffect>()) sgdx::error("Effect is not a fog effect");
+	effect->as<sgd::FogEffect>()->power = power;
+}
+
+SGD_RenderEffect SGD_DECL sgd_CreateMonocolorEffect() {
+	auto effect = new sgd::MonocolorEffect();
+	sgdx::mainScene()->sceneRenderer()->add(effect);
+	return sgdx::createHandle(effect);
+}
+
+void SGD_DECL sgd_SetMonocolorEffectColor(SGD_RenderEffect heffect, float red, float green, float blue, float alpha) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	if (!effect->is<sgd::MonocolorEffect>()) sgdx::error("Effect is not a monocolor effect");
+	effect->as<sgd::MonocolorEffect>()->color = sgd::Vec4f(red, green, blue, alpha);
+}
+
+void SGD_DECL sgd_SetRenderEffectEnabled(SGD_RenderEffect heffect, SGD_Bool enabled) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	effect->enabled = enabled;
+}
+
+//! Is render effect enabled.
+SGD_Bool SGD_DECL sgd_IsRenderEffectEnabled(SGD_RenderEffect heffect) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	return effect->enabled();
 }

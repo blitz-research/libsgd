@@ -16,9 +16,6 @@ Local light0 = CreatePointLight()
 SetEntityPosition light0,0,5,-2.5
 SetLightRange light0, 10
 SetLightShadowMappingEnabled light0,True
-;Local light = CreatePointLight()
-;SetEntityParent light, player
-;'SetLightRange light, 50
 
 Local groundMaterial = CreatePBRMaterial()
 SetMaterialVector4f groundMaterial, "albedoColor4f",.6,.5,.5,1
@@ -69,6 +66,10 @@ Local collider4=CreateMeshCollider(model4,0,0)
 
 Set2DTextColor 0,0,0,1
 
+Local cursorMesh = CreateSphereMesh(.01, 32,16,CreatePBRMaterial())
+Local cursor= CreateModel(cursorMesh)
+SetModelColor cursor, 0, 1, 0, 1
+
 While (PollEvents() And 1) <> 1
 
 	TurnEntity model0, .3, .4, .5
@@ -89,6 +90,9 @@ While (PollEvents() And 1) <> 1
 	
 	Clear2D()
 	Draw2DText "Picked collider:" + collider,0,0
+	
+	CameraUnproject camera, GetMouseX(), GetMouseY(), 1
+	SetEntityPosition cursor, GetUnprojectedX(), GetUnprojectedY(), GetUnprojectedZ()
 	
 	RenderScene()
 	Present()

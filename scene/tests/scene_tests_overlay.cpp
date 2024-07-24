@@ -2,9 +2,6 @@
 
 void entry() {
 
-	OverlayPtr overlay = new Overlay();
-	scene->add(overlay);
-
 	DrawListPtr dc = overlay->drawList();
 
 	ImagePtr image = loadImage(Path("sgd://misc/explode64_vstrip.png"), 16).result();
@@ -41,9 +38,9 @@ void entry() {
 
 		dc->clear();
 
-		dc->addImage(image, {64,64}, frame+=.1f);
+		dc->addImage(image, Vec2f(window->mouse()->position()), frame+=.1f);
 
-		auto str = std::to_string(gc->FPS());
+		auto str = std::to_string(currentGC()->FPS());
 		dc->addText(str,{w - dc->font()->textWidth(str),0});
 
 		dc->addText(std::to_string(window->mouse()->position().z) + " " + std::to_string(window->mouse()->velocity().z), {0,64});
@@ -55,5 +52,8 @@ void entry() {
 }
 
 int main() {
+
+	setConfigVar("dawn.backendType","D3D12");
+
 	start(entry);
 }

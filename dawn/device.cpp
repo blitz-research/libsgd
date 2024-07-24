@@ -113,12 +113,20 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 	};
 	SGD_LOG << "Backend type:" << backendTypes[props.backendType];
 	SGD_LOG << "Compatibility mode:" << props.compatibilityMode;
+
+	//wgpu::SupportedLimits limits;
+	//wgpuAdapterGetLimits(adapter.Get(), reinterpret_cast<WGPUSupportedLimits*>(&limits));
+	//SGD_LOG<<"Max bind groups:"<<limits.limits.maxBindGroups;
+	//SGD_LOG << "Max bind groups plus vertex buffers:"<<limits.limits.maxBindGroupsPlusVertexBuffers;
+	//SGD_LOG<<"Max bindings per bind group:"<<limits.limits.maxBindingsPerBindGroup;
 }
 
 } // namespace
 
 const wgpu::Instance& getWGPUInstance() {
-	static wgpu::Instance instance = wgpu::CreateInstance();
+	wgpu::InstanceDescriptor desc{};
+	desc.features.timedWaitAnyEnable = true;
+	static wgpu::Instance instance = wgpu::CreateInstance(&desc);
 	return instance;
 }
 

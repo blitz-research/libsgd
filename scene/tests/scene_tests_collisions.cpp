@@ -53,7 +53,7 @@ void entry() {
 
 		dc->clear();
 		dc->addText(toString(camera->worldPosition())+", "+toString(camera->worldPosition()), {0,0});
-		dc->addText(toString(scene->RPS()), {0, 20});
+		dc->addText(toString(scene->sceneRenderer()->RPS()), {0, 20});
 
 		render();
 	}

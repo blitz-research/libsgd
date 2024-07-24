@@ -5,11 +5,9 @@ void entry() {
 	// Height of eifeel tower!
 	float size = 330.0f;
 
-	MaterialPtr groundMaterial = loadPBRMaterial(Path("sgd://materials/Ground037_1K-JPG")).result();
-	groundMaterial->setTexture("roughnessTexture", whiteTexture());
-	groundMaterial->setFloat("roughnessFactor1f", .75f);
+	MaterialPtr groundMaterial = loadPBRMaterial(Path("sgd://misc/grass1K.jpg")).result();
 	MeshPtr groundMesh = createBoxMesh({{-size, 0, -size}, {size, 0, size}}, groundMaterial);
-	transformTexCoords(groundMesh, {size, size}, {0, 0});
+	transformTexCoords(groundMesh, {size / 2, size / 2}, {0, 0});
 
 	MeshPtr towerMesh = loadStaticMesh(Path("sgd://models/eiffel_tower.glb")).result();
 	fit(towerMesh, {{-size / 2, 0, -size / 2}, {size / 2, size, size / 2}}, true);
@@ -32,15 +30,27 @@ void entry() {
 	light->shadowsEnabled = true;
 	setRotation(light, {-30, 0, 0});
 
+	auto& config = scene->sceneRenderer()->sceneBindings()->lockConfigUniforms();
+	config.csmTextureSize = 4096;
+	config.csmClipRange = 660.0f;
+	config.csmDepthBias = .0001f;
+	scene->sceneRenderer()->sceneBindings()->unlockConfigUniforms();
+	scene->sceneRenderer()->ambientLightColor = Vec4f(0, 0, 0, 0);
+
+	FogEffectPtr fog = new FogEffect();
+	scene->sceneRenderer()->add(fog);
+
+//	BloomEffectPtr bloom = new BloomEffect();
+//	scene->sceneRenderer()->add(bloom);
+
+#if 0
 	camera->near = .125f;
 	camera->far = 1024;
 	scene->sceneBindings()->csmSplitDistances = {16, 64, 256, 1024};
 	scene->sceneBindings()->csmTextureSize = 2048;
 	scene->sceneBindings()->csmDepthBias = .0001f;
 	scene->sceneBindings()->csmClipRange = 330.0f;
-
-	auto overlay = new Overlay();
-	scene->add(overlay);
+#endif
 
 	auto dc = overlay->drawList();
 
@@ -50,17 +60,19 @@ void entry() {
 		playerFly(1.25f);
 
 		light->setWorldPosition({});
-
 		rotate(light, {0, .025f, 0});
 
 		dc->clear();
-		dc->addText("FPS:" + std::to_string(gc->FPS()), {0, 0});
-		dc->addText("RPS:" + std::to_string(scene->RPS()), {0, 16});
+		dc->addText("FPS:" + std::to_string(currentGC()->FPS()), {0, 0});
+		dc->addText("RPS:" + std::to_string(scene->sceneRenderer()->RPS()), {0, 16});
 
 		render();
 	}
 }
 
 int main() {
+	setConfigVar("dawn.backendType", "Vulkan");
+	setConfigVar("dawn.presentMode", "Fifo");
+	setConfigVar("render.timeStampsEnabled", "1");
 	start(entry);
 }

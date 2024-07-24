@@ -1,6 +1,7 @@
 #include "internal.h"
 
 #include <thread>
+
 #if SGD_OS_WINDOWS
 #include <clocale>
 #endif
@@ -36,7 +37,7 @@ void SGD_DECL sgd_Terminate() {
 
 	if(sgdx::g_mainWindow) {
 		if (sgdx::g_mainGC) {
-			sgdx::g_mainGC->wgpuDevice().Destroy();
+			sgd::destroyGC();
 			sgdx::g_mainGC = nullptr;
 		}
 		sgdx::g_mainWindow->close();
@@ -44,6 +45,10 @@ void SGD_DECL sgd_Terminate() {
 	}
 
 	sgd::exitApp();
+}
+
+void SGD_DECL sgd_SetConfigVar(SGD_String name, SGD_String value) {
+	sgd::setConfigVar(name, value);
 }
 
 void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(SGD_String error, void* context), void* context) {
@@ -84,10 +89,11 @@ int SGD_DECL sgd_PollEvents() {
 }
 
 void SGD_DECL sgd_DebugMemory() {
-#if SGD_CONFIG_DEBUG
 	sgdx::started();
+
 	static sgdx::Map<sgdx::ObjectType*, int> counts;
 	static const sgdx::String pad = "                   ";
+
 	for (auto type = sgd::ObjectType::allTypes(); type; type = type->succ) {
 		int count = type->instanceCount();
 		int diff = count - counts[type];
@@ -98,5 +104,4 @@ void SGD_DECL sgd_DebugMemory() {
 		sgd::log() << name << count << dstr;
 	}
 	sgdx::log() << "---------------------------------";
-#endif
 }

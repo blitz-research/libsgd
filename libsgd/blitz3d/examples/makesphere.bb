@@ -46,7 +46,6 @@ Function createSphere(radius#, xSegs, ySegs, material)
 	
 End Function
 
-
 CreateWindow(1280, 720, "Custom mesh demo", 0)
 
 env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)

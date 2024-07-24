@@ -60,6 +60,9 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 			GLFWmonitor* monitor{};
 			if (bool(flags & WindowFlags::fullscreen)) {
 				monitor = glfwGetPrimaryMonitor();
+			}else if (bool(flags & WindowFlags::fullscreen60hz)) {
+				monitor = glfwGetPrimaryMonitor();
+				glfwWindowHint(GLFW_REFRESH_RATE, 60);
 #if 0
 				glfwWindowHint(GLFW_RED_BITS, 8);
 				glfwWindowHint(GLFW_GREEN_BITS, 8);
@@ -93,7 +96,7 @@ Window::Window(CVec2u size, CString title, WindowFlags flags) : m_flags(flags) {
 				});
 				int w, h;
 				glfwGetWindowSize(m_glfwWindow, &w, &h);
-//				g_suspended = !w || !h;
+				if(!w || !h) suspendApp();
 				m_size = Vec2u(w, h);
 			}
 			{

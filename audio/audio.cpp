@@ -24,7 +24,7 @@ auto initing = appIniting.connect(nullptr, [] {
 		return;
 	}
 
-	SGD_LOG << "Soloud::init success!";
+	SGD_LOG << "Soloud::init success";
 
 	appSuspending.connect(nullptr, [] {
 		g_soloud->setPauseAll(true);

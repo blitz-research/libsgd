@@ -161,9 +161,6 @@ int64_t millis();
 int64_t micros();
 int64_t nanos();
 
-String toUpper(String str);
-String toLower(String str);
-
 bool isMainThread();
 
 void alert(CString msg);

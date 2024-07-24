@@ -1,7 +1,8 @@
 ﻿#include "log.h"
+#include "config.h"
+#include "path.h"
 #include "stringutil.h"
 
-#include "path.h"
 #include <chrono>
 #include <fstream>
 #include <iomanip>
@@ -15,8 +16,7 @@
 
 namespace sgd {
 
-thread_local String debugThreadName = (std::ostringstream() << std::setw(6) << std::this_thread::get_id()).str();
-//thread_local String debugThreadName = (std::ostringstream() << std::this_thread::get_id()).str();
+thread_local String debugThreadId = (std::ostringstream() << std::setw(6) << std::this_thread::get_id()).str();
 
 namespace {
 
@@ -43,6 +43,12 @@ std::mutex g_mutex;
 
 std::ofstream g_logstream;
 
+bool g_stdoutEnabled = true;
+
+auto init = configVarChanged()["log.stdoutEnabled"].connect(nullptr, [](CString value) { //
+	g_stdoutEnabled = truthy(value);
+});
+
 } // namespace
 
 Log::Log(Log&& log) noexcept : buf(std::move(log.buf)) {
@@ -53,7 +59,7 @@ Log::Log(Log&& log) noexcept : buf(std::move(log.buf)) {
 Log::~Log() {
 	if (moved) return;
 
-	auto str = timeStamp(Clock::now()) + " [" + debugThreadName + "] " + buf.str() + "\n";
+	auto str = timeStamp(Clock::now()) + " [" + debugThreadId + "] " + buf.str() + "\n";
 
 	{
 		std::lock_guard<std::mutex> lock(g_mutex);
@@ -61,21 +67,21 @@ Log::~Log() {
 		if (!g_logstream.is_open()) {
 			static bool opened;
 
-			if(opened) SGD_PANIC("Logging error, log file unexpectedly closed");
+			if (opened) SGD_PANIC("Logging error, log file unexpectedly closed");
 
 			Path path("~/.sgd/log.txt");
 			if (!path.createFile(true)) SGD_PANIC("Logging error, failed to create log file");
 
 			g_logstream.open(path.filePath());
-			if(!g_logstream.is_open()) SGD_PANIC("Logging error, failed to open log file");
+			if (!g_logstream.is_open()) SGD_PANIC("Logging error, failed to open log file");
 
-			opened=true;
+			opened = true;
 		}
 
 		g_logstream << str;
 		g_logstream.flush();
 
-		std::cout << str << std::flush;
+		if (g_stdoutEnabled) std::cout << str << std::flush;
 	}
 }
 

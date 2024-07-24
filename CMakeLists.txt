@@ -188,12 +188,12 @@ set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/LIBSGD_INSTALL)
 
 add_subdirectory(external EXCLUDE_FROM_ALL)
 
-add_subdirectory(core)          # [libcurl json11]
-add_subdirectory(geom)          # core
-add_subdirectory(app)           # geom [glfw]
-add_subdirectory(dawn)          # app [lib-dawn]
-add_subdirectory(window)        # app
-add_subdirectory(audio)         # app [soloud]
-add_subdirectory(graphics)      # window dawn [tinygltf stb]
-add_subdirectory(scene)			# graphics
-add_subdirectory(libsgd)        # scene audio
+add_subdirectory(core)      # [libcurl json11]
+add_subdirectory(geom)      # core
+add_subdirectory(app)       # geom [glfw]
+add_subdirectory(dawn)      # geom [glfw lib-dawn]
+add_subdirectory(window)    # app
+add_subdirectory(audio)     # app [soloud]
+add_subdirectory(graphics)	# window dawn [stb]
+add_subdirectory(scene)		# graphics [tinlygltf]
+add_subdirectory(libsgd)    # scene audio

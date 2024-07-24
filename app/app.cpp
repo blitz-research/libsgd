@@ -10,6 +10,7 @@ bool g_inited;
 bool g_exited;
 
 int g_suspended;
+
 }
 
 void initApp() {

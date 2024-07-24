@@ -9,8 +9,6 @@
 
 namespace sgd {
 
-//extern thread_local String debugThreadName;
-
 struct Log {
 	std::stringstream buf;
 	bool moved{};
