@@ -2,6 +2,17 @@
 
 namespace sgd {
 
+namespace {
+
+const Map<BufferType, const char*> usageNames{
+	{BufferType::uniform, "Uniform buffer"}, //
+	{BufferType::storage, "Storage buffer"}, //
+	{BufferType::vertex, "Vertex buffer"},	 //
+	{BufferType::index, "Index buffer"},	 //
+};
+
+}
+
 Buffer::Buffer(BufferType type, const void* data, uint32_t size)
 	: m_type(type), m_data((uint8_t*)std::malloc(size)), m_size(size), m_capacity(m_size) {
 
@@ -16,6 +27,7 @@ Buffer::Buffer(BufferType type, const void* data, uint32_t size)
 }
 
 Buffer::~Buffer() {
+	currentGC()->wgpuFree(m_alloced, usageNames.find(m_type)->second);
 	std::free(m_data);
 }
 
@@ -44,17 +56,23 @@ void Buffer::onValidate() const {
 	auto gc = currentGC();
 
 	if (m_invalid) {
-		static const Map<BufferType, wgpu::BufferUsage> usages = {
+		static const Map<BufferType, wgpu::BufferUsage> usages{
 			{BufferType::uniform, wgpu::BufferUsage::Uniform}, //
 			{BufferType::storage, wgpu::BufferUsage::Storage}, //
 			{BufferType::vertex, wgpu::BufferUsage::Vertex},   //
 			{BufferType::index, wgpu::BufferUsage::Index},	   //
 		};
+
 		wgpu::BufferDescriptor desc{};
 		desc.usage = usages.find(m_type)->second | wgpu::BufferUsage::CopyDst;
-		desc.size = (m_capacity + 3u) & ~3u;
+		desc.size = m_capacity + 3u & ~3u;
 		desc.mappedAtCreation = true;
+
+		gc->wgpuAllocing(desc.size, usageNames.find(m_type)->second);
 		m_wgpuBuffer = gc->wgpuDevice().CreateBuffer(&desc);
+		gc->wgpuFree(m_alloced, usageNames.find(m_type)->second);
+		m_alloced = desc.size;
+
 		std::memcpy(m_wgpuBuffer.GetMappedRange(0, m_size), m_data, m_size);
 		m_wgpuBuffer.Unmap();
 		m_invalid = false;

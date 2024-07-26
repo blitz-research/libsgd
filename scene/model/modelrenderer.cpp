@@ -10,6 +10,10 @@ ModelRenderer::ModelRenderer() {
 
 void ModelRenderer::add(CModel* model) {
 	CMesh* mesh = model->mesh();
+	if(bool(mesh->flags() & MeshFlags::sorted)) {
+		m_sortedInsts.emplace_back(model);
+		return;
+	}
 	auto it = m_instanceLists.find(mesh);
 	if (it == m_instanceLists.end()) {
 		auto renderer = new MeshRenderer(mesh);
@@ -25,7 +29,18 @@ void ModelRenderer::add(CModel* model) {
 }
 
 void ModelRenderer::remove(CModel* model) {
-	auto it = m_instanceLists.find(model->mesh());
+	CMesh* mesh = model->mesh();
+	if(bool(mesh->flags() & MeshFlags::sorted)) {
+		for(auto it=m_sortedInsts.begin();it!=m_sortedInsts.end();++it) {
+			if(it->model==model) {
+				m_sortedInsts.erase(it);
+				return;
+			}
+		}
+		SGD_ASSERT(false);
+		return;
+	}
+	auto it = m_instanceLists.find(mesh);
 	SGD_ASSERT(it != m_instanceLists.end());
 	auto list = it->second.get();
 	model->mesh.changed.disconnect(this);
@@ -33,6 +48,7 @@ void ModelRenderer::remove(CModel* model) {
 }
 
 void ModelRenderer::update(CVec3r eye) {
+
 	for (auto& kv : m_instanceLists) {
 		if (!kv.first) continue;
 		auto list = kv.second.get();
@@ -45,6 +61,9 @@ void ModelRenderer::update(CVec3r eye) {
 		}
 		list->meshRenderer->unlockInstances();
 	}
+
+	auto cmp =
+
 }
 
 void ModelRenderer::render(RenderQueue* rq) const {

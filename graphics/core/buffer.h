@@ -68,6 +68,7 @@ private:
 
 	mutable wgpu::Buffer m_wgpuBuffer;
 	mutable bool m_invalid{true};
+	mutable uint32_t m_alloced{};
 
 	void onValidate() const override;
 };

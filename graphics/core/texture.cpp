@@ -71,7 +71,7 @@ Texture::Texture(Texture* texture, uint32_t layer)
 }
 
 Texture::~Texture() {
-
+	currentGC()->wgpuFree(m_alloced, "Texture");
 	std::free(m_data);
 }
 
@@ -122,9 +122,14 @@ void Texture::onValidate() const {
 		}
 		if (bool(m_flags & TextureFlags::renderTarget)) {
 			desc.usage |= wgpu::TextureUsage::RenderAttachment;
-			if(bool(m_flags & TextureFlags::msaa)) desc.sampleCount = 4;
+			if (bool(m_flags & TextureFlags::msaa)) desc.sampleCount = 4;
 		}
+
+		uint32_t allocing = (m_size.x * bytesPerTexel(m_format) + 255U & ~255U) * m_size.y * m_depth;
+		gc->wgpuAllocing(allocing, "Texture");
 		m_wgpuTexture = gc->wgpuDevice().CreateTexture(&desc);
+		gc->wgpuFree(m_alloced, "Texture");
+		m_alloced = allocing;
 
 		m_wgpuSampler = getOrCreateWGPUSampler(gc, m_flags);
 

@@ -83,7 +83,11 @@ private:
 
 SGD_SHARED(Mesh);
 
-enum struct MeshFlags { none = 0, tangentsEnabled = 1 };
+enum struct MeshFlags {
+	none = 0,
+	tangentsEnabled = 1,
+	sorted = 2,
+};
 
 struct Mesh : GraphicsResource {
 	SGD_OBJECT_TYPE(Mesh, GraphicsResource);
@@ -149,7 +153,6 @@ private:
 	uint32_t m_vertexCount;
 	MeshFlags m_flags;
 	Vector<SurfacePtr> m_surfaces;
-
 };
 
 } // namespace sgd

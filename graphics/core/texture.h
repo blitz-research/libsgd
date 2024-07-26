@@ -103,6 +103,7 @@ private:
 	mutable wgpu::Texture m_wgpuTexture;
 	mutable wgpu::Sampler m_wgpuSampler;
 	mutable wgpu::TextureView m_wgpuTextureView;
+	mutable uint32_t m_alloced{};
 
 	void onValidate() const override;
 };

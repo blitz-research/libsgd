@@ -11,6 +11,20 @@
 
 namespace sgd {
 
+namespace {
+
+bool g_debugGPUAllocs = false;
+auto init0 = configVarChanged()["debug.gpuAllocs"].connect(nullptr, [](CString value) { //
+	g_debugGPUAllocs = truthy(value);
+});
+
+bool g_debugGPUFrees = false;
+auto init1 = configVarChanged()["debug.gpuFrees"].connect(nullptr, [](CString value) { //
+	g_debugGPUFrees = truthy(value);
+});
+
+} // namespace
+
 // ***** GraphicsContext *****
 
 GraphicsContext* createGC(Window* window) {
@@ -57,7 +71,7 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 				GetVersionEx((OSVERSIONINFO*)&info);
 				if (info.dwMajorVersion == 6 && info.dwMinorVersion >= 2) { // 6.2 is >= windows 8
 					backendType = (sizeof(void*) == 8) ? wgpu::BackendType::D3D12 : wgpu::BackendType::D3D11; // NOLINT
-				} else {	// <= windows 7
+				} else {																					  // <= windows 7
 					backendType = wgpu::BackendType::Vulkan;
 				}
 #elif SGD_OS_LINUX
@@ -75,7 +89,7 @@ GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
 				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
 
 				auto resize = [=](CVec2u size) {
-					if(size==m_swapChainSize) return;
+					if (size == m_swapChainSize) return;
 
 					m_swapChainSize = size;
 					if (!size.x || !size.y) return;
@@ -131,7 +145,7 @@ GraphicsContext::~GraphicsContext() {
 }
 
 void GraphicsContext::present(CTexture* texture) {
-	if(!m_swapChainSize.x || !m_swapChainSize.y) return;
+	if (!m_swapChainSize.x || !m_swapChainSize.y) return;
 
 	++m_frames;
 	auto elapsed = sgd::micros() - m_micros;
@@ -163,6 +177,21 @@ void GraphicsContext::present(CTexture* texture) {
 #endif
 		m_wgpuDevice.GetAdapter().GetInstance().ProcessEvents();
 	});
+}
+
+void GraphicsContext::wgpuAllocing(uint32_t size, const char* type) {
+	if (g_debugGPUAllocs) {
+		SGD_LOG << "wgpuAllocing size:" << size << "type:" << type << " total:" << m_wgpuAlloced;
+	}
+	m_wgpuAlloced += size;
+}
+
+void GraphicsContext::wgpuFree(uint32_t size, const char* type) {
+	if (!size) return;
+	m_wgpuAlloced -= size;
+	if (g_debugGPUFrees) {
+		SGD_LOG << "wgpuFree size:" << size << "type:" << type << "total:" << m_wgpuAlloced;
+	}
 }
 
 // ***** GraphicsResource *****

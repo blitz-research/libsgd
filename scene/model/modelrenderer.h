@@ -22,9 +22,16 @@ struct ModelRenderer : Shared {
 private:
 	struct InstanceList {
 		MeshRendererPtr meshRenderer;
-		Vector<CModelPtr> models;
+		Vector<CModel*> models;
 	};
+	struct SortedInstance {
+		CModel* model{};
+		float distance{};
+	};
+
 	Map<CMesh*, UniquePtr<InstanceList>> m_instanceLists;
+
+	Vector<SortedInstance> m_sortedInsts;
 };
 
 }
