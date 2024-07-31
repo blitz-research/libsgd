@@ -2,6 +2,8 @@
 
 void entry() {
 
+	//setConfigVar("debug.gltfLoader","1");
+
 	scene->collisionSpace()->enableCollisions(1, 0, CollisionResponse::slide);
 
 	float sz = 50;

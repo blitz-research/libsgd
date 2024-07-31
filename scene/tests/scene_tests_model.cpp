@@ -35,22 +35,9 @@ void entry() {
 	config.csmClipRange = 660.0f;
 	config.csmDepthBias = .0001f;
 	scene->sceneRenderer()->sceneBindings()->unlockConfigUniforms();
-	scene->sceneRenderer()->ambientLightColor = Vec4f(0, 0, 0, 0);
 
-	FogEffectPtr fog = new FogEffect();
-	scene->sceneRenderer()->add(fog);
-
-//	BloomEffectPtr bloom = new BloomEffect();
-//	scene->sceneRenderer()->add(bloom);
-
-#if 0
-	camera->near = .125f;
-	camera->far = 1024;
-	scene->sceneBindings()->csmSplitDistances = {16, 64, 256, 1024};
-	scene->sceneBindings()->csmTextureSize = 2048;
-	scene->sceneBindings()->csmDepthBias = .0001f;
-	scene->sceneBindings()->csmClipRange = 330.0f;
-#endif
+//	FogEffectPtr fog = new FogEffect();
+//	scene->sceneRenderer()->add(fog);
 
 	auto dc = overlay->drawList();
 

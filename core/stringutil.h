@@ -32,6 +32,6 @@ String enquote(CString str);
 String dequote(CString str);
 
 //! "1", "true", "on"
-bool truthy(CString str);
+bool truthiness(CString str);
 
 }

@@ -14,134 +14,139 @@ namespace sgd {
 namespace {
 
 bool g_debugGPUAllocs = false;
-auto init0 = configVarChanged()["debug.gpuAllocs"].connect(nullptr, [](CString value) { //
-	g_debugGPUAllocs = truthy(value);
+auto init0 = configVarChanged("debug.gpuAllocs").connect(nullptr, [](CString value) { //
+	g_debugGPUAllocs = truthiness(value);
 });
 
 bool g_debugGPUFrees = false;
-auto init1 = configVarChanged()["debug.gpuFrees"].connect(nullptr, [](CString value) { //
-	g_debugGPUFrees = truthy(value);
+auto init1 = configVarChanged("debug.gpuFrees").connect(nullptr, [](CString value) { //
+	g_debugGPUFrees = truthiness(value);
 });
+
+wgpu::BackendType backendType() {
+
+	auto cfg = getConfigVar("dawn.backendType");
+#if SGD_OS_WINDOWS
+	if (cfg == "D3D12")	return wgpu::BackendType::D3D12;
+	if (cfg == "D3D11")	return wgpu::BackendType::D3D11;
+#endif
+#if SGD_OS_WINDOWS || SGD_OS_LINUX
+	if (cfg == "Vulkan") return wgpu::BackendType::Vulkan;
+#elif SGD_OS_MACOS
+	 if (cfg == "Metal")return wgpu::BackendType::Metal;
+		return wgpu::BackendType::Metal;
+#endif
+
+#if SGD_OS_WINDOWS
+	OSVERSIONINFO info{sizeof(OSVERSIONINFO)};
+	GetVersionEx((OSVERSIONINFO*)&info);
+	if (info.dwMajorVersion > 6 || (info.dwMajorVersion == 6 && info.dwMinorVersion >= 2)) {
+		// >= Windows 8
+		return (sizeof(void*) == 8) ? wgpu::BackendType::D3D12 : wgpu::BackendType::D3D11; // NOLINT
+	}
+	// <= windows 7
+	return wgpu::BackendType::Vulkan;
+#elif SGD_OS_LINUX
+	return wgpu::BackendType::Vulkan;
+#elif SGD_OS_MACOS
+	return wgpu::BackendType::Metal;
+#endif
+	SGD_ABORT();
+}
 
 } // namespace
 
 // ***** GraphicsContext *****
 
 GraphicsContext* createGC(Window* window) {
-	if (GraphicsContext::g_currentGC) SGD_ABORT();
-	return GraphicsContext::g_currentGC = new GraphicsContext(window);
+	runOnMainThread(
+		[=] {
+			if (GraphicsContext::g_currentGC) return;
+			GraphicsContext::g_currentGC = new GraphicsContext(window);
+		},
+		true);
+	return GraphicsContext::g_currentGC;
 }
 
 void destroyGC() {
-	if (!GraphicsContext::g_currentGC) return;
-	delete GraphicsContext::g_currentGC;
-	GraphicsContext::g_currentGC = nullptr;
+	runOnMainThread(
+		[] {
+			if (!GraphicsContext::g_currentGC) return;
+			GraphicsContext::g_currentGC->destroy();
+			GraphicsContext::g_currentGC = nullptr;
+		},
+		true);
 }
 
 GraphicsContext::GraphicsContext(Window* window) : m_window(window) {
-	if (g_currentGC) SGD_ABORT();
 
 	CondVar<bool> ready;
 
-	runOnMainThread(
-		[&] {
-			auto backendType = wgpu::BackendType::Undefined;
-			auto bt = getConfigVar("dawn.backendType");
-			if (bt == "D3D12") {
-#if SGD_OS_WINDOWS
-				backendType = wgpu::BackendType::D3D12;
-#endif
-			} else if (bt == "D3D11") {
-#if SGD_OS_WINDOWS
-				backendType = wgpu::BackendType::D3D11;
-#endif
-			} else if (bt == "Vulkan") {
-#if SGD_OS_WINDOWS || SGD_OS_LINUX
-				backendType = wgpu::BackendType::Vulkan;
-#endif
-			} else if (bt == "Metal") {
-#if SGD_OS_MACOS
-				backendType = wgpu::BackendType::Metal;
-#endif
+	wgpu::RequestAdapterOptions adapterOpts{};
+	adapterOpts.backendType = backendType();
+
+	requestWGPUDevice(adapterOpts, [&](const wgpu::Device& device) {
+		m_wgpuDevice = device;
+		m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
+
+		auto resize = [=](CVec2u size) {
+			if (size == m_swapChainSize) return;
+
+			m_swapChainSize = size;
+			if (!size.x || !size.y) return;
+
+			wgpu::SurfaceCapabilities surfCaps{};
+			if (!m_wgpuSurface.GetCapabilities(m_wgpuDevice.GetAdapter(), &surfCaps)) {
+				SGD_ERROR("wgpu::Surface::GetCapabilities failed");
+			}
+			if (!surfCaps.formatCount) {
+				SGD_ERROR("wgpu::SurfaceCapabilities.formats == 0");
 			}
 
-			if (backendType == wgpu::BackendType::Undefined) {
-#if SGD_OS_WINDOWS
-				OSVERSIONINFO info{sizeof(OSVERSIONINFO)};
-				GetVersionEx((OSVERSIONINFO*)&info);
-				if (info.dwMajorVersion == 6 && info.dwMinorVersion >= 2) { // 6.2 is >= windows 8
-					backendType = (sizeof(void*) == 8) ? wgpu::BackendType::D3D12 : wgpu::BackendType::D3D11; // NOLINT
-				} else {																					  // <= windows 7
-					backendType = wgpu::BackendType::Vulkan;
-				}
-#elif SGD_OS_LINUX
-				backendType = wgpu::BackendType::Vulkan;
-#elif SGD_OS_MACOS
-				backendType = wgpu::BackendType::Metal;
-#endif
+			wgpu::SurfaceConfiguration config{};
+			config.device = m_wgpuDevice;
+			config.width = m_swapChainSize.x;
+			config.height = m_swapChainSize.y;
+			config.format = surfCaps.formats[0];
+			config.usage = wgpu::TextureUsage::RenderAttachment;
+			config.presentMode = wgpu::PresentMode::Fifo;
+			config.viewFormatCount = 0;
+			config.viewFormats = nullptr;
+			config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
+
+			auto pm = getConfigVar("dawn.presentMode");
+			if (pm == "Immediate") {
+				config.presentMode = wgpu::PresentMode::Immediate;
+			} else if (pm == "Mailbox") {
+				config.presentMode = wgpu::PresentMode::Mailbox;
+			} else if (pm == "FifoRelaxed") {
+				config.presentMode = wgpu::PresentMode::FifoRelaxed;
 			}
 
-			wgpu::RequestAdapterOptions opts{};
-			opts.backendType = backendType;
+			m_wgpuSurface.Configure(&config);
 
-			requestWGPUDevice(opts, [&](const wgpu::Device& device) {
-				m_wgpuDevice = device;
-				m_wgpuSurface = createWGPUSurface(m_wgpuDevice, m_window->glfwWindow());
+			swapChainSizeChanged.emit(m_swapChainSize);
+		};
 
-				auto resize = [=](CVec2u size) {
-					if (size == m_swapChainSize) return;
+		m_window->sizeChanged0.connect(this, [=](CVec2u size) { //
+			resize(size);
+		});
+		resize(m_window->size());
 
-					m_swapChainSize = size;
-					if (!size.x || !size.y) return;
-
-					wgpu::SurfaceCapabilities surfCaps{};
-					if (!m_wgpuSurface.GetCapabilities(m_wgpuDevice.GetAdapter(), &surfCaps)) {
-						SGD_PANIC("wgpu::Surface::GetCapabilities failed");
-					}
-					if (!surfCaps.formatCount) {
-						SGD_PANIC("wgpu::SurfaceCapabilities.formats == 0");
-					}
-
-					wgpu::SurfaceConfiguration config{};
-					config.device = m_wgpuDevice;
-					config.width = m_swapChainSize.x;
-					config.height = m_swapChainSize.y;
-					config.format = surfCaps.formats[0];
-					config.usage = wgpu::TextureUsage::RenderAttachment;
-					config.presentMode = wgpu::PresentMode::Fifo;
-					config.viewFormatCount = 0;
-					config.viewFormats = nullptr;
-					config.alphaMode = wgpu::CompositeAlphaMode::Opaque;
-
-					auto pm = getConfigVar("dawn.presentMode");
-					if (pm == "Immediate") {
-						config.presentMode = wgpu::PresentMode::Immediate;
-					} else if (pm == "Mailbox") {
-						config.presentMode = wgpu::PresentMode::Mailbox;
-					} else if (pm == "FifoRelaxed") {
-						config.presentMode = wgpu::PresentMode::FifoRelaxed;
-					}
-
-					m_wgpuSurface.Configure(&config);
-
-					swapChainSizeChanged.emit(m_swapChainSize);
-				};
-
-				m_window->sizeChanged0.connect(this, [=](CVec2u size) { //
-					resize(size);
-				});
-				resize(m_window->size());
-
-				ready = true;
-			});
-		},
-		true);
+		ready = true;
+	});
 
 	ready.waiteq(true);
 }
 
 GraphicsContext::~GraphicsContext() {
-	runOnMainThread([=] { m_wgpuDevice.Destroy(); }, true);
+	destroy();
+}
+
+void GraphicsContext::destroy() {
+	if (!m_wgpuDevice) return;
+	m_wgpuDevice.Destroy();
+	m_wgpuDevice = {};
 }
 
 void GraphicsContext::present(CTexture* texture) {
@@ -161,12 +166,12 @@ void GraphicsContext::present(CTexture* texture) {
 		m_wgpuSurface.GetCurrentTexture(&surfaceTexture);
 
 		if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::Success) {
-			SGD_PANIC("wgpu::Surface::GetCurrentTexture() failed.");
+			SGD_ERROR("wgpu::Surface::GetCurrentTexture() failed.");
 			return;
 		}
 
 		if (!surfaceTexture.texture) {
-			SGD_PANIC("surface.texture is nullptr.");
+			SGD_ERROR("surface.texture is nullptr.");
 			return;
 		}
 

@@ -23,14 +23,14 @@ EllipsoidCollider::EllipsoidCollider(Entity* entity, uint32_t colliderType, floa
 
 Collider* EllipsoidCollider::intersectRay(CLiner ray, float rradius, Contact& contact) {
 
-	SGD_PANIC("TODO");
+	SGD_ERROR("TODO");
 
 	return nullptr;
 }
 
 Collider* EllipsoidCollider::intersectRay(CLiner ray, CVec3f radii, Contact& contact) {
 
-	SGD_PANIC("TODO");
+	SGD_ERROR("TODO");
 
 	return nullptr;
 }

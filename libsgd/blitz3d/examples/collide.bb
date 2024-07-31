@@ -1,10 +1,13 @@
 Include "start.bb"
 
-CreateWindow 1280, 720, "Collisions Demo", 4
+SetConfigVar "debug.gpuAllocs", 1
+;SetConfigVar "debug.gpuFrees"
+
+CreateWindow 1280, 720, "Collisions Demo", WINDOW_FLAGS_RESIZABLE
 
 SetAmbientLightColor 1,.9,.8,.2
 
-Local env =  LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
+Local env =  LoadTexture("sgd://envmaps/sunnysky-cube.png", TEXTURE_FORMAT_SRGBA8, TEXTURE_FLAGS_ENVMAP)
 SetEnvTexture env
 
 Local skybox = CreateSkybox(env)
@@ -39,6 +42,15 @@ While PollEvents()<>1
 
 	Local sp#=3.2
 	If IsKeyDown(KEY_LEFT_SHIFT) sp=5.6
+	
+	If IsKeyHit(KEY_F11)
+		If GetWindowState()<>4
+			SetWindowState 4
+		Else
+			SetWindowState 2
+		EndIf
+	EndIf
+	
 
 	PlayerWalk(sp/60.0)
 	

@@ -4,8 +4,8 @@
 
 #define SKYBOX 1
 #define MESH 1
-//#define DRAWLIST 1
-// #define IMAGE 1
+#define DRAWLIST 1
+#define IMAGE 1
 
 using namespace sgd;
 
@@ -20,14 +20,14 @@ RenderQueuePtr renderQueue;
 
 SkyboxGeometryPtr skyboxGeometry;
 
-MeshPtr meshGeometry;
+MeshPtr mesh;
 MeshRendererPtr meshRenderer;
 
 DrawListPtr drawList;
 
 #if IMAGE
 ImagePtr image;
-// ImageRendererPtr imageRenderer;
+ImageRendererPtr imageRenderer;
 #endif
 
 void render() {
@@ -52,12 +52,11 @@ void render() {
 #endif
 #if IMAGE
 	{
-		imageRenderer->beginUpdate();
-		auto instp = imageRenderer->addInstances(image, 1);
+		auto instp = imageRenderer->lockInstances(1);
 		instp->worldMatrix = AffineMat4f::TRS({0, 0, 1});
 		instp->color = Vec4f(1);
 		instp->frame = 0;
-		imageRenderer->endUpdate();
+		imageRenderer->unlockInstances();
 	}
 #endif
 
@@ -72,13 +71,13 @@ void render() {
 		skyboxGeometry->render(renderQueue);
 #endif
 #if MESH
-		meshRenderer->render(renderQueue);
+		meshRenderer->render(renderQueue, mesh, 1, 0);
 #endif
 #if DRAWLIST
 		drawList->render(renderQueue);
 #endif
 #if IMAGE
-		imageRenderer->render(renderQueue);
+		imageRenderer->render(renderQueue, image, 0, 1);
 #endif
 
 		renderContext->beginRender();
@@ -155,8 +154,8 @@ int main() {
 
 #if MESH
 	MaterialPtr material = loadPBRMaterial(Path("sgd://materials/Fabric048_1K-JPG")).result();
-	meshGeometry = createSphereMesh(.5f, 48, 24, material);
-	meshRenderer = new MeshRenderer(meshGeometry);
+	mesh = createSphereMesh(.5f, 48, 24, material);
+	meshRenderer = new MeshRenderer();
 #endif
 
 #if DRAWLIST

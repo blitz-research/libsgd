@@ -67,7 +67,7 @@ String dequote(CString str) {
 	return str.substr(1, str.size() - 2);
 }
 
-bool truthy(CString str) {
+bool truthiness(CString str) {
 	auto tstr = toLower(str);
 	return tstr=="1" || tstr == "true" || tstr=="on";
 }

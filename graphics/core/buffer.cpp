@@ -27,7 +27,7 @@ Buffer::Buffer(BufferType type, const void* data, uint32_t size)
 }
 
 Buffer::~Buffer() {
-	currentGC()->wgpuFree(m_alloced, usageNames.find(m_type)->second);
+	if(currentGC()) currentGC()->wgpuFree(m_alloced, "Buffer");
 	std::free(m_data);
 }
 

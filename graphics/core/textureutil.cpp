@@ -117,7 +117,7 @@ Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, Textu
 		size = {sz, sz};
 	}
 
-	premultiplyAlpha(img, format, size, size.x * bpp);
+	if (n != 3) premultiplyAlpha(img, format, size, size.x * bpp);
 
 	auto texture = new Texture(size, depth, format, flags);
 
@@ -139,10 +139,9 @@ Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, Textu
 void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pitch) {
 	if (format != TextureFormat::rgba8 && format != TextureFormat::srgba8) return;
 
-	auto bpp = bytesPerTexel(format);
-
 	switch (format) {
 	case TextureFormat::rgba8:
+//		SGD_LOG << "Begin pm alpha";
 		for (auto y = 0; y < size.y; ++y) {
 			auto p = (uint8_t*)data + y * pitch;
 			for (auto x = 0; x < size.x; p += 4, ++x) {
@@ -152,8 +151,10 @@ void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pi
 				p[2] = ftou8(std::pow(std::pow(u8tof(p[2]), 2.2f) * a, 1.0f / 2.2f));
 			}
 		}
+//		SGD_LOG << "End pm alpha";
 		break;
 	case TextureFormat::srgba8:
+//		SGD_LOG << "Begin pm alpha";
 		for (auto y = 0; y < size.y; ++y) {
 			auto p = (uint8_t*)data + y * pitch;
 			for (auto x = 0; x < size.x; p += 4, ++x) {
@@ -162,6 +163,7 @@ void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pi
 				p[2] = p[2] * p[3] / 255;
 			}
 		}
+//		SGD_LOG << "End pm alpha";
 		break;
 	default:
 		break;

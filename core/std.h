@@ -16,31 +16,13 @@
 #include <string>
 #include <vector>
 
-// clang-format off
-#if SGD_COMPILER_MSVC
-#define SGD_BREAK() {__debugbreak();std::abort();}
-#elif SGD_OS_EMSCRIPTEN
-#define SGD_BREAK() {__builtin_trap();std::abort();}
-//#define SGD_BREAK() emscripten_force_exit(-1)
-#else
-#define SGD_BREAK() {__builtin_trap();std::abort();}
-#endif
+#define SGD_ERROR(MSG) sgd::error(MSG, __FILE__, __LINE__)
+#define SGD_ABORT() SGD_ERROR("Internal SGD Error");
 
 #if SGD_CONFIG_RELEASE
-#define SGD_PANIC(MSG) {sgd::alert(MSG);std::abort();}
-#define SGD_ABORT() {SGD_PANIC("Internal SGD Error");}
 #define SGD_ASSERT(COND)
 #else
-#define SGD_PANIC(MSG) {sgd::alert(MSG);SGD_BREAK()}
-#define SGD_ABORT() {SGD_PANIC("Internal SGD Error");}
-#define SGD_ASSERT(COND) if (!(COND)) {SGD_PANIC("SGD_ASSERT failed: " #COND);}
-#endif
-// clang-format on
-
-#if SGD_OS_EMSCRIPTEN
-#include <emscripten.h>
-#define EM_CALLBACK extern "C" EMSCRIPTEN_KEEPALIVE
-#define EM_EXTERN extern "C"
+#define SGD_ASSERT(COND) if (!(COND)) {SGD_ERROR("SGD_ASSERT failed: " #COND);}
 #endif
 
 //! @file
@@ -87,17 +69,9 @@ template <class K, class V> using CPair = const Pair<K, V>&;
 using Data = Vector<uint8_t>;
 using CData = const Data&;
 
-[[noreturn]] void unreachable();
+void setErrorHandler(const Function<void(CString msg, const char* file, int line)>& errorHandler);
 
-// Same as mod but handles negative x value so there's no 'hole' around 0, y should still be positive.
-inline int floorMod(int x, int y) {
-	return x >= 0 ? x % y : x - ((x - y + 1) / y) * y;
-}
-
-// Same as std::fmod but handles negative x value so there's no 'hole' around 0, y should still be positive.
-inline float floorMod(float x, float y) {
-	return x - std::floor(float(x) / float(y)) * y;
-}
+[[noreturn]] void error(CString msg, const char* file, int line);
 
 template <class C, class V> bool contains(const C& container, const V& value) {
 	return std::find(container.begin(), container.end(), value) != container.end();
@@ -182,5 +156,15 @@ inline uint8_t ftou8(float f) {
 inline float u8tof(uint32_t c) {
 	return (float)c / 255.0f; // ! Ignores overflow
 };
+
+// Same as mod but handles negative x value so there's no 'hole' around 0, y should still be positive.
+inline int floorMod(int x, int y) {
+	return x >= 0 ? x % y : x - ((x - y + 1) / y) * y;
+}
+
+// Same as std::fmod but handles negative x value so there's no 'hole' around 0, y should still be positive.
+inline float floorMod(float x, float y) {
+	return x - std::floor(float(x) / float(y)) * y;
+}
 
 } // namespace sgd

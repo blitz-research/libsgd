@@ -22,7 +22,6 @@ struct SGD_Event {
 inline bool g_started;
 inline bool g_terminated;
 inline WindowPtr g_mainWindow;
-inline GraphicsContextPtr g_mainGC;
 inline ScenePtr g_mainScene;
 inline OverlayPtr g_overlay;
 inline DrawListPtr g_drawList;
@@ -96,11 +95,6 @@ inline void started() {
 inline Window* mainWindow() {
 	if (g_mainWindow) return g_mainWindow;
 	error("Main window has not been created");
-}
-
-inline GraphicsContext* mainGC() {
-	if (g_mainGC) return g_mainGC;
-	error("Graphics context does not exist");
 }
 
 inline Scene* mainScene() {

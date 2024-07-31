@@ -85,7 +85,8 @@ void beginAppEventLoop() {
 #if SGD_OS_EMSCRIPTEN
 
 	emscripten_exit_with_live_runtime();
-	unreachable();
+
+	SGD_ABORT();
 
 #else
 

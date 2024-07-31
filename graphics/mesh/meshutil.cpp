@@ -147,7 +147,7 @@ Mesh* copy(CMesh* mesh) {
 	newMesh->unlockVertices();
 
 	for (Surface* surf : mesh->surfaces()) {
-		auto newSurf = new Surface(surf->triangleCount(), surf->material());
+		auto newSurf = new Surface(newMesh, surf->material(), surf->triangleCount());
 		sgd::copy(newSurf->lockTriangles(), surf->triangles(), surf->triangleCount());
 		newSurf->unlockTriangles();
 		newMesh->addSurface(newSurf);

@@ -24,7 +24,7 @@ Collider* SphereCollider::intersectRay(CLiner ray, float rradius, Contact& conta
 }
 
 Collider* SphereCollider::intersectRay(CLiner ray, CVec3f radii, Contact& contact) {
-	SGD_PANIC("TODO");
+	SGD_ERROR("TODO");
 
 	return nullptr;
 }

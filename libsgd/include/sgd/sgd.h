@@ -143,33 +143,79 @@ SGD_API void SGD_DECL sgd_DebugMemory();
 //! @name Window
 //! @{
 
+//! @cond Window states for use with SetWindowState
+#define SGD_WINDOW_STATE_CLOSED     0
+#define SGD_WINDOW_STATE_MINIMIZED  1
+#define SGD_WINDOW_STATE_NORMAL     2
+#define SGD_WINDOW_STATE_MAXIMIZED  3
+#define SGD_WINDOW_STATE_FULLSCREEN 4
+//! @endcond
+
 //! @cond Window flags for use with CreateWindow.
-#define SGD_WINDOW_FLAGS_FULLSCREEN 1
-#define SGD_WINDOW_FLAGS_RESIZABLE 2
-#define SGD_WINDOW_FLAGS_CENTERED 4
-#define SGD_WINDOW_FLAGS_RGBA8_60HZ 256
+#define SGD_WINDOW_FLAGS_FULLSCREEN      1
+#define SGD_WINDOW_FLAGS_RESIZABLE       2
+#define SGD_WINDOW_FLAGS_CENTERED        4
+#define SGD_WINDOW_FLAGS_FULLSCREEN_60HZ 8
 //! @endcond
 
 //! Create a new window.
 //!
 //! `flags` should be one or more of the following bit mask values:
 //!
-//! Window flag                 | Integer value | Description
-//! ----------------------------|---------------|------------
-//! SGD_WINDOW_FLAGS_FULLSCREEN | 1             | Create a fullscreen window.
-//! SGD_WINDOW_FLAGS_RESIZABLE  | 2             | Create a resizable window.
-//! SGD_WINDOW_FLAGS_CENTERED   | 4             | Open window centered on desktop.
-//! SGD_WINDOW_FLAGS_RGBA8_60HZ | 256           | Create an exclusive mode fullscreen window.
+//! Window flag                      | Integer value | Description
+//! ---------------------------------|---------------|------------
+//! SGD_WINDOW_FLAGS_FULLSCREEN      | 1             | Create a fullscreen window
+//! SGD_WINDOW_FLAGS_RESIZABLE       | 2             | Create a resizable window
+//! SGD_WINDOW_FLAGS_CENTERED        | 4             | Open window centered on desktop
+//! SGD_WINDOW_FLAGS_FULLSCREEN_60HZ | 8             | Create a fullscreen 60 hz window
 SGD_API void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flags);
 
 //! Destroy window.
 SGD_API void SGD_DECL sgd_DestroyWindow();
+
+//! Set window position.
+SGD_API void SGD_DECL sgd_SetWindowPosition(int x, int y);
+
+//! Get window x.
+SGD_API int SGD_DECL sgd_GetWindowX();
+
+//! Get window y.
+SGD_API int SGD_DECL sgd_GetWindowY();
+
+//! Set window size.
+SGD_API void SGD_DECL sgd_SetWindowSize(int width, int height);
 
 //! Get window width.
 SGD_API int SGD_DECL sgd_GetWindowWidth();
 
 //! Get window height.
 SGD_API int SGD_DECL sgd_GetWindowHeight();
+
+//! Set window title.
+SGD_API void SGD_DECL sgd_SetWindowTitle(SGD_String title);
+
+//! Get window title. The returned string will be valid until the next call to sgd_GetWindowTitle().
+SGD_API SGD_String SGD_DECL sgd_GetWindowTitle();
+
+//! Set fullscreen mode.
+SGD_API void SGD_DECL sgd_SetFullscreenMode(int width, int height, int hertz);
+
+
+//! Set window state.
+//!
+//! `state` should be one of the following values:
+//!
+//! State                          | Integer value | Description
+//! -------------------------------|---------------|------------
+//! SGD_WINDOW_STATE_CLOSED        | 0             | Ignored - returned by sgd_GetWindowState only
+//! SGD_WINDOW_STATE_MINIMIZED     | 1             | Minimize window
+//! SGD_WINDOW_STATE_NORMAL        | 2			   | Restore minimized or maximized window, or exit fullscreen mode
+//! SGD_WINDOW_STATE_MAXIMIZED     | 3             | Maximize window
+//! SGD_WINDOW_STATE_FULLSCREEN    | 4             | Re-enter fullscreen mode
+SGD_API void SGD_DECL sgd_SetWindowState(int state);
+
+//! Get window state. See sgd_SetWindowState.
+SGD_API int SGD_DECL sgd_GetWindowState();
 
 //! @}
 
@@ -297,14 +343,14 @@ SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, int axis);
 //!
 //! Texture flags               | Integer value | Description
 //! ----------------------------|---------------|------------
-//! SGD_TEXTURE_FLAGS_NONE      | 0x00          | No texture flags.
-//! SGD_TEXTURE_FLAGS_CLAMP_U   | 0x01          | Clamp texture U coordinate.
-//! SGD_TEXTURE_FLAGS_CLAMP_V   | 0x02          | Clamp texture V coordinate.
-//! SGD_TEXTURE_FLAGS_CLAMP_W   | 0x04          | Clamp texture W coordinate.
-//! SGD_TEXTURE_FLAGS_CLAMP     | 0x07          | Clamp texture U, V, W coordinates.
-//! SGD_TEXTURE_FLAGS_FILTER    | 0x08          | Filter magnified texels.
-//! SGD_TEXTURE_FLAGS_MIPMAP    | 0x10          | Mipmap minified texels.
-//! SGD_TEXTURE_FLAGS_CUBE      | 0x20          | Create a cube texture.
+//! SGD_TEXTURE_FLAGS_NONE      | 0x00          | No texture flags
+//! SGD_TEXTURE_FLAGS_CLAMP_U   | 0x01          | Clamp texture U coordinate
+//! SGD_TEXTURE_FLAGS_CLAMP_V   | 0x02          | Clamp texture V coordinate
+//! SGD_TEXTURE_FLAGS_CLAMP_W   | 0x04          | Clamp texture W coordinate
+//! SGD_TEXTURE_FLAGS_CLAMP     | 0x07          | Clamp texture U, V, W coordinates
+//! SGD_TEXTURE_FLAGS_FILTER    | 0x08          | Filter magnified texels
+//! SGD_TEXTURE_FLAGS_MIPMAP    | 0x10          | Mipmap minified texels
+//! SGD_TEXTURE_FLAGS_CUBE      | 0x20          | Create a cube texture
 //!
 //! Some convenient default combinations of texture flags are also defined:
 //!
@@ -362,8 +408,8 @@ SGD_API SGD_Material SGD_DECL sgd_LoadPrelitMaterial(SGD_String path);
 //! Blend mode                 | Integer value | Description
 //! ---------------------------|---------------|------------
 //! SGD_BLEND_MODE_OPAQUE      | 1             | Opaque
-//! SGD_BLEND_MODE_ALPHA_MASK  | 2             | Alpha mask - fragments with alpha >= 0.5 are rendered, others are discarded.
-//! SGD_BLEND_MODE_ALPHA_BLEND | 3             | Additive blend - fragments are blended ing using premultipled alpha.
+//! SGD_BLEND_MODE_ALPHA_MASK  | 2             | Alpha mask - fragments with alpha >= 0.5 are rendered, others are discarded
+//! SGD_BLEND_MODE_ALPHA_BLEND | 3             | Alpha blend - fragments are blended ing using premultipled alpha
 SGD_API void SGD_DECL sgd_SetMaterialBlendMode(SGD_Material material, int blendMode);
 
 //! Set material depth comparison function.
@@ -388,9 +434,9 @@ SGD_API void SGD_DECL sgd_SetMaterialDepthFunc(SGD_Material material, int depthF
 //!
 //! Cull mode           | Integer value | Description
 //! --------------------| --------------|------------
-//! SGD_CULL_MODE_NONE  | 1             | Don't cull any primitives.
-//! SGD_CULL_MODE_FRONT | 2             | Cull front facing primitives.
-//! SGD_CULL_MODE_BACK  | 3             | Cull back facing primitives.
+//! SGD_CULL_MODE_NONE  | 1             | Don't cull any primitives
+//! SGD_CULL_MODE_FRONT | 2             | Cull front facing primitives
+//! SGD_CULL_MODE_BACK  | 3             | Cull back facing primitives
 SGD_API void SGD_DECL sgd_SetMaterialCullMode(SGD_Material material, int cullMode);
 
 //! Set material vector4 property.
@@ -731,8 +777,6 @@ SGD_API void SGD_DECL sgd_SetSSMClipNear(float near);
 //! Set depth bias for SSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.0001.
 SGD_API void SGD_DECL sgd_SetSSMDepthBias(float bias);
 
-
-
 //! Render scene.
 SGD_API void SGD_DECL sgd_RenderScene();
 
@@ -771,11 +815,26 @@ SGD_API void SGD_DECL sgd_ResetEntity(SGD_Entity entity);
 //! Copy entity and children recursively.
 SGD_API SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity entity);
 
+//! Set entity name
+SGD_API void SGD_DECL sgd_SetEntityName(SGD_Entity entity, SGD_String name);
+
+//! Get entity name. The returned string will remain valid until the next call to sgd_GetEntityName.
+SGD_API SGD_String SGD_DECL sgd_GetEntityName(SGD_Entity entity);
+
 //! Set entity's parent.
 SGD_API void SGD_DECL sgd_SetEntityParent(SGD_Entity entity, SGD_Entity parent);
 
 //! Get entity's parent.
 SGD_API SGD_Entity SGD_DECL sgd_GetEntityParent(SGD_Entity entity);
+
+//! Get entity number of children
+SGD_API int SGD_DECL sgd_GetEntityChildCount(SGD_Entity entity);
+
+//! Get entity child by index. childIndex must be >= 0 and < sgd_GetEntityChildCount(entity)
+SGD_API SGD_Entity SGD_DECL sgd_GetEntityChild(SGD_Entity entity, int childIndex);
+
+//! Recursively search for an entity by name.
+SGD_API SGD_Entity SGD_DECL sgd_FindEntityChild(SGD_Entity entity, SGD_String childName);
 
 //! Set entity's world space position.
 SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity entity, SGD_Real tx, SGD_Real ty, SGD_Real tz);

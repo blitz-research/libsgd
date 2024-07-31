@@ -61,7 +61,7 @@ void SkyboxGeometry::onValidate() const {
 }
 
 void SkyboxGeometry::render(RenderQueue* rq) const {
-	rq->addRenderOp(nullptr, nullptr, m_material, m_bindGroup, emptyBindGroup(BindGroupType::renderer), 4, 1, 0, false);
+	rq->addRenderOp(nullptr, nullptr, m_material, m_bindGroup, emptyBindGroup(BindGroupType::renderer), 4, 1, 0, 0, false);
 }
 
 } // namespace sgd

@@ -27,7 +27,7 @@ else ()
 		GIT_SHALLOW TRUE
 		EXCLUDE_FROM_ALL
 	)
-
+	set(DAWN_BUILD_MONOLITHIC_LIBRARY OFF)
 	set(DAWN_FETCH_DEPENDENCIES ON)
 	set(DAWN_BUILD_SAMPLES OFF)
 	set(DAWN_USE_GLFW OFF)
@@ -37,7 +37,16 @@ else ()
 
 	FetchContent_MakeAvailable(dawn)
 
-	target_link_libraries(lib-dawn INTERFACE webgpu_dawn webgpu_cpp)
+	target_link_libraries(lib-dawn INTERFACE
+		webgpu_cpp
+#		webgpu_dawn
+#		dawn_internal_config
+#		dawn::dawn_common
+#		dawn::dawn_system_utils
+#		dawn::dawn_wgpu_utils
+		dawn::dawn_proc
+		dawn::dawn_native
+	)
 
 	target_include_directories(lib-dawn INTERFACE ${DAWN_INCLUDE_DIR})
 

@@ -1,10 +1,20 @@
 #include "gltfloader.h"
 
+#include <graphics/exports.h>
+
 #define TINYGLTF_IMPLEMENTATION 1
 #define TINYGLTF_NO_IMAGE_WRITE 1
 #include <tiny_gltf.h>
 
 namespace sgd {
+
+namespace {
+
+bool g_debugLoader;
+
+auto init = configVarChanged("debug.gltfLoader").connect(nullptr, [](CString value) { g_debugLoader = truthiness(value); });
+
+} // namespace
 
 AffineMat4f GLTFLoader::nodeMatrix(const tinygltf::Node& gltfNode) {
 
@@ -108,8 +118,8 @@ Texture* GLTFLoader::loadTexture(int id, bool srgb, bool pmAlpha) {
 	auto& gltfImage = gltfModel.images[gltfTex.source];
 
 	// Shouldn't just PANIC!
-	if (gltfImage.bits != 8) SGD_PANIC("TODO: Unsupported gltfImage.bits: " + toString(gltfImage.bits));
-	if (gltfImage.component != 4) SGD_PANIC("TODO: Unsupported gltfImage.component: " + toString(gltfImage.component));
+	if (gltfImage.bits != 8) SGD_ERROR("TODO: Unsupported gltfImage.bits: " + toString(gltfImage.bits));
+	if (gltfImage.component != 4) SGD_ERROR("TODO: Unsupported gltfImage.component: " + toString(gltfImage.component));
 
 	auto texFormat = srgb ? TextureFormat::srgba8 : TextureFormat::rgba8;
 	auto texFlags = TextureFlags::none;
@@ -162,42 +172,60 @@ Material* GLTFLoader::loadMaterial(int id) {
 	auto& gltfMat = gltfModel.materials[id];
 	auto material = cachedMaterials[id] = new Material(&pbrMaterialDescriptor);
 
-	static const Map<String, BlendMode> blendModes{
-		{"OPAQUE", BlendMode::opaque}, {"MASK", BlendMode::alphaMask}, {"BLEND", BlendMode::alphaBlend}};
+	static const Map<String, BlendMode> blendModes{{"OPAQUE", BlendMode::opaque},  //
+												   {"MASK", BlendMode::alphaMask}, //
+												   {"BLEND", BlendMode::alphaBlend}};
 	auto it = blendModes.find(gltfMat.alphaMode);
 	material->blendMode = it != blendModes.end() ? it->second : BlendMode::opaque;
 	material->cullMode = gltfMat.doubleSided ? CullMode::none : CullMode::back;
+
+	if (g_debugLoader) {
+		SGD_LOG << "Material:" << gltfMat.name;
+		SGD_LOG << "  BlendMode:" << toString(material->blendMode());
+		SGD_LOG << "  DepthFunc:" << toString(material->depthFunc());
+		SGD_LOG << "  CullMode:" << toString(material->cullMode());
+	}
 
 	auto& pbr = gltfMat.pbrMetallicRoughness;
 
 	{
 		auto factor = pbr.baseColorFactor.data();
-		material->setVector4f("albedoColor4f", Vec4f((float)factor[0], (float)factor[1], (float)factor[2], (float)factor[3]));
-		//			CLOG << "alphaMode:" << gltfMat.alphaMode << "albedoColor:" << uniforms->albedoColor;
+		auto alpha = (float)factor[3];
+		auto color = Vec4f((float)factor[0] * alpha, (float)factor[1] * alpha, (float)factor[2] * alpha, alpha);
+		material->setVector4f("albedoColor4f", color);
+		if (g_debugLoader) SGD_LOG << "  albedoColor:" << color;
+
 		auto& texInfo = pbr.baseColorTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
-			material->setTexture("albedoTexture",
-								 loadTexture(texInfo.index, true, material->blendMode() == BlendMode::alphaBlend));
+			auto texture = loadTexture(texInfo.index, true, material->blendMode() == BlendMode::alphaBlend);
+			material->setTexture("albedoTexture", texture);
+			if (g_debugLoader) SGD_LOG << "  albedoTexture:" << gltfModel.textures[texInfo.index].name;
 		}
 	}
 	{
 		auto factor = gltfMat.emissiveFactor.data();
-		material->setVector3f("emissiveColor3f", Vec3f((float)factor[0], (float)factor[1], (float)factor[2]));
+		auto color = Vec3f((float)factor[0], (float)factor[1], (float)factor[2]);
+		material->setVector3f("emissiveColor3f", color);
+		if (g_debugLoader) SGD_LOG << "  emissiveColor:" << color;
+
 		auto& texInfo = gltfMat.emissiveTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
-			material->setTexture("emissiveTexture", loadTexture(texInfo.index, true, false));
+			auto texture = loadTexture(texInfo.index, true, false);
+			material->setTexture("emissiveTexture", texture);
+			if (g_debugLoader) SGD_LOG << "  emissiveTexture:" << gltfModel.textures[texInfo.index].name;
 		}
 	}
 	{
 		auto& texInfo = gltfMat.normalTexture;
 		if (texInfo.index >= 0) {
-			if(texInfo.texCoord==0) {
+			if (texInfo.texCoord == 0) {
 				SGD_ASSERT(texInfo.scale == 1.0f);
 				material->setTexture("normalTexture", loadTexture(texInfo.index, false, false));
-			}else{
-				SGD_LOG << "TODO: Skipping normal map: texInfo.texCoord=" <<texInfo.texCoord;
+				if (g_debugLoader) SGD_LOG << "  normalTexture:" << gltfModel.textures[texInfo.index].name;
+			} else {
+				SGD_LOG << "TODO: Skipping normal map with texInfo.texCoord=" << texInfo.texCoord;
 			}
 		}
 	}
@@ -206,17 +234,23 @@ Material* GLTFLoader::loadMaterial(int id) {
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
 			material->setTexture("occlusionTexture", loadTexture(texInfo.index, false, false));
+			if (g_debugLoader) SGD_LOG << "  occlusionTexture:" << gltfModel.textures[texInfo.index].name;
 		}
 	}
 	{
-		material->setFloat("metallicFactor1f", pbr.metallicFactor);
-		material->setFloat("roughnessFactor1f", pbr.roughnessFactor);
+		material->setFloat("metallicFactor1f", (float)pbr.metallicFactor);
+		if (g_debugLoader) SGD_LOG << "  metallicFactor:" << toString(pbr.metallicFactor);
+
+		material->setFloat("roughnessFactor1f", (float)pbr.roughnessFactor);
+		if (g_debugLoader) SGD_LOG << "  roughnessFactor:" << toString(pbr.roughnessFactor);
+
 		auto& texInfo = pbr.metallicRoughnessTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
 			auto texture = loadTexture(texInfo.index, false, false);
 			material->setTexture("metallicTexture", texture);
 			material->setTexture("roughnessTexture", texture);
+			if (g_debugLoader) SGD_LOG << "  metallicRoughnesstexture:" << gltfModel.textures[texInfo.index].name;
 		}
 	}
 
@@ -262,33 +296,33 @@ void GLTFLoader::copyBufferData(const tinygltf::Accessor& accessor, void* dst, s
 
 void GLTFLoader::beginMesh() {
 	meshVertices.clear();
-	meshTriangles.clear();
-	meshHasNormals = false;
+	meshSurfaces.clear();
+	opaqueSurfaces.clear();
 	meshHasTangents = false;
+	meshFlags = MeshFlags::none;
 }
 
 Mesh* GLTFLoader::endMesh() {
 
-	MeshFlags flags = MeshFlags::none;
-	for (auto& it : this->meshTriangles) {
-		if (gltfModel.materials[it.first].normalTexture.index == -1) continue;
-		flags |= MeshFlags::tangentsEnabled;
-		break;
+	if (g_debugLoader) {
+		SGD_LOG << "Mesh flags:" << (int)meshFlags;
 	}
 
-	auto mesh = new Mesh(meshVertices.size(), flags);
+	auto mesh = new Mesh(meshVertices.size(), meshFlags);
 	sgd::copy(mesh->lockVertices(), meshVertices.data(), meshVertices.size());
 	mesh->unlockVertices();
 
-	for (auto& it : this->meshTriangles) {
-		auto& triangles = it.second;
-		auto surface = new Surface(triangles.size(), loadMaterial(it.first));
+	for (auto& surf : this->meshSurfaces) {
+		auto& triangles = surf.triangles;
+		auto surface = new Surface(mesh, loadMaterial(surf.materialId), triangles.size());
 		sgd::copy(surface->lockTriangles(), triangles.data(), triangles.size());
 		surface->unlockTriangles();
 		mesh->addSurface(surface);
 	}
 
-	if (bool(flags & MeshFlags::tangentsEnabled) && !meshHasTangents) updateTangents(mesh);
+	if (bool(meshFlags & MeshFlags::tangentsEnabled) && !meshHasTangents) updateTangents(mesh);
+
+	mesh->updateBounds();
 
 	beginMesh();
 
@@ -314,57 +348,153 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 	for (auto& attrib : gltfPrim.attributes) {
 
 		auto& accessor = gltfModel.accessors[attrib.second];
-		int count = accessor.count;
+		auto count = accessor.count;
 
 		if (attrib.first == "POSITION") {
-			SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC3 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-			copyBufferData(accessor, &vp->position, sizeof(Vertex));
+			//
+			if (accessor.type == TINYGLTF_TYPE_VEC3) {
+				if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+					copyBufferData(accessor, &vp->position, sizeof(Vertex));
+				} else {
+					SGD_LOG << "TODO: Unsupported POSITION component type:" << accessor.componentType;
+					continue;
+				}
+			} else {
+				SGD_LOG << "TODO: Unsupported POSITION type:" << accessor.type;
+				continue;
+			}
 			for (int i = 0; i < count; ++i) vp[i].position.z = -vp[i].position.z;
+			//
 		} else if (attrib.first == "NORMAL") {
-			SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC3 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-			copyBufferData(accessor, &vp->normal, sizeof(Vertex));
+			//
+			if (accessor.type == TINYGLTF_TYPE_VEC3) {
+				if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+					copyBufferData(accessor, &vp->normal, sizeof(Vertex));
+				} else {
+					SGD_LOG << "TODO: Unsupported NORMAL component type:" << accessor.componentType;
+					continue;
+				}
+			} else {
+				SGD_LOG << "TODO: Unsupported NORMAL type:" << accessor.type;
+				continue;
+			}
 			for (int i = 0; i < count; ++i) vp[i].normal.z = -vp[i].normal.z;
-			meshHasNormals = true;
+			//
 		} else if (attrib.first == "TANGENT") {
-			SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC4 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-			copyBufferData(accessor, &vp->tangent, sizeof(Vertex));
+			//
+			if (accessor.type == TINYGLTF_TYPE_VEC4) {
+				if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+					copyBufferData(accessor, &vp->tangent, sizeof(Vertex));
+				} else {
+					SGD_LOG << "TODO: Unsupported TANGENT component type:" << accessor.componentType;
+					continue;
+				}
+			} else {
+				SGD_LOG << "TODO: Unsupported TANGENT type:" << accessor.type;
+				continue;
+			}
 			for (int i = 0; i < count; ++i) vp[i].tangent.z = -vp[i].tangent.z;
 			meshHasTangents = true;
+			//
 		} else if (attrib.first == "TEXCOORD_0") {
-			SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC2 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-			copyBufferData(accessor, &vp->texCoords, sizeof(Vertex));
-		} else if (attrib.first == "JOINTS_0") {
-			SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC4);
-			if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
-				copyBufferData<Vec4<uint8_t>, Vec4<uint8_t>>(accessor, &vp->joints, sizeof(Vertex));
+			//
+			if (accessor.type == TINYGLTF_TYPE_VEC2) {
+				if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+					copyBufferData(accessor, &vp->texCoords, sizeof(Vertex));
+				} else {
+					SGD_LOG << "TODO: Unsupported TEXCOORD_0 component type:" << accessor.componentType;
+					continue;
+				}
 			} else {
-				SGD_ASSERT(accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT);
-				copyBufferData<Vec4<int16_t>, Vec4<uint8_t>>(accessor, &vp->joints, sizeof(Vertex));
+				SGD_LOG << "TODO: Unsupported TEXCOORD_0 type:" << accessor.type;
+				continue;
+			}
+			//
+		} else if (attrib.first == "COLOR_0") {
+			//
+			if (accessor.type == TINYGLTF_TYPE_VEC4) {
+				if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+					copyBufferData(accessor, &vp->color, sizeof(Vertex));
+				} else {
+					SGD_LOG << "TODO: Unsupported COLOR_0 component type:" << accessor.componentType;
+					continue;
+				}
+			} else {
+				SGD_LOG << "TODO: Unsupported COLOR_0 type:" << accessor.type;
+				continue;
+			}
+			for (int i = 0; i < count; ++i) vp[i].color.xyz() *= vp[i].color.w;
+			//
+		} else if (attrib.first == "JOINTS_0") {
+			//
+			if (accessor.type == TINYGLTF_TYPE_VEC4) {
+				if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE) {
+					copyBufferData<Vec4<uint8_t>, Vec4<uint8_t>>(accessor, &vp->joints, sizeof(Vertex));
+				} else if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT) {
+					copyBufferData<Vec4<int16_t>, Vec4<uint8_t>>(accessor, &vp->joints, sizeof(Vertex));
+				} else {
+					SGD_LOG << "TODO: Unsupported JOINTS_0 component type:" << accessor.componentType;
+					continue;
+				}
+			} else {
+				SGD_LOG << "TODO: Unsupported JOINTS_0 type:" << accessor.type;
+				continue;
 			}
 #if SGD_CONFIG_DEBUG
+			// Validate joint indices
 			for (int i = 0; i < accessor.count; ++i) {
 				SGD_ASSERT(vp[i].joints[0] < bones.size() && vp[i].joints[1] < bones.size() && vp[i].joints[2] < bones.size() &&
 						   vp[i].joints[3] < bones.size());
 			}
-#endif
+#endif //
 		} else if (attrib.first == "WEIGHTS_0") {
-			SGD_ASSERT(accessor.type == TINYGLTF_TYPE_VEC4 && accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT);
-			copyBufferData(accessor, &vp->weights, sizeof(Vertex));
+			//
+			if (accessor.type == TINYGLTF_TYPE_VEC4) {
+				if (accessor.componentType == TINYGLTF_COMPONENT_TYPE_FLOAT) {
+					copyBufferData(accessor, &vp->weights, sizeof(Vertex));
+				} else {
+					SGD_LOG << "TODO: Unsupported WEIGHTS_0 component type:" << accessor.componentType;
+					continue;
+				}
+			} else {
+				SGD_LOG << "TODO: Unsupported WEIGHTS_0 type:" << accessor.type;
+				continue;
+			}
 #if SGD_CONFIG_DEBUG
 			for (int i = 0; i < accessor.count; ++i) {
 				float w = vp[i].weights[0] + vp[i].weights[1] + vp[i].weights[2] + vp[i].weights[3];
 				SGD_ASSERT(std::abs(w - 1) < .00001f);
 			}
-#endif
+#endif //
 		} else {
 			SGD_LOG << "TODO: Skipping unrecognized gltf attribute:" << attrib.first;
 		}
 	}
 
+	auto& gltfMat = gltfModel.materials[gltfPrim.material];
+	if (gltfMat.normalTexture.index != -1 && gltfMat.normalTexture.texCoord == 0) meshFlags |= MeshFlags::tangentsEnabled;
+
+	MeshSurface* surfp = nullptr;
+	if (gltfMat.alphaMode != "BLEND") {
+		// shared surface
+		auto it = opaqueSurfaces.find(gltfPrim.material);
+		if (it != opaqueSurfaces.end()) {
+			surfp = &meshSurfaces[it->second];
+		} else {
+			meshSurfaces.push_back({gltfPrim.material});
+			surfp = &meshSurfaces.back();
+			opaqueSurfaces.insert(std::make_pair(gltfPrim.material, (uint32_t)meshSurfaces.size() - 1));
+		}
+	} else {
+		meshSurfaces.push_back({gltfPrim.material});
+		surfp = &meshSurfaces.back();
+		meshFlags |= MeshFlags::blendedSurfaces;
+	}
+	auto& triangles = surfp->triangles;
+
 	// Add triangles
 	const auto& accessor = gltfModel.accessors[gltfPrim.indices];
 
-	auto& triangles = meshTriangles[gltfPrim.material];
 	uint32_t firstTri = triangles.size();
 	uint32_t triCount = accessor.count / 3;
 	SGD_ASSERT(triCount * 3 == accessor.count);
@@ -383,7 +513,7 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 		copyBufferData<uint8_t, uint32_t>(accessor, tp, sizeof(uint32_t));
 		break;
 	default:
-		SGD_PANIC("TODO: Unsupported gltf component type for triangle indices");
+		SGD_ERROR("TODO: Unsupported gltf component type for triangle indices");
 	}
 	for (int i = 0; i < accessor.count; ++i) {
 		SGD_ASSERT(tp[i] < vertexCount);
@@ -451,7 +581,7 @@ void GLTFLoader::loadAnimations() {
 				copyBufferData(time_accessor, &seq->scaleKeys[0].time, sizeof(seq->scaleKeys[0]));
 				copyBufferData(value_accessor, &seq->scaleKeys[0].value, sizeof(seq->scaleKeys[0]));
 			} else {
-				SGD_PANIC("TODO: Unsupported gltf animation channel target_path");
+				SGD_ERROR("TODO: Unsupported gltf animation channel target_path");
 			}
 		}
 		Vector<CAnimationSeqPtr> seqs;
@@ -613,14 +743,18 @@ Expected<Mesh*, FileioEx> loadStaticMesh(CPath path) {
 	auto r = loader.open(path);
 	if (!r) return r.error();
 
+	if (g_debugLoader) SGD_LOG << "Loading static mesh" << path.str();
+
 	return loader.loadStaticMesh();
 }
 
 Expected<Model*, FileioEx> loadBonedModel(CPath path) {
 	GLTFLoader loader;
 
-	auto r= loader.open(path);
-	if(!r) return r.error();
+	auto r = loader.open(path);
+	if (!r) return r.error();
+
+	if (g_debugLoader) SGD_LOG << "Loading boned model" << path.str();
 
 	return loader.loadBonedModel();
 }
@@ -628,8 +762,10 @@ Expected<Model*, FileioEx> loadBonedModel(CPath path) {
 Expected<Model*, FileioEx> loadSkinnedModel(CPath path) {
 	GLTFLoader loader;
 
-	auto r= loader.open(path);
-	if(!r) return r.error();
+	auto r = loader.open(path);
+	if (!r) return r.error();
+
+	if (g_debugLoader) SGD_LOG << "Loading skinned model" << path.str();
 
 	return loader.loadSkinnedModel();
 }

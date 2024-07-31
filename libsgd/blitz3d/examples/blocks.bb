@@ -1,7 +1,7 @@
 
 Include "start.bb"
 
-Const NUM_BLOCKS = 50000
+Const NUM_BLOCKS = 25000
 Const WORLD_SIZE = 100
 
 Type Block

@@ -28,4 +28,13 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType, //
 											   CMaterial* material,		 //
 											   CBindGroup* geometry,	 //
 											   CBindGroup* renderer);	 //
+
+String toString(RenderPassType rpassType);
+
+String toString(BlendMode blendMode);
+
+String toString(DepthFunc depthFunc);
+
+String toString(CullMode cullMode);
+
 } // namespace sgd

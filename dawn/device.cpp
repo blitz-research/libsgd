@@ -1,5 +1,8 @@
 #include "device.h"
 
+#include "dawn/dawn_proc.h"
+#include "dawn/native/DawnNative.h"
+
 #include <GLFW/glfw3.h>
 
 #if SGD_OS_WINDOWS
@@ -25,7 +28,17 @@ void* createMetalLayer(GLFWwindow* window);
 
 namespace {
 
-wgpu::FeatureName requiredFeatures[]{wgpu::FeatureName::TimestampQuery};
+bool g_validationEnabled = true;
+auto init0 = configVarChanged("dawn.validationEnabled").connect(nullptr,[](CString value){
+	g_validationEnabled = truthiness(value);
+});
+
+bool g_robustnessEnabled = true;
+auto init1 = configVarChanged("dawn.robustnessEnabled").connect(nullptr,[](CString value){
+	g_validationEnabled = truthiness(value);
+});
+
+//wgpu::FeatureName requiredFeatures[]{wgpu::FeatureName::TimestampQuery};
 //, wgpu::FeatureName::Float32Filterable};
 //, wgpu::FeatureName::TimestampQueryInsidePasses};
 
@@ -41,7 +54,7 @@ void dawnDeviceLostCallback(WGPUDevice const* device, WGPUDeviceLostReason reaso
 
 	//	SGD_LOG << "Dawn device lost:" << rname;
 	//	SGD_LOG << message;
-	SGD_PANIC(String("Dawn device lost: ") + rname + "\n" + message);
+	SGD_ERROR(String("Dawn device lost: ") + rname + "\n" + message);
 }
 
 void dawnErrorCallback(WGPUErrorType type, const char* message, void*) {
@@ -78,32 +91,28 @@ void dawnLoggingCallback(WGPULoggingType type, const char* message, void*) {
 		SGD_ABORT();
 		break;
 	default:
-		SGD_PANIC("Dawn logging error");
+		SGD_ERROR("Dawn logging error");
 	}
 }
 
 void logAdapterProps(const wgpu::Adapter& adapter) {
 
-	wgpu::AdapterProperties props{};
+	wgpu::AdapterInfo info{};
 
-	// Crashes on Linux sometimes!
-	// adapter.GetProperties(&props);
-	wgpuAdapterGetProperties(adapter.Get(), reinterpret_cast<WGPUAdapterProperties*>(&props));
-
-	SGD_LOG << "Dawn WGPU Adapter Properties:";
-	SGD_LOG << "Vender name:" << (props.vendorName ? props.vendorName : "???");
-	SGD_LOG << "Architecture:" << (props.architecture ? props.architecture : "???");
-	SGD_LOG << "Name:" << (props.name ? props.name : "???");
-	SGD_LOG << "Driver description:" << (props.driverDescription ? props.driverDescription : "???");
-
+	adapter.GetInfo(&info);
+	SGD_LOG << "Dawn WGPU Adapter Info:";
+	SGD_LOG << "Vender name:" << (info.vendor ? info.vendor : "???");
+	SGD_LOG << "Architecture:" << (info.architecture ? info.architecture : "???");
+	SGD_LOG << "Name:" << (info.device ? info.device : "???");
+	SGD_LOG << "Driver description:" << (info.description ? info.description : "???");
 	Map<wgpu::AdapterType, String> adapterTypes{
 		{wgpu::AdapterType::DiscreteGPU, "DiscreteGPU"},
 		{wgpu::AdapterType::IntegratedGPU, "IntegratedGPU"},
 		{wgpu::AdapterType::CPU, "CPU"},
 		{wgpu::AdapterType::Unknown, "Unknown"},
 	};
-	SGD_LOG << "Adapter type:" << adapterTypes[props.adapterType];
-
+	auto adapterIt = adapterTypes.find(info.adapterType);
+	SGD_LOG << "Adapter type:" << (adapterIt!=adapterTypes.end() ? adapterIt->second : "???");
 	Map<wgpu::BackendType, String> backendTypes{
 		{wgpu::BackendType::Undefined, "Undefined"}, {wgpu::BackendType::D3D12, "D3D12"},
 		{wgpu::BackendType::D3D11, "D3D11"},		 {wgpu::BackendType::Vulkan, "Vulkan"},
@@ -111,8 +120,9 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 		{wgpu::BackendType::OpenGL, "OpenGL"},		 {wgpu::BackendType::OpenGLES, "OpenGLES"},
 		{wgpu::BackendType::WebGPU, "WebGPU"},
 	};
-	SGD_LOG << "Backend type:" << backendTypes[props.backendType];
-	SGD_LOG << "Compatibility mode:" << props.compatibilityMode;
+	auto backendIt = backendTypes.find(info.backendType);
+	SGD_LOG << "Backend type:" << (backendIt!=backendTypes.end() ? backendIt->second : "???");
+	SGD_LOG << "Compatibility mode:" << info.compatibilityMode;
 
 	//wgpu::SupportedLimits limits;
 	//wgpuAdapterGetLimits(adapter.Get(), reinterpret_cast<WGPUSupportedLimits*>(&limits));
@@ -124,65 +134,70 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 } // namespace
 
 const wgpu::Instance& getWGPUInstance() {
+	static wgpu::Instance instance;
+	if(instance) return instance;
+
+	dawnProcSetProcs(&dawn::native::GetProcs());
+
 	wgpu::InstanceDescriptor desc{};
 	desc.features.timedWaitAnyEnable = true;
-	static wgpu::Instance instance = wgpu::CreateInstance(&desc);
-	return instance;
+
+	return instance = wgpu::CreateInstance(&desc);
 }
 
 void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 					   CFunction<void(const wgpu::Device& device)> callbackFunc) {
 
-	void* userdata = new Function<void(const wgpu::Device& device)>(callbackFunc);
-
 	getWGPUInstance().RequestAdapter(
 		&adapterOptions,
-		[](WGPURequestAdapterStatus status, WGPUAdapter cAdapter, char const* message, void* userdata) {
-			//
-			if (status != WGPURequestAdapterStatus_Success) {
-				SGD_PANIC("Dawn RequestAdapter() failed");
+		wgpu::CallbackMode::AllowProcessEvents,
+		[=](wgpu::RequestAdapterStatus status, const wgpu::Adapter& adapter, char const* message) {
+			if (status != wgpu::RequestAdapterStatus::Success) {
+				SGD_ERROR("Dawn RequestAdapter() failed");
 			}
-			auto adapter = wgpu::Adapter::Acquire(cAdapter);
 
 			logAdapterProps(adapter);
 
 			wgpu::DeviceDescriptor devDesc{};
 			wgpu::DawnTogglesDescriptor togglesDesc{};
-			const char* enabledToggles[]{"allow_unsafe_apis"};
-			//, "float32-filterable"
 
+			Vector<const char*> enabledToggles;
+			Vector<wgpu::FeatureName> requiredFeatures;
+
+			enabledToggles.push_back("allow_unsafe_apis");
+			if(!g_validationEnabled) enabledToggles.push_back("skip_validation");
+			if(!g_robustnessEnabled) enabledToggles.push_back("disable_robustness");
+
+			//for(auto s : enabledToggles) SGD_LOG << "toggle:"<<s;
+
+			if(adapter.HasFeature(wgpu::FeatureName::TimestampQuery)) {
+				requiredFeatures.push_back(wgpu::FeatureName::TimestampQuery);
+			}
+
+			devDesc.nextInChain = &togglesDesc;
+			devDesc.requiredFeatureCount = requiredFeatures.size();
+			devDesc.requiredFeatures = requiredFeatures.data();
 			devDesc.deviceLostCallbackInfo.callback = &dawnDeviceLostCallback;
 			devDesc.uncapturedErrorCallbackInfo.callback = &dawnErrorCallback;
 
-			auto feature = wgpu::FeatureName::TimestampQuery;
-			if (adapter.HasFeature(feature)) {
-				togglesDesc.enabledToggleCount = std::size(enabledToggles);
-				togglesDesc.enabledToggles = enabledToggles;
-				devDesc.nextInChain = &togglesDesc;
-				devDesc.requiredFeatureCount = 1;
-				devDesc.requiredFeatures = &feature;
-			}
+			togglesDesc.enabledToggleCount=enabledToggles.size();
+			togglesDesc.enabledToggles=enabledToggles.data();
 
 			adapter.RequestDevice(
 				&devDesc,
-				[](WGPURequestDeviceStatus status, WGPUDevice cDevice, const char* message, void* userdata) {
-					//
-					if (status != WGPURequestDeviceStatus_Success) {
-						SGD_PANIC("Dawn RequestDevice() failed");
+				wgpu::CallbackMode::AllowProcessEvents,
+				[=](wgpu::RequestDeviceStatus status, const wgpu::Device& device, const char* message) {
+					if (status != wgpu::RequestDeviceStatus::Success) {
+						SGD_ERROR("Dawn RequestDevice() failed");
 					}
-					auto device = wgpu::Device::Acquire(cDevice);
 
 					device.SetLoggingCallback(&dawnLoggingCallback, nullptr);
 
-					auto callback = (Function<void(const wgpu::Device&)>*)userdata;
-					(*callback)(device);
+					callbackFunc(device);
+				});
+		});
 
-					delete callback;
-					//
-				},
-				userdata);
-		},
-		userdata);
+	getWGPUInstance().ProcessEvents();
 	getWGPUInstance().ProcessEvents();
 }
 

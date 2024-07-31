@@ -17,10 +17,7 @@ void initApp() {
 	if(g_inited) return;
 	g_inited = true;
 
-	if (!glfwInit()) {
-		SGD_LOG << "glfwInit() failed - aborting";
-		SGD_ABORT();
-	}
+	if (!glfwInit()) SGD_ERROR("glfwInit() failed, aborting");
 
 	appIniting.emit();
 }
@@ -52,6 +49,12 @@ Vec2u desktopSize() {
 	auto monitor = glfwGetPrimaryMonitor();
 	auto mode = glfwGetVideoMode(monitor);
 	return Vec2i{mode->width, mode->height};
+}
+
+uint32_t desktopHz() {
+	auto monitor = glfwGetPrimaryMonitor();
+	auto mode = glfwGetVideoMode(monitor);
+	return mode->refreshRate;
 }
 
 void pollEvents() {

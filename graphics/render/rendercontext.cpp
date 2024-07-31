@@ -4,15 +4,23 @@
 
 namespace sgd {
 
+namespace {
+
+bool g_debugOps;
+
+}
+
 wgpu::CommandEncoder RenderContext::beginRender() {
 	SGD_ASSERT(isMainThread() && !m_wgpuCommandEncoder);
 
+	if(g_debugOps) SGD_LOG << "Begin render";
 	return m_wgpuCommandEncoder = currentGC()->wgpuDevice().CreateCommandEncoder();
 }
 
 void RenderContext::endRender() {
 	SGD_ASSERT(isMainThread() && m_wgpuCommandEncoder && !m_wgpuRenderPassEncoder);
 
+	if(g_debugOps) SGD_LOG << "End render";
 	auto commandBuffer = m_wgpuCommandEncoder.Finish();
 	currentGC()->wgpuDevice().GetQueue().Submit(1, &commandBuffer);
 
@@ -59,6 +67,7 @@ wgpu::RenderPassEncoder RenderContext::beginRenderPass(RenderPassType type, Text
 		break;
 	}
 
+	if(g_debugOps) SGD_LOG<< "Begin render pass";
 	m_wgpuRenderPassEncoder = m_wgpuCommandEncoder.BeginRenderPass(&renderPassDescriptor);
 
 	m_wgpuRenderPassEncoder.SetBindGroup(0, sceneBindings->wgpuBindGroup());
@@ -74,7 +83,9 @@ wgpu::RenderPassEncoder RenderContext::beginRenderPass(RenderPassType type, Text
 void RenderContext::endRenderPass() {
 	SGD_ASSERT(isMainThread() && m_wgpuRenderPassEncoder);
 
+	if(g_debugOps) SGD_LOG<< "End render pass";
 	m_wgpuRenderPassEncoder.End();
+
 	m_wgpuRenderPassEncoder = {};
 }
 
@@ -84,27 +95,35 @@ void RenderContext::render(CVector<RenderOp>& ops) {
 
 	for (auto& op : ops) {
 		if (op.vbuffer.Get() != m_rop.vbuffer.Get()) {
+			if(g_debugOps) SGD_LOG << "Set vertex buffer";
 			if((m_rop.vbuffer = op.vbuffer)) encoder.SetVertexBuffer(0, m_rop.vbuffer);
 		}
 		if (op.ibuffer.Get() != m_rop.ibuffer.Get()) {
+			if(g_debugOps) SGD_LOG << "Set index buffer";
 			if((m_rop.ibuffer = op.ibuffer)) encoder.SetIndexBuffer(m_rop.ibuffer, wgpu::IndexFormat::Uint32);
 		}
 		if (op.material.Get() != m_rop.material.Get()) {
+			if(g_debugOps) SGD_LOG << "Set material bind group";
 			encoder.SetBindGroup(1, m_rop.material = op.material);
 		}
 		if (op.geometry.Get() != m_rop.geometry.Get()) {
+			if(g_debugOps) SGD_LOG << "Set geometry bind group";
 			encoder.SetBindGroup(2, m_rop.geometry = op.geometry);
 		}
 		if (op.renderer.Get() != m_rop.renderer.Get()) {
+			if(g_debugOps) SGD_LOG << "Set renderer bind group";
 			encoder.SetBindGroup(3, m_rop.renderer = op.renderer);
 		}
 		if (op.pipeline.Get() != m_rop.pipeline.Get()) {
+			if(g_debugOps) SGD_LOG << "Set render pipeline";
 			encoder.SetPipeline(m_rop.pipeline = op.pipeline);
 		}
 		if (m_rop.ibuffer) {
-			encoder.DrawIndexed(op.elementCount, op.instanceCount, op.firstElement, 0, 0);
+			if(g_debugOps) SGD_LOG << "Draw indexed";
+			encoder.DrawIndexed(op.elementCount, op.instanceCount, op.firstElement, 0, op.firstInstance);
 		} else {
-			encoder.Draw(op.elementCount, op.instanceCount, op.firstElement, 0);
+			if(g_debugOps) SGD_LOG << "Draw";
+			encoder.Draw(op.elementCount, op.instanceCount, op.firstElement, op.firstInstance);
 		}
 	}
 }

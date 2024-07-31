@@ -13,6 +13,11 @@ struct GLTFLoader {
 
 private:
 
+	struct MeshSurface {
+		int materialId;
+		Vector<Triangle> triangles;
+	};
+
 	tinygltf::Model gltfModel;
 
 	Vector<bool> cachedImages;
@@ -20,9 +25,10 @@ private:
 	Vector<MaterialPtr> cachedMaterials;
 
 	Vector<Vertex> meshVertices;
-	Map<int, Vector<Triangle>> meshTriangles; // keyed by material index
-	bool meshHasNormals{};
+	Vector<MeshSurface> meshSurfaces;
+	Map<int, uint32_t> opaqueSurfaces;		// keyed by material index, index into meshSurfaces
 	bool meshHasTangents{};
+	MeshFlags meshFlags;
 
 	// loadBones
 	Vector<EntityPtr> bones;

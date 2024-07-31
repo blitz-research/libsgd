@@ -27,3 +27,6 @@ target_link_libraries(scene_tests_overlay scene)
 
 add_executable(scene_tests_collisions scene_tests_collisions.cpp)
 target_link_libraries(scene_tests_collisions scene)
+
+add_executable(scene_tests_blendtest scene_tests_blendtest.cpp)
+target_link_libraries(scene_tests_blendtest scene)

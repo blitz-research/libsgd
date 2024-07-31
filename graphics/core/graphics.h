@@ -65,7 +65,10 @@ private:
 	float m_fps{};
 
 	explicit GraphicsContext(Window* window);
+
 	~GraphicsContext() override;
+
+	void destroy();
 };
 
 GraphicsContext* createGC(Window* window);
