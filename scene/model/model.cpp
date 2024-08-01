@@ -7,7 +7,14 @@
 
 namespace sgd {
 
-Model::Model(Mesh* mmesh) : mesh(mmesh) {
+void Model::init() {
+	color.changed.connect(
+		nullptr, [=](CVec4f ccolor) { m_pmColor = {ccolor.x * ccolor.w, ccolor.y * ccolor.w, ccolor.z * ccolor.w, ccolor.w}; });
+	m_pmColor = color();
+}
+
+Model::Model(Mesh* mesh) : mesh(mesh) {
+	init();
 }
 
 Model::Model(CModel* that)
@@ -17,24 +24,24 @@ Model::Model(CModel* that)
 	  m_bones(that->m_bones),		   //
 	  m_animations(that->m_animations) // We need an AnimationSet
 {
-	if (m_bones.empty()) return;
-
-	// This is currently a bit crusty, we need to remap bone entities to their copies, assumes they've been copied by Entity
-	// ctor 'in order'. Would like a nicer way to do this ultimately.
-	//
-	Map<Entity*, Entity*> bonesMap;
-	Function<void(const Entity*, const Entity*)> mapBones;
-	mapBones = [&](const Entity* e0, const Entity* e1) {
-		SGD_ASSERT(e0->children().size() == e1->children().size()); // should be same after copy!
-		for (int i = 0; i < e0->children().size(); ++i) {
-			auto c0 = e0->children()[i];
-			auto c1 = e1->children()[i];
-			bonesMap[c0] = c1;
-			mapBones(c0, c1);
-		}
-	};
-	mapBones(this, that);
-	for (auto& bone : m_bones) bone = bonesMap[bone];
+	if (!m_bones.empty()) {
+		// This is currently a bit crusty, we need to remap bone entities to their copies, assumes they've been copied by Entity
+		// ctor 'in order'. Would like a nicer way to do this ultimately.
+		Map<Entity*, Entity*> bonesMap;
+		Function<void(const Entity*, const Entity*)> mapBones;
+		mapBones = [&](const Entity* e0, const Entity* e1) {
+			SGD_ASSERT(e0->children().size() == e1->children().size()); // should be same after copy!
+			for (int i = 0; i < e0->children().size(); ++i) {
+				auto c0 = e0->children()[i];
+				auto c1 = e1->children()[i];
+				bonesMap[c0] = c1;
+				mapBones(c0, c1);
+			}
+		};
+		mapBones(this, that);
+		for (auto& bone : m_bones) bone = bonesMap[bone];
+	}
+	init();
 }
 
 Model::Model(Vector<EntityPtr> bones, Vector<AnimationPtr> animations, Vector<Joint> joints) //
@@ -43,6 +50,7 @@ Model::Model(Vector<EntityPtr> bones, Vector<AnimationPtr> animations, Vector<Jo
 	  m_joints(std::move(joints)),															 //
 	  m_skinned(!m_joints.empty()),															 //
 	  m_jointMatrices(m_joints.size()) {													 //
+	init();
 }
 
 Model* Model::onCopy() const {

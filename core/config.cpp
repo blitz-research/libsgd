@@ -16,11 +16,11 @@ std::mutex g_configMutex;
 
 } // namespace
 
-Map<String, Signal<CString>>& configVarChanged() {
+Signal<CString>& configVarChanged(CString name) {
 
 	if (!g_configVarChanged) g_configVarChanged = new Map<String, Signal<CString>>();
 
-	return *g_configVarChanged;
+	return (*g_configVarChanged)[name];
 }
 
 void setConfigVar(CString name, CString value) {
@@ -31,7 +31,7 @@ void setConfigVar(CString name, CString value) {
 	if (value == *p) return;
 
 	*p = value;
-	configVarChanged()[name].emit(value);
+	configVarChanged(name).emit(value);
 }
 
 String getConfigVar(CString name) {

@@ -49,8 +49,9 @@ wgpu::Sampler getOrCreateWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
 	desc.addressModeW = bool(flags & TextureFlags::clampW) ? wgpu::AddressMode::ClampToEdge : wgpu::AddressMode::Repeat;
 	desc.magFilter = bool(flags & TextureFlags::filter) ? wgpu::FilterMode::Linear : wgpu::FilterMode::Nearest;
 	desc.minFilter = wgpu::FilterMode::Linear;
-	desc.mipmapFilter = wgpu::MipmapFilterMode::Linear;
+	desc.mipmapFilter = bool(flags & TextureFlags::mipmap) ? wgpu::MipmapFilterMode::Linear : wgpu::MipmapFilterMode::Nearest;
 	desc.compare = bool(flags & TextureFlags::compare) ? wgpu::CompareFunction::LessEqual : wgpu::CompareFunction::Undefined;
+	desc.maxAnisotropy = bool(flags & TextureFlags::filter) && bool(flags & TextureFlags::mipmap) ? 16 : 1;
 
 	return sampler = gc->wgpuDevice().CreateSampler(&desc);
 }
@@ -71,7 +72,7 @@ Texture::Texture(Texture* texture, uint32_t layer)
 }
 
 Texture::~Texture() {
-
+	if(currentGC()) currentGC()->wgpuFree(m_alloced, "Texture");
 	std::free(m_data);
 }
 
@@ -80,7 +81,7 @@ void Texture::update(const void* src, size_t srcPitch) {
 	auto dstPitch = PITCH(m_size);
 
 	if (dstPitch != srcPitch) {
-		SGD_PANIC("TODO");
+		SGD_ERROR("TODO");
 		auto rowSize = std::min(srcPitch, dstPitch);
 		for (int y = 0; y < m_size.y * m_depth; ++y) {
 			std::memcpy(m_data + dstPitch * y, (uint8_t*)src + srcPitch * y, rowSize);
@@ -122,9 +123,14 @@ void Texture::onValidate() const {
 		}
 		if (bool(m_flags & TextureFlags::renderTarget)) {
 			desc.usage |= wgpu::TextureUsage::RenderAttachment;
-			if(bool(m_flags & TextureFlags::msaa)) desc.sampleCount = 4;
+			if (bool(m_flags & TextureFlags::msaa)) desc.sampleCount = 4;
 		}
+
+		uint32_t allocing = (m_size.x * bytesPerTexel(m_format) + 255U & ~255U) * m_size.y * m_depth;
+		gc->wgpuAllocing(allocing, "Texture");
 		m_wgpuTexture = gc->wgpuDevice().CreateTexture(&desc);
+		gc->wgpuFree(m_alloced, "Texture");
+		m_alloced = allocing;
 
 		m_wgpuSampler = getOrCreateWGPUSampler(gc, m_flags);
 

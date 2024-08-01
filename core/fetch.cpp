@@ -114,7 +114,7 @@ CURL* openCurl() {
 
 	g_curl = curl_easy_init();
 	if (!g_curl) {
-		SGD_PANIC("!!! Failed to create CURL instance");
+		SGD_ERROR("!!! Failed to create CURL instance");
 		return nullptr;
 	}
 

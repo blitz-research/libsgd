@@ -1,4 +1,5 @@
 ﻿#include "std.h"
+#include "log.h"
 
 #include <thread>
 
@@ -22,6 +23,8 @@ extern "C" const char* __asan_default_options() { // NOLINT (unused function)
 }
 #endif
 
+namespace sgd {
+
 namespace {
 
 using Clock = std::chrono::high_resolution_clock;
@@ -30,12 +33,30 @@ Clock::time_point g_timerStart = Clock::now();
 
 std::thread::id g_mainThreadId = std::this_thread::get_id();
 
+Function<void(CString msg, const char* file, int line)> onError = [](CString msg, const char* file, int line) { //
+	SGD_LOG << "Runtime error:" << msg << "file:" << file << "line:" << line;
+#if SGD_CONFIG_DEBUG
+#if SGD_COMPILER_MSVC
+	__debugbreak();
+#elif SGD_OS_EMSCRIPTEN
+	// emscripten_force_exit(-1)
+	__builtin_trap();
+#else
+	__builtin_trap();
+#endif
+#else
+	alert(msg);
+#endif
+};
+
 } // namespace
 
-namespace sgd {
+void setErrorHandler(const Function<void(CString msg, const char* file, int line)>& handler) {
+	onError = handler;
+}
 
-void unreachable() {
-	SGD_BREAK();
+void error(CString msg, const char* file, int line) {
+	onError(msg, file, line);
 	std::abort();
 }
 

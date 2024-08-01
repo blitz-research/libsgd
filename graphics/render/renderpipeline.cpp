@@ -8,37 +8,43 @@
 
 namespace sgd {
 
-namespace {
-
-String renderPassName(RenderPassType rpassType) {
-	switch (rpassType) {
-	case RenderPassType::shadow:
-		return "SHADOW";
-	case RenderPassType::opaque:
-		return "OPAQUE";
-	case RenderPassType::blend:
-		return "BLEND";
-	default:
-		SGD_ABORT();
-	}
+String toString(RenderPassType rpassType) {
+	static const Map<RenderPassType, String> types {
+		{RenderPassType::shadow,"SHADOW"},
+			{RenderPassType::opaque,"OPAQUE"},
+			{RenderPassType::blend,"BLEND"},
+	};
+	return types.find(rpassType)->second;
 }
 
-String blendModeName(BlendMode blendMode) {
-	switch (blendMode) {
-	case BlendMode::undefined:
-		return "UNDEFINED";
-	case BlendMode::opaque:
-		return "OPAQUE";
-	case BlendMode::alphaMask:
-		return "ALPHA_MASK";
-	case BlendMode::alphaBlend:
-		return "ALPHA_BLEND";
-	default:
-		SGD_ABORT();
-	}
+String toString(BlendMode blendMode) {
+	static const Map<BlendMode, String> modes {
+		{BlendMode::undefined,"UNDEFINED"},
+		{BlendMode::opaque,"OPAQUE"},
+		{BlendMode::alphaMask,"ALPHA_MASK"},
+		{BlendMode::alphaBlend,"ALPHA_BLEND"},
+	};
+	return modes.find(blendMode)->second;
 }
 
-} // namespace
+String toString(DepthFunc depthFunc) {
+	static const Map<DepthFunc, String> funcs {
+		{DepthFunc::undefined, "UNDEFINED"}, {DepthFunc::never, "NEVER"}, {DepthFunc::less, "LESS"},
+		{DepthFunc::equal, "EQUAL"}, {DepthFunc::lessEqual, "LESS_EQUAL"}, {DepthFunc::greater, "GREATER"},
+		{DepthFunc::notEqual, "NOT_EQUAL"}, {DepthFunc::greaterEqual, "GREATER_EQUAL"}, {DepthFunc::always, "ALWAYS"},
+	};
+	return funcs.find(depthFunc)->second;
+}
+
+String toString(CullMode cullMode) {
+	static const Map<CullMode, String> modes {
+		{CullMode::undefined, "UNDEFINED"},
+		{CullMode::none, "NONE"},
+		{CullMode::front, "FRONT"},
+		{CullMode::back, "BACK"},
+	};
+	return modes.find(cullMode)->second;
+}
 
 wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
 											   BlendMode blendMode,	  //
@@ -92,8 +98,8 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
 #elif SGD_OS_EMSCRIPTEN
 		header += "#define OS_EMSCRIPTEN 1\n";
 #endif
-		header += "#define RENDER_PASS_" + renderPassName(rpassType) + " 1\n";
-		header += "#define BLEND_MODE_" + blendModeName(blendMode) + " 1\n";
+		header += "#define RENDER_PASS_" + toString(rpassType) + " 1\n";
+		header += "#define BLEND_MODE_" + toString(blendMode) + " 1\n";
 
 		tcpp::Lexer lexer(std::make_unique<tcpp::StringInputStream>(header + source));
 		tcpp::Preprocessor preprocessor(lexer, {errorCallback});

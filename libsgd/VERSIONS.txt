@@ -1,4 +1,44 @@
 
+***** V0.11 *****
+
+Added sgd.bb and keycodes.bb include files. Ultimately you wont need these as they'll be built into the runtime.
+
+Added SetWindowTitle, SetWindowPosition, GetWindowX, GetWindowY, SetWindowState, GetWindowState, SetFullscrenMode.
+
+Added some range checking to primitive creation.
+
+Tweaked error system so ALL errors end up at LibSGD error handler.
+
+Changed SetModelColor so you don't have to premultiply color by alpha any more.
+
+Added blendtest.bb demo.
+
+Added SetEntityName, GetEntityName, GetEntityChildCount, GetEntityChild, FindEntityChild.
+
+Added dawn.validationEnabled bool config var to disable dawn device validation. Should only be used for 'release' type builds. In theory,
+SGD should not be causing Dawn errors, in practice it still happens and the validation errors can be incredibly useful.
+
+Finally implemented transparent surface sorting. Transparent models/surfaces are now sorted based on origin (center of bounding box)
+distance to eye. Models are sorted first, then surfaces within the same model are sorted against each other. This tries to reduce sorting
+work somewhat by avoiding comparing every surface with every surface, but it raises the possiblity of sorting errors when two surfaces
+from different models intersect.
+
+Transparent surfaces cannot be instanced (AFAICT), so must effectively be drawn one-by-one which is considerably slower than instancing.
+Ultimately this will be made optional, as drawing transparent surfaces in any old random order is often good enough, but for now, any
+surfaces loaded by the gltf loader that use alphaBlend blend mode will be treated as transparent and sorted by origin as above.
+
+Transparent surface are also not 'merged' by the loader. When loading several surfaces that use the same opaque/alphaMask material, the
+loader will merge them into a single SGD surface. However, doing this to transparent surfaces may result in single unsortable 'blob'
+surfaces, so surfaces with transparent materials are never merged.
+
+Opaque/alphaMask surfaces are pretty much unaffected by any of this, and are still instanced when shared by multiple models, even if those
+models also contain transparent surface. Sprites are also still rendered in a separate pass, which will need addressing at some point in
+the future too.
+
+Added debug.gltfLoader bool config var to enable gltf loader logging.
+
+Fixed gltf material base color not being premultiplied by alpha.
+
 ***** V0.10 *****
 
 Added CameraUnproject, GetUnprojectedX, GetUnprojectedY, GetUnprojectedZ.

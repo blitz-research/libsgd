@@ -22,6 +22,7 @@ float camera_rx;
 
 void render() {
 	auto gc = currentGC();
+
 	scene->render();
 
 	gc->present(scene->sceneRenderer()->outputTexture());
@@ -32,10 +33,7 @@ void start(void (*entry)()) {
 	initApp();
 
 	window = new Window({1024, 768}, "Hello world!", sgd::WindowFlags::resizable | sgd::WindowFlags::centered);
-
 	//window = new Window(desktopSize(), "Hello world!", sgd::WindowFlags::fullscreen);
-
-	SGD_LOG << "Window size" << window->size();
 
 	window->closeClicked.connect(nullptr, [] { std::exit(0); });
 
@@ -58,14 +56,12 @@ void start(void (*entry)()) {
 						  .result();
 
 	scene->sceneRenderer()->envTexture = skyTexture;
-
-	skybox = new Skybox();
+	skybox = new Skybox(skyTexture);
 	scene->add(skybox);
-	skybox->skyTexture = skyTexture;
 
 	light = new Light(LightType::directional);
 	scene->add(light);
-	turn(light, {-45, 45, 0});
+	turn(light, {-45, -45, 0});
 
 	overlay = new Overlay();
 	scene->add(overlay);

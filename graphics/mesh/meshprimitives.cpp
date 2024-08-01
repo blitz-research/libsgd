@@ -17,13 +17,13 @@ Mesh* createMesh(CVector<Vertex> vertices, CVector<Triangle> triangles, Material
 	sgd::copy(mesh->lockVertices(), vertices.data(), vertices.size());
 	mesh->unlockVertices();
 
-	auto surface = new Surface(triangles.size(), material);
+	auto surface = new Surface(mesh, material, triangles.size());
 	sgd::copy(surface->lockTriangles(), triangles.data(), triangles.size());
 	surface->unlockTriangles();
 
 	mesh->addSurface(surface);
 
-	if(bool(flags & MeshFlags::tangentsEnabled)) updateTangents(mesh);
+	if (bool(flags & MeshFlags::tangentsEnabled)) updateTangents(mesh);
 
 	return mesh;
 }
@@ -57,6 +57,9 @@ Mesh* createBoxMesh(CBoxf box, Material* material) {
 }
 
 Mesh* createSphereMesh(float radius, uint32_t xSegs, uint32_t ySegs, Material* material) {
+
+	if (xSegs < 3 || xSegs > 1000) SGD_ERROR("xSegs must be in the range 2..1000");
+	if (ySegs < 2 || ySegs > 1000) SGD_ERROR("ySegs must be in the range 2..1000");
 
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;
@@ -97,6 +100,8 @@ Mesh* createSphereMesh(float radius, uint32_t xSegs, uint32_t ySegs, Material* m
 }
 
 Mesh* createCylinderMesh(float height, float radius, uint32_t segs, Material* material) {
+
+	if (segs < 3 || segs > 1000) SGD_ERROR("segs must be in the range 3..1000");
 
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;
@@ -140,6 +145,8 @@ Mesh* createCylinderMesh(float height, float radius, uint32_t segs, Material* ma
 }
 
 Mesh* createConeMesh(float length, float radius, uint32_t segs, Material* material) {
+
+	if (segs < 3 || segs > 1000) SGD_ERROR("segs must be in the range 3..1000");
 
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;
@@ -189,6 +196,9 @@ Mesh* createConeMesh(float length, float radius, uint32_t segs, Material* materi
 }
 
 Mesh* createTorusMesh(float outerRadius, float innerRadius, uint32_t outerSegs, uint32_t innerSegs, Material* material) {
+
+	if (innerSegs < 3 || innerSegs > 1000) SGD_ERROR("innerSegs must be in the range 3..1000");
+	if (outerSegs < 3 || outerSegs > 1000) SGD_ERROR("outerSegs must be in the range 3..1000");
 
 	Vector<Vertex> vertices;
 	Vector<Triangle> triangles;

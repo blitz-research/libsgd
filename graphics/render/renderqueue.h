@@ -20,8 +20,9 @@ struct RenderQueue : Shared {
 					 CBindGroup* renderer,	 //
 					 uint32_t elementCount,	 //
 					 uint32_t instanceCount, //
-					 uint32_t firstElement,
-					 bool shadows); //
+					 uint32_t firstElement,	 //
+					 uint32_t firstInstance, //
+					 bool shadows);			 //
 
 	CVector<RenderOp> renderOps(RenderPassType rpassType) const {
 		return m_renderOps[(int)rpassType];

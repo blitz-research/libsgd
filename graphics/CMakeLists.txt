@@ -63,7 +63,11 @@ add_library(graphics
 	mesh/skinnedmeshrenderer.cpp
 	mesh/skinnedmeshrenderer.h
     mesh/skinnedmeshrenderer.wgsl
-    
+	mesh/surface.cpp
+	mesh/surface.h
+	mesh/vertex.cpp
+	mesh/vertex.h
+
 	render/rendercontext.cpp
 	render/rendercontext.h
 	render/renderop.cpp

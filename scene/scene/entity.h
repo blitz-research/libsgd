@@ -47,7 +47,7 @@ struct Entity : Shared {
 
 	void setName(CString name);
 
-	CString name()const {
+	CString name() const {
 		return m_name;
 	}
 
@@ -124,24 +124,33 @@ struct Entity : Shared {
 
 	CAffineMat4r localMatrix() const;
 
+	Entity* findChild(CString name) { // NOLINT (recursize)
+		if (m_name == name) return this;
+		for (Entity* child : m_children) {
+			auto found = child->findChild(name);
+			if (found) return found;
+		}
+		return nullptr;
+	}
+
 	template <class FuncTy> void visitChildren(FuncTy boolFunc) {
 		for (Entity* child : m_children) {
-			if(boolFunc(child)) child->visitChildren(boolFunc);
+			if (boolFunc(child)) child->visitChildren(boolFunc);
 		}
 	}
 
 protected:
 	explicit Entity(const Entity* that);
 
-	virtual void onCreate(){};
-	virtual void onDestroy(){};
-	virtual void onEnable(){};
-	virtual void onDisable(){};
-	virtual void onShow(){};
-	virtual void onHide(){};
-	virtual void onInvalidate(){};
-	virtual void onValidate(){};
-	virtual void onReset(){};
+	virtual void onCreate() {};
+	virtual void onDestroy() {};
+	virtual void onEnable() {};
+	virtual void onDisable() {};
+	virtual void onShow() {};
+	virtual void onHide() {};
+	virtual void onInvalidate() {};
+	virtual void onValidate() {};
+	virtual void onReset() {};
 
 	virtual Entity* onCopy() const = 0;
 

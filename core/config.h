@@ -6,7 +6,7 @@
 
 namespace sgd {
 
-Map<String, Signal<CString>>& configVarChanged();
+Signal<CString>& configVarChanged(CString name);
 
 void setConfigVar(CString name, CString value);
 String getConfigVar(CString name);

@@ -1,25 +1,6 @@
 
-Const KEY_ESCAPE = 256
-Const KEY_SPACE = 32
-					
-Const KEY_RIGHT = 262
-Const KEY_LEFT = 263
-Const KEY_DOWN = 264
-Const KEY_UP = 265
-
-Const KEY_W = 87
-Const KEY_A = 65
-Const KEY_S = 83
-Const KEY_D = 68
-
-Const KEY_LEFT_SHIFT = 340
-Const KEY_LEFT_CONTROL = 341
-Const KEY_LEFT_ALT = 342
-Const KEY_LEFT_SUPER = 343
-Const KEY_RIGHT_SHIFT = 344
-Const KEY_RIGHT_CONTROL = 345
-Const KEY_RIGHT_ALT = 346
-Const KEY_RIGHT_SUPER = 347
+Include "../sgd.bb"
+Include "../keycodes.bb"
 
 Global player
 Global player_rvx#,player_rvy#

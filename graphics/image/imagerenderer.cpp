@@ -43,7 +43,7 @@ void ImageRenderer::unlockInstances() {
 void ImageRenderer::render(RenderQueue* rq, CImage* image, uint32_t first, uint32_t count) {
 	rq->addRenderOp(nullptr, nullptr,									//
 					image->material(), image->bindGroup(), m_bindGroup, //
-					count * 6, 1, first * 6, false);					//
+					count * 6, 1, first * 6, 0, false);					//
 }
 
 } // namespace sgd

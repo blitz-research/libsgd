@@ -16,13 +16,16 @@ struct Joint {
 struct Model : Entity {
 	SGD_OBJECT_TYPE(Model, Entity);
 
+	explicit Model(Mesh* mesh = nullptr);
+	explicit Model(const Model* that);
+	Model(Vector<EntityPtr> bones, Vector<AnimationPtr> animations, Vector<Joint> joints);
+
 	Property<MeshPtr> mesh;
 	Property<Vec4f> color{Vec4f(1)};
 
-	Model() = default;
-	explicit Model(Mesh* mesh);
-	explicit Model(const Model* that);
-	Model(Vector<EntityPtr> bones, Vector<AnimationPtr> animations, Vector<Joint> joints);
+	CVec4f pmColor() const {
+		return m_pmColor;
+	}
 
 	void animate(uint32_t index, float time, AnimationMode mode, float weight);
 
@@ -31,6 +34,7 @@ struct Model : Entity {
 	}
 
 private:
+	Vec4f m_pmColor;
 	Vector<AnimationPtr> m_animations;
 	Vector<EntityPtr> m_bones;
 	Vector<Joint> m_joints;
@@ -41,6 +45,8 @@ private:
 
 	void onShow() override;
 	void onHide() override;
+
+	void init();
 };
 
 } // namespace sgd

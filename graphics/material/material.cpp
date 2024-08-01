@@ -49,7 +49,7 @@ Material::Material(const MaterialDescriptor* desc)
 void Material::setTexture(CString name, CTexture* texture) {
 
 	auto it = m_desc->textureDescs.find(name);
-	if (it == m_desc->textureDescs.end()) SGD_PANIC("Material texture \""+name+"\" not found");
+	if (it == m_desc->textureDescs.end()) SGD_ERROR("Material texture \""+name+"\" not found");
 
 	if (name == "normalTexture") m_hasNormalTexture = bool(texture);
 	if (!texture) texture = it->second.defValue;
@@ -61,8 +61,8 @@ void Material::setVector4f(CString name, CVec4f value) {
 	SGD_ASSERT(endsWith(name, "4f"));
 
 	auto it = m_desc->uniformDescs.find(name);
-	if(it==m_desc->uniformDescs.end()) SGD_PANIC("Material param \""+name+"\" not found");
-	if(it->second.type != 4) SGD_PANIC("Material param \""+name+"\" has wrong size");
+	if(it==m_desc->uniformDescs.end()) SGD_ERROR("Material param \""+name+"\" not found");
+	if(it->second.type != 4) SGD_ERROR("Material param \""+name+"\" has wrong size");
 
 	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
 }
@@ -71,8 +71,8 @@ void Material::setVector3f(CString name, CVec3f value) {
 	SGD_ASSERT(endsWith(name, "3f"));
 
 	auto it = m_desc->uniformDescs.find(name);
-	if(it==m_desc->uniformDescs.end()) SGD_PANIC("Material param \""+name+"\" not found");
-	if(it->second.type != 3) SGD_PANIC("Material param \""+name+"\" has wrong size");
+	if(it==m_desc->uniformDescs.end()) SGD_ERROR("Material param \""+name+"\" not found");
+	if(it->second.type != 3) SGD_ERROR("Material param \""+name+"\" has wrong size");
 
 	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
 }
@@ -81,8 +81,8 @@ void Material::setVector2f(CString name, CVec2f value) {
 	SGD_ASSERT(endsWith(name, "2f"));
 
 	auto it = m_desc->uniformDescs.find(name);
-	if(it==m_desc->uniformDescs.end()) SGD_PANIC("Material param \""+name+"\" not found");
-	if(it->second.type != 2) SGD_PANIC("Material param \""+name+"\" has wrong size");
+	if(it==m_desc->uniformDescs.end()) SGD_ERROR("Material param \""+name+"\" not found");
+	if(it->second.type != 2) SGD_ERROR("Material param \""+name+"\" has wrong size");
 
 	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
 }
@@ -91,8 +91,8 @@ void Material::setFloat(CString name, float value) {
 	SGD_ASSERT(endsWith(name, "1f"));
 
 	auto it = m_desc->uniformDescs.find(name);
-	if(it==m_desc->uniformDescs.end()) SGD_PANIC("Material param \""+name+"\" not found");
-	if(it->second.type != 1) SGD_PANIC("Material param \""+name+"\" has wrong size");
+	if(it==m_desc->uniformDescs.end()) SGD_ERROR("Material param \""+name+"\" not found");
+	if(it->second.type != 1) SGD_ERROR("Material param \""+name+"\" has wrong size");
 
 	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
 }
@@ -101,8 +101,8 @@ void Material::setInt(CString name, int value) {
 	SGD_ASSERT(endsWith(name, "1i"));
 
 	auto it = m_desc->uniformDescs.find(name);
-	if(it==m_desc->uniformDescs.end()) SGD_PANIC("Material param \""+name+"\" not found");
-	if(it->second.type != 1) SGD_PANIC("Material param \""+name+"\" has wrong size");
+	if(it==m_desc->uniformDescs.end()) SGD_ERROR("Material param \""+name+"\" not found");
+	if(it->second.type != 1) SGD_ERROR("Material param \""+name+"\" has wrong size");
 
 	m_uniformBuffer->update(&value, it->second.offset, sizeof(value));
 }

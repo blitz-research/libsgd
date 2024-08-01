@@ -14,6 +14,7 @@ struct RenderOp {
 	uint32_t elementCount{};
 	uint32_t instanceCount{};
 	uint32_t firstElement{};
+	uint32_t firstInstance{};
 
 	RenderOp() = default;
 
@@ -26,7 +27,8 @@ struct RenderOp {
 		wgpu::RenderPipeline pipeline,	 //
 		uint32_t elementCount,			 //
 		uint32_t instanceCount,			 //
-		uint32_t firstElement)			 //
+		uint32_t firstElement,			 //
+		uint32_t firstInstance)			 //
 		: vbuffer(std::move(vbuffer)),	 //
 		  ibuffer(std::move(ibuffer)),	 //
 		  material(std::move(material)), //
@@ -35,9 +37,10 @@ struct RenderOp {
 		  pipeline(std::move(pipeline)), //
 		  elementCount(elementCount),	 //
 		  instanceCount(instanceCount),	 //
-		  firstElement(firstElement) { //
+		  firstElement(firstElement),	 //
+		  firstInstance(firstInstance) {
 	}
 };
 using CRenderOp = const RenderOp&;
 
-}
+} // namespace sgd

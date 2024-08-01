@@ -36,12 +36,53 @@ void SGD_DECL sgd_DestroyWindow() {
 	sgdx::g_mainWindow = nullptr;
 }
 
+void SGD_DECL sgd_SetWindowTitle(SGD_String title) {
+	sgdx::mainWindow()->setTitle(title);
+}
+
+SGD_API SGD_String SGD_DECL sgd_GetWindowTitle() {
+	static sgd::String title;
+	title = sgdx::mainWindow()->title() + '\0';
+	return title.data();
+}
+
+void SGD_DECL sgd_SetWindowPosition(int x, int y) {
+	sgdx::mainWindow()->setPosition({x,y});
+}
+
+int SGD_DECL sgd_GetWindowX() {
+	return sgdx::mainWindow()->position().x;
+
+}
+
+int SGD_DECL sgd_GetWindowY() {
+	return sgdx::mainWindow()->position().y;
+}
+
+void SGD_DECL sgd_SetWindowSize(int width, int height) {
+	sgdx::mainWindow()->setSize(sgd::Vec2u(width,height));
+}
+
 int SGD_DECL sgd_GetWindowWidth() {
 	return (int)sgdx::mainWindow()->size().x;
 }
 
 int SGD_DECL sgd_GetWindowHeight() {
 	return (int)sgdx::mainWindow()->size().y;
+}
+
+
+
+void SGD_DECL sgd_SetFullscreenMode(int width, int height, int hertz) {
+	sgdx::mainWindow()->setFullscreenMode(sgd::Vec2u(width, height), hertz);
+}
+
+void SGD_DECL sgd_SetWindowState(int state) {
+	sgdx::mainWindow()->setState((sgd::WindowState)state);
+}
+
+int SGD_DECL sgd_GetWindowState() {
+	return (int)sgdx::mainWindow()->state();
 }
 
 SGD_Bool SGD_DECL sgd_IsKeyDown(int keyCode) {

@@ -19,9 +19,10 @@ void unlockConfigUniforms() {
 
 // ***** Scene *****
 
+// Creates a new scene if none exists.
 void SGD_DECL sgd_ClearScene() {
 	if (!sgdx::g_mainScene) {
-		sgdx::g_mainGC = sgd::createGC(sgdx::mainWindow());
+		sgd::createGC(sgdx::mainWindow());
 		sgdx::g_mainScene = new sgd::Scene();
 	} else {
 		sgdx::mainScene()->clear();
@@ -119,11 +120,11 @@ void SGD_DECL sgd_RenderScene() {
 }
 
 void SGD_DECL sgd_Present() {
-	sgdx::mainGC()->present(sgdx::mainScene()->sceneRenderer()->outputTexture());
+	sgd::currentGC()->present(sgdx::mainScene()->sceneRenderer()->outputTexture());
 }
 
 float SGD_DECL sgd_GetFPS() {
-	return sgdx::mainGC()->FPS();
+	return sgd::currentGC()->FPS();
 }
 
 float SGD_DECL sgd_GetRPS() {
@@ -176,6 +177,18 @@ SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
 	return sgdx::createHandle(copy);
 }
 
+void SGD_DECL sgd_SetEntityName(SGD_Entity hentity, SGD_String name) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	entity->setName(name);
+}
+
+SGD_String SGD_DECL sgd_GetEntityName(SGD_Entity hentity) {
+	static sgd::String name;
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	name = entity->name() + '\0';
+	return name.data();
+}
+
 void SGD_DECL sgd_SetEntityParent(SGD_Entity hentity, SGD_Entity hparent) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	auto parent = hparent ? sgdx::resolveHandle<sgd::Entity>(hparent) : nullptr;
@@ -186,6 +199,21 @@ SGD_Entity SGD_DECL sgd_GetEntityParent(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	auto parent = entity->parent();
 	return parent ? sgdx::getOrCreateHandle(parent) : 0;
+}
+
+int SGD_DECL sgd_GetEntityChildCount(SGD_Entity hentity) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return (int)entity->children().size();
+}
+SGD_Entity SGD_DECL sgd_GetEntityChild(SGD_Entity hentity, int childIndex) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	if(childIndex<0 || childIndex>=entity->children().size()) sgdx::error("Child index out of range");
+	return sgdx::getOrCreateHandle(entity->children()[childIndex].get());
+}
+
+SGD_Entity SGD_DECL sgd_FindEntityChild(SGD_Entity hentity, SGD_String name) {
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	return sgdx::getOrCreateHandle(entity->findChild(name));
 }
 
 void SGD_DECL sgd_SetEntityPosition(SGD_Entity hentity, SGD_Real tx, SGD_Real ty, SGD_Real tz) {

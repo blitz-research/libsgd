@@ -5,8 +5,8 @@ namespace sgd {
 namespace {
 
 BindGroupDescriptor bindGroupDescriptor( //
-	"meshGeometry",						//
-	BindGroupType::geometry,			//
+	"meshGeometry",						 //
+	BindGroupType::geometry,			 //
 	{
 		// geometry_uniforms: MeshUniforms
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
@@ -14,20 +14,6 @@ BindGroupDescriptor bindGroupDescriptor( //
 	});
 
 } // namespace
-
-// ***** Surface *****
-
-Surface::Surface(uint32_t triangleCount, Material* material)
-	: m_triangleBuffer(new Buffer(BufferType::index, nullptr, triangleCount * sizeof(Triangle))),
-	  m_triangleCount(triangleCount), m_material(material) {
-}
-
-void Surface::resizeTriangles(uint32_t count) {
-	m_triangleBuffer->resize(count * sizeof(Triangle));
-	m_triangleCount = count;
-}
-
-// ***** Mesh *****
 
 Mesh::Mesh(uint32_t vertexCount, MeshFlags flags)											 //
 	: m_bindGroup(new BindGroup(&bindGroupDescriptor)),										 //
@@ -58,6 +44,15 @@ void Mesh::addSurface(Surface* surf) {
 	m_surfaces.emplace_back(surf);
 	addDependency(surf->triangleBuffer());
 	addDependency(surf->material());
+}
+
+void Mesh::updateBounds() {
+	m_bounds = {};
+	for (Surface* surf : m_surfaces) {
+		surf->updateBounds();
+		m_bounds |= surf->bounds();
+	}
+	m_origin = center(m_bounds);
 }
 
 } // namespace sgd

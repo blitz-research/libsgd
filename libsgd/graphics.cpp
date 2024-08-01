@@ -232,7 +232,7 @@ void SGD_DECL sgd_SetMeshVertexColor(SGD_Mesh hmesh, int vertex, float r, float 
 SGD_Surface SGD_DECL sgd_CreateSurface(SGD_Mesh hmesh, int triangleCount, SGD_Material hmaterial) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	auto surface = new sgd::Surface(triangleCount, material);
+	auto surface = new sgd::Surface(mesh, material, triangleCount);
 	mesh->addSurface(surface);
 	return sgdx::createHandle(surface);
 }

@@ -2,7 +2,9 @@
 
 void entry() {
 
-	float sz = 1000;
+	setConfigVar("debug.gltfLoader","1");
+
+	float sz = 100;
 
 	{
 		MaterialPtr material = loadPBRMaterial(Path("sgd://misc/brownish-grass.jpg")).result();
@@ -17,13 +19,11 @@ void entry() {
 	meshes[1] = loadStaticMesh(Path("sgd://models/palm_tree1.glb")).result();
 	meshes[2] = loadStaticMesh(Path("sgd://models/birch_tree1.glb")).result();
 
-	int n = 1000;
-
+	int n = 10000;
 	for (int i = 0; i < n; ++i) {
-		ModelPtr model = new Model();
+		ModelPtr model = new Model(meshes[(int)rnd(3)]);
 		scene->add(model);
 		move(model, {rnd(-sz, sz), 0, rnd(-sz, sz)});
-		model->mesh = meshes[(int)rnd(3)];
 	}
 
 	createPlayer(nullptr);

@@ -24,8 +24,8 @@ static_assert(sizeof(Vertex) == 88);
 wgpu::VertexBufferLayout const vertexBufferLayout{sizeof(Vertex), wgpu::VertexStepMode::Vertex, std::size(vertexAttribs),
 												  vertexAttribs};
 BindGroupDescriptor bindGroupDescriptor( //
-	"meshRenderer",						//
-	BindGroupType::renderer,			//
+	"meshRenderer",						 //
+	BindGroupType::renderer,			 //
 	{
 		// renderer_instances: MeshInstance[]
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::ReadOnlyStorage),
@@ -36,10 +36,8 @@ BindGroupDescriptor bindGroupDescriptor( //
 
 } // namespace
 
-MeshRenderer::MeshRenderer(CMesh* mesh)				   //
-	: m_mesh(mesh),									   //
-	  m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
-	  m_instanceCapacity(8),						   //
+MeshRenderer::MeshRenderer()							//
+	: m_bindGroup(new BindGroup(&bindGroupDescriptor)), //
 	  m_instanceBuffer(new Buffer(BufferType::storage, nullptr, m_instanceCapacity * sizeof(MeshInstance))) {
 
 	m_bindGroup->setBuffer(0, m_instanceBuffer);
@@ -58,12 +56,18 @@ void MeshRenderer::unlockInstances() {
 	m_instanceBuffer->unlock();
 }
 
-void MeshRenderer::render(RenderQueue* rq) const {
-	for (Surface* surf : m_mesh->surfaces()) {
-		rq->addRenderOp(m_mesh->vertexBuffer(), surf->triangleBuffer(),		//
-						surf->material(), m_mesh->bindGroup(), m_bindGroup, //
-						surf->triangleCount() * 3, m_instanceCount, 0, m_mesh->shadowsEnabled());
+void MeshRenderer::render(RenderQueue* rq, CMesh* mesh, uint32_t count, uint32_t first) const {
+	for (Surface* surf : mesh->surfaces()) {
+		rq->addRenderOp(mesh->vertexBuffer(), surf->triangleBuffer(),	  //
+						surf->material(), mesh->bindGroup(), m_bindGroup, //
+						surf->triangleCount() * 3, count, 0, first, mesh->shadowsEnabled());
 	}
+}
+
+void MeshRenderer::render(RenderQueue* rq, CSurface* surf, uint32_t count, uint32_t first) const {
+	rq->addRenderOp(surf->mesh()->vertexBuffer(), surf->triangleBuffer(),	  //
+					surf->material(), surf->mesh()->bindGroup(), m_bindGroup, //
+					surf->triangleCount() * 3, count, 0, first, surf->mesh()->shadowsEnabled());
 }
 
 } // namespace sgd

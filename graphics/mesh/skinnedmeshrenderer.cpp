@@ -64,7 +64,7 @@ void SkinnedMeshRenderer::render(RenderQueue* rq) const {
 	for (Surface* surf : m_mesh->surfaces()) {
 		rq->addRenderOp(m_mesh->vertexBuffer(), surf->triangleBuffer(),		//
 						surf->material(), m_mesh->bindGroup(), m_bindGroup, //
-						surf->triangleCount() * 3, m_instanceCount, 0, m_mesh->shadowsEnabled());
+						surf->triangleCount() * 3, m_instanceCount, 0, 0, m_mesh->shadowsEnabled());
 	}
 }
 

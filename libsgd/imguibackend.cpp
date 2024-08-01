@@ -97,7 +97,7 @@ SGD_Bool SGD_DECL sgd_ImGui_ImplSGD_Init(void* imguiProcs) {
 #endif
 
 	ImGui_ImplWGPU_InitInfo init_info;
-	init_info.Device = sgdx::mainGC()->wgpuDevice().Get();
+	init_info.Device = sgd::currentGC()->wgpuDevice().Get();
 	init_info.NumFramesInFlight = 3;
 	init_info.RenderTargetFormat = WGPUTextureFormat_RGBA16Float;
 	init_info.DepthStencilFormat = WGPUTextureFormat_Undefined;
@@ -119,7 +119,7 @@ SGD_API void SGD_DECL sgd_ImGui_ImplSGD_RenderDrawData(void* imguiDrawData) {
 	auto size = sgdx::mainScene()->sceneRenderer()->renderTargetSize();
 	if(!size.x || !size.y) return;
 
-	auto device = sgdx::mainGC()->wgpuDevice().Get();
+	auto device = sgd::currentGC()->wgpuDevice().Get();
 	auto renderTarget = sgdx::mainScene()->sceneRenderer()->outputTexture()->wgpuTexture().Get();
 
 	WGPURenderPassColorAttachment color_attachments = {};

@@ -50,7 +50,7 @@ void Scene::remove(Entity* entity) { // NOLINT (recursive)
 	if (entity->m_invalid) sgd::remove(m_invalid, entity);
 
 	// Careful, this could be last reference and could delete entity
-	if (!sgd::rremove(m_entities, entity)) SGD_PANIC("Failed to remove entity from scene");
+	if (!sgd::rremove(m_entities, entity)) SGD_ERROR("Failed to remove entity from scene");
 }
 
 void Scene::validate() {

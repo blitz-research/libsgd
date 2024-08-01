@@ -124,7 +124,7 @@ void DrawList::pushLayer() {
 }
 
 void DrawList::popLayer() {
-	if (m_drawOpCounts.size() == 1) SGD_PANIC("DrawList layer stack underflow");
+	if (m_drawOpCounts.size() == 1) SGD_ERROR("DrawList layer stack underflow");
 	clear();
 	m_drawOpCounts.pop_back();
 	m_vertexCounts.pop_back();
@@ -330,7 +330,7 @@ void DrawList::render(RenderQueue* rq) const {
 
 		rq->addRenderOp(m_vertexBuffer, nullptr,			   //
 						material, m_bindGroup, renderer,	   //
-						count, 1, first, false); //
+						count, 1, first, 0, false); //
 
 		first += count;
 	}

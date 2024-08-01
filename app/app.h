@@ -22,5 +22,6 @@ void resumeApp();
 void pollEvents();
 
 Vec2u desktopSize();
+uint32_t desktopHz();
 
 } // namespace sgd

@@ -36,6 +36,14 @@ struct GraphicsContext : Shared {
 
 	void present(CTexture* texture);
 
+	void wgpuAllocing(uint32_t size, const char* type);
+
+	void wgpuFree(uint32_t size, const char* type);
+
+	size_t wgpuAlloced() const {
+		return m_wgpuAlloced;
+	}
+
 	const wgpu::Device& wgpuDevice() const {
 		SGD_ASSERT(isMainThread());
 		return m_wgpuDevice;
@@ -50,12 +58,17 @@ private:
 
 	Vec2u m_swapChainSize;
 
+	size_t m_wgpuAlloced{};
+
 	int64_t m_micros{};
 	int m_frames{};
 	float m_fps{};
 
 	explicit GraphicsContext(Window* window);
+
 	~GraphicsContext() override;
+
+	void destroy();
 };
 
 GraphicsContext* createGC(Window* window);

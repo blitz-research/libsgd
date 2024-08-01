@@ -14,14 +14,14 @@ namespace {
 
 bool g_vsyncEnabled = true;
 
-auto init0 = configVarChanged()["render.vsyncEnabled"].connect(nullptr, [](CString value) { //
-	g_vsyncEnabled = truthy(value);
+auto init0 = configVarChanged("render.vsyncEnabled").connect(nullptr, [](CString value) { //
+	g_vsyncEnabled = truthiness(value);
 });
 
 bool g_timeStampsEnabled = true;
 
-auto init = configVarChanged()["render.timeStampsEnabled"].connect(nullptr, [](CString value) { //
-	g_timeStampsEnabled = truthy(value);
+auto init = configVarChanged("render.timeStampsEnabled").connect(nullptr, [](CString value) { //
+	g_timeStampsEnabled = truthiness(value);
 });
 
 } // namespace
@@ -312,6 +312,7 @@ void SceneRenderer::renderAsync() {
 		m_wgpuCommandEncoder.ResolveQuerySet(m_timeStampQueries, 0, timeStampCount, m_timeStampBuffer, 0);
 		m_wgpuCommandEncoder.CopyBufferToBuffer(m_timeStampBuffer, 0, m_timeStampResults, 0, timeStampCount * 8);
 	}
+
 
 	if (g_vsyncEnabled) {
 
