@@ -35,14 +35,13 @@ Shane
 Simon Harrison
 Michael Hartlef
 MarLupin
-James Boyd
+Medi98
 Chaduke
+James Boyd
 Michael Denathorn
 Andy Hewco
 Markus Rosse
-Medi98
 Dex
 Dan
-Amon
 JaviCervera
-That1Guard
+Amon

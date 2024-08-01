@@ -1,6 +1,8 @@
 
 ***** V0.11 *****
 
+Added sgd.bb and keycodes.bb include files. Ultimately you wont need these as they'll be built into the runtime.
+
 Added SetWindowTitle, SetWindowPosition, GetWindowX, GetWindowY, SetWindowState, GetWindowState, SetFullscrenMode.
 
 Added some range checking to primitive creation.
