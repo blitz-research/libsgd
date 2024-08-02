@@ -10,86 +10,90 @@ template <class IntersectFunc>
 Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFunc intersectFunc, CollisionResponse response,
 				 Vector<Collision>& collisions) {
 
-	static constexpr int maxLoops = 6;
 	static constexpr real eps = (real).0001;
-
-	// Max distance to travel
-	auto dir = dst - src;
-	auto d = length(dir);
-	if (d <= eps) return src;
+	static constexpr int maxLoops = 6;
 
 	Planer hitPlanes[3];
-	int nHits = 0;
-	int i = 0;
+	int state = 0;
+	int loops = 0;
+
+	auto maxd = std::numeric_limits<real>::max();
 
 	for (;;) {
 
-		Contact contact(d);
+		auto dir = dst - src;
+		auto d = length(dir);
+		if (d <= eps) return src;
+		dir /= d;
+		if (d > maxd) {
+			dst = src + dir * maxd;
+		}else{
+			maxd = d;
+		}
 
-		Line ray(src, normalize(dst - src));
+		Contact contact(maxd);
+		Line ray(src, dir);
 
 		auto collider = intersectFunc(ray, contact);
 		if (!collider) return dst;
 
 		collisions.emplace_back(ray, contact, collider);
+
 		if (response == CollisionResponse::ignore) return dst;
 
-		auto t = std::max(contact.time - eps, (real)0);
-		src = ray * t;
+		// Hit distance/time
+		auto hitd = std::max(contact.time - eps, (real)0);
+		src = ray * hitd;
 
 		if (response == CollisionResponse::stop) return src;
 
-		if (++nHits == maxLoops) {
+		// Subtract hit distance moved from remaining distance
+		if ((maxd -= hitd) <= eps) return src;
+
+		// Avoid looping forever
+		if (++loops == maxLoops) {
 #if SGD_CONFIG_DEBUG
 			SGD_LOG << "collideRay nHits == maxLoops! ray:" << ray << "contact:" << contact;
 #endif
 			return src;
 		}
 
-		auto ndot = dot(contact.normal, ray.d);
-		if (ndot == (real)-1) return src;
+		Plane plane(contact.point, contact.normal);
+		plane.d -= eps;
 
-		d -= t;
-		if (d <= eps) return src;
+		// New destination?
+		dst = nearest(plane, dst);
 
-		hitPlanes[i] = {contact.point, contact.normal};
-		hitPlanes[i].d -= eps;
-
-		dst = nearest(hitPlanes[i], dst);
-
-		switch (i) {
-		case 0: {
-			// First hit, move along plane
-			i = 1;
+		switch (state) {
+		case 0: { // First plane hit
+			hitPlanes[0] = plane;
+			state = 1;
 			break;
 		}
-		case 1: {
-			// Second hit, OK to leave first plane?
+		case 1: { // Second plane hit
 			if (distance(hitPlanes[0], dst) >= 0) {
-				hitPlanes[0] = hitPlanes[1];
+				hitPlanes[0] = plane;
 				break;
 			}
-			// No, slide along crease, intersection of 2 planes.
+			// Slide along crease, intersection of 2 planes.
+			hitPlanes[1] = plane;
 			auto crease = normalize(cross(hitPlanes[0].n, hitPlanes[1].n));
 			dst = src + crease * dot(dst - src, crease);
-			i = 2;
+			state = 2;
 			break;
 		}
-		case 2: {
-			// Third hit, Ok to leave crease planes?
+		case 2: { // Third plane hit
 			if (distance(hitPlanes[0], dst) >= 0 && distance(hitPlanes[1], dst) >= 0) {
-				hitPlanes[0] = hitPlanes[2];
-				i = 1;
+				hitPlanes[0] = plane;
+				state = 1;
 				break;
 			}
-			// No, stop at point, intersection of 3 planes.
+			// Stop at point, intersection of 3 planes.
 			return src;
 		}
 		default:
 			SGD_ABORT();
 		}
-		// Never move backwards from original dir
-		if (dot(dst - src, dir) <= 0) return src;
 	}
 }
 

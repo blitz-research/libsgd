@@ -22,7 +22,8 @@ struct Collision {
 enum struct CollisionResponse {
 	ignore = 0,
 	stop,
-	slide
+	slide,
+	slidexz,
 };
 
 struct Collider : EntityListener {

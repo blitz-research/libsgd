@@ -1,4 +1,11 @@
 
+***** V0.12 *****
+
+Fixed speeding up during collisions.
+
+Fixed not being able to change collision response type.
+
+
 ***** V0.11 *****
 
 Added sgd.bb and keycodes.bb include files. Ultimately you wont need these as they'll be built into the runtime.
@@ -38,6 +45,7 @@ the future too.
 Added debug.gltfLoader bool config var to enable gltf loader logging.
 
 Fixed gltf material base color not being premultiplied by alpha.
+
 
 ***** V0.10 *****
 
