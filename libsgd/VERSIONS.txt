@@ -1,7 +1,7 @@
 
-***** V0.12 *****
+***** V0.11b *****
 
-Fixed speeding up during collisions.
+Fixed bug where some alpha blended surfaces were being drawn twice.
 
 Fixed not being able to change collision response type.
 

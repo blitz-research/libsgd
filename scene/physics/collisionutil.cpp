@@ -10,7 +10,7 @@ template <class IntersectFunc>
 Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFunc intersectFunc, CollisionResponse response,
 				 Vector<Collision>& collisions) {
 
-	static constexpr real eps = (real).0001;
+	static constexpr real eps = (real).001;
 	static constexpr int maxLoops = 6;
 
 	Planer hitPlanes[3];
@@ -19,15 +19,19 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 
 	auto maxd = std::numeric_limits<real>::max();
 
+	auto fwd = dst - src;
+
 	for (;;) {
 
 		auto dir = dst - src;
+		if (dot(dir, fwd) < 0) return src;
 		auto d = length(dir);
 		if (d <= eps) return src;
 		dir /= d;
 		if (d > maxd) {
+			if(state) SGD_LOG << "### d > maxd";
 			dst = src + dir * maxd;
-		}else{
+		} else {
 			maxd = d;
 		}
 
@@ -58,8 +62,9 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 			return src;
 		}
 
-		Plane plane(contact.point, contact.normal);
-		plane.d -= eps;
+		Plane plane(src, contact.normal);
+//		Plane plane(contact.point, contact.normal);
+//		plane.d -= eps;
 
 		// New destination?
 		dst = nearest(plane, dst);
@@ -71,7 +76,7 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 			break;
 		}
 		case 1: { // Second plane hit
-			if (distance(hitPlanes[0], dst) >= 0) {
+			if (distance(hitPlanes[0], dst) > 0) {
 				hitPlanes[0] = plane;
 				break;
 			}
@@ -83,7 +88,7 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 			break;
 		}
 		case 2: { // Third plane hit
-			if (distance(hitPlanes[0], dst) >= 0 && distance(hitPlanes[1], dst) >= 0) {
+			if (distance(hitPlanes[0], dst) > 0 && distance(hitPlanes[1], dst) > 0) {
 				hitPlanes[0] = plane;
 				state = 1;
 				break;

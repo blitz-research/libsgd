@@ -2,6 +2,8 @@
 
 void entry() {
 
+	setConfigVar("debug.gltfLoader", "1");
+
 	float sz = 50;
 
 	MeshPtr levelMesh = loadStaticMesh(Path("sgd://models/ManurewaDuplex.glb")).result();

@@ -4,9 +4,11 @@
 
 namespace sgd {
 
+namespace {}
+
 ModelRenderer::ModelRenderer()
-	:												 //
-	  m_opaqueRenderer(new MeshRenderer()),	 //
+	:										  //
+	  m_opaqueRenderer(new MeshRenderer()),	  //
 	  m_blendedRenderer(new MeshRenderer()) { //
 }
 
@@ -20,7 +22,7 @@ void ModelRenderer::add(CModel* model) {
 		});
 		return;
 	}
-	
+
 	// Always add to opaque list for now
 	auto it = m_opaqueLists.find(mesh);
 	if (it == m_opaqueLists.end()) {
@@ -33,7 +35,7 @@ void ModelRenderer::add(CModel* model) {
 	if (!bool(mesh->flags() & MeshFlags::blendedSurfaces)) {
 		model->mesh.changed.connect(this, [=](CMesh*) {
 			model->mesh.changed.disconnect(this);
-			sgd::remove(opaqueList->models, model);		// remove from opaque list only...
+			sgd::remove(opaqueList->models, model); // remove from opaque list only...
 			--m_numOpaqueInsts;
 			add(model);
 		});
@@ -87,7 +89,7 @@ void ModelRenderer::remove(CModel* model) {
 void ModelRenderer::update(CVec3r eye) {
 
 	// Update opaque instances
-	if(!m_opaqueLists.empty()) {
+	if (!m_opaqueLists.empty()) {
 
 		auto instp = m_opaqueRenderer->lockInstances(m_numOpaqueInsts);
 
@@ -109,7 +111,7 @@ void ModelRenderer::update(CVec3r eye) {
 			inst.distance = (float)length(inst.model->worldMatrix() * Vec3r(inst.model->mesh()->origin()) - eye);
 		}
 
-		std::sort(m_blendedInsts.begin(), m_blendedInsts.end(),[](const BlendedInstance& lhs, const BlendedInstance& rhs) { //
+		std::sort(m_blendedInsts.begin(), m_blendedInsts.end(), [](const BlendedInstance& lhs, const BlendedInstance& rhs) { //
 			return lhs.distance > rhs.distance;
 		});
 
@@ -132,11 +134,12 @@ void ModelRenderer::update(CVec3r eye) {
 			}
 
 			// Sort surfaces within model instance bounds only
-			std::sort(m_surfaceInsts.begin(), m_surfaceInsts.end(), [](const SurfaceInstance& lhs, const SurfaceInstance& rhs) { //
-				return lhs.distance > rhs.distance;
-			});
+			std::sort(m_surfaceInsts.begin(), m_surfaceInsts.end(),
+					  [](const SurfaceInstance& lhs, const SurfaceInstance& rhs) { //
+						  return lhs.distance > rhs.distance;
+					  });
 
-			for(auto& surf : m_surfaceInsts) {
+			for (auto& surf : m_surfaceInsts) {
 				m_blendedSurfs.push_back(surf.surface);
 			}
 			m_blendedSurfs.push_back(nullptr);
@@ -147,30 +150,30 @@ void ModelRenderer::update(CVec3r eye) {
 
 void ModelRenderer::render(RenderQueue* rq) const {
 
-	// Render opaque
+	//  Render opaque
 	{
 		uint32_t first = 0;
 		for (auto& kv : m_opaqueLists) {
 			auto mesh = kv.first;
 			uint32_t count = kv.second->models.size();
-			if(bool(mesh->flags() & MeshFlags::blendedSurfaces)) {
-				m_opaqueRenderer->render(rq, mesh, count, first);
-			}else {
+			if (bool(mesh->flags() & MeshFlags::blendedSurfaces)) {
 				for (Surface* surf : mesh->surfaces()) {
 					if (surf->material()->blendMode() == BlendMode::alphaBlend) continue;
 					m_opaqueRenderer->render(rq, surf, count, first);
 				}
+			} else {
+				m_opaqueRenderer->render(rq, mesh, count, first);
 			}
 			first += count;
 		}
 	}
 
-	if(m_blendedSurfs.empty()) return;
+	if (m_blendedSurfs.empty()) return;
 
 	// Render blended
 	{
 		uint32_t index = 0;
-		for(auto surf : m_blendedSurfs) {
+		for (auto surf : m_blendedSurfs) {
 			if (surf) {
 				m_blendedRenderer->render(rq, surf, 1, index);
 			} else {
