@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(window_tests)
 
-add_executable(window_tests window_tests.cpp)
-
-target_link_libraries(window_tests window)
+if (SGD_OS_WINDOWS)
+    add_executable(window_tests window_tests.cpp)
+    target_link_libraries(window_tests window)
+endif ()
