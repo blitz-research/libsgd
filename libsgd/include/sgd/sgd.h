@@ -107,7 +107,7 @@ SGD_API void SGD_DECL sgd_Terminate();
 SGD_API void SGD_DECL sgd_SetConfigVar(SGD_String name, SGD_String value);
 
 //! Set global configuration variable. The returned value is valid until the next call to sgd_GetConfigVar.
-SGD_API SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name);
+//SGD_API SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name);
 
 //! Set error handler callback.
 SGD_API void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(SGD_String error, void* context), void* context);
@@ -1174,8 +1174,10 @@ SGD_API void SGD_DECL sgd_SetSpriteFrame(SGD_Sprite sprite, float frame);
 //! @{
 
 //! @cond
+#define SGD_COLLISION_RESPONSE_NONE 0
 #define SGD_COLLISION_RESPONSE_STOP 1
 #define SGD_COLLISION_RESPONSE_SLIDE 2
+#define SGD_COLLISION_RESPONSE_SLIDEXZ 3
 //! @endcond
 
 //! Create a new sphere collider and attach it to entity.
@@ -1200,10 +1202,12 @@ SGD_API void SGD_DECL sgd_SetColliderHeight(SGD_Collider collider, float height)
 //!
 //! `response` should be one of the following:
 //!
-//! Response                     | Integer value | Description
-//! -----------------------------|---------------|------------
-//! SGD_COLLISION_RESPONSE_STOP  | 1             | Source collider should stop when it collisides with destination collider.
-//! SGD_COLLISION_RESPONSE_SLIDE | 2             | Source collider should slide along geometry when it collides with distantion collider.
+//! Response                       | Integer value | Description
+//! -------------------------------|---------------|------------
+//! SGD_COLLISION_RESPONSE_NONE    | 0             | Source collider should do nothing when it collides with destination collider.
+//! SGD_COLLISION_RESPONSE_STOP    | 1             | Source collider should stop when it collides with destination collider.
+//! SGD_COLLISION_RESPONSE_SLIDE   | 2             | Source collider should slide along geometry when it collides with destination collider.
+//! SGD_COLLISION_RESPONSE_SLIDEXZ | 3             | Source collider should slide along XZ plane when it collides with destination collider.
 SGD_API void SGD_DECL sgd_EnableCollisions(int srcColliderType, int dstColliderType, int response);
 
 //! Update enabled colliders.

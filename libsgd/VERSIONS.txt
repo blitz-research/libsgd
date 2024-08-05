@@ -6,13 +6,13 @@
 Changed SetMeshShadowCastingEnabled to SetMeshShadowsEnabled, SetLightShadowCastingEnabled to SetLightShadowsEnabled and related
 'Is' getters.
 
-Added: GetSurfaceCount, GetSurface, GetSurfaceMaterial.
+Added GetSurfaceCount, GetSurface, GetSurfaceMaterial.
 
 Added GetVertexX, GetVertexY, GetVertexZ etc.
 
 Reverted Mesh function names to simpler b3d style.
 
-Added COLLISION_RESPONSE_SLIDEXZ to prevent sliding down hills, gnarly piece of code! Really need a 'threshold' angle version...
+Added COLLISION_RESPONSE_SLIDEXZ to prevent sliding down hills, really need a 'threshold' angle version...
 
 Added new bool config vars: "render.shadowPassEnabled", "render.opaquePassEnabled", "render.blendPassEnabled",
 "render.effectPassEnabled".
