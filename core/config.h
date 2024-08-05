@@ -11,4 +11,10 @@ Signal<CString>& configVarChanged(CString name);
 void setConfigVar(CString name, CString value);
 String getConfigVar(CString name);
 
+// clang-format off
+#define SGD_BOOL_CONFIG_VAR(IDENT, NAME, DEFAULT) \
+bool IDENT = DEFAULT; \
+auto IDENT##_init = configVarChanged(NAME).connect(nullptr, [](CString value) { IDENT = truthiness(value); });
+// clang-format on
+
 } // namespace sgd

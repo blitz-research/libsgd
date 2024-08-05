@@ -9,7 +9,7 @@ SetFogEffectColor fog,.3,.6,1,1
 SetFogEffectPower fog,2
 
 Local light = CreateDirectionalLight()
-SetLightShadowMappingEnabled light,True
+SetLightShadowsEnabled light,True
 SetEntityRotation light,-30,0,0
 
 Local env =  LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
@@ -23,14 +23,14 @@ Local sz#=330
 
 SetCSMClipRange sz * 2
 
-Local groundMaterial = LoadPBRMaterial("sgd://misc/brownish-grass.jpg")
+Local groundMaterial = LoadPBRMaterial("sgd://misc/grass1K.jpg")
 Local groundMesh = CreateBoxMesh(-sz,0,-sz,sz,0,sz,groundMaterial)
 TFormMeshTexCoords groundMesh,sz,sz,0,0
 Local ground = CreateModel(groundMesh)
 CreateMeshCollider(ground, 0, 0)
 
 Local towerMesh = LoadMesh("sgd://models/eiffel_tower.glb")
-SetMeshShadowCastingEnabled towerMesh,True
+SetMeshShadowsEnabled towerMesh,True
 FitMesh(towerMesh,-sz/2,0,-sz/2,sz/2,sz,sz/2,True)
 Local tower = CreateModel(towerMesh)
 CreateMeshCollider(tower, 0, 0)

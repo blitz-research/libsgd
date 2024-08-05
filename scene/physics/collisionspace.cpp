@@ -11,7 +11,16 @@ CollisionNode::CollisionNode(Collider* collider, CollisionSpace* space) : m_coll
 
 void CollisionSpace::enableCollisions(uint32_t srcType, uint32_t dstType, CollisionResponse response) {
 
-	if (m_colliderMasks[srcType] & (1 << dstType)) return;
+	if (m_colliderMasks[srcType] & (1 << dstType)) {
+		// already enabled, change response?
+		for (auto& ec : m_enabledCollisions[srcType]) {
+			if (ec.dstType == dstType) {
+				ec.response = response;
+				return;
+			}
+		}
+		SGD_ABORT();
+	}
 
 	m_enabledCollisions[srcType].push_back({srcType, dstType, response});
 

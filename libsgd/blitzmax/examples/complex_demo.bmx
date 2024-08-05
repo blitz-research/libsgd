@@ -312,7 +312,7 @@ Type Bullet
 			light = SGD.CreatePointLight ()
 			SGD.SetLightRange light, 25
 			If SHADOWS_ON
-				SGD.SetLightShadowMappingEnabled light, True
+				SGD.SetLightShadowsEnabled light, True
 			EndIf
 '		EndIf
 		
@@ -470,7 +470,7 @@ Function demo_CreateCamera:Int ()
 	Local camera_light:Int = SGD.CreateSpotLight ()
 	SGD.SetEntityParent camera_light, camera
 	If SHADOWS_ON
-		SGD.SetLightShadowMappingEnabled camera_light, True ' Working? Can't see shadows from it, even offset:
+		SGD.SetLightShadowsEnabled camera_light, True ' Working? Can't see shadows from it, even offset:
 	EndIf
 '	SGD.MoveEntity camera_light, -2, 2, 2
 '	SGD.TurnEntity camera_light, 0, -10, 0
@@ -552,7 +552,7 @@ Function demo_GetStaticCubeMesh:Int (cube_material_path:String = "sgd://material
 		CubeMesh = SGD.CreateBoxMesh (-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, cube_material)
 
 		If SHADOWS_ON
-			SGD.SetMeshShadowCastingEnabled CubeMesh, True
+			SGD.SetMeshShadowsEnabled CubeMesh, True
 		EndIf
 
 	EndIf
@@ -585,7 +585,7 @@ Function demo_GetStaticBulletMesh:Int ()'cube_material_path:String = "sgd://mate
 
 		BulletMesh = SGD.CreateBoxMesh (-0.5, -0.5, -0.5, 0.5, 0.5, 0.5, cube_material)
 		If SHADOWS_ON
-			SGD.SetMeshShadowCastingEnabled BulletMesh, False
+			SGD.SetMeshShadowsEnabled BulletMesh, False
 		EndIf
 		
 	EndIf

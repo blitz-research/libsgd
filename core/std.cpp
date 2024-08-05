@@ -1,5 +1,6 @@
 ﻿#include "std.h"
 #include "log.h"
+#include "stringutil.h"
 
 #include <thread>
 
@@ -33,8 +34,10 @@ Clock::time_point g_timerStart = Clock::now();
 
 std::thread::id g_mainThreadId = std::this_thread::get_id();
 
-Function<void(CString msg, const char* file, int line)> onError = [](CString msg, const char* file, int line) { //
+auto defaultOnError = [](CString msg, const char* file, int line) { //
+
 	SGD_LOG << "Runtime error:" << msg << "file:" << file << "line:" << line;
+
 #if SGD_CONFIG_DEBUG
 #if SGD_COMPILER_MSVC
 	__debugbreak();
@@ -49,14 +52,21 @@ Function<void(CString msg, const char* file, int line)> onError = [](CString msg
 #endif
 };
 
+Function<void(CString msg, const char* file, int line)> onError = defaultOnError;
+
 } // namespace
 
 void setErrorHandler(const Function<void(CString msg, const char* file, int line)>& handler) {
-	onError = handler;
+	onError = handler ? handler : defaultOnError;
 }
 
 void error(CString msg, const char* file, int line) {
-	onError(msg, file, line);
+	// Sanitize internal file paths.
+	auto tfile = replace(file, "\\", "/");
+	if (startsWith(tfile, SGD_CMAKE_SOURCE_DIR "/")) {
+		tfile = tfile.substr(std::char_traits<char>::length(SGD_CMAKE_SOURCE_DIR "/"));
+	}
+	onError(msg, tfile.c_str(), line);
 	std::abort();
 }
 

@@ -3,10 +3,6 @@ Include "start.bb"
 
 CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "Blend test", 4)
 
-SetWindowTitle "Hello World!"
-
-SetFullscreenMode 1920,1080,60
-
 SetAmbientLightColor 1,1,1,.2
 
 Local env =  LoadTexture("sgd://envmaps/stormy-cube.jpg", 4, 56)
@@ -58,7 +54,6 @@ Wend
 			
 			
 			
-
 
 
 

@@ -41,13 +41,28 @@ String timeStamp(const Clock::time_point& tp) {
 
 std::mutex g_mutex;
 
-std::ofstream g_logstream;
+String g_logfilePath = "~/.sgd/log.txt";
+std::ofstream g_logfileStream;
 
-bool g_stdoutEnabled = true;
+SGD_BOOL_CONFIG_VAR(g_logfileEnabled,"log.logfileEnabled",true);
+SGD_BOOL_CONFIG_VAR(g_stdoutEnabled,"log.stdoutEnabled", true);
 
-auto init = configVarChanged("log.stdoutEnabled").connect(nullptr, [](CString value) { //
-	g_stdoutEnabled = truthiness(value);
+auto g_logfilePath_init = configVarChanged("log.logfilePath").connect(nullptr, [](CString value) { //
+	if(g_logfileStream.is_open()) g_logfileStream.close();
+	g_logfilePath = value;
 });
+
+std::ofstream& logfileStream() {
+	if(g_logfileStream.is_open()) return g_logfileStream;
+
+	Path path(g_logfilePath);
+	if (!path.createFile(true)) SGD_ERROR("Logging error, failed to create log file");
+
+	g_logfileStream.open(path.filePath());
+	if (!g_logfileStream.is_open()) SGD_ERROR("Logging error, failed to open log file stream");
+
+	return g_logfileStream;
+}
 
 } // namespace
 
@@ -64,34 +79,21 @@ Log::~Log() {
 	{
 		std::lock_guard<std::mutex> lock(g_mutex);
 
-		if (!g_logstream.is_open()) {
-			static bool opened;
-
-			if (opened) SGD_ERROR("Logging error, log file unexpectedly closed");
-
-			Path path("~/.sgd/log.txt");
-			if (!path.createFile(true)) SGD_ERROR("Logging error, failed to create log file");
-
-			g_logstream.open(path.filePath());
-			if (!g_logstream.is_open()) SGD_ERROR("Logging error, failed to open log file");
-
-			opened = true;
+		if(g_logfileEnabled) {
+			logfileStream() << str << std::flush;
 		}
-
-		g_logstream << str;
-		g_logstream.flush();
-
-		if (g_stdoutEnabled) std::cout << str << std::flush;
+		if(g_stdoutEnabled) {
+			std::cout<<str<<std::flush;
+		}
 	}
 }
 
 Log log(CString file, CString func, int line) {
-
+	// Sanitize internal file paths.
 	auto tfile = replace(file, "\\", "/");
 	if (startsWith(tfile, SGD_CMAKE_SOURCE_DIR "/")) {
 		tfile = tfile.substr(std::char_traits<char>::length(SGD_CMAKE_SOURCE_DIR "/"));
 	}
-
 	return Log() << tfile << ("(" + std::to_string(line) + ") :");
 }
 

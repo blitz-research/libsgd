@@ -16,7 +16,7 @@ void entry() {
 	sgd_SetMaxCSMLights(2);
 
 	SGD_Mesh mesh2 = sgd_CreateSphereMesh(1, 24, 12, material);
-	sgd_SetMeshShadowCastingEnabled(mesh2, 1);
+	sgd_SetMeshShadowsEnabled(mesh2, 1);
 
 	SGD_Model model2 = sgd_CreateModel(mesh2);
 	sgd_MoveEntity(model2, 0, 0, 0);
@@ -27,7 +27,7 @@ void entry() {
 	// Red, left
 	SGD_Light light0 = sgd_CreatePointLight();
 	sgd_SetEntityParent(light0, pivot);
-	sgd_SetLightShadowMappingEnabled(light0, 1);
+	sgd_SetLightShadowsEnabled(light0, 1);
 	sgd_MoveEntity(light0, -5, 0, 0);
 	sgd_SetLightColor(light0, 1, 0, 0, 1.5);
 	sgd_SetLightRange(light0, 20);
@@ -35,7 +35,7 @@ void entry() {
 	// Green, right
 	SGD_Light light1 = sgd_CreatePointLight();
 	sgd_SetEntityParent(light1, pivot);
-	sgd_SetLightShadowMappingEnabled(light1, 1);
+	sgd_SetLightShadowsEnabled(light1, 1);
 	sgd_MoveEntity(light1, 5, 0, 0);
 	sgd_SetLightColor(light1, 0, 1, 0, 1.5);
 	sgd_SetLightRange(light1, 20);

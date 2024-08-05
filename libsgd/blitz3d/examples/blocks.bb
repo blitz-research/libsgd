@@ -114,7 +114,7 @@ Function UpdateBullets()
 		If bullet\vz<1 bullet\vz=1
 		
 		Local light=CreatePointLight()
-		SetLightShadowMappingEnabled light,True
+		SetLightShadowsEnabled light,True
 		SetEntityParent light,bullet\entity
 		SetLightColor light,r,g,b,2
 		SetLightRange light,50
@@ -136,7 +136,6 @@ End Function
 
 Function CreateGround()
 
-;	Local material = LoadPBRMaterial("sgd://materials/Fabric050_1K-JPG")
 	Local material = LoadPBRMaterial("sgd://materials/Gravel023_1K-JPG")
 
 	Local mesh = CreateBoxMesh(-WORLD_SIZE * 2,-1,-WORLD_SIZE*2,WORLD_SIZE*2,0,WORLD_SIZE*2,material)
@@ -149,9 +148,8 @@ End Function
 Function CreateBlocks()
 
 	Local material = LoadPBRMaterial("sgd://materials/Fabric048_1K-JPG")
-;	Local material = LoadPBRMaterial("sgd://materials/PaintedWood09C_1K-JPG")
 	Local mesh = CreateBoxMesh(-1,-1,-1,1,1,1,material)
-	SetMeshShadowCastingEnabled mesh,True
+	SetMeshShadowsEnabled mesh,True
 	
 	For i=1 To NUM_BLOCKS
 		block.Block = New Block

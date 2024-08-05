@@ -6,7 +6,7 @@ Function createSphere(radius#, xSegs, ySegs, material)
 	Local fxSegs# = 1/Float(xSegs), fySegs# = 1/Float(ySegs)
 	
 	For i=0 To xSegs-1
-		AddMeshVertex mesh, 0, radius, 0, 0, 1, 0, (Float(i) + .5) * 2 * fxSegs, 0
+		AddVertex mesh, 0, radius, 0, 0, 1, 0, (Float(i) + .5) * 2 * fxSegs, 0
 	Next
 	For j = 1 To ySegs-1
 		Local pitch# = HALF_PI - Float(j) * Pi * fySegs;
@@ -16,30 +16,30 @@ Function createSphere(radius#, xSegs, ySegs, material)
 			Local y# = Sin(pitch);
 			Local x# = Cos(yaw) * r;
 			Local z# = Sin(yaw) * r;
-			AddMeshVertex mesh, x * radius, y * radius, z * radius, x, y, z, Float(i) * 2 * fxSegs, Float(j) * fySegs
+			AddVertex mesh, x * radius, y * radius, z * radius, x, y, z, Float(i) * 2 * fxSegs, Float(j) * fySegs
 		Next
 	Next
 	For i = 0 To xSegs-1
-		AddMeshVertex mesh, 0, -radius, 0, 0, -1, 0, (Float(i) + .5) * 2 * fxSegs, 1
+		AddVertex mesh, 0, -radius, 0, 0, -1, 0, (Float(i) + .5) * 2 * fxSegs, 1
 	Next
 	
 	Local surf = CreateSurface(mesh, 0, material);
 	
 	For i = 0 To xSegs-1
-		AddSurfaceTriangle surf, i, i + xSegs, i + xSegs + 1
+		AddTriangle surf, i, i + xSegs, i + xSegs + 1
 	Next
 	
 	For j = 1 To ySegs-2
 		For i = 0 To xSegs-1
 			Local v0 = j * (xSegs + 1) + i - 1
 			Local v2 = v0 + xSegs + 2
-			AddSurfaceTriangle surf, v0, v2, v0 + 1
-			AddSurfaceTriangle surf, v0, v2 - 1, v2
+			AddTriangle surf, v0, v2, v0 + 1
+			AddTriangle surf, v0, v2 - 1, v2
 		Next
 	Next
 	For i = 0 To xSegs-1
 		v0 = (xSegs + 1) * (ySegs - 1) + i - 1
-		AddSurfaceTriangle surf, v0, v0 + xSegs + 1, v0 + 1
+		AddTriangle surf, v0, v0 + xSegs + 1, v0 + 1
 	Next
 	
 	Return mesh

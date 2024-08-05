@@ -20,13 +20,13 @@ SGD_SHARED(Surface);
 struct Surface : Shared {
 	SGD_OBJECT_TYPE(Surface, Shared);
 
-	Surface(CMesh* mesh, CMaterial* material, uint32_t triangleCount);
+	Surface(CMesh* mesh, Material* material, uint32_t triangleCount);
 
 	CMesh* mesh()const{
 		return m_mesh;
 	}
 
-	CMaterial* material() const {
+	Material* material() const {
 		return m_material;
 	}
 
@@ -68,7 +68,7 @@ struct Surface : Shared {
 
 private:
 	CMesh* m_mesh;
-	CMaterialPtr m_material;
+	MaterialPtr m_material;
 	uint32_t m_triangleCount;
 	BufferPtr m_triangleBuffer;
 	Boxf m_bounds;

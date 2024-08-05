@@ -12,17 +12,12 @@ namespace sgd {
 
 namespace {
 
-bool g_vsyncEnabled = true;
-
-auto init0 = configVarChanged("render.vsyncEnabled").connect(nullptr, [](CString value) { //
-	g_vsyncEnabled = truthiness(value);
-});
-
-bool g_timeStampsEnabled = true;
-
-auto init = configVarChanged("render.timeStampsEnabled").connect(nullptr, [](CString value) { //
-	g_timeStampsEnabled = truthiness(value);
-});
+SGD_BOOL_CONFIG_VAR(g_vsyncEnabled, "render.vsyncEnabled", true);
+SGD_BOOL_CONFIG_VAR(g_timeStampsEnabled, "render.timeStampsEnabled", true);
+SGD_BOOL_CONFIG_VAR(g_shadowPassEnabled, "render.shadowPassEnabled", true);
+SGD_BOOL_CONFIG_VAR(g_opaquePassEnabled, "render.opaquePassEnabled", true);
+SGD_BOOL_CONFIG_VAR(g_blendPassEnabled, "render.blendPassEnabled", true);
+SGD_BOOL_CONFIG_VAR(g_effectPassEnabled, "render.effectPassEnabled", true);
 
 } // namespace
 
@@ -269,18 +264,18 @@ Texture* SceneRenderer::outputTexture() const {
 // ***** Async rendering *****
 
 void SceneRenderer::renderGeometry(RenderPassType rpassType, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
-								   float clearDepth, BindGroup* sceneBindings) {
+								   float clearDepth, BindGroup* sceneBindings, bool enabled) {
 
 	m_renderContext->beginRenderPass(rpassType, colorBuffer, depthBuffer, clearColor, clearDepth, sceneBindings);
 
-	m_renderContext->render(m_renderQueue->renderOps(rpassType));
+	if (enabled) {
+		m_renderContext->render(m_renderQueue->renderOps(rpassType));
+	}
 
 	m_renderContext->endRenderPass();
 }
 
 void SceneRenderer::renderAsync() {
-
-	auto gc = currentGC();
 
 	auto timeStampsEnabled = g_timeStampsEnabled && m_timeStampsEnabled;
 	if (timeStampsEnabled) m_timeStampsEnabled = false;
@@ -290,22 +285,24 @@ void SceneRenderer::renderAsync() {
 	// Shadows
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 0);
 	for (auto& pass : m_sceneBindings->shadowPasses()) {
-		renderGeometry(RenderPassType::shadow, nullptr, pass.renderTarget, {}, 1, pass.sceneBindings);
+		renderGeometry(RenderPassType::shadow, nullptr, pass.renderTarget, {}, 1, pass.sceneBindings, g_shadowPassEnabled);
 	}
 
 	// Opaque
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 1);
 	renderGeometry(RenderPassType::opaque, m_renderTarget, m_depthBuffer, clearColor(), clearDepth(),
-				   m_sceneBindings->bindGroup());
+				   m_sceneBindings->bindGroup(), g_opaquePassEnabled);
 
 	// Blend
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 2);
 	renderGeometry(RenderPassType::blend, m_renderTarget, m_depthBuffer, clearColor(), clearDepth(),
-				   m_sceneBindings->bindGroup());
+				   m_sceneBindings->bindGroup(), g_blendPassEnabled);
 
 	// Effects
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 3);
-	m_renderEffectStack->render(m_renderContext, m_sceneBindings->bindGroup());
+	if (g_effectPassEnabled) {
+		m_renderEffectStack->render(m_renderContext, m_sceneBindings->bindGroup());
+	}
 
 	if (timeStampsEnabled) {
 		m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 4);
@@ -313,17 +310,14 @@ void SceneRenderer::renderAsync() {
 		m_wgpuCommandEncoder.CopyBufferToBuffer(m_timeStampBuffer, 0, m_timeStampResults, 0, timeStampCount * 8);
 	}
 
-
 	if (g_vsyncEnabled) {
-
-		auto ms = millis();
+		// auto ms = millis();
 		while (m_wgpuWorkDone.id) {
 			currentGC()->wgpuDevice().GetAdapter().GetInstance().WaitAny(m_wgpuWorkDone, 5000000000);
 			m_wgpuWorkDone.id = 0;
 		};
-		ms = millis() - ms;
+		// ms = millis() - ms;
 		//	SGD_LOG << "Wait for work done ms:"<<ms;
-
 		m_wgpuWorkDone = currentGC()->wgpuDevice().GetQueue().OnSubmittedWorkDone( //
 			wgpu::CallbackMode::WaitAnyOnly, [this](wgpu::QueueWorkDoneStatus status) {});
 	}

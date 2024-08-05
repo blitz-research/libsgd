@@ -3,7 +3,7 @@
 
 namespace sgd {
 
-Surface::Surface(CMesh* mesh, CMaterial* material, uint32_t triangleCount)
+Surface::Surface(CMesh* mesh, Material* material, uint32_t triangleCount)
 	: m_mesh(mesh),			//
 	  m_material(material), //
 	  m_triangleCount(triangleCount),

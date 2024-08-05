@@ -13,7 +13,7 @@ CreatePlayer(0)
 MoveEntity player,0,15,-25
 
 Local light = CreateDirectionalLight()
-SetLightShadowMappingEnabled light,True
+SetLightShadowsEnabled light,True
 TurnEntity light,-75,15,0
 
 Local sz#=32
@@ -23,7 +23,7 @@ TFormMeshTexCoords groundMesh, sz, sz, 0,0
 Local groundModel = CreateModel(groundMesh)
 
 Local crateMesh = LoadMesh("sgd://models/sci-fi_crate.glb")
-SetMeshShadowCastingEnabled crateMesh,True
+SetMeshShadowsEnabled crateMesh,True
 FitMesh CrateMesh,-.4,-.4,-.4,.4,.4,.4,True
 For x=-20 To 20
 	For z=-20 To 20

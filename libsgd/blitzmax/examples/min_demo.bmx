@@ -87,7 +87,7 @@ Local light:Int = SGD.CreatePointLight ()
 ' Light details:
 
 SGD.SetLightRange light, 25.0
-SGD.SetLightShadowMappingEnabled (light, True) ' CASTING SHADOW
+SGD.SetLightShadowsEnabled (light, True) ' CASTING SHADOW
 SGD.SetLightColor light, 1.0, 1.0, 1.0, 1.0
 
 ' Positioning:
@@ -121,7 +121,7 @@ Local cube_material:Int	= SGD.CreatePBRMaterial ()
 Local cube_size:Float	= 1.0
 Local cube_mesh			= SGD.CreateBoxMesh (-cube_size * 0.5, -cube_size * 0.5, -cube_size * 0.5, cube_size * 0.5, cube_size * 0.5, cube_size * 0.5, cube_material)
 
-SGD.SetMeshShadowCastingEnabled cube_mesh, True ' CUBE CASTS SHADOW
+SGD.SetMeshShadowsEnabled cube_mesh, True ' CUBE CASTS SHADOW
 
 ' Change colour here!
 

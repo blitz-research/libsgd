@@ -16,6 +16,9 @@ target_link_libraries(scene_tests_bloom scene)
 add_executable(scene_tests_trees scene_tests_trees.cpp)
 target_link_libraries(scene_tests_trees scene)
 
+add_executable(scene_tests_forest scene_tests_forest.cpp)
+target_link_libraries(scene_tests_forest scene)
+
 add_executable(scene_tests_skinned_model scene_tests_skinned_model.cpp)
 target_link_libraries(scene_tests_skinned_model scene)
 

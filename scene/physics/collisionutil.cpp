@@ -10,86 +10,121 @@ template <class IntersectFunc>
 Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFunc intersectFunc, CollisionResponse response,
 				 Vector<Collision>& collisions) {
 
+	static constexpr real mind = (real).0001;
+	static constexpr real eps = (real).01;
+
 	static constexpr int maxLoops = 6;
-	static constexpr real eps = (real).0001;
 
-	// Max distance to travel
 	auto dir = dst - src;
-	auto d = length(dir);
-	if (d <= eps) return src;
+	auto dist = length(dir);
+	if (dist <= mind) return src;
 
-	Planer hitPlanes[3];
-	int nHits = 0;
-	int i = 0;
+	auto dist_xz = length(Vec2r(dir.x, dir.z));
+	dir /= dist;
+	auto fwd = dir;
+
+	Planer planes[3];
+	int state = 0;
+	int loops = 0;
 
 	for (;;) {
 
-		Contact contact(d);
-
-		Line ray(src, normalize(dst - src));
+		Contact contact(dist);
+		Line ray(src, dir);
 
 		auto collider = intersectFunc(ray, contact);
 		if (!collider) return dst;
 
 		collisions.emplace_back(ray, contact, collider);
+
 		if (response == CollisionResponse::ignore) return dst;
 
-		auto t = std::max(contact.time - eps, (real)0);
-		src = ray * t;
+		// Hit distance/time
+		auto hitd = std::max(contact.time - eps, (real)0);
+		src = ray * hitd;
 
 		if (response == CollisionResponse::stop) return src;
 
-		if (++nHits == maxLoops) {
+		if (hitd > dist) SGD_LOG << "### OOPS 1:" << hitd << dist;
+		if ((dist -= hitd) <= mind) return src;
+
+		// Subtract hit distance moved from remaining distance
+		if (response == CollisionResponse::slidexz) {
+			auto d_xz = length(Vec2r(src.x - ray.o.x, src.z - ray.o.z));
+			if (d_xz > dist_xz) SGD_LOG << "### OOPS 2:" << d_xz << dist_xz;
+			dist_xz -= d_xz;
+		}
+
+		// Avoid looping forever
+		if (++loops == maxLoops) {
 #if SGD_CONFIG_DEBUG
-			SGD_LOG << "collideRay nHits == maxLoops! ray:" << ray << "contact:" << contact;
+			SGD_LOG << "collideRay loops == maxLoops! ray:" << ray << "contact:" << contact;
 #endif
 			return src;
 		}
 
-		auto ndot = dot(contact.normal, ray.d);
-		if (ndot == (real)-1) return src;
+		Plane plane(src, contact.normal);
+		// Plane plane(contact.point, contact.normal);
+		// plane.d -= mind;
 
-		d -= t;
-		if (d <= eps) return src;
+		// New destination?
+		dst = nearest(plane, dst);
 
-		hitPlanes[i] = {contact.point, contact.normal};
-		hitPlanes[i].d -= eps;
-
-		dst = nearest(hitPlanes[i], dst);
-
-		switch (i) {
-		case 0: {
-			// First hit, move along plane
-			i = 1;
+		switch (state) {
+		case 0: { // First plane hit
+			planes[0] = plane;
+			state = 1;
 			break;
 		}
-		case 1: {
-			// Second hit, OK to leave first plane?
-			if (distance(hitPlanes[0], dst) >= 0) {
-				hitPlanes[0] = hitPlanes[1];
+		case 1: { // Second plane hit
+			if (distance(planes[0], dst) > 0) {
+				planes[0] = plane;
 				break;
 			}
-			// No, slide along crease, intersection of 2 planes.
-			auto crease = normalize(cross(hitPlanes[0].n, hitPlanes[1].n));
+			// Slide along crease, intersection of 2 planes.
+			planes[1] = plane;
+			auto crease = normalize(cross(planes[0].n, planes[1].n));
 			dst = src + crease * dot(dst - src, crease);
-			i = 2;
+			state = 2;
 			break;
 		}
-		case 2: {
-			// Third hit, Ok to leave crease planes?
-			if (distance(hitPlanes[0], dst) >= 0 && distance(hitPlanes[1], dst) >= 0) {
-				hitPlanes[0] = hitPlanes[2];
-				i = 1;
+		case 2: { // Third plane hit
+			if (distance(planes[0], dst) > 0 && distance(planes[1], dst) > 0) {
+				planes[0] = plane;
+				state = 1;
 				break;
 			}
-			// No, stop at point, intersection of 3 planes.
+			// Stop at point, intersection of 3 planes.
 			return src;
 		}
 		default:
 			SGD_ABORT();
 		}
-		// Never move backwards from original dir
-		if (dot(dst - src, dir) <= 0) return src;
+
+		dir = dst - src;
+		if (dot(fwd, dir) < 0) return src;
+
+		auto d = length(dir);
+		if (d <= mind) return src;
+
+		dir /= d;
+		if (d > dist) {
+			SGD_LOG << "### OOPS 3:" << d << dist;
+			dst = src + dir * dist;
+		} else {
+			dist = d;
+		}
+
+		if (response == CollisionResponse::slidexz) {
+			auto d_xz = length(Vec2r(dst.x - src.x, dst.z - src.z));
+			if (d_xz > dist_xz) {
+				dist *= dist_xz / d_xz;
+				if (dist <= mind) return src;
+				dst = src + dir * dist;
+			} else {
+				dist_xz = d_xz;
+			}
+		}
 	}
 }
 

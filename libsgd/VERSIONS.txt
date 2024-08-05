@@ -1,4 +1,27 @@
 
+***** V0.12 *****
+
+***** WARNING ****** Changed order of CreateSurface parameters. Use: CreateSurface(mesh, material, triangleCount) !!!!!
+
+Changed SetMeshShadowCastingEnabled to SetMeshShadowsEnabled, SetLightShadowCastingEnabled to SetLightShadowsEnabled and related
+'Is' getters.
+
+Added GetSurfaceCount, GetSurface, GetSurfaceMaterial.
+
+Added GetVertexX, GetVertexY, GetVertexZ etc.
+
+Reverted Mesh function names to simpler b3d style.
+
+Added COLLISION_RESPONSE_SLIDEXZ to prevent sliding down hills, really need a 'threshold' angle version...
+
+Added new bool config vars: "render.shadowPassEnabled", "render.opaquePassEnabled", "render.blendPassEnabled",
+"render.effectPassEnabled".
+
+Fixed bug where some alpha blended surfaces were being drawn twice.
+
+Fixed not being able to change collision response type.
+
+
 ***** V0.11 *****
 
 Added sgd.bb and keycodes.bb include files. Ultimately you wont need these as they'll be built into the runtime.
@@ -38,6 +61,7 @@ the future too.
 Added debug.gltfLoader bool config var to enable gltf loader logging.
 
 Fixed gltf material base color not being premultiplied by alpha.
+
 
 ***** V0.10 *****
 
