@@ -120,7 +120,7 @@ private:
 	void updateLightingUniforms();
 
 	void renderGeometry(RenderPassType rpassType, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
-						float clearDepth, BindGroup* sceneBindings);
+						float clearDepth, BindGroup* sceneBindings, bool enabled);
 
 	void renderAsync();
 };

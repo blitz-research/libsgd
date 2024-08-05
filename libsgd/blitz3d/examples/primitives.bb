@@ -15,13 +15,13 @@ SetMaxPSMLights 6
 Local light0 = CreatePointLight()
 SetEntityPosition light0,0,5,-2.5
 SetLightRange light0, 10
-SetLightShadowMappingEnabled light0,True
+SetLightShadowsEnabled light0,True
 
 Local groundMaterial = CreatePBRMaterial()
 SetMaterialVector4f groundMaterial, "albedoColor4f",.6,.5,.5,1
 SetMaterialFloat groundMaterial, "roughnessFactor1f",0.5
 Local groundMesh = CreateBoxMesh(-5,-.1,-5,5,0,5,groundMaterial)
-SetMeshShadowCastingEnabled groundMesh, True
+SetMeshShadowsEnabled groundMesh, True
 Local groundModel = CreateModel(groundMesh)
 
 Local material = LoadPBRMaterial("sgd://materials/Fabric050_1K-JPG")
@@ -33,28 +33,28 @@ CreatePlayer(0)
 MoveEntity player,0,y,-5
 
 Local mesh0 = CreateSphereMesh(r, 96, 48, material)
-SetMeshShadowCastingEnabled mesh0, True
+SetMeshShadowsEnabled mesh0, True
 Local model0 = CreateModel(mesh0)
 MoveEntity model0, -2.5, y, 0
 
 Local r2#=r*.7071
 Local mesh1 = CreateBoxMesh(-r2, -r2, -r2, r2, r2, r2, material)
-SetMeshShadowCastingEnabled mesh1, True
+SetMeshShadowsEnabled mesh1, True
 Local model1 = CreateModel(mesh1)
 MoveEntity model1, -1.25, y, 0
 
 Local mesh2 = CreateCylinderMesh(r * 2, r / 2, 96, material)
-SetMeshShadowCastingEnabled mesh2, True
+SetMeshShadowsEnabled mesh2, True
 Local model2 = CreateModel(mesh2)
 MoveEntity model2, 0, y, 0
 
 Local mesh3 = CreateConeMesh(r * 2, r / 2, 96, material)
-SetMeshShadowCastingEnabled mesh3, True
+SetMeshShadowsEnabled mesh3, True
 Local model3 = CreateModel(mesh3)
 MoveEntity model3, 1.25, y, 0
 
 Local mesh4 = CreateTorusMesh(r * .75, r * .25, 96, 48, material)
-SetMeshShadowCastingEnabled mesh4, True
+SetMeshShadowsEnabled mesh4, True
 Local model4 = CreateModel(mesh4)
 MoveEntity model4, 2.5, y, 0
 

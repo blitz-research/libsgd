@@ -2,8 +2,6 @@
 
 void entry() {
 
-	setConfigVar("debug.gltfLoader", "1");
-
 	float sz = 50;
 
 	MeshPtr levelMesh = loadStaticMesh(Path("sgd://models/ManurewaDuplex.glb")).result();
@@ -21,7 +19,7 @@ void entry() {
 
 	ColliderPtr playerCollider = new EllipsoidCollider(player, 1, .2f, 1.8f);
 
-	scene->collisionSpace()->enableCollisions(1, 0, CollisionResponse::slide);
+	scene->collisionSpace()->enableCollisions(1, 0, CollisionResponse::slidexz);
 
 	auto dc = overlay->drawList();
 
@@ -40,21 +38,20 @@ void entry() {
 			vel += .1f;
 		}
 
-		vel += gravity;
-
 		real py = player->worldPosition().y;
+
+		vel += gravity;
 
 		move(player, {0, vel, 0});
 
 		scene->collisionSpace()->updateColliders();
 
-		auto tvel = player->worldPosition().y - py;
-
-		if (vel<0 && tvel>=0) vel=tvel;
+		vel = player->worldPosition().y - py;
 
 		dc->clear();
-		dc->addText(toString(camera->worldPosition()) + ", " + toString(camera->worldPosition()), {0, 0});
-		dc->addText(toString(scene->sceneRenderer()->RPS()), {0, 20});
+		dc->addText(toString(vel)+","+toString(gravity),{0,0});
+//		dc->addText(toString(camera->worldPosition()) + ", " + toString(camera->worldPosition()), {0, 0});
+//		dc->addText(toString(scene->sceneRenderer()->RPS()), {0, 20});
 
 		render();
 	}

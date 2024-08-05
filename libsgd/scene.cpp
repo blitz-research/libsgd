@@ -499,12 +499,12 @@ void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light hlight, float angle) {
 	light->outerConeAngle = angle;
 }
 
-void SGD_DECL sgd_SetLightShadowMappingEnabled(SGD_Light hlight, SGD_Bool enabled) {
+void SGD_DECL sgd_SetLightShadowsEnabled(SGD_Light hlight, SGD_Bool enabled) {
 	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
 	light->shadowsEnabled = enabled;
 }
 
-SGD_Bool SGD_DECL sgd_IsLightShadowMappingEnabled(SGD_Light hlight) {
+SGD_Bool SGD_DECL sgd_IsLightShadowsEnabled(SGD_Light hlight) {
 	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
 	return light->shadowsEnabled();
 }

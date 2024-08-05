@@ -1,5 +1,21 @@
 
-***** V0.11b *****
+***** V0.12 *****
+
+***** WARNING ****** Changed order of CreateSurface parameters. Use: CreateSurface(mesh, material, triangleCount) !!!!!
+
+Changed SetMeshShadowCastingEnabled to SetMeshShadowsEnabled, SetLightShadowCastingEnabled to SetLightShadowsEnabled and related
+'Is' getters.
+
+Added: GetSurfaceCount, GetSurface, GetSurfaceMaterial.
+
+Added GetVertexX, GetVertexY, GetVertexZ etc.
+
+Reverted Mesh function names to simpler b3d style.
+
+Added COLLISION_RESPONSE_SLIDEXZ to prevent sliding down hills, gnarly piece of code! Really need a 'threshold' angle version...
+
+Added new bool config vars: "render.shadowPassEnabled", "render.opaquePassEnabled", "render.blendPassEnabled",
+"render.effectPassEnabled".
 
 Fixed bug where some alpha blended surfaces were being drawn twice.
 

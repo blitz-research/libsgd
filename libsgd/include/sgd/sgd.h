@@ -91,10 +91,23 @@ SGD_API void SGD_DECL sgd_Init();
 SGD_API void SGD_DECL sgd_Terminate();
 
 //! Set global configuration variable.
+//!
+//! Config var name           | Default | Description
+//!---------------------------|---------|------------
+//! log.logfilePath           |         | Logfile path, defaults to "~/.sgd/log.txt".
+//! log.logfileEnabled        | "1"     | Enables logging to logfile.
+//! log.stdoutEnabled         | "1"     | Enables logging to stdout.
+//! gltf.loggingEnabled       | "0"     | Enables logging by the gltf loader.
+//! dawn.backendType          |         | Backend for Dawn to use, one of: "D3D12", "D3D11", "Vulkan", "Metal". Defaults to "D3D12" on 64 bit Windows, "D3D11" on 32 bit Windows, "Vulkan" on 64 bit Linux and "Metal" on 64 bit MacOS.
+//! render.vsyncEnabled       | "1"     | Hack that fixes https://issues.chromium.org/issues/42241496#comment3
+//! render.shadowPassEnabled  | "1"     | Enables shadow rendering.
+//! render.opaquePassEnabled  | "1"     | Enables opaque rendering.
+//! render.blendPassEnabled   | "1"     | Enables blended rendering.
+//! render.effectPassEnabled  | "1"     | Enables effects rendering.
 SGD_API void SGD_DECL sgd_SetConfigVar(SGD_String name, SGD_String value);
 
-//! Set global configuration variable.
-//SGD_API SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name);
+//! Set global configuration variable. The returned value is valid until the next call to sgd_GetConfigVar.
+SGD_API SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name);
 
 //! Set error handler callback.
 SGD_API void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(SGD_String error, void* context), void* context);
@@ -104,6 +117,9 @@ SGD_API void SGD_DECL sgd_Error(SGD_String error);
 
 //! Generate modal alert dialog.
 SGD_API void SGD_DECL sgd_Alert(SGD_String message);
+
+//! Write line of text to log.
+SGD_API void SGD_DECL sgd_Log(SGD_String line);
 
 //! Return width of desktop in pixels.
 SGD_API int SGD_DECL sgd_GetDesktopWidth();
@@ -479,10 +495,10 @@ SGD_API SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int seg
 SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs, SGD_Material material);
 
 //! Set mesh shadow casting enabled, defaults to true.
-SGD_API void SGD_DECL sgd_SetMeshShadowCastingEnabled(SGD_Mesh mesh, SGD_Bool enabled);
+SGD_API void SGD_DECL sgd_SetMeshShadowsEnabled(SGD_Mesh mesh, SGD_Bool enabled);
 
 //! Get mesh shadow casting enabled.
-SGD_API SGD_Bool SGD_DECL sgd_IsMeshShadowCastingEnabled(SGD_Mesh mesh);
+SGD_API SGD_Bool SGD_DECL sgd_IsMeshShadowsEnabled(SGD_Mesh mesh);
 
 //! Copy mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_CopyMesh(SGD_Mesh mesh);
@@ -515,48 +531,109 @@ SGD_API void SGD_DECL sgd_FlipMesh(SGD_Mesh mesh);
 SGD_API SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, int flags);
 
 //! Add uninitialized vertices to a mesh, returning index of the first new vertex.
-SGD_API void SGD_DECL sgd_ResizeMeshVertices(SGD_Mesh mesh, int count);
+SGD_API void SGD_DECL sgd_ResizeVertices(SGD_Mesh mesh, int count);
 
 //! Get number of vertices in mesh.
-SGD_API int SGD_DECL sgd_GetMeshVertexCount(SGD_Mesh mesh);
+SGD_API int SGD_DECL sgd_GetVertexCount(SGD_Mesh mesh);
 
 //! Add a vertex to a mesh, returning index of new vertex.
-SGD_API int SGD_DECL sgd_AddMeshVertex(SGD_Mesh mesh, float x, float y, float z, float nx, float ny, float nz, float s, float t);
+SGD_API int SGD_DECL sgd_AddVertex(SGD_Mesh mesh, float x, float y, float z, float nx, float ny, float nz, float s, float t);
 
 //! Set vertex.
-SGD_API void SGD_DECL sgd_SetMeshVertex(SGD_Mesh mesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s, float t);
+SGD_API void SGD_DECL sgd_SetVertex(SGD_Mesh mesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s, float t);
 
 //! Set vertex position.
-SGD_API void SGD_DECL sgd_SetMeshVertexPosition(SGD_Mesh mesh, int vertex, float x, float y, float z);
+SGD_API void SGD_DECL sgd_SetVertexPosition(SGD_Mesh mesh, int vertex, float x, float y, float z);
 
 //! Set vertex normal.
-SGD_API void SGD_DECL sgd_SetMeshVertexNormal(SGD_Mesh mesh, int vertex, float nx, float ny, float nz);
+SGD_API void SGD_DECL sgd_SetVertexNormal(SGD_Mesh mesh, int vertex, float nx, float ny, float nz);
 
 //! Set vertex tangent.
-SGD_API void SGD_DECL sgd_SetMeshVertexTangent(SGD_Mesh mesh, int vertex, float tx, float ty, float tz, float tw);
-
-//! Set vertex texture coordinates.
-SGD_API void SGD_DECL sgd_SetMeshVertexTexCoords(SGD_Mesh mesh, int vertex, float u, float v);
+SGD_API void SGD_DECL sgd_SetVertexTangent(SGD_Mesh mesh, int vertex, float tx, float ty, float tz, float tw);
 
 //! Set vertex color.
-SGD_API void SGD_DECL sgd_SetMeshVertexColor(SGD_Mesh mesh, int vertex, float r, float g, float b, float a);
+SGD_API void SGD_DECL sgd_SetVertexColor(SGD_Mesh mesh, int vertex, float r, float g, float b, float a);
+
+//! Set vertex texture coordinate 0.
+SGD_API void SGD_DECL sgd_SetVertexTexCoord0(SGD_Mesh mesh, int vertex, float u0, float v0);
+
+//! Get vertex position x coordinate.
+SGD_API float SGD_DECL sgd_GetVertexX(SGD_Mesh mesh, int vertex);
+
+//! Get vertex position y coordinate.
+SGD_API float SGD_DECL sgd_GetVertexY(SGD_Mesh mesh, int vertex);
+
+//! Get vertex position z coordinate.
+SGD_API float SGD_DECL sgd_GetVertexZ(SGD_Mesh mesh, int vertex);
+
+//! Get vertex normal x component.
+SGD_API float SGD_DECL sgd_GetVertexNX(SGD_Mesh mesh, int vertex);
+
+//! Get vertex normal y component.
+SGD_API float SGD_DECL sgd_GetVertexNY(SGD_Mesh mesh, int vertex);
+
+//! Get vertex normal z component.
+SGD_API float SGD_DECL sgd_GetVertexNZ(SGD_Mesh mesh, int vertex);
+
+//! Get vertex tangent x component.
+SGD_API float SGD_DECL sgd_GetVertexTX(SGD_Mesh mesh, int vertex);
+
+//! Get vertex tangent y component.
+SGD_API float SGD_DECL sgd_GetVertexTY(SGD_Mesh mesh, int vertex);
+
+//! Get vertex tangent z component.
+SGD_API float SGD_DECL sgd_GetVertexTZ(SGD_Mesh mesh, int vertex);
+
+//! Get vertex tangent w component.
+SGD_API float SGD_DECL sgd_GetVertexTW(SGD_Mesh mesh, int vertex);
+
+//! Get vertex color red component.
+SGD_API float SGD_DECL sgd_GetVertexRed(SGD_Mesh mesh, int vertex);
+
+//! Get vertex color green component.
+SGD_API float SGD_DECL sgd_GetVertexGreen(SGD_Mesh mesh, int vertex);
+
+//! Get vertex color blue component.
+SGD_API float SGD_DECL sgd_GetVertexBlue(SGD_Mesh mesh, int vertex);
+
+//! Get vertex color alpha component.
+SGD_API float SGD_DECL sgd_GetVertexAlpha(SGD_Mesh mesh, int vertex);
+
+//! Get vertex texture coordinate 0 u component.
+SGD_API float SGD_DECL sgd_GetVertexU0(SGD_Mesh mesh, int vertex);
+
+//! Get vertex tangent coorindate 1 y component.
+SGD_API float SGD_DECL sgd_GetVertexV0(SGD_Mesh mesh, int vertex);
 
 // ***** Surfaces *****
 
 //! Create a new Surface and add it to mesh.
-SGD_API SGD_Surface SGD_DECL sgd_CreateSurface(SGD_Mesh mesh, int triangleCount, SGD_Material material);
+SGD_API SGD_Surface SGD_DECL sgd_CreateSurface(SGD_Mesh mesh, SGD_Material material, int triangleCount);
+
+//! Get mesh surface count.
+SGD_API int SGD_DECL sgd_GetSurfaceCount(SGD_Mesh mesh);
+
+//! Get mesh surface.
+SGD_API SGD_Surface SGD_DECL sgd_GetSurface(SGD_Mesh mesh, int surface);
+
+//! Get surface material.
+SGD_API SGD_Material SGD_DECL sgd_GetSurfaceMaterial(SGD_Surface surface);
 
 //! Add empty triangles to surface, returning index of first new triangle.
-SGD_API void SGD_DECL sgd_ResizeSurfaceTriangles(SGD_Surface surface, int count);
+SGD_API void SGD_DECL sgd_ResizeTriangles(SGD_Surface surface, int count);
 
 //! Get number of triangles in surface.
-SGD_API int SGD_DECL sgd_GetSurfaceTriangleCount(SGD_Surface surface);
+SGD_API int SGD_DECL sgd_GetTriangleCount(SGD_Surface surface);
 
 //! Add triangle to surface, returning index of new triangle.
-SGD_API int SGD_DECL sgd_AddSurfaceTriangle(SGD_Surface surface, int v0, int v1, int v2);
+SGD_API int SGD_DECL sgd_AddTriangle(SGD_Surface surface, int v0, int v1, int v2);
 
 //! Update existing triangle vertices in surface.
-SGD_API void SGD_DECL sgd_SetSurfaceTriangle(SGD_Surface surface, int triangle, int v0, int v1, int v2);
+SGD_API void SGD_DECL sgd_SetTriangle(SGD_Surface surface, int triangle, int v0, int v1, int v2);
+
+//! Get mesh vertex index of a triangle corner. Vertex must be 0, 1 or 2.
+SGD_API int SGD_DECL sgd_GetTriangleVertex(SGD_Surface surface, int triangle, int vertex);
+
 
 //! @}
 
@@ -1009,10 +1086,10 @@ SGD_API void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light light, float angle);
 SGD_API void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light light, float angle);
 
 //! Set light shadow mapping enabled, defaults to false.
-SGD_API void SGD_DECL sgd_SetLightShadowMappingEnabled(SGD_Light light, SGD_Bool enabled);
+SGD_API void SGD_DECL sgd_SetLightShadowsEnabled(SGD_Light light, SGD_Bool enabled);
 
 //! Get light shadow mapping enabled.
-SGD_API SGD_Bool SGD_DECL sgd_IsLightShadowMappingEnabled(SGD_Light light);
+SGD_API SGD_Bool SGD_DECL sgd_IsLightShadowsEnabled(SGD_Light light);
 
 //! Set light priority.
 SGD_API void SGD_DECL sgd_SetLightPriority(SGD_Light light, int priority);

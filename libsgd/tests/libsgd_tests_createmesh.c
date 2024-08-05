@@ -7,7 +7,7 @@ SGD_Mesh createSphereMesh(float radius, int xSegs, int ySegs, SGD_Material mater
 	float fxSegs = 1 / (float)xSegs, fySegs = 1 / (float)ySegs;
 
 	for (int i = 0; i < xSegs; ++i) {
-		sgd_AddMeshVertex(mesh, 0, radius, 0, 0, 1, 0, ((float)i + .5f) * 2 * fxSegs, 0);
+		sgd_AddVertex(mesh, 0, radius, 0, 0, 1, 0, ((float)i + .5f) * 2 * fxSegs, 0);
 	}
 	for (int j = 1; j < ySegs; ++j) {
 		float pitch = SGD_HALF_PI - (float)j * SGD_PI * fySegs;
@@ -17,29 +17,29 @@ SGD_Mesh createSphereMesh(float radius, int xSegs, int ySegs, SGD_Material mater
 			float y = sinf(pitch);
 			float x = cosf(yaw) * r;
 			float z = sinf(yaw) * r;
-			sgd_AddMeshVertex(mesh, x * radius, y * radius, z * radius, x, y, z, (float)i * 2 * fxSegs, (float)j * fySegs);
+			sgd_AddVertex(mesh, x * radius, y * radius, z * radius, x, y, z, (float)i * 2 * fxSegs, (float)j * fySegs);
 		}
 	}
 	for (int i = 0; i < xSegs; ++i) {
-		sgd_AddMeshVertex(mesh, 0, -radius, 0, 0, -1, 0, ((float)i + .5f) * 2 * fxSegs, 1);
+		sgd_AddVertex(mesh, 0, -radius, 0, 0, -1, 0, ((float)i + .5f) * 2 * fxSegs, 1);
 	}
 
-	SGD_Surface surf = sgd_CreateSurface(mesh, 0, material);
+	SGD_Surface surf = sgd_CreateSurface(mesh, material, 0);
 
 	for (int i = 0; i < xSegs; ++i) {
-		sgd_AddSurfaceTriangle(surf, i, i + xSegs, i + xSegs + 1);
+		sgd_AddTriangle(surf, i, i + xSegs, i + xSegs + 1);
 	}
 	for (int j = 1; j < ySegs - 1; ++j) {
 		for (int i = 0; i < xSegs; ++i) {
 			int v0 = j * (xSegs + 1) + i - 1;
 			int v2 = v0 + xSegs + 2;
-			sgd_AddSurfaceTriangle(surf, v0, v2, v0 + 1);
-			sgd_AddSurfaceTriangle(surf, v0, v2 - 1, v2);
+			sgd_AddTriangle(surf, v0, v2, v0 + 1);
+			sgd_AddTriangle(surf, v0, v2 - 1, v2);
 		}
 	}
 	for (int i = 0; i < xSegs; ++i) {
 		int v0 = (xSegs + 1) * (ySegs - 1) + i - 1;
-		sgd_AddSurfaceTriangle(surf, v0, v0 + xSegs + 1, v0 + 1);
+		sgd_AddTriangle(surf, v0, v0 + xSegs + 1, v0 + 1);
 	}
 
 	return mesh;

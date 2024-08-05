@@ -48,6 +48,12 @@ void SGD_DECL sgd_SetConfigVar(SGD_String name, SGD_String value) {
 	sgd::setConfigVar(name, value);
 }
 
+SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name) {
+	static sgd::String result;
+	result = sgd::getConfigVar(name) + '\0';
+	return result.data();
+}
+
 void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(SGD_String error, void* context), void* context) {
 	sgd::setErrorHandler([=](sgd::CString msg, const char *file, int line){
 		handler(msg.c_str(), context);
@@ -60,6 +66,10 @@ void SGD_DECL sgd_Error(SGD_String error) {
 
 void SGD_DECL sgd_Alert(SGD_String message) {
 	sgd::alert(message);
+}
+
+void SGD_DECL sgd_Log(SGD_String line) {
+	sgd::log() << line;
 }
 
 int SGD_DECL sgd_GetDesktopWidth() {

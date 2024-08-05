@@ -10,32 +10,26 @@ template <class IntersectFunc>
 Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFunc intersectFunc, CollisionResponse response,
 				 Vector<Collision>& collisions) {
 
-	static constexpr real eps = (real).001;
+	static constexpr real mind = (real).0001;
+	static constexpr real eps = (real).01;
+
 	static constexpr int maxLoops = 6;
 
-	Planer hitPlanes[3];
+	auto dir = dst - src;
+	auto dist = length(dir);
+	if (dist <= mind) return src;
+
+	auto dist_xz = length(Vec2r(dir.x, dir.z));
+	dir /= dist;
+	auto fwd = dir;
+
+	Planer planes[3];
 	int state = 0;
 	int loops = 0;
 
-	auto maxd = std::numeric_limits<real>::max();
-
-	auto fwd = dst - src;
-
 	for (;;) {
 
-		auto dir = dst - src;
-		if (dot(dir, fwd) < 0) return src;
-		auto d = length(dir);
-		if (d <= eps) return src;
-		dir /= d;
-		if (d > maxd) {
-			if(state) SGD_LOG << "### d > maxd";
-			dst = src + dir * maxd;
-		} else {
-			maxd = d;
-		}
-
-		Contact contact(maxd);
+		Contact contact(dist);
 		Line ray(src, dir);
 
 		auto collider = intersectFunc(ray, contact);
@@ -51,45 +45,52 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 
 		if (response == CollisionResponse::stop) return src;
 
+		if (hitd > dist) SGD_LOG << "### OOPS 1:" << hitd << dist;
+		if ((dist -= hitd) <= mind) return src;
+
 		// Subtract hit distance moved from remaining distance
-		if ((maxd -= hitd) <= eps) return src;
+		if (response == CollisionResponse::slidexz) {
+			auto d_xz = length(Vec2r(src.x - ray.o.x, src.z - ray.o.z));
+			if (d_xz > dist_xz) SGD_LOG << "### OOPS 2:" << d_xz << dist_xz;
+			dist_xz -= d_xz;
+		}
 
 		// Avoid looping forever
 		if (++loops == maxLoops) {
 #if SGD_CONFIG_DEBUG
-			SGD_LOG << "collideRay nHits == maxLoops! ray:" << ray << "contact:" << contact;
+			SGD_LOG << "collideRay loops == maxLoops! ray:" << ray << "contact:" << contact;
 #endif
 			return src;
 		}
 
 		Plane plane(src, contact.normal);
-//		Plane plane(contact.point, contact.normal);
-//		plane.d -= eps;
+		// Plane plane(contact.point, contact.normal);
+		// plane.d -= mind;
 
 		// New destination?
 		dst = nearest(plane, dst);
 
 		switch (state) {
 		case 0: { // First plane hit
-			hitPlanes[0] = plane;
+			planes[0] = plane;
 			state = 1;
 			break;
 		}
 		case 1: { // Second plane hit
-			if (distance(hitPlanes[0], dst) > 0) {
-				hitPlanes[0] = plane;
+			if (distance(planes[0], dst) > 0) {
+				planes[0] = plane;
 				break;
 			}
 			// Slide along crease, intersection of 2 planes.
-			hitPlanes[1] = plane;
-			auto crease = normalize(cross(hitPlanes[0].n, hitPlanes[1].n));
+			planes[1] = plane;
+			auto crease = normalize(cross(planes[0].n, planes[1].n));
 			dst = src + crease * dot(dst - src, crease);
 			state = 2;
 			break;
 		}
 		case 2: { // Third plane hit
-			if (distance(hitPlanes[0], dst) > 0 && distance(hitPlanes[1], dst) > 0) {
-				hitPlanes[0] = plane;
+			if (distance(planes[0], dst) > 0 && distance(planes[1], dst) > 0) {
+				planes[0] = plane;
 				state = 1;
 				break;
 			}
@@ -98,6 +99,31 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 		}
 		default:
 			SGD_ABORT();
+		}
+
+		dir = dst - src;
+		if (dot(fwd, dir) < 0) return src;
+
+		auto d = length(dir);
+		if (d <= mind) return src;
+
+		dir /= d;
+		if (d > dist) {
+			SGD_LOG << "### OOPS 3:" << d << dist;
+			dst = src + dir * dist;
+		} else {
+			dist = d;
+		}
+
+		if (response == CollisionResponse::slidexz) {
+			auto d_xz = length(Vec2r(dst.x - src.x, dst.z - src.z));
+			if (d_xz > dist_xz) {
+				dist *= dist_xz / d_xz;
+				if (dist <= mind) return src;
+				dst = src + dir * dist;
+			} else {
+				dist_xz = d_xz;
+			}
 		}
 	}
 }
