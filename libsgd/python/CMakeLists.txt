@@ -4,22 +4,24 @@ project(libsgd_python)
 
 # 64 bit only for now
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
-    return()
+	message(WARNING "### Python target only supported on 64 bit platforms, skipping...")
+	return()
 endif()
 
 # Check we have SWIG
 find_program(SWIG_PATH swig)
 if(SWIG_PATH STREQUAL SWIG_PATH-NOTFOUND)
-    message(WARNING "### Can't find swig program, skipping python target.")
-    return()
+	message(WARNING "### Can't find swig program, skipping python target.")
+	return()
 endif()
 
-# Check we have Python development
-find_package(Python COMPONENTS Development)
-if(NOT Python_Development_FOUND)
-    message(WARNING "### Python development package not found, skipping python target")
-    return()
+if(SGD_OS_WINDOWS)
+	SET(HOME $ENV{USERPROFILE})
+else()
+	SET(HOME $ENV{HOME})
 endif()
+
+set(PYTHON_DIR ${HOME}/AppData/Local/Programs/Python)
 
 message("### Configuring python target...")
 
@@ -29,25 +31,30 @@ add_custom_command(
 	OUTPUT sgd_wrap.c sgd.py
 	VERBATIM)
 
-add_library(libsgd_python SHARED sgd_wrap.c)
+function(create_python_lib_target py_ver include_dirs libs)
 
-target_include_directories(libsgd_python PRIVATE ${Python_INCLUDE_DIRS})
+	set(target libsgd_python_${py_ver})
 
-target_link_libraries(libsgd_python PRIVATE libsgd ${Python_LIBRARIES})
+	add_library(${target} SHARED sgd_wrap.c)
+	target_include_directories(${target} PRIVATE ${include_dirs})
+	target_link_libraries(${target} PRIVATE libsgd ${libs})
 
-set_target_properties(libsgd_python PROPERTIES OUTPUT_NAME _sgd)
+	set_target_properties(${target} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs/${py_ver})
+	set_target_properties(${target} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs/${py_ver})
+	set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs/${py_ver})
+	set_target_properties(${target} PROPERTIES OUTPUT_NAME _sgd)
+	set_target_properties(${target} PROPERTIES PREFIX "")
+	if(SGD_OS_WINDOWS)
+		set_target_properties(${target} PROPERTIES SUFFIX .pyd)
+	endif()
 
-set_target_properties(libsgd_python PROPERTIES PREFIX "")
+endfunction()
 
-if(SGD_OS_WINDOWS)
-	set_target_properties(libsgd_python PROPERTIES SUFFIX .pyd)
-endif()
+create_python_lib_target(py38 ${PYTHON_DIR}/Python38/include ${PYTHON_DIR}/Python38/libs/Python38.lib)
+create_python_lib_target(py39 ${PYTHON_DIR}/Python39/include ${PYTHON_DIR}/Python39/libs/Python39.lib)
+create_python_lib_target(py310 ${PYTHON_DIR}/Python310/include ${PYTHON_DIR}/Python310/libs/Python310.lib)
+create_python_lib_target(py311 ${PYTHON_DIR}/Python311/include ${PYTHON_DIR}/Python311/libs/Python311.lib)
 
-install(TARGETS libsgd_python RUNTIME DESTINATION python)
-
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sgd.py ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.py DESTINATION python)
-
-# For now, you must manually build pypi package
-# install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/pypi DESTINATION python)
-
-#winpty python
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/pypi/ DESTINATION python)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sgd.py DESTINATION python/libsgd)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs DESTINATION python/libsgd FILES_MATCHING PATTERN "*.pyd")
