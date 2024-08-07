@@ -10,7 +10,7 @@ namespace sgd {
 
 namespace {
 
-SGD_BOOL_CONFIG_VAR(g_loggingEnabled,"gltf.loggingEnabled",false);
+SGD_BOOL_CONFIG_VAR(g_loggingEnabled, "gltf.loggingEnabled", false);
 
 } // namespace
 
@@ -105,6 +105,8 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 	cachedImages.resize(gltfModel.images.size());
 	cachedTextures.resize(gltfModel.textures.size());
 	cachedMaterials.resize(gltfModel.materials.size());
+
+	meshVertices.reserve(512 * 1024);	// Too much?
 
 	return true;
 }
@@ -339,6 +341,9 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 	uint32_t vertexCount = 0;
 	for (auto& attrib : gltfPrim.attributes) {
 		vertexCount = std::max(vertexCount, (uint32_t)gltfModel.accessors[attrib.second].count);
+	}
+	if (firstVertex + vertexCount > meshVertices.capacity()) {
+		meshVertices.reserve(std::max((uint32_t)meshVertices.capacity() * 3 / 2, vertexCount));
 	}
 	meshVertices.resize(firstVertex + vertexCount);
 	auto vp = meshVertices.data() + firstVertex;
@@ -662,11 +667,13 @@ Expected<Mesh*, FileioEx> GLTFLoader::loadStaticMesh() {
 	loadBones();
 
 	beginMesh();
+
 	for (int i = 0; i < bones.size(); ++i) {
 		auto mesh = gltfModel.nodes[i].mesh;
 		if (mesh == -1) continue;
 
-		auto firstVertex = meshVertices.size();
+		auto firstVertex = (uint32_t)meshVertices.size();
+
 		updateMesh(gltfModel.meshes[mesh]);
 
 		const auto& worldMatrix = bones[i] ? bones[i]->worldMatrix() : AffineMat4r{};
@@ -678,6 +685,7 @@ Expected<Mesh*, FileioEx> GLTFLoader::loadStaticMesh() {
 			vp->tangent.xyz() = cof * Vec3r(vp->tangent.xyz());
 		}
 	}
+
 	return endMesh();
 }
 

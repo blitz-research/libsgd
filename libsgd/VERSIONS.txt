@@ -1,4 +1,10 @@
 
+***** V0.13 *****
+
+Fixed OOM error caused by gltf loader not growing vertices vector exponentially per primitive. This blows up on 32 bit archs with models
+with lots of vertices and lots of surfaces.
+
+
 ***** V0.12 *****
 
 ***** WARNING ****** Changed order of CreateSurface parameters. Use: CreateSurface(mesh, material, triangleCount) !!!!!

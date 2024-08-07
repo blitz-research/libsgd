@@ -79,7 +79,7 @@ void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String property, 
 
 SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path) {
 	sgdx::started();
-	auto mesh = sgdx::loadStaticMesh(sgd::Path(path));
+	auto mesh = sgd::loadStaticMesh(sgd::Path(path));
 	if (!mesh) sgdx::error("Failed to load mesh", mesh.error());
 	return sgdx::createHandle(mesh.result());
 }

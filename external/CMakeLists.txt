@@ -38,12 +38,8 @@ else ()
 	FetchContent_MakeAvailable(dawn)
 
 	target_link_libraries(lib-dawn INTERFACE
+		#webgpu_dawn
 		webgpu_cpp
-#		webgpu_dawn
-#		dawn_internal_config
-#		dawn::dawn_common
-#		dawn::dawn_system_utils
-#		dawn::dawn_wgpu_utils
 		dawn::dawn_proc
 		dawn::dawn_native
 	)
