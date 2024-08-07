@@ -47,4 +47,7 @@ install(TARGETS libsgd_python RUNTIME DESTINATION python)
 
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sgd.py ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.py DESTINATION python)
 
+# For now, you must manually build pypi package
+# install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/pypi DESTINATION python)
+
 #winpty python
