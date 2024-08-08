@@ -1,7 +1,15 @@
 R"(
 
-@group(2) @binding(0) var effect_sourceTexture: texture_2d<f32>;
-@group(2) @binding(1) var effect_sourceSampler: sampler;
+struct BloomEffectUniforms {
+    texCoordScale: vec2f,
+    kernelSize: u32,
+    padding: u32,
+    kernel: array<vec4f, 64>,
+}
+
+@group(2) @binding(0) var<uniform> effect_uniforms: BloomEffectUniforms;
+@group(2) @binding(1) var effect_sourceTexture: texture_2d<f32>;
+@group(2) @binding(2) var effect_sourceSampler: sampler;
 
 struct Varying {
     @builtin(position) clipPosition: vec4f,
@@ -29,41 +37,19 @@ struct Varying {
 	let color = textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords, 0);
 	return vec4f(max(color.rgb - vec3(1.0), vec3(0.0)), color.a);
 
-#elif BLOOM_PASS_1
-
-	return textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords, 0);
-
-#elif BLOOM_PASS_2 || BLOOM_PASS_3
-
-	const kernelSize = 2u;
-	const offsets = array<f32, kernelSize>(0.53805, 2.06278);
-	const weights = array<f32, kernelSize>(0.44908, 0.05092);
-
-//	const kernelSize = 9u;
-// 	const offsets = array<f32, kernelSize>(0.66293, 2.47904, 4.46232, 6.44568, 8.42917, 10.41281, 12.39664, 14.38070, 16.36501);
-// 	const weights = array<f32, kernelSize>(0.10855, 0.13135, 0.10406, 0.07216, 0.04380,  0.02328,  0.01083,  0.00441,  0.00157);
-
-#if BLOOM_PASS_2
-	let halfTexelSize = vec2f(1.0 / f32(textureDimensions(effect_sourceTexture).x), 0.0);
 #else
-	let halfTexelSize = vec2f(0.0, 1.0 / f32(textureDimensions(effect_sourceTexture).y));
-#endif
+
+    let size = effect_uniforms.kernelSize;
+    let texCoordScale = effect_uniforms.texCoordScale;
+	let texCoords = in.texCoords - texCoordScale * f32(size) / 2.0;
 
 	var color = vec3f(0.0);
 
-	for(var i=0u; i < kernelSize; i+=1) {
-
-		let offset = halfTexelSize * offsets[i];
-
-		color += textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords + offset, 0).rgb * weights[i];
-		color += textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords - offset, 0).rgb * weights[i];
+	for(var i = 0u; i < size; i+=1) {
+	    color += textureSampleLevel(effect_sourceTexture, effect_sourceSampler, texCoords + texCoordScale * f32(i), 0).rgb * effect_uniforms.kernel[i].w;
 	}
 
-	return vec4f(color, 0.0);   // 0.0 alpha for additive blending
-
-#elif BLOOM_PASS_4
-
-	return textureSampleLevel(effect_sourceTexture, effect_sourceSampler, in.texCoords, 0.0);
+	return vec4f(color, 0.0);   // alpha = 0.0 for additive last pass
 
 #endif
 }

@@ -1,23 +1,21 @@
 #include "bloomeffect.h"
 
+#include "gaussianfilter.h"
+
 namespace sgd {
 
 namespace {
 
+struct alignas(16) BloomEffectUniforms {
+	Vec2f texCoordScale;
+	uint32_t kernelSize{};
+	uint32_t padding{};
+	Vec4f kernel[64];
+};
+
 auto shaderSource{
 #include "bloomeffect.wgsl"
 };
-
-BindGroupDescriptor bindGroupDesc( //
-	"bloomEffect",				   //
-	BindGroupType::geometry,	   //
-	{
-		textureBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::e2D),
-		samplerBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment),
-	},
-	shaderSource, //
-	{},			  //
-	wgpu::PrimitiveTopology::TriangleStrip);
 
 Array<BindGroupDescriptor*, BloomEffect::numPasses> bindGroupDescriptors;
 
@@ -31,8 +29,9 @@ BloomEffect::BloomEffect() {
 			auto desc = new BindGroupDescriptor( //
 				"bloomEffect", BindGroupType::geometry,
 				{
-					textureBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::e2D),
-					samplerBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment),
+					bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform),
+					textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::e2D),
+					samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Fragment),
 				},
 				header + shaderSource, //
 				{},					   //
@@ -43,25 +42,48 @@ BloomEffect::BloomEffect() {
 
 	for (int pass = 0; pass < numPasses; ++pass) {
 		m_passes[pass].bindGroup = new BindGroup(bindGroupDescriptors[pass]);
+		m_passes[pass].bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(BloomEffectUniforms)));
 	}
 }
 
 Texture* BloomEffect::onValidate(Texture* sourceTexture, Texture* depthBuffer) {
 
-	m_passes[0].renderTarget = getOrCreateRenderTarget(sourceTexture->size() / 2u, sourceTexture->format());
-	m_passes[1].renderTarget = getOrCreateRenderTarget(sourceTexture->size() / 4u, sourceTexture->format());
-	m_passes[2].renderTarget = getOrCreateRenderTarget(sourceTexture->size() / 8u, sourceTexture->format());
-	m_passes[3].renderTarget = getOrCreateRenderTarget(sourceTexture->size() / 8u, sourceTexture->format());
-	m_passes[4].renderTarget = sourceTexture;
+	// Update uniforms
+	{
+		auto r = std::min(std::max(this->radius(), 1u), 31u);
+		auto kernelSize = r * 2 + 1;
+		// https://dsp.stackexchange.com/a/74157
+		float sigma = (float)r / 2;
+		auto kernel = generateKernel(kernelSize, sigma);
 
-	m_passes[0].bindGroup->setTexture(0, sourceTexture);
-	for (int pass = 1; pass < numPasses; ++pass) {
-		m_passes[pass].bindGroup->setTexture(0, m_passes[pass - 1].renderTarget);
+		BloomEffectUniforms uniforms{};
+		uniforms.kernelSize = kernelSize;
+		std::memcpy(&uniforms.kernel, kernel.data(), sizeof(Vec4f) * kernelSize);
+
+		uniforms.texCoordScale = Vec2f(1.0f / (float)sourceTexture->size().x, 0.0f);
+		((Buffer*)m_passes[0].bindGroup->getBuffer(0))->update(&uniforms, 0, sizeof(uniforms));
+		((Buffer*)m_passes[1].bindGroup->getBuffer(0))->update(&uniforms, 0, sizeof(uniforms));
+
+		uniforms.texCoordScale = Vec2f(0.0f, 1.0f / (float)sourceTexture->size().y);
+		((Buffer*)m_passes[2].bindGroup->getBuffer(0))->update(&uniforms, 0, sizeof(uniforms));
 	}
 
-	for (auto& pass : m_passes) pass.pipeline = {};
+	// Update render targets
+	{
 
-	return m_passes[numPasses - 1].renderTarget;
+		m_passes[0].renderTarget = getOrCreateRenderTarget(sourceTexture->size(), sourceTexture->format());
+		m_passes[1].renderTarget = getOrCreateRenderTarget(sourceTexture->size(), sourceTexture->format());
+		m_passes[2].renderTarget = sourceTexture;
+
+		m_passes[0].bindGroup->setTexture(1, sourceTexture);
+		for (int pass = 1; pass < numPasses; ++pass) {
+			m_passes[pass].bindGroup->setTexture(1, m_passes[pass - 1].renderTarget);
+		}
+
+		for (auto& pass : m_passes) pass.pipeline = {};
+	}
+
+	return sourceTexture;
 }
 
 void BloomEffect::onRender(RenderContext* rc, BindGroup* sceneBindings) const {
@@ -70,7 +92,7 @@ void BloomEffect::onRender(RenderContext* rc, BindGroup* sceneBindings) const {
 		for (int pass = 0; pass < numPasses; ++pass) {
 			auto blendMode = pass < numPasses - 1 ? BlendMode::opaque : BlendMode::alphaBlend;
 			auto rpassType = blendMode == BlendMode::opaque ? RenderPassType::opaque : RenderPassType::blend;
-			auto pipeline = getOrCreateRenderPipeline(rpassType,					//
+			auto pipeline = getOrCreateRenderPipeline(rpassType,								//
 													  blendMode,								//
 													  DepthFunc::undefined,						//
 													  CullMode::none,							//

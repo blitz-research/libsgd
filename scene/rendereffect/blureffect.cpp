@@ -1,5 +1,7 @@
 #include "blureffect.h"
 
+#include "gaussianfilter.h"
+
 namespace sgd {
 
 namespace {
@@ -10,20 +12,6 @@ struct alignas(16) BlurEffectUniforms {
 	uint32_t padding{};
 	Vec4f kernel[64];
 };
-
-Vector<Vec4f> generateKernel(uint32_t size, float sigma) {
-	Vector<Vec4f> kernel(size);
-	float sum = 0;
-	for (int i = 0; i < size; ++i) {
-		float x = (float)i - (float)size / 2 + .5f;
-		kernel[i] = Vec4f(std::exp(-(x * x) / (2 * sigma * sigma)) / (std::sqrt(2 * pi) * sigma));
-		sum += kernel[i].w;
-	}
-	for (int i = 0; i < size; ++i) {
-		kernel[i] /= sum;
-	}
-	return kernel;
-}
 
 auto shaderSource{
 #include "blureffect.wgsl"
@@ -58,14 +46,9 @@ Texture* BlurEffect::onValidate(Texture* sourceTexture, Texture* depthBuffer) {
 	m_renderTargets[1] = sourceTexture;
 
 	auto r = std::min(std::max(this->radius(), 1u), 31u);
-
 	auto kernelSize = r * 2 + 1;
-
 	// https://dsp.stackexchange.com/a/74157
 	float sigma = (float)r / 2;
-
-	SGD_LOG << "Validating blur effect, kernalSize:" << kernelSize << "sigma:" << sigma;
-
 	auto kernel = generateKernel(kernelSize, sigma);
 	BlurEffectUniforms uniforms{};
 	uniforms.kernelSize = kernelSize;

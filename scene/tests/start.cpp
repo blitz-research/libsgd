@@ -78,8 +78,6 @@ void createPlayer(Mesh* mesh) {
 	camera = new Camera(CameraType::perspective);
 	scene->add(camera);
 	camera->setParent(player);
-	camera->near = .1f;
-	camera->far = 1000;
 }
 
 void playerWalk(float speed) {

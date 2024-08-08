@@ -106,7 +106,7 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 	cachedTextures.resize(gltfModel.textures.size());
 	cachedMaterials.resize(gltfModel.materials.size());
 
-	meshVertices.reserve(512 * 1024);	// Too much?
+	meshVertices.reserve(512 * 1024); // Too much?
 
 	return true;
 }
@@ -180,10 +180,17 @@ Material* GLTFLoader::loadMaterial(int id) {
 	material->cullMode = gltfMat.doubleSided ? CullMode::none : CullMode::back;
 
 	if (g_loggingEnabled) {
-		SGD_LOG << "Material:" << gltfMat.name;
+		SGD_LOG << "Creating material:" << gltfMat.name;
 		SGD_LOG << "  BlendMode:" << toString(material->blendMode());
 		SGD_LOG << "  DepthFunc:" << toString(material->depthFunc());
 		SGD_LOG << "  CullMode:" << toString(material->cullMode());
+	}
+
+	if (g_loggingEnabled) {
+		SGD_LOG << "  Material extensions:";
+		for (auto [key, value] : gltfMat.extensions) {
+			SGD_LOG << "  extension name:" << key;
+		}
 	}
 
 	auto& pbr = gltfMat.pbrMetallicRoughness;
@@ -206,6 +213,17 @@ Material* GLTFLoader::loadMaterial(int id) {
 	{
 		auto factor = gltfMat.emissiveFactor.data();
 		auto color = Vec3f((float)factor[0], (float)factor[1], (float)factor[2]);
+		auto ext = gltfMat.extensions.find("KHR_materials_emissive_strength");
+		if (ext != gltfMat.extensions.end()) {
+			auto& val = ext->second;
+			if (val.Has("emissiveStrength")) {
+				if(val.Get("emissiveStrength").IsNumber()) {
+					auto strength = (float)val.Get("emissiveStrength").GetNumberAsDouble();
+					color *= strength;
+				}
+			}
+		}
+
 		material->setVector3f("emissiveColor3f", color);
 		if (g_loggingEnabled) SGD_LOG << "  emissiveColor:" << color;
 
@@ -305,14 +323,15 @@ void GLTFLoader::beginMesh() {
 Mesh* GLTFLoader::endMesh() {
 
 	if (g_loggingEnabled) {
-		SGD_LOG << "Mesh flags:" << (int)meshFlags;
+		SGD_LOG << "Creating mesh vertices:" << meshVertices.size() << "surfaces:" << meshSurfaces.size()
+				<< "flags:" << (int)meshFlags;
 	}
 
 	auto mesh = new Mesh(meshVertices.size(), meshFlags);
 	sgd::copy(mesh->lockVertices(), meshVertices.data(), meshVertices.size());
 	mesh->unlockVertices();
 
-	for (auto& surf : this->meshSurfaces) {
+	for (auto& surf : meshSurfaces) {
 		auto& triangles = surf.triangles;
 		auto surface = new Surface(mesh, loadMaterial(surf.materialId), triangles.size());
 		sgd::copy(surface->lockTriangles(), triangles.data(), triangles.size());
@@ -334,7 +353,9 @@ void GLTFLoader::updateMesh(const tinygltf::Primitive& gltfPrim) {
 		SGD_LOG << "TODO: Skipping unsupported gltf primitive mode:" << gltfPrim.mode;
 		return;
 	}
-	if (gltfPrim.material == -1) return;
+	if (gltfPrim.material == -1) {
+		return;
+	}
 
 	// Add vertex attributes
 	uint32_t firstVertex = meshVertices.size();
@@ -595,7 +616,10 @@ void GLTFLoader::loadAnimations() {
 
 Model* GLTFLoader::loadBones(const tinygltf::Node& gltfNode, Model* parent) {
 
+	if (g_loggingEnabled) SGD_LOG << "Creating Model for node:" << gltfNode.name;
+
 	auto model = new Model();
+	model->setName(gltfNode.name);
 	model->setParent(parent);
 	model->setLocalMatrix(nodeMatrix(gltfNode));
 
@@ -698,6 +722,8 @@ Expected<Model*, FileioEx> GLTFLoader::loadBonedModel() {
 	for (int i = 0; i < bones.size(); ++i) {
 		auto mesh = gltfModel.nodes[i].mesh;
 		if (mesh == -1 || !bones[i]) continue;
+
+		if (g_loggingEnabled) SGD_LOG << "Loading mesh for bone" << gltfModel.nodes[i].name;
 
 		beginMesh();
 		updateMesh(gltfModel.meshes[mesh]);

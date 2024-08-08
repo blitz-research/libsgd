@@ -1,6 +1,12 @@
 
 ***** V0.13 *****
 
+Simplified bloom filter, added radius param.
+
+Fixed gltfloader setting entity names so FindEntityChild() should now work.
+
+Added support for emissive strength gltf extension allowing for emissive colors component values > 1.
+
 Fixed OOM error caused by gltf loader not growing vertices vector exponentially per primitive. This blows up on 32 bit archs with models
 with lots of vertices and lots of surfaces.
 

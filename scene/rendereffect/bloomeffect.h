@@ -6,11 +6,13 @@ namespace sgd {
 SGD_SHARED(BloomEffect);
 
 struct BloomEffect : RenderEffect {
-	static constexpr int numPasses = 5;
+	static constexpr int numPasses = 3;
 
 	SGD_OBJECT_TYPE(BloomEffect, RenderEffect);
 
 	BloomEffect();
+
+	Property<uint32_t> radius{2};
 
 private:
 	struct Pass {

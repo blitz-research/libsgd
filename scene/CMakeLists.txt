@@ -50,6 +50,8 @@ add_library(scene
 	rendereffect/fogeffect.cpp
 	rendereffect/fogeffect.h
 	rendereffect/fogeffect.wgsl
+	rendereffect/gaussianfilter.cpp
+	rendereffect/gaussianfilter.h
 	rendereffect/rendereffect.cpp
 	rendereffect/rendereffect.h
 	rendereffect/monocoloreffect.cpp
