@@ -1,1 +1,1 @@
-include libsgd/libs/*
+include libsgd/libs/py*/_sgd.pyd
