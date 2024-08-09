@@ -4,7 +4,7 @@ project(libsgd_python)
 
 # 64 bit only for now
 if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
-	message(WARNING "### Python target only supported on 64 bit platforms, skipping...")
+	message(WARNING "### Python target only supported on 64 bit platforms, skipping python target.")
 	return()
 endif()
 
@@ -15,13 +15,18 @@ if(SWIG_PATH STREQUAL SWIG_PATH-NOTFOUND)
 	return()
 endif()
 
+set(PYTHON_DIR "")
+
 if(SGD_OS_WINDOWS)
-	SET(HOME $ENV{USERPROFILE})
-else()
-	SET(HOME $ENV{HOME})
+	set(PYTHON_DIR $ENV{USERPROFILE}/AppData/Local/Programs/Python)
 endif()
 
-set(PYTHON_DIR ${HOME}/AppData/Local/Programs/Python)
+message("PYTHON_DIR=${PYTHON_DIR}")
+
+if(NOT EXISTS ${PYTHON_DIR})
+	message(WARNING "### Can't find python installations, skipping python target.")
+	retrun()
+endif()
 
 message("### Configuring python target...")
 
@@ -32,6 +37,11 @@ add_custom_command(
 	VERBATIM)
 
 function(create_python_lib_target py_ver include_dirs libs)
+
+	if(NOT EXISTS ${include_dirs} OR NOT EXISTS ${libs})
+		message(WARNING "Python dev libs ${libs} for python version ${py_ver} not found, skipping version.")
+		return()
+	endif()
 
 	set(target libsgd_python_${py_ver})
 
