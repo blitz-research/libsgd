@@ -21,8 +21,6 @@ if(SGD_OS_WINDOWS)
 	set(PYTHON_DIR $ENV{USERPROFILE}/AppData/Local/Programs/Python)
 endif()
 
-message("PYTHON_DIR=${PYTHON_DIR}")
-
 if(NOT EXISTS ${PYTHON_DIR})
 	message(WARNING "### Can't find python installations, skipping python target.")
 	retrun()
@@ -30,9 +28,13 @@ endif()
 
 message("### Configuring python target...")
 
+set(SRC ${CMAKE_CURRENT_SOURCE_DIR})
+set(BIN ${CMAKE_CURRENT_BINARY_DIR})
+set(INC ${CMAKE_SOURCE_DIR}/libsgd/include)
+
 add_custom_command(
-	COMMAND swig -python -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
-	DEPENDS libsgd ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
+	COMMAND swig -python -outcurrentdir -I${INC} ${SRC}/sgd.i
+	DEPENDS libsgd ${SRC}/sgd.i
 	OUTPUT sgd_wrap.c sgd.py
 	VERBATIM)
 
@@ -49,9 +51,9 @@ function(create_python_lib_target py_ver include_dirs libs)
 	target_include_directories(${target} PRIVATE ${include_dirs})
 	target_link_libraries(${target} PRIVATE libsgd ${libs})
 
-	set_target_properties(${target} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs/${py_ver})
-	set_target_properties(${target} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs/${py_ver})
-	set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs/${py_ver})
+	set_target_properties(${target} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY ${BIN}/libs/${py_ver})
+	set_target_properties(${target} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${BIN}/libs/${py_ver})
+	set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN}/libs/${py_ver})
 	set_target_properties(${target} PROPERTIES OUTPUT_NAME _sgd)
 	set_target_properties(${target} PROPERTIES PREFIX "")
 	if(SGD_OS_WINDOWS)
@@ -65,6 +67,6 @@ create_python_lib_target(py39 ${PYTHON_DIR}/Python39/include ${PYTHON_DIR}/Pytho
 create_python_lib_target(py310 ${PYTHON_DIR}/Python310/include ${PYTHON_DIR}/Python310/libs/Python310.lib)
 create_python_lib_target(py311 ${PYTHON_DIR}/Python311/include ${PYTHON_DIR}/Python311/libs/Python311.lib)
 
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/pypi/ DESTINATION python)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/sgd.py DESTINATION python/libsgd)
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/libs DESTINATION python/libsgd FILES_MATCHING PATTERN "*.pyd")
+install(DIRECTORY ${SRC}/pypi/ DESTINATION python)
+install(FILES ${BIN}/sgd.py DESTINATION python/libsgd)
+install(DIRECTORY ${BIN}/libs DESTINATION python/libsgd FILES_MATCHING PATTERN "*.pyd")
