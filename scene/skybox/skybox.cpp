@@ -23,14 +23,16 @@ Skybox::Skybox(const Skybox* that)
 }
 
 void Skybox::init() {
-	m_geometry = new SkyboxGeometry();
-	m_geometry->skyTexture = skyTexture();
-	skyTexture.changed.connect(nullptr, [=](Texture* texture) { //
-		m_geometry->skyTexture = texture;
+	m_bindings = new SkyboxBindings();
+
+	m_bindings->skyTexture = skyTexture();
+	skyTexture.changed.connect(nullptr, [=](CTexture* ctexture) { //
+		m_bindings->skyTexture = ctexture;
 	});
-	m_geometry->roughness = roughness();
-	roughness.changed.connect(nullptr, [=](float rroughness) { //
-		m_geometry->roughness = rroughness;
+
+	m_bindings->roughness = roughness();
+	roughness.changed.connect(nullptr, [=](float r) { //
+		m_bindings->roughness = r;
 	});
 }
 

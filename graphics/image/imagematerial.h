@@ -6,4 +6,6 @@ namespace sgd {
 
 extern CMaterialDescriptor imageMaterialDescriptor;
 
+extern CMaterialDescriptor imageMaterialDescriptorMX;
+
 }

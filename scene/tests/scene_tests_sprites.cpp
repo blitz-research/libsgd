@@ -4,17 +4,19 @@ void entry() {
 
 	createPlayer(nullptr);
 
-	MonocolorEffectPtr monocolorEffect = new MonocolorEffect();
-	monocolorEffect->color=Vec4f(1,1,.75f,1);
-	scene->sceneRenderer()->add(monocolorEffect);
+	//MonocolorEffectPtr monocolorEffect = new MonocolorEffect();
+	//monocolorEffect->color=Vec4f(1,1,.75f,1);
+	//scene->sceneRenderer()->add(monocolorEffect);
 
-//	BlurEffectPtr blurEffect = new BlurEffect();
-//	blurEffect->radius = 15;
-//	scene->sceneRenderer()->add(blurEffect);
+	//BlurEffectPtr blurEffect = new BlurEffect();
+	//blurEffect->radius = 15;
+	//scene->sceneRenderer()->add(blurEffect);
 
-	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), 1).result();
+//	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), 1).result();
+	ImagePtr image = loadImage(Path("sgd://misc/light.png"), 1).result();
 	image->viewMode = ImageViewMode::fixed;
-	image->rect = Rectf{-1, 0, 1, 1};
+//	image->rect = Rectf{-1, 0, 1, 1};
+	image->rect = Rectf(-.5f, -.5f, .5f, .5f);
 
 	for (int i = 0; i < 50000; ++i) {
 

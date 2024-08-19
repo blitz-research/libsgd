@@ -44,6 +44,10 @@ BloomEffect::BloomEffect() {
 		m_passes[pass].bindGroup = new BindGroup(bindGroupDescriptors[pass]);
 		m_passes[pass].bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(BloomEffectUniforms)));
 	}
+
+	radius.changed.connect(nullptr, [=](uint32_t) { //
+		invalidate();
+	});
 }
 
 Texture* BloomEffect::onValidate(Texture* sourceTexture, Texture* depthBuffer) {
@@ -53,7 +57,7 @@ Texture* BloomEffect::onValidate(Texture* sourceTexture, Texture* depthBuffer) {
 		auto r = std::min(std::max(this->radius(), 1u), 31u);
 		auto kernelSize = r * 2 + 1;
 		// https://dsp.stackexchange.com/a/74157
-		float sigma = (float)r / 2;
+		float sigma = (float)r / 4;	//Should be 2 according to above, but 4 Looks much better in bloom, all just a blur in blur.
 		auto kernel = generateKernel(kernelSize, sigma);
 
 		BloomEffectUniforms uniforms{};

@@ -1,3 +1,4 @@
+Dialect "modern"
 
 Include "start.bb"
 
@@ -18,20 +19,20 @@ End Type
 Global bulletImage
 Global slimeball
 
-CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "スノー Blocks", 4)
+CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"スノー Blocks",WINDOW_FLAGS_CENTERED
 
 SetMaxPSMLights 8
 
 ResetScene()
 
-While (PollEvents() And 1) <> 1
+While Not (PollEvents() And EVENT_MASK_CLOSE_CLICKED)
 
 	If IsKeyHit(KEY_ESCAPE)
 		End
 		ResetScene()
 	EndIf
 	
-	PlayerFly(1)
+	PlayerFly(.25)
 	
 	UpdateBullets()
 	
@@ -52,9 +53,7 @@ Function ResetScene()
 	Delete Each Block
 	ClearScene()
 	
-;	CreateBloomEffect()	; 'meh...
-
-	Local env =  LoadTexture("sgd://envmaps/stormy-cube.jpg", 4, 56)
+	Local env =  LoadCubeTexture("sgd://envmaps/stormy-cube.jpg", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_DEFAULT)
 	SetEnvTexture env
 	
 	Local skybox = CreateSkybox(env)
@@ -66,7 +65,7 @@ Function ResetScene()
 	TurnEntity light,-60,0,0
 	
 	CreatePlayer(0)
-	MoveEntity player, 0,50,-100
+	MoveEntity player,0,50,-100
 	
 	light = CreateSpotLight()
 	SetEntityParent light,player
@@ -83,8 +82,8 @@ End Function
 
 Function UpdateBlocks()
 
-	For block.Block = Each Block
-		TurnEntity block\model,block\xr,block\yr,0
+	For block:Block = Each Block
+		TurnEntity block.model,block.xr,block.yr,0
 	Next
 
 End Function
@@ -101,34 +100,34 @@ Function UpdateBullets()
 		Case 3 b=1
 		End Select
 		
-		Local bullet.Bullet = New Bullet
+		Local bullet:Bullet = New Bullet
 		
-		bullet\entity = CreateSprite(bulletImage)
-		SetSpriteColor bullet\entity,r,g,b,1
+		bullet.entity = CreateSprite(bulletImage)
+		SetSpriteColor bullet.entity,r,g,b,1
 		
-		SetEntityParent bullet\entity,player
-		SetEntityParent bullet\entity,0
+		SetEntityParent bullet.entity,player
+		SetEntityParent bullet.entity,0
 		
-		bullet\timeout = 180
-		bullet\vz = player_vz + 1
-		If bullet\vz<1 bullet\vz=1
+		bullet.timeout = 180
+		bullet.vz = player_vz + .75
+		If bullet.vz<.75 bullet.vz=.75
 		
 		Local light=CreatePointLight()
 		SetLightShadowsEnabled light,True
-		SetEntityParent light,bullet\entity
+		SetEntityParent light,bullet.entity
 		SetLightColor light,r,g,b,2
 		SetLightRange light,50
 		
 		PlaySound slimeball
 	EndIf
 
-	For bullet.Bullet = Each Bullet
-		bullet\timeout = bullet\timeout - 1
-		If bullet\timeout = 0
-			DestroyEntity bullet\entity
+	For bullet:Bullet = Each Bullet
+		bullet.timeout = bullet.timeout - 1
+		If bullet.timeout = 0
+			DestroyEntity bullet.entity
 			Delete bullet
 		Else
-			MoveEntity bullet\entity,0,0,bullet\vz
+			MoveEntity bullet.entity,0,0,bullet.vz
 		EndIf
 	Next
 
@@ -145,20 +144,21 @@ Function CreateGround()
 	
 End Function
 
+
 Function CreateBlocks()
 
 	Local material = LoadPBRMaterial("sgd://materials/Fabric048_1K-JPG")
 	Local mesh = CreateBoxMesh(-1,-1,-1,1,1,1,material)
 	SetMeshShadowsEnabled mesh,True
 	
-	For i=1 To NUM_BLOCKS
-		block.Block = New Block
-		block\model = CreateModel(mesh)
-		SetModelColor block\model, Rnd(1), Rnd(1), Rnd(1), 1
-		SetEntityPosition block\model, Rnd(-WORLD_SIZE,WORLD_SIZE), Rnd(1,WORLD_SIZE), Rnd(-WORLD_SIZE,WORLD_SIZE)
-		TurnEntity block\model, Rnd(360), Rnd(360), 0
-		block\xr = Rnd(3)
-		block\yr = Rnd(3)
+	For i = 1 To NUM_BLOCKS
+		block:Block = New Block
+		block.model = CreateModel(mesh)
+		SetModelColor block.model, Rnd(1), Rnd(1), Rnd(1), 1
+		SetEntityPosition block.model, Rnd(-WORLD_SIZE,WORLD_SIZE), Rnd(1,WORLD_SIZE), Rnd(-WORLD_SIZE,WORLD_SIZE)
+		TurnEntity block.model, Rnd(360), Rnd(360), 0
+		block.xr = Rnd(3)
+		block.yr = Rnd(3)
 	Next
 	
 End Function

@@ -10,18 +10,17 @@ namespace sgd {
 Material* createPBRMaterial(CVec4f albedoColor) {
 	auto material = new Material(&pbrMaterialDescriptor);
 	material->setVector4f("albedoColor4f", albedoColor);
-
 	return material;
 }
 
 Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
-	if (!path.isUrl() && !path.exists()) return FileioEx("Material directory does not exist");
+	if (!path.isUrl() && !path.exists()) return SGD_FILEIOEX("Material directory does not exist");
 
 	auto texFlags = TextureFlags::mipmap | TextureFlags::filter;
 
 	Set<String> exts{".png",".jpg",".jpeg",".bmp",".tga",".gif"};
 	if(exts.find(path.ext())!=exts.end()) {
-		auto texture = loadTexture(path, TextureFormat::srgba8, texFlags);
+		auto texture = load2DTexture(path, TextureFormat::srgba8, texFlags);
 		if(!texture) return texture.error();
 		auto material = new Material(&pbrMaterialDescriptor);
 		material->setTexture("albedoTexture", texture.result());
@@ -29,7 +28,7 @@ Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
 	}
 
 	auto tryLoad = [=](CString suffix, TextureFormat format) -> Texture* {
-		auto texture = loadTexture(path / path.stem() + suffix, format, texFlags);
+		auto texture = load2DTexture(path / path.stem() + suffix, format, texFlags);
 		return texture ? texture.result() : nullptr;
 	};
 
@@ -69,7 +68,10 @@ Material* createPrelitMaterial(CVec4f albedoColor) {
 }
 
 Expected<Material*, FileioEx> loadPrelitMaterial(CPath path) {
-	auto texture = loadTexture(path, TextureFormat::srgba8, TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clampU | TextureFlags::clampV);
+
+	auto flags = TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clamp;
+
+	auto texture = load2DTexture(path, TextureFormat::any, flags);
 	if (!texture) return texture.error();
 
 	auto material = createPrelitMaterial();

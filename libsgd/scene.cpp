@@ -595,9 +595,9 @@ void SGD_DECL sgd_SetSpriteFrame(SGD_Sprite hsprite, float frame) {
 // ***** Skybox *****
 
 SGD_Skybox SGD_DECL sgd_LoadSkybox(SGD_String path, float roughness) {
-
-	auto texture = sgdx::loadTexture(sgdx::Path(path), sgdx::TextureFormat::srgba8,
-									 sgdx::TextureFlags::cube | sgdx::TextureFlags::mipmap | sgdx::TextureFlags::filter);
+	sgdx::started();
+	auto flags = sgd::TextureFlags::mipmap | sgd::TextureFlags::filter;
+	auto texture = sgd::loadCubeTexture(sgdx::Path(path), sgdx::TextureFormat::any, flags);
 	if (!texture) sgdx::error("Failed to load texture", texture.error());
 
 	auto skybox = new sgdx::Skybox();
@@ -785,6 +785,19 @@ SGD_RenderEffect SGD_DECL sgd_CreateBloomEffect() {
 	return sgdx::createHandle(effect);
 }
 
+void SGD_DECL sgd_SetBloomEffectRadius(SGD_RenderEffect heffect, int radius) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	if (!effect->is<sgd::BloomEffect>()) sgdx::error("Effect is not a bloom effect");
+	if (radius < 1 || radius > 31) sgdx::error("Bloom radius must be in the range 1 to 31 inclusive");
+	effect->as<sgd::BloomEffect>()->radius = radius;
+}
+
+int SGD_DECL sgd_GetBloomEffectRadius(SGD_RenderEffect heffect) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	if (!effect->is<sgd::BloomEffect>()) sgdx::error("Effect is not a bloom effect");
+	return (int)effect->as<sgd::BloomEffect>()->radius();
+}
+
 SGD_RenderEffect SGD_DECL sgd_CreateBlurEffect() {
 	auto effect = new sgd::BlurEffect();
 	sgdx::mainScene()->sceneRenderer()->add(effect);
@@ -796,6 +809,12 @@ void SGD_DECL sgd_SetBlurEffectRadius(SGD_RenderEffect heffect, int radius) {
 	if (!effect->is<sgd::BlurEffect>()) sgdx::error("Effect is not a blur effect");
 	if (radius < 1 || radius > 31) sgdx::error("Blur radius must be in the range 1 to 31 inclusive");
 	effect->as<sgd::BlurEffect>()->radius = radius;
+}
+
+int SGD_DECL sgd_GetBlurEffectRadius(SGD_RenderEffect heffect) {
+	auto effect = sgdx::resolveHandle<sgd::RenderEffect>(heffect);
+	if (!effect->is<sgd::BlurEffect>()) sgdx::error("Effect is not a blur effect");
+	return (int)effect->as<sgd::BlurEffect>()->radius();
 }
 
 SGD_RenderEffect SGD_DECL sgd_CreateFogEffect() {

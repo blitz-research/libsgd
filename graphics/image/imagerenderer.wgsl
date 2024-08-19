@@ -1,11 +1,11 @@
 R"(
 
-struct ImageGeometryUniforms {
+struct ImageUniforms {
     rect: vec4f,
     viewMode: u32,
 }
 
-@group(2) @binding(0) var<uniform> geometry_uniforms: ImageGeometryUniforms;
+@group(2) @binding(0) var<uniform> geometry_uniforms: ImageUniforms;
 
 struct ImageInstance {
     worldMatrix: mat4x4f,

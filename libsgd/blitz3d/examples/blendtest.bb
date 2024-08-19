@@ -1,11 +1,12 @@
+Dialect "modern"
 
 Include "start.bb"
 
-CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "Blend test", 4)
+CreateWindow GetDesktopWidth()/2, GetDesktopHeight()/2, "Blend test", WINDOW_FLAGS_CENTERED
 
 SetAmbientLightColor 1,1,1,.2
 
-Local env =  LoadTexture("sgd://envmaps/stormy-cube.jpg", 4, 56)
+Local env =  LoadCubeTexture("sgd://envmaps/stormy-cube.jpg", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_DEFAULT)
 SetEnvTexture env
 CreateSkybox env
 
@@ -26,9 +27,9 @@ End Type
 For x = 0 To cells-1
 	For y=0 To cells-1
 		For z=0 To cells-1
-			Local model.Model=New Model
-			model\entity=CreateModel(mesh)
-			MoveEntity model\entity,x*spc-halfsz, y*spc-halfsz,z*spc-halfsz
+			Local model:Model=New Model
+			model.entity=CreateModel(mesh)
+			MoveEntity model.entity,x*spc-halfsz, y*spc-halfsz,z*spc-halfsz
 		Next
 	Next
 Next
@@ -36,12 +37,12 @@ Next
 CreatePlayer(0)
 MoveEntity player,0,0,-halfsz
 
-While PollEvents()<>1
+While Not (PollEvents() And EVENT_MASK_CLOSE_CLICKED)
 
 	SeedRnd 1234
 	
-	For model.model = Each Model
-		TurnEntity model\entity,Rnd(-.7,.7),Rnd(-.3,.3),0
+	For model:model = Each Model
+		TurnEntity model.entity,Rnd(-.7,.7),Rnd(-.3,.3),0
 	Next
 	
 	PlayerFly(.125)
@@ -50,11 +51,3 @@ While PollEvents()<>1
 	Present
 
 Wend
-
-			
-			
-			
-
-
-
-

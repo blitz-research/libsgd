@@ -1,9 +1,10 @@
+Dialect "modern"
 
 Include "start.bb"
 
-CreateWindow(1280, 720, "Primitives", 2)
+CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Primitives",WINDOW_FLAGS_CENTERED
 
-env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
+env = LoadCubeTexture("sgd://envmaps/sunnysky-cube.png",TEXTURE_FORMAT_ANY,TEXTURE_FLAGS_DEFAULT)
 SetEnvTexture env
 
 Local skybox = CreateSkybox(env)
@@ -18,10 +19,11 @@ SetLightRange light0, 10
 SetLightShadowsEnabled light0,True
 
 Local groundMaterial = CreatePBRMaterial()
-SetMaterialVector4f groundMaterial, "albedoColor4f",.6,.5,.5,1
-SetMaterialFloat groundMaterial, "roughnessFactor1f",0.5
+SetMaterialVector4f groundMaterial,"albedoColor4f",.6,.5,.5,1
+
 Local groundMesh = CreateBoxMesh(-5,-.1,-5,5,0,5,groundMaterial)
 SetMeshShadowsEnabled groundMesh, True
+
 Local groundModel = CreateModel(groundMesh)
 
 Local material = LoadPBRMaterial("sgd://materials/Fabric050_1K-JPG")
@@ -78,11 +80,11 @@ While (PollEvents() And 1) <> 1
 	TurnEntity model3, .3, .4, .5
 	TurnEntity model4, .3, .4, .5
 	
-	If IsKeyHit(49) SetEntityVisible model0, Not GetEntityVisible(model0)
-	If IsKeyHit(50) SetEntityVisible model1, Not GetEntityVisible(model1)
-	If IsKeyHit(51) SetEntityVisible model2, Not GetEntityVisible(model2)
-	If IsKeyHit(52) SetEntityVisible model3, Not GetEntityVisible(model3)
-	If IsKeyHit(53) SetEntityVisible model4, Not GetEntityVisible(model4)
+	If IsKeyHit(49) SetEntityVisible model0, Not IsEntityVisible(model0)
+	If IsKeyHit(50) SetEntityVisible model1, Not IsEntityVisible(model1)
+	If IsKeyHit(51) SetEntityVisible model2, Not IsEntityVisible(model2)
+	If IsKeyHit(52) SetEntityVisible model3, Not IsEntityVisible(model3)
+	If IsKeyHit(53) SetEntityVisible model4, Not IsEntityVisible(model4)
 	
 	PlayerFly(.05)
 	

@@ -1,12 +1,13 @@
+Dialect "modern"
 
 Include "start.bb"
 
-CreateWindow(GetDesktopWidth()/2, GetDesktopHeight()/2, "Some nice trees", 4)
+CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Some nice trees",WINDOW_FLAGS_CENTERED
 
 Local light = CreateDirectionalLight()
 RotateEntity light,-45,0,0
 
-Local env =  LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
+Local env =  LoadCubeTexture("sgd://envmaps/sunnysky-cube.png",TEXTURE_FORMAT_ANY,TEXTURE_FLAGS_DEFAULT)
 SetEnvTexture env
 
 Local skybox = CreateSkybox(env)

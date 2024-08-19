@@ -2,11 +2,14 @@ R"(
 
 struct SkyboxUniforms {
     worldMatrix: mat4x4f,
-    mipmapBias: f32
+    mipmapBias: f32,
+    textureType: u32,
 }
+
 @group(2) @binding(0) var<uniform> geometry_uniforms: SkyboxUniforms;
-@group(2) @binding(1) var geometry_skyboxTexture: texture_cube<f32>;
-@group(2) @binding(2) var geometry_skyboxSampler: sampler;
+@group(2) @binding(1) var geometry_skyboxTextureCube: texture_cube<f32>;
+@group(2) @binding(2) var geometry_skyboxTexture2D: texture_cube<f32>;
+@group(2) @binding(3) var geometry_skyboxSampler: sampler;
 
 struct Varying {
     @builtin(position) clipPosition: vec4f,
@@ -27,13 +30,25 @@ struct Varying {
     return out;
 }
 
-@fragment fn fragmentMain(in: Varying) -> @location(0) vec4<f32> {
+@fragment fn fragmentMain(in: Varying) -> @location(0) vec4f {
 
-    let tv = scene_camera.inverseProjectionMatrix * vec4f(in.clipCoords, 0, 1);
+    let ndcCoords = in.clipCoords;
 
-    let wv = scene_camera.worldMatrix * geometry_uniforms.worldMatrix * vec4f(tv.xyz / tv.w, 0);
+    let tvec = scene_camera.inverseProjectionMatrix * vec4f(ndcCoords, 0, 1);
+    let wvec = (scene_camera.worldMatrix * geometry_uniforms.worldMatrix * vec4f(tvec.xyz/ tvec.w, 0)).xyz;
 
-    return textureSampleBias(geometry_skyboxTexture, geometry_skyboxSampler, wv.xyz, geometry_uniforms.mipmapBias);
+    if(geometry_uniforms.textureType == 1) {
+
+        return textureSampleBias(geometry_skyboxTextureCube, geometry_skyboxSampler, wvec, geometry_uniforms.mipmapBias);
+
+    } else {
+
+        let u = atan2(wvec.x, wvec.z) / pi * 0.5 + 0.5;
+        let v = -atan2(wvec.y, length(wvec.xz)) / pi + 0.5;
+
+//        return textureSampleBias(scene_envTexture2D, scene_envSampler, vec2f(u, v), geometry_uniforms.mipmapBias);
+        return textureSampleLevel(scene_envTexture2D, scene_envSampler, vec2f(u, v), geometry_uniforms.mipmapBias);
+    }
 }
 
 )"

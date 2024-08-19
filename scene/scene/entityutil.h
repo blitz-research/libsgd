@@ -17,7 +17,7 @@ inline void setRotation(Entity* entity, CVec3r rot) {
 }
 
 inline Vec3r rotation(const Entity* entity) {
-	return rotation(entity->localBasis());
+	return rotation(entity->localBasis()) * real(radiansToDegrees);
 }
 
 inline void setScale(Entity* entity, CVec3r scl) {

@@ -2,10 +2,6 @@
 
 #include "dawn/generatemipmaps.h"
 
-#define PITCH(SZ) ((size_t)(SZ.x) * bytesPerTexel(m_format))
-
-#define SIZE(SZ) (PITCH(SZ) * (SZ).y * m_depth)
-
 namespace sgd {
 
 namespace {
@@ -16,10 +12,24 @@ wgpu::TextureFormat getFormat(TextureFormat format) {
 				{TextureFormat::rg8, wgpu::TextureFormat::RG8Unorm},
 				{TextureFormat::rgba8, wgpu::TextureFormat::RGBA8Unorm},
 				{TextureFormat::srgba8, wgpu::TextureFormat::RGBA8UnormSrgb},
+				//
+				{TextureFormat::r8s, wgpu::TextureFormat::R8Snorm},
+				{TextureFormat::rg8s, wgpu::TextureFormat::RG8Snorm},
+				{TextureFormat::rgba8s, wgpu::TextureFormat::RGBA8Snorm},
+				//
+				{TextureFormat::r16f, wgpu::TextureFormat::R16Float},
+				{TextureFormat::rg16f, wgpu::TextureFormat::RG16Float},
 				{TextureFormat::rgba16f, wgpu::TextureFormat::RGBA16Float},
+				//
+				{TextureFormat::r32f, wgpu::TextureFormat::R32Float},
+				{TextureFormat::rg32f, wgpu::TextureFormat::RG32Float},
+				{TextureFormat::rgba32f, wgpu::TextureFormat::RGBA32Float},
+				//
 				{TextureFormat::depth32f, wgpu::TextureFormat::Depth32Float}};
 
-	return formats.find(format)->second;
+	auto it = formats.find(format);
+	if (it != formats.end()) return it->second;
+	SGD_ABORT();
 }
 
 TextureFormat getFormat(wgpu::TextureFormat format) {
@@ -28,17 +38,31 @@ TextureFormat getFormat(wgpu::TextureFormat format) {
 				{wgpu::TextureFormat::RG8Unorm, TextureFormat::rg8},
 				{wgpu::TextureFormat::RGBA8Unorm, TextureFormat::rgba8},
 				{wgpu::TextureFormat::RGBA8UnormSrgb, TextureFormat::srgba8},
+				//
+				{wgpu::TextureFormat::R8Snorm, TextureFormat::rg8s},
+				{wgpu::TextureFormat::RG8Snorm, TextureFormat::rgba8s},
+				{wgpu::TextureFormat::RGBA8Snorm, TextureFormat::rgba8s},
+				//
+				{wgpu::TextureFormat::R16Float, TextureFormat::r16f},
+				{wgpu::TextureFormat::RG16Float, TextureFormat::rg16f},
 				{wgpu::TextureFormat::RGBA16Float, TextureFormat::rgba16f},
+				//
+				{wgpu::TextureFormat::R32Float, TextureFormat::r32f},
+				{wgpu::TextureFormat::RG32Float, TextureFormat::rg32f},
+				{wgpu::TextureFormat::RGBA32Float, TextureFormat::rgba32f},
+				//
 				{wgpu::TextureFormat::Depth32Float, TextureFormat::depth32f}};
 
-	return formats.find(format)->second;
+	auto it = formats.find(format);
+	if (it != formats.end()) return it->second;
+	SGD_ABORT();
 }
 
 wgpu::Sampler getOrCreateWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
 
 	static Map<TextureFlags, wgpu::Sampler> cache;
 
-	auto key = flags & (TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clamp | TextureFlags::compare);
+	auto key = flags & (TextureFlags::clamp | TextureFlags::filter | TextureFlags::mipmap | TextureFlags::compare);
 
 	auto& sampler = cache[key];
 	if (sampler) return sampler;
@@ -58,118 +82,128 @@ wgpu::Sampler getOrCreateWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
 
 } // namespace
 
-Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags)
-	: m_size(size), m_depth(depth), m_format(format), m_flags(flags) {
+Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags, TextureData* data)
+	: m_size(size),		//
+	  m_depth(depth),	//
+	  m_format(format), //
+	  m_flags(flags),	//
+	  m_data(data) {
+	SGD_ASSERT(size.y * depth == data->size().y);
+	SGD_ASSERT(format == data->format());
+	m_dirty = true;
+}
 
-	m_data = (uint8_t*)std::malloc(SIZE(m_size));
+Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags)
+	: m_size(size),		//
+	  m_depth(depth),	//
+	  m_format(format), //
+	  m_flags(flags),
+	  m_data(!bool(flags & TextureFlags::renderTarget) ? new TextureData({size.x, size.y * depth}, format) : nullptr) {
 }
 
 Texture::Texture(Texture* texture, uint32_t layer)
-	: m_size(texture->m_size), m_depth(1), m_format(texture->m_format), m_flags(TextureFlags::layerView), //
-	  m_texture(texture), m_layer(layer), m_data(nullptr) {
-
+	: m_size(texture->size()),			//
+	  m_depth(1),						//
+	  m_format(texture->format()),		//
+	  m_flags(TextureFlags::layerView), //
+	  m_texture(texture),				//
+	  m_layer(layer) {
 	addDependency(m_texture);
 }
 
-Texture::~Texture() {
-	if(currentGC()) currentGC()->wgpuFree(m_alloced, "Texture");
-	std::free(m_data);
-}
+void Texture::update(const void* src, size_t pitch) {
+	if (m_data->pitch() != pitch) SGD_ERROR("TODO");
 
-void Texture::update(const void* src, size_t srcPitch) {
-
-	auto dstPitch = PITCH(m_size);
-
-	if (dstPitch != srcPitch) {
-		SGD_ERROR("TODO");
-		auto rowSize = std::min(srcPitch, dstPitch);
-		for (int y = 0; y < m_size.y * m_depth; ++y) {
-			std::memcpy(m_data + dstPitch * y, (uint8_t*)src + srcPitch * y, rowSize);
-		}
-	} else {
-		std::memcpy(m_data, src, dstPitch * m_size.y * m_depth);
-	}
+	std::memcpy(m_data->data(), src, m_data->pitch() * m_data->size().y);
 
 	m_dirty = true;
 	invalidate();
 }
 
-void Texture::onValidate() const {
+void Texture::updateLayerView() const {
+	m_wgpuTexture = m_texture->m_wgpuTexture;
+	m_wgpuSampler = m_texture->m_wgpuSampler;
+	wgpu::TextureViewDescriptor tvDesc{};
+	tvDesc.format = m_wgpuTexture.GetFormat();
+	tvDesc.dimension = wgpu::TextureViewDimension::e2D;
+	tvDesc.baseArrayLayer = m_layer;
+	tvDesc.arrayLayerCount = 1;
+	m_wgpuTextureView = m_wgpuTexture.CreateView(&tvDesc);
+}
 
+void Texture::updateTexture() const {
+	auto gc = currentGC();
+
+	wgpu::TextureDescriptor desc{};
+	desc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
+	desc.size = {m_size.x, m_size.y, m_depth};
+	desc.format = getFormat(m_format);
+	if (bool(m_flags & TextureFlags::mipmap)) {
+		desc.mipLevelCount = (uint32_t)std::floor(log2(std::max(desc.size.width, desc.size.height))) + 1u;
+		desc.usage |= wgpu::TextureUsage::RenderAttachment;
+	}
+	if (bool(m_flags & TextureFlags::renderTarget)) {
+		desc.usage |= wgpu::TextureUsage::RenderAttachment;
+		if (bool(m_flags & TextureFlags::msaa)) desc.sampleCount = 4;
+	}
+
+	m_wgpuTexture = gc->wgpuDevice().CreateTexture(&desc);
+
+	m_wgpuSampler = getOrCreateWGPUSampler(gc, m_flags);
+
+	wgpu::TextureViewDescriptor tvDesc{};
+	tvDesc.arrayLayerCount = m_depth;
+	tvDesc.format = m_wgpuTexture.GetFormat();
+
+	if (bool(m_flags & TextureFlags::array)) {
+		if (bool(m_flags & TextureFlags::cube)) {
+			tvDesc.dimension = wgpu::TextureViewDimension::CubeArray;
+		} else {
+			tvDesc.dimension = wgpu::TextureViewDimension::e2DArray;
+		}
+	} else if (bool(m_flags & TextureFlags::cube)) {
+		tvDesc.dimension = wgpu::TextureViewDimension::Cube;
+	} else {
+		tvDesc.dimension = wgpu::TextureViewDimension::e2D;
+	}
+
+	m_wgpuTextureView = m_wgpuTexture.CreateView(&tvDesc);
+}
+
+void Texture::updateData() const {
+	auto gc = currentGC();
+
+	wgpu::ImageCopyTexture dst{};
+	dst.texture = m_wgpuTexture;
+
+	wgpu::TextureDataLayout layout{};
+	layout.bytesPerRow = m_data->pitch();
+	layout.rowsPerImage = m_size.y;
+
+	wgpu::Extent3D extent{m_size.x, m_size.y, m_depth};
+
+	gc->wgpuDevice().GetQueue().WriteTexture(&dst, m_data->data(), layout.bytesPerRow * layout.rowsPerImage * m_depth, &layout,
+											 &extent);
+
+	if (m_wgpuTexture.GetMipLevelCount() > 1) generateMipmaps(gc->wgpuDevice(), m_wgpuTexture);
+}
+
+void Texture::onValidate() const {
 	auto gc = currentGC();
 
 	if (m_flags == TextureFlags::layerView) {
-		m_wgpuTexture = m_texture->m_wgpuTexture;
-		m_wgpuSampler = m_texture->m_wgpuSampler;
-		wgpu::TextureViewDescriptor tvDesc{};
-		tvDesc.format = m_wgpuTexture.GetFormat();
-		tvDesc.dimension = wgpu::TextureViewDimension::e2D;
-		tvDesc.baseArrayLayer = m_layer;
-		tvDesc.arrayLayerCount = 1;
-		m_wgpuTextureView = m_wgpuTexture.CreateView(&tvDesc);
+		updateLayerView();
 		return;
 	}
 
 	if (!m_wgpuTexture) {
-
-		// Create texture
-		wgpu::TextureDescriptor desc{};
-		desc.usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::CopyDst;
-		desc.size = {m_size.x, m_size.y, m_depth};
-		desc.format = getFormat(m_format);
-		if (bool(m_flags & TextureFlags::mipmap)) {
-			desc.mipLevelCount = (uint32_t)std::floor(log2(std::max(m_size.x, m_size.y))) + 1u;
-			desc.usage |= wgpu::TextureUsage::RenderAttachment;
-		}
-		if (bool(m_flags & TextureFlags::renderTarget)) {
-			desc.usage |= wgpu::TextureUsage::RenderAttachment;
-			if (bool(m_flags & TextureFlags::msaa)) desc.sampleCount = 4;
-		}
-
-		uint32_t allocing = (m_size.x * bytesPerTexel(m_format) + 255U & ~255U) * m_size.y * m_depth;
-		gc->wgpuAllocing(allocing, "Texture");
-		m_wgpuTexture = gc->wgpuDevice().CreateTexture(&desc);
-		gc->wgpuFree(m_alloced, "Texture");
-		m_alloced = allocing;
-
-		m_wgpuSampler = getOrCreateWGPUSampler(gc, m_flags);
-
-		wgpu::TextureViewDescriptor tvDesc{};
-		tvDesc.arrayLayerCount = m_depth;
-		tvDesc.format = m_wgpuTexture.GetFormat();
-
-		if (bool(m_flags & TextureFlags::array)) {
-			if (bool(m_flags & TextureFlags::cube)) {
-				tvDesc.dimension = wgpu::TextureViewDimension::CubeArray;
-			} else {
-				tvDesc.dimension = wgpu::TextureViewDimension::e2DArray;
-			}
-		} else if (bool(m_flags & TextureFlags::cube)) {
-			tvDesc.dimension = wgpu::TextureViewDimension::Cube;
-		} else {
-			tvDesc.dimension = wgpu::TextureViewDimension::e2D;
-		}
-
-		m_wgpuTextureView = m_wgpuTexture.CreateView(&tvDesc);
+		updateTexture();
 	}
 
 	if (m_dirty) {
-
-		wgpu::ImageCopyTexture dst{};
-		dst.texture = m_wgpuTexture;
-
-		wgpu::TextureDataLayout layout{};
-		layout.bytesPerRow = PITCH(m_size);
-		layout.rowsPerImage = m_size.y;
-
-		wgpu::Extent3D extent{m_size.x, m_size.y, m_depth};
-
-		gc->wgpuDevice().GetQueue().WriteTexture(&dst, m_data, layout.bytesPerRow * layout.rowsPerImage * m_depth, &layout,
-												 &extent);
-
-		if (m_wgpuTexture.GetMipLevelCount() > 1) generateMipmaps(gc->wgpuDevice(), m_wgpuTexture);
-
+		SGD_ASSERT(m_data);
 		m_dirty = false;
+		updateData();
 	}
 }
 

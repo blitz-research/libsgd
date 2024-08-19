@@ -2,10 +2,17 @@
 
 void entry() {
 
-	// Height of eifeel tower!
+//	setConfigVar("gltf.loggingEnabled","1");
+
+	// Height of eiffel tower!
 	float size = 330.0f;
 
+//	MaterialPtr groundMaterial=new Material(&pbrMaterialDescriptor);
+//	groundMaterial->setVector4f("albedoColor4f",{.6f,.5f,.5f,1});
+//	groundMaterial->setFloat("roughnessFactor1f",1);
 	MaterialPtr groundMaterial = loadPBRMaterial(Path("sgd://misc/grass1K.jpg")).result();
+	groundMaterial->setFloat("roughnessFactor1f", 1);
+
 	MeshPtr groundMesh = createBoxMesh({{-size, 0, -size}, {size, 0, size}}, groundMaterial);
 	transformTexCoords(groundMesh, {size / 2, size / 2}, {0, 0});
 
@@ -46,7 +53,8 @@ void entry() {
 
 		playerFly(1.25f);
 
-		light->setWorldPosition({});
+//		light->setWorldPosition({});
+
 		rotate(light, {0, .025f, 0});
 
 		dc->clear();
@@ -58,8 +66,5 @@ void entry() {
 }
 
 int main() {
-	setConfigVar("dawn.backendType", "Vulkan");
-	setConfigVar("dawn.presentMode", "Fifo");
-	setConfigVar("render.timeStampsEnabled", "1");
 	start(entry);
 }

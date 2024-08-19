@@ -1,3 +1,4 @@
+Dialect "modern"
 
 Include "../sgd.bb"
 Include "../keycodes.bb"

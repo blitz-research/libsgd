@@ -34,8 +34,5 @@ void entry() {
 }
 
 int main() {
-//	setConfigVar("dawn.backendType", "Vulkan");
-//	setConfigVar("dawn.presentMode", "Fifo");
-//	setConfigVar("render.timeStampsEnabled", "1");
 	start(entry);
 }

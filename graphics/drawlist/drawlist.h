@@ -25,8 +25,8 @@ struct DrawList : public Shared {
 	Property<CMaterialPtr> fillMaterial{};
 	Property<bool> fillEnabled{true};
 
-	Property<Vec4f> outlineColor{Vec4f(0, 0, 0, 1)};
-	Property<float> outlineWidth{1};
+	Property<Vec4f> outlineColor{Vec4f(0, 0, 0, .75f)};
+	Property<float> outlineWidth{2};
 	Property<bool> outlineEnabled{false};
 
 	Property<bool> lineSmoothing{true};
@@ -44,13 +44,18 @@ struct DrawList : public Shared {
 	void clear();
 	void flush();
 
+	void fillQuad(CVec2f v0, CVec2f v1, CVec2f v2, CVec2f v3, CMaterial* material, CVec4f color, float frame);
+	void fillLine(CVec2f v0, CVec2f v1, CMaterial* material, CVec4f color, float width, float frame);
+	void fillRect(CRectf rect, CMaterial* material, CVec4f color, float frame);
 	void addOutline(CVec2f v0, CVec2f v1);
-	void addLine(CVec2f v0, CVec2f v1);
+	void addOutline(CRectf rect);
+
+	void addImage(CImage* image, CVec2f v, float frame);
 	void addRect(CRectf rect);
+	void addLine(CVec2f v0, CVec2f v1);
 	void addOval(CRectf rect);
 	void addPoint(CVec2f p);
 	void addText(CString text, CVec2f v);
-	void addImage(CImage* image, CVec2f v, float frame);
 
 	void pushLayer();
 	void popLayer();

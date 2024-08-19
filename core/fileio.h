@@ -5,14 +5,16 @@
 
 //! @file
 
+#define SGD_FILEIOEX(MSG) sgd::FileioEx(sgd::String(MSG), __FILE__, __LINE__)
+
 namespace sgd {
 
 struct FileioEx;
 using CFileioEx = const FileioEx&;
 
 struct FileioEx {
-	explicit FileioEx(String message) : m_message(std::move(message)) {
-	}
+
+	FileioEx(String message, const char* file, int line);
 
 	CString message() const {
 		return m_message;

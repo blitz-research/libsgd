@@ -60,7 +60,7 @@ Expected<Font*, FileioEx> loadFont(CPath path, float height) {
 
 	stbtt_fontinfo info;
 	if (!stbtt_InitFont(&info, data.result().data(), 0)) {
-		return FileioEx("Failed to initialize font \"" + path.str() + "\"");
+		return SGD_FILEIOEX("Failed to initialize font \"" + path.str() + "\"");
 	}
 
 	int ascent, descent, lineGap;

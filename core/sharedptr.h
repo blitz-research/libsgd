@@ -99,12 +99,20 @@ template <class T> struct SharedPtr {
 
 	operator T*() const& {
 #if SGD_DEBUG_SHARED_REFS
-		if(m_ptr) ((Shared*)m_ptr)->validateRefs();
+		if (m_ptr) ((Shared*)m_ptr)->validateRefs();
 #endif
 		return m_ptr;
 	}
 
-	T* get()const{return m_ptr;}
+	T* reset() {
+		auto p = m_ptr;
+		m_ptr = nullptr;
+		return p;
+	}
+
+	T* get() const {
+		return m_ptr;
+	}
 
 private:
 	template <class> friend class SharedPtr;

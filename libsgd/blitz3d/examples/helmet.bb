@@ -1,7 +1,10 @@
+Dialect "modern"
 
-CreateWindow(1280, 720, "Helmet", 0)
+Include "start.bb"
 
-env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
+CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Helmet",WINDOW_FLAGS_CENTERED
+
+env = LoadCubeTexture("sgd://envmaps/sunnysky-cube.png",TEXTURE_FORMAT_ANY,TEXTURE_FLAGS_DEFAULT)
 SetEnvTexture env
 
 skybox = CreateSkybox(env)

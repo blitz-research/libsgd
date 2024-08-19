@@ -6,7 +6,7 @@ const maxJoints: u32 = 256;
 
 // Shared with static mesh
 struct MeshUniforms {
-    tangentsEnabled: i32,
+    tangentsEnabled: u32,
 }
 @group(2) @binding(0) var<uniform> geometry_uniforms: MeshUniforms;
 

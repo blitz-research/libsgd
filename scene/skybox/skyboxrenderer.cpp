@@ -12,15 +12,15 @@ void SkyboxRenderer::remove(CSkybox* skybox) {
 
 void SkyboxRenderer::update(CVec3r eye) {
 	for (CSkybox* skybox : m_skyboxes) {
-		auto geometry = skybox->skyboxGeometry();
-		geometry->worldMatrix = skybox->worldMatrix();
+		auto bindings = skybox->skyboxBindings();
+		bindings->worldMatrix = skybox->worldMatrix();
 	}
 }
 
 void SkyboxRenderer::render(RenderQueue* rq) const {
 	for (CSkybox* skybox : m_skyboxes) {
-		auto geometry = skybox->skyboxGeometry();
-		geometry->render(rq);
+		auto bindings = skybox->skyboxBindings();
+		bindings->render(rq);
 	}
 }
 

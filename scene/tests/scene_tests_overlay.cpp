@@ -1,5 +1,40 @@
 #include "start.cpp"
 
+#if 0
+void entry() {
+
+	setConfigVar("gltf.loggingEnabled","1");
+
+	camera = new Camera(CameraType::perspective);
+	scene->add(camera);
+	move(camera,{0,0,-2});
+
+	MeshPtr mesh = loadStaticMesh(Path("sgd://models/helmet.glb")).result();
+
+	ModelPtr model = new Model(mesh);
+	scene->add(model);
+
+	for (;;) {
+		pollEvents();
+
+		if(window->keyboard()->key(KeyCode::LEFT).down()) {
+			turn(model, {0, 1, 0});
+		}else if (window->keyboard()->key(KeyCode::RIGHT).down()) {
+			turn(model, {0, -1, 0});
+		}
+		if(window->keyboard()->key(KeyCode::UP).down()) {
+			turn(model, {1, 0, 0});
+		}else if (window->keyboard()->key(KeyCode::DOWN).down()) {
+			turn(model, {-1, 0, 0});
+		}
+
+		render();
+	}
+}
+
+#endif
+
+#if 1
 void entry() {
 
 	DrawListPtr dc = overlay->drawList();
@@ -9,27 +44,27 @@ void entry() {
 	auto w = (float)window->size().x;
 	auto h = (float)window->size().y;
 
-	dc->fillColor = Vec4f(1, 0, 0, 1);
-//	dc->addRect({0, 0, w, h});
+	dc->outlineEnabled = false;
+	for (int i = 0; i < 25; ++i) {
+		//dc->lineWidth = rnd(1, 7);
+		dc->fillColor = Vec4f(rnd(), rnd(), rnd(), 1);
+		dc->addLine({rnd(w), rnd(h)}, {rnd(w), rnd(h)});
+	}
 
-	dc->fillColor = Vec4f(0, 1, 1, 1);
-	dc->addLine({1, 1}, {w - 2, 1});
-	dc->addLine({w - 2, 1}, {w - 2, h - 2});
-	dc->addLine({w - 2, h - 2}, {1, h - 2});
-	dc->addLine({1, h - 2}, {1, 1});
+	dc->outlineEnabled = true;
+	for (int i = 0; i < 25; ++i) {
+		dc->fillColor = Vec4f(rnd(), rnd(), rnd(), 1);
+		auto x = rnd(w), y = rnd(h);
+		dc->addRect(Rectf(x, y, x + rnd(32, 64), y + rnd(32, 64)));
+	}
 
-	dc->fillColor = Vec4f(0, 0, 0, 1);
-//	dc->addRect({2, 2, w - 2, h - 2});
+	dc->outlineEnabled = true;
+	for (int i = 0; i < 25; ++i) {
+		dc->fillColor = Vec4f(rnd(), rnd(), rnd(), 1);
+		auto x = rnd(w), y = rnd(h);
+		dc->addOval(Rectf(x, y, x + rnd(32, 64), y + rnd(32, 64)));
+	}
 
-	auto fh = dc->font()->height;
-
-	dc->fillColor = Vec4f(0, 0, 0, 1);
-	dc->addText("Hello World!", {2, 2});
-	dc->addText("Hello world!", {2, fh + 2});
-	dc->addText("Hello world!", {2, h - fh * 2 - 2});
-	dc->addText("Hello world!", {2, h - fh - 2});
-
-//	dc->clear();
 	dc->pushLayer();
 
 	float frame = 0;
@@ -38,22 +73,24 @@ void entry() {
 
 		dc->clear();
 
-		dc->addImage(image, Vec2f(window->mouse()->position()), frame+=.1f);
+		dc->addImage(image, Vec2f(window->mouse()->position()), frame += .1f);
 
 		auto str = std::to_string(currentGC()->FPS());
-		dc->addText(str,{w - dc->font()->textWidth(str),0});
+		dc->addText(str, {w - dc->font()->textWidth(str), 0});
 
-		dc->addText(std::to_string(window->mouse()->position().z) + " " + std::to_string(window->mouse()->velocity().z), {0,64});
+		dc->addText(std::to_string(window->mouse()->position().z) + " " + std::to_string(window->mouse()->velocity().z),
+					{0, 64});
 
 		render();
 	}
 
 	dc->popLayer();
 }
+#endif
 
 int main() {
 
-	setConfigVar("dawn.backendType","D3D12");
+	setConfigVar("dawn.backendType", "D3D12");
 
 	start(entry);
 }

@@ -7,6 +7,7 @@
 #include "core/buffer.h"
 #include "core/graphics.h"
 #include "core/texture.h"
+#include "core/texturedata.h"
 #include "core/textureutil.h"
 
 #include "drawlist/drawlist.h"
@@ -34,4 +35,4 @@
 #include "render/renderqueue.h"
 #include "render/scenebindings.h"
 
-#include "skybox/skyboxgeometry.h"
+#include "skybox/skyboxbindings.h"

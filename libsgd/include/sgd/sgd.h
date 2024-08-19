@@ -42,12 +42,6 @@
 #define SGD_TRUE 1
 #define SGD_FALSE 0
 
-#define SGD_PI 3.14159265359f
-#define SGD_TWO_PI 6.28318530718f
-#define SGD_HALF_PI 1.5707963268f
-#define SGD_DEGREES_TO_RADIANS .01745329252f
-#define SGD_RADIANS_TO_DEGREES 57.295779513f
-
 //! @endcond
 
 //! @name Typedefs
@@ -168,10 +162,10 @@ SGD_API void SGD_DECL sgd_DebugMemory();
 //! @endcond
 
 //! @cond Window flags for use with CreateWindow.
-#define SGD_WINDOW_FLAGS_FULLSCREEN      1
-#define SGD_WINDOW_FLAGS_RESIZABLE       2
-#define SGD_WINDOW_FLAGS_CENTERED        4
-#define SGD_WINDOW_FLAGS_FULLSCREEN_60HZ 8
+#define SGD_WINDOW_FLAGS_NONE       0
+#define SGD_WINDOW_FLAGS_FULLSCREEN 1
+#define SGD_WINDOW_FLAGS_RESIZABLE  2
+#define SGD_WINDOW_FLAGS_CENTERED   4
 //! @endcond
 
 //! Create a new window.
@@ -314,66 +308,109 @@ SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, int axis);
 //! @{
 
 //! @cond Texture format constants
-#define SGD_TEXTURE_FORMAT_R8 1
-#define SGD_TEXTURE_FORMAT_RG8 2
-#define SGD_TEXTURE_FORMAT_RGBA8 3
-#define SGD_TEXTURE_FORMAT_SRGBA8 4
-#define SGD_TEXTURE_FORMAT_RGBA16F 5
-#define SGD_TEXTURE_FORMAT_DEPTH32F 6
+#define SGD_TEXTURE_FORMAT_ANY     0
+
+#define SGD_TEXTURE_FORMAT_R8      1
+#define SGD_TEXTURE_FORMAT_RG8     2
+#define SGD_TEXTURE_FORMAT_RGBA8   3
+#define SGD_TEXTURE_FORMAT_SRGBA8  4
+
+#define SGD_TEXTURE_FORMAT_R8S     5
+#define SGD_TEXTURE_FORMAT_RG8S    6
+#define SGD_TEXTURE_FORMAT_RGBA8S  7
+
+#define SGD_TEXTURE_FORMAT_R16F    8
+#define SGD_TEXTURE_FORMAT_RG16F   9
+#define SGD_TEXTURE_FORMAT_RGBA16F 10
+
 //! @endcond
 
 //! @cond Texture flag constants
-#define SGD_TEXTURE_FLAGS_NONE 0x0
-#define SGD_TEXTURE_FLAGS_CLAMP_U 0x01
-#define SGD_TEXTURE_FLAGS_CLAMP_V 0x02
-#define SGD_TEXTURE_FLAGS_CLAMP_W 0x04
-#define SGD_TEXTURE_FLAGS_CLAMP_COORDS 0x07
-#define SGD_TEXTURE_FLAGS_FILTER 0x08
-#define SGD_TEXTURE_FLAGS_MIPMAP 0x10
-#define SGD_TEXTURE_FLAGS_CUBE 0x20
-//
-#define SGD_TEXTURE_FLAGS_ENVMAP_DEFAULT   0x38
-#define SGD_TEXTURE_FLAGS_MATERIAL_DEFAULT 0x18
-#define SGD_TEXTURE_FLAGS_IMAGE_DEFAULT    0x1f
+#define SGD_TEXTURE_FLAGS_NONE         0x00
+#define SGD_TEXTURE_FLAGS_CLAMP_U      0x01
+#define SGD_TEXTURE_FLAGS_CLAMP_V      0x02
+#define SGD_TEXTURE_FLAGS_CLAMP_W      0x04
+#define SGD_TEXTURE_FLAGS_CLAMP		   0x07
+#define SGD_TEXTURE_FLAGS_FILTER       0x08
+#define SGD_TEXTURE_FLAGS_MIPMAP       0x10
+#define SGD_TEXTURE_FLAGS_DEFAULT	   0x18
+#define SGD_TEXTURE_FLAGS_IMAGE        0x1f
+
 //! @endcond
 
-//! Load a new texture.
+//! Load a new 2D texture.
 //!
 //! @param `path` is the file path of the texture to load.
+//!
+//! @param `depth` should be 1.
 //!
 //! @param `format` should be one of the following:
 //!
 //! Texture format              | Integer value | Bytes per texel | Description
 //! ----------------------------|---------------|-----------------|------------
+//! SGD_TEXTURE_FORMAT_ANY      | 0             | NA              | Any (*).
 //! SGD_TEXTURE_FORMAT_R8       | 1             | 1               | Unsigned byte per component linear red.
 //! SGD_TEXTURE_FORMAT_RG8      | 2             | 2               | Unsigned byte per component linear red/green.
 //! SGD_TEXTURE_FORMAT_RGBA8    | 3             | 4               | Unsigned byte per component linear red/green/blue/alpha
 //! SGD_TEXTURE_FORMAT_SRGBA8   | 4             | 4               | Unsigned byte per component standard red/green/blue/alpha
-//! SGD_TEXTURE_FORMAT_RGBA16F  | 5             | 8               | 16 bit float per component linear red/green/blue/alpha
-//! SGD_TEXTURE_FORMAT_DEPTH32F | 6             | 4               | 32 bit float per component depth
+//! SGD_TEXTURE_FORMAT_R8S      | 5             | 1               | Signed byte per component linear red.
+//! SGD_TEXTURE_FORMAT_RG8S     | 6             | 2               | Signed byte per component linear red/green.
+//! SGD_TEXTURE_FORMAT_RGBA8    | 7             | 4               | Signed byte per component linear red/green/blue/alpha
+//! SGD_TEXTURE_FORMAT_R16F     | 8             | 2               | 16 bit float per component linear red.
+//! SGD_TEXTURE_FORMAT_RG16F    | 9             | 4               | 16 bit float per component linear red/green.
+//! SGD_TEXTURE_FORMAT_RGBA16F  | 10            | 8               | 16 bit float per component linear red/green/blue/alpha
 //!
-//! Note that you should generally use the 'standard' formats when dealing with WYSIWG images,
-//! 'linear' when dealing with algorithmically generated data.
+//! (*) SGD_TEXTURE_FORMAT_ANY can be used with texture and material loading functions to let SGD pick a suitable texture format.
 //!
 //! @param `flags` should be one or more of the following bitmasks:
 //!
-//! Texture flags               | Integer value | Description
-//! ----------------------------|---------------|------------
-//! SGD_TEXTURE_FLAGS_NONE      | 0x00          | No texture flags
-//! SGD_TEXTURE_FLAGS_CLAMP_U   | 0x01          | Clamp texture U coordinate
-//! SGD_TEXTURE_FLAGS_CLAMP_V   | 0x02          | Clamp texture V coordinate
-//! SGD_TEXTURE_FLAGS_CLAMP_W   | 0x04          | Clamp texture W coordinate
-//! SGD_TEXTURE_FLAGS_CLAMP     | 0x07          | Clamp texture U, V, W coordinates
-//! SGD_TEXTURE_FLAGS_FILTER    | 0x08          | Filter magnified texels
-//! SGD_TEXTURE_FLAGS_MIPMAP    | 0x10          | Mipmap minified texels
-//! SGD_TEXTURE_FLAGS_CUBE      | 0x20          | Create a cube texture
-//!
-//! Some convenient default combinations of texture flags are also defined:
-//!
-//! SGD_TEXTURE_FLAGS_ENVMAP_DEFAULT   0x38
-//! SGD_TEXTURE_FLAGS_MATERIAL_DEFAULT 0x18
-//! SGD_TEXTURE_FLAGS_IMAGE_DEFAULT    0x1f
-SGD_API SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags);
+//! Texture flags                   | Integer value | Description
+//! --------------------------------|---------------|------------
+//! SGD_TEXTURE_FLAGS_NONE          | 0x00          | No texture flags.
+//! SGD_TEXTURE_FLAGS_CLAMP_U       | 0x01          | Clamp texture U, V, W coordinates.
+//! SGD_TEXTURE_FLAGS_CLAMP_V       | 0x02          | Clamp texture U, V, W coordinates.
+//! SGD_TEXTURE_FLAGS_CLAMP_W       | 0x04          | Clamp texture U, V, W coordinates.
+//! SGD_TEXTURE_FLAGS_FILTER		| 0x08          | Enable filtering of magnified textures.
+//! SGD_TEXTURE_FLAGS_MIPMAP        | 0x10          | Enable mipmapping of minified textures.
+//! SGD_TEXTURE_FLAGS_DEFAULT		| 0x18			| Convenience flag that combines mipmap and filter.
+//! SGD_TEXTURE_FLAGS_IMAGE         | 0x01f         | Convenience flag that combines mipmap, filter and clamp.
+SGD_API SGD_Texture SGD_DECL sgd_Load2DTexture(SGD_String path, int format, int flags);
+
+//! Load a new cube texture.
+SGD_API SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, int format, int flags);
+
+//! Load an new array texture.
+SGD_API SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, int format, int flags);
+
+//! Create a new 2D texture.
+SGD_API SGD_Texture SGD_DECL sgd_Create2DTexture(int width, int height, int format, int flags);
+
+//! Create a new cube texture.
+SGD_API SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, int format, int flags);
+
+//! Create a new array texture.
+SGD_API SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, int format, int flags);
+
+//! Get width of texture.
+SGD_API int SGD_DECL sgd_GetTextureWidth(SGD_Texture texture);
+
+//! Get height of texture.
+SGD_API int SGD_DECL sgd_GetTextureHeight(SGD_Texture texture);
+
+//! Get height of texture.
+SGD_API int SGD_DECL sgd_GetTextureDepth(SGD_Texture texture);
+
+//! Get texture format.
+SGD_API int SGD_DECL sgd_GetTextureFormat(SGD_Texture texture);
+
+//! Get texture flags.
+SGD_API int SGD_DECL sgd_GetTextureFlags(SGD_Texture texture);
+
+// Set texture texel.
+SGD_API void SGD_DECL sgd_SetTexelSRGBA(SGD_Texture texture, int x, int y, int rgba);
+
+// Get texture texel
+SGD_API int SGD_DECL sgd_GetTexelSRGBA(SGD_Texture texture, int x, int y);
 
 //! @}
 
@@ -411,7 +448,7 @@ SGD_API SGD_Material SGD_DECL sgd_CreatePBRMaterial();
 //! Load a new PBR material.
 SGD_API SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path);
 
-//! Create a new prelit matterial.
+//! Create a new prelit material.
 SGD_API SGD_Material SGD_DECL sgd_CreatePrelitMaterial();
 
 //! Load a new prelit material.
@@ -655,7 +692,12 @@ SGD_API float SGD_DECL sgd_GetFontHeight(SGD_Font font);
 //! @{
 
 //! Load an image for use with 3D sprites or Draw2DImage.
+//!
+//! Multiframe images must be layed out in a vertical strip.
 SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int depth);
+
+//! Create an image with an existing texture.
+SGD_API SGD_Image SGD_DECL sgd_CreateImage(SGD_Texture texture);
 
 //! @cond
 #define SGD_IMAGE_VIEW_MODE_FIXED 1
@@ -674,23 +716,14 @@ SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int depth);
 //! SGD_IMAGE_VIEW_MODE_UPRIGHT | 3             | Image is rotated around local Y axis to face camera, useful for tree like sprites.
 SGD_API void SGD_DECL sgd_SetImageViewMode(SGD_Image image, int viewMode);
 
-//! Set rect for use with 3D sprites.
-SGD_API void SGD_DECL sgd_SetImageRect(SGD_Image image, float minX, float minY, float maxX, float maxY);
-
-//! Set 2D handle for use with Draw2DImage.
-SGD_API void SGD_DECL sgd_SetImage2DHandle(SGD_Image image, float x, float y);
-
 //! Set image blend mode.
 SGD_API void SGD_DECL sgd_SetImageBlendMode(SGD_Image image, int blendMode);
 
-//! Get width of image.
-SGD_API int SGD_DECL sgd_GetImageWidth(SGD_Image image);
+//! Set rect for use with 3D sprites.
+SGD_API void SGD_DECL sgd_SetImageRect(SGD_Image image, float minX, float minY, float maxX, float maxY);
 
-//! Get height of image.
-SGD_API int SGD_DECL sgd_GetImageHeight(SGD_Image image);
-
-//! Get depth (animation frames) of image.
-SGD_API int SGD_DECL sgd_GetImageDepth(SGD_Image image);
+//! Get texture used to create image.
+SGD_API int SGD_DECL sgd_GetImageTexture(SGD_Image image);
 
 //! @}
 
@@ -1271,11 +1304,20 @@ SGD_API SGD_Real SGD_DECL sgd_GetPickedNZ();
 //! Create a new bloom effect and add it to the scene.
 SGD_API SGD_RenderEffect SGD_DECL sgd_CreateBloomEffect();
 
+// Set bloom render effect radius, should be in the range 1 to 31 inclusive, defaults to 2.
+SGD_API void SGD_DECL sgd_SetBloomEffectRadius(SGD_RenderEffect effect, int radius);
+
+// Get bloom render effect radius.
+SGD_API int SGD_DECL sgd_GetBloomEffectRadius(SGD_RenderEffect effect);
+
 //! Create a new blur render effect and add it to the scene.
 SGD_API SGD_RenderEffect SGD_DECL sgd_CreateBlurEffect();
 
 // Set blur render effect radius, should be in the range 1 to 31 inclusive, defaults to 2.
 SGD_API void SGD_DECL sgd_SetBlurEffectRadius(SGD_RenderEffect effect, int radius);
+
+// Get blur render effect radius.
+SGD_API int SGD_DECL sgd_GetBlurEffectRadius(SGD_RenderEffect effect);
 
 //! Create a new fog render effect and add it to the scene.
 SGD_API SGD_RenderEffect SGD_DECL sgd_CreateFogEffect();

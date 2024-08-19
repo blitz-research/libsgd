@@ -1,5 +1,9 @@
 #include "start.c"
 
+#define SGD_PI 3.14159265359f
+#define SGD_TWO_PI 6.28318530718f
+#define SGD_HALF_PI 1.5707963268f
+
 SGD_Mesh createSphereMesh(float radius, int xSegs, int ySegs, SGD_Material material) {
 
 	SGD_Mesh mesh = sgd_CreateMesh(0,0);

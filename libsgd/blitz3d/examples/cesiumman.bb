@@ -1,8 +1,11 @@
+Dialect "modern"
+
+Include "../sgd.bb"
 
 Global camera
 Global model
 
-CreateWindow(1280, 720, "Cesium Man", 0)
+CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Cesium Man",WINDOW_FLAGS_CENTERED
 
 LoadScene()
 
@@ -11,7 +14,7 @@ Local monocolor = CreateMonocolorEffect()
 SetMonocolorEffectColor monocolor, 1,1,.75,1
 
 atime#=0
-While Not PollEvents()
+While Not (PollEvents() And EVENT_MASK_CLOSE_CLICKED)
 	If IsKeyDown(263)
 		TurnEntity model,0,3,0
 	Else If IsKeyDown(262)
@@ -33,7 +36,7 @@ Wend
 
 Function LoadScene()
 
-	Local env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
+	Local env = LoadCubeTexture("sgd://envmaps/sunnysky-cube.png", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_DEFAULT)
 	SetEnvTexture env
 
 	Local skybox = CreateSkybox(env)

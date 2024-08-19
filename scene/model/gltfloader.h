@@ -42,7 +42,7 @@ private:
 	static int bytesPerComponent(int componentType);
 	static int byteSize(const tinygltf::Accessor& accessor);
 
-	Texture* loadTexture(int id, bool srgb, bool pmAlpha);
+	Texture* loadTexture(int id, TextureFormat format, bool pmAlpha);
 	Material* loadMaterial(int id);
 
 	uint8_t* bufferData(const tinygltf::Accessor& accessor) const;

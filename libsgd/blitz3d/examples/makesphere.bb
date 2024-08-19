@@ -1,3 +1,9 @@
+Dialect "modern"
+
+Include "start.bb"
+
+Const TWO_PI#=6.28318530718
+Const HALF_PI#= 1.5707963268
 
 Function createSphere(radius#, xSegs, ySegs, material)
 
@@ -46,9 +52,9 @@ Function createSphere(radius#, xSegs, ySegs, material)
 	
 End Function
 
-CreateWindow(1280, 720, "Custom mesh demo", 0)
+CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Custom mesh demo",WINDOW_FLAGS_CENTERED
 
-env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
+env = LoadCubeTexture("sgd://envmaps/sunnysky-cube.png", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_DEFAULT)
 
 SetEnvTexture env
 

@@ -4,10 +4,32 @@ R"(
 // in a fragment shader you can use:
 // @diagnostic(off, derivative_uniformity)
 
+// ***** std header *****
+
+const pi = 3.14159265359;
+const twoPi = pi * 2.0;
+const halfPi = pi * 0.5;
+const degreesToRadians = 0.01745329252;
+const radiansToDegrees = 57.295779513;
+
+// Weird, but the only thing that seemed to work on Metal...
+fn isNan(tz:f32) ->bool {
+    if tz > 0.0 {
+        if tz <= 0.0 {return true;}
+    }else if tz < 0.0 {
+        if tz >= 0.0 {return true;}
+    }else if tz == 0.0 {
+        if tz != 0.0 {return true;}
+    }else{
+        return true;
+    }
+    return false;
+}
+
 // ***** Scene *****
 
-// Note: Must sync with scenebindings.h
-
+// Note: *MUST* stay in sync with scenebindgroup.h
+//
 const maxDirectionalLights: u32 = 4;
 const maxPointLights: u32 = 32;
 const maxSpotLights: u32 = 16;
@@ -15,16 +37,17 @@ const maxSpotLights: u32 = 16;
 const configUniformsBinding = 0;
 const cameraUniformsBinding = 1;
 const lightingUniformsBinding = 2;
-const envTextureBinding = 3;
-const envSamplerBinding = 4;
-const csmTextureBinding = 5;
-const csmSamplerBinding = 6;
-const csmMatricesBinding = 7;
-const psmTextureBinding = 8;
-const psmSamplerBinding = 9;
-const ssmTextureBinding = 10;
-const ssmSamplerBinding = 11;
-const ssmMatricesBinding = 12;
+const envTextureCubeBinding = 3;
+const envTexture2DBinding = 4;
+const envSamplerBinding = 5;
+const csmTextureBinding = 6;
+const csmSamplerBinding = 7;
+const csmMatricesBinding = 8;
+const psmTextureBinding = 9;
+const psmSamplerBinding = 10;
+const ssmTextureBinding = 11;
+const ssmSamplerBinding = 12;
+const ssmMatricesBinding = 13;
 
 struct ConfigUniforms {
 
@@ -81,6 +104,8 @@ struct SpotLight {
 
 struct LightingUniforms {
 	ambientLightColor: vec4f,
+
+	envTextureType: u32,    // 0 = cube, 1 = 2D
 	
 	numDirectionalLights: u32,
 	numPointLights: u32,
@@ -98,23 +123,11 @@ struct LightingUniforms {
 @group(0) @binding(configUniformsBinding) var<uniform> scene_config: ConfigUniforms;
 @group(0) @binding(cameraUniformsBinding) var<uniform> scene_camera: CameraUniforms;
 
-fn isNan(tz:f32) ->bool {
-    if tz > 0.0 {
-        if tz <= 0.0 {return true;}
-    }else if tz < 0.0 {
-        if tz >= 0.0 {return true;}
-    }else if tz == 0.0 {
-        if tz != 0.0 {return true;}
-    }else{
-        return true;
-    }
-    return false;
-}
-
 #if !RENDER_PASS_SHADOWS
 
 @group(0) @binding(lightingUniformsBinding) var<uniform> scene_lighting: LightingUniforms;
-@group(0) @binding(envTextureBinding) var scene_envTexture: texture_cube<f32>;
+@group(0) @binding(envTextureCubeBinding) var scene_envTextureCube: texture_cube<f32>;
+@group(0) @binding(envTexture2DBinding) var scene_envTexture2D: texture_2d<f32>;
 @group(0) @binding(envSamplerBinding) var scene_envSampler: sampler;
 @group(0) @binding(csmTextureBinding) var scene_csmTexture: texture_depth_2d_array;
 @group(0) @binding(csmSamplerBinding) var scene_csmSampler: sampler_comparison;
@@ -169,17 +182,29 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
     let spower = pow(2.0, glossiness * 12.0);       // specular power
     let fnorm = (spower + 2.0) / 8.0;               // normalization factor
 
-	let vpos = scene_camera.worldMatrix[3].xyz;  // viewer position
+	let vpos = scene_camera.worldMatrix[3].xyz;     // viewer position
     let vvec = normalize(vpos - position);          // vector to viewer
 	let ndotv = max(dot(normal, vvec), 0.0);
 
+    var env:vec3f;
+    {
+        let rvec = reflect(-vvec, normal);
+        let mipLevel  = roughness * f32(textureNumLevels(scene_envTextureCube));
+        if scene_lighting.envTextureType == 1 {
+            //
+            env = textureSampleLevel(scene_envTextureCube, scene_envSampler,  rvec, mipLevel).rgb;
+            //
+        } else {
+            //
+            let u = atan2(rvec.x, rvec.z) / pi * 0.5 + 0.5;
+            let v = -atan2(rvec.y, length(rvec.xz)) / pi + 0.5;
+            env = textureSampleLevel(scene_envTexture2D, scene_envSampler, vec2f(u, v), mipLevel).rgb;
+        }
+    }
+
     let fdiffuse = scene_lighting.ambientLightColor.rgb * scene_lighting.ambientLightColor.a * diffuse;
-
-    let mips = f32(textureNumLevels(scene_envTexture));
-    let env = textureSampleLevel(scene_envTexture, scene_envSampler,  reflect(-vvec, normal), roughness * mips).rgb;
-
 	let fschlick = specular + (1.0 - specular) * pow(1.0 - ndotv, 5.0) * glossiness;
-	let fspecular = env * fschlick;
+	let fspecular = fschlick * env;
 
 	var color = (fdiffuse + fspecular) * occlusion;
 

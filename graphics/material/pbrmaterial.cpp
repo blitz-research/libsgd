@@ -7,10 +7,10 @@ namespace sgd {
 namespace {
 
 struct alignas(16) PBRMaterialUniforms {
-	Vec4f albedoColor{1};
-	Vec3f emissiveColor{0};
-	float metallicFactor{0};
-	float roughnessFactor{1};
+	Vec4f albedoColor;
+	Vec3f emissiveColor;
+	float metallicFactor{};
+	float roughnessFactor{};
 };
 
 auto shaderSource{
@@ -18,8 +18,7 @@ auto shaderSource{
 };
 
 BindGroupDescriptor bindGroupDescriptor( //
-	"pbrMaterial",
-	BindGroupType::material,
+	"pbrMaterial", BindGroupType::material,
 	{
 		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform), // PBRMaterialUniforms
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Fragment),								  // albedoTexture
@@ -36,6 +35,7 @@ BindGroupDescriptor bindGroupDescriptor( //
 		samplerBindGroupLayoutEntry(12, wgpu::ShaderStage::Fragment),								  // normalSampler
 	},
 	shaderSource);
+
 } // namespace
 
 const MaterialDescriptor pbrMaterialDescriptor( //
@@ -54,7 +54,8 @@ const MaterialDescriptor pbrMaterialDescriptor( //
 		{"metallicTexture", {5, whiteTexture()}},
 		{"roughnessTexture", {7, whiteTexture()}},
 		{"occlusionTexture", {9, whiteTexture()}},
-		{"normalTexture", {11, flatNormalTexture()}},
-	},1);
+		{"normalTexture", {11, flatTexture()}},
+	},
+	1);
 
 } // namespace sgd

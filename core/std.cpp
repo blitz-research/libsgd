@@ -35,9 +35,6 @@ Clock::time_point g_timerStart = Clock::now();
 std::thread::id g_mainThreadId = std::this_thread::get_id();
 
 auto defaultOnError = [](CString msg, const char* file, int line) { //
-
-	SGD_LOG << "Runtime error:" << msg << "file:" << file << "line:" << line;
-
 #if SGD_CONFIG_DEBUG
 #if SGD_COMPILER_MSVC
 	__debugbreak();
@@ -66,6 +63,7 @@ void error(CString msg, const char* file, int line) {
 	if (startsWith(tfile, SGD_CMAKE_SOURCE_DIR "/")) {
 		tfile = tfile.substr(std::char_traits<char>::length(SGD_CMAKE_SOURCE_DIR "/"));
 	}
+	SGD_LOG << "Runtime error:" << msg << "file:" << file << "line:" << line;
 	onError(msg, tfile.c_str(), line);
 	std::abort();
 }

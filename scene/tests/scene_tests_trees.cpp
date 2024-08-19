@@ -32,7 +32,7 @@ void entry() {
 	for (;;) {
 		pollEvents();
 
-		playerFly(.25f);
+		playerFly(.125f);
 
 		render();
 	}

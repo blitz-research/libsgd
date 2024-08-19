@@ -8,20 +8,12 @@ namespace sgd {
 
 Expected<Image*, FileioEx> loadImage(CPath path, uint32_t depth) {
 
-	auto format = TextureFormat::srgba8;
 	auto flags = TextureFlags::array | TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clamp;
 
-	auto texture = loadTexture(path, format, flags, depth);
+	auto texture = loadArrayTexture(path, TextureFormat::any, flags, depth);
 	if (!texture) return texture.error();
 
-	auto material = new Material(&imageMaterialDescriptor);
-	material->setTexture("albedoTexture", texture.result());
-	material->blendMode = BlendMode::alphaBlend;
-	material->cullMode = CullMode::none;
-
-	auto image = new Image(material);
-
-	return image;
+	return new Image(texture.result());
 }
 
 } // namespace sgd

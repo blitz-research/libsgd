@@ -69,7 +69,7 @@ SGD.SetAmbientLightColor 0, 0, 0, 1'0.025, 0.05, 0.0375, 1.0
 ' SKYBOX:
 ' --------
  
-Local sky_texture:Int = SGD.LoadTexture (sky_map_path, SGD.TEXTURE_FORMAT_SRGBA8, SGD.TEXTURE_FLAGS_ENVMAP_DEFAULT)
+Local sky_texture:Int = SGD.LoadCubeTexture (sky_map_path, SGD.TEXTURE_FORMAT_ANY, SGD.TEXTURE_FLAGS_DEFAULT)
 
 SGD.SetEnvTexture sky_texture
 

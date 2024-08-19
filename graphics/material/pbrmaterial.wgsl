@@ -43,7 +43,9 @@ fn evaluateMaterial(position: vec3f, tanMatrix: mat3x3f, texCoords: vec3f, color
 	let occlusion = textureSample(material_occlusionTexture, material_occlusionSampler, texCoords2d).r;
    	let normal = textureSample(material_normalTexture, material_normalSampler, texCoords2d).rgb * 2 - 1;
 
+
     return evaluateLighting(position, normalize(tanMatrix * normal), albedo, emissive, metallic, roughness, occlusion);
+//    return evaluateLighting(position, normalize(tanMatrix * normal), albedo, emissive, 0, 0, occlusion);
 }
 
 )"

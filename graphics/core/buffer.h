@@ -41,6 +41,10 @@ struct Buffer : GraphicsResource {
 		return m_data + offset;
 	}
 
+	uint8_t* lock() {
+		return lock(0, m_size);
+	}
+
 	void unlock() {
 		invalidate(false);
 	}

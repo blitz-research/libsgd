@@ -4,7 +4,7 @@
 
 namespace sgd {
 
-SGD_SHARED(SkyboxGeometry);
+SGD_SHARED(SkyboxBindings);
 
 SGD_SHARED(Texture);
 SGD_SHARED(Skybox);
@@ -16,13 +16,13 @@ struct Skybox : Entity {
 	explicit Skybox(Texture* texture);
 	explicit Skybox(const Skybox* that);
 
-	Property<TexturePtr> skyTexture;
-	Property<float> roughness;
+	Property<TexturePtr> skyTexture{};
+	Property<float> roughness{0};
 
-	SkyboxGeometry* skyboxGeometry() const { return m_geometry;}
+	SkyboxBindings* skyboxBindings() const { return m_bindings;}
 
 private:
-	SkyboxGeometryPtr m_geometry;
+	SkyboxBindingsPtr m_bindings;
 
 	Skybox* onCopy() const override;
 

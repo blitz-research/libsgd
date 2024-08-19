@@ -1,9 +1,10 @@
+Dialect "modern"
 
 Include "start.bb"
 
-CreateWindow(1280, 720, "Primitives", 2)
+CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Crates",WINDOW_FLAGS_CENTERED
 
-env = LoadTexture("sgd://envmaps/sunnysky-cube.png", 4, 56)
+env = LoadCubeTexture("sgd://envmaps/sunnysky-cube.png", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_DEFAULT)
 SetEnvTexture env
 
 Local skybox = CreateSkybox(env)
@@ -14,7 +15,7 @@ MoveEntity player,0,15,-25
 
 Local light = CreateDirectionalLight()
 SetLightShadowsEnabled light,True
-TurnEntity light,-75,15,0
+TurnEntity light,-90,0,0
 
 Local sz#=32
 Local groundMaterial = LoadPBRMaterial("sgd://misc/brownish-grass.jpg")

@@ -4,6 +4,8 @@ void entry() {
 
 	float sz = 50;
 
+	setConfigVar("gltf.loggingEnabled","1");
+
 	MeshPtr levelMesh = loadStaticMesh(Path("sgd://models/ManurewaDuplex.glb")).result();
 	fit(levelMesh, Boxf(-sz, sz), true);
 

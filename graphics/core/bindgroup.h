@@ -42,7 +42,8 @@ struct BindGroup : GraphicsResource {
 	void setBuffer(uint32_t index, CBuffer* buffer);
 	CBuffer* getBuffer(uint32_t index) const;
 
-	void setTexture(uint32_t index, CTexture* texture);
+	void setTexture(uint32_t index, CTexture* texture, bool setSampler = true);
+	void setSampler(uint32_t index, CTexture* texture);
 	CTexture* getTexture(uint32_t index) const;
 
 	wgpu::BindGroup wgpuBindGroup() const {

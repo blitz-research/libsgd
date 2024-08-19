@@ -1,13 +1,12 @@
+Dialect "modern"
+
 Include "start.bb"
 
-SetConfigVar "debug.gpuAllocs", 1
-;SetConfigVar "debug.gpuFrees"
+CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Collide Demo",WINDOW_FLAGS_RESIZABLE
 
-CreateWindow 1280, 720, "Collisions Demo", WINDOW_FLAGS_RESIZABLE
+;SetAmbientLightColor 1,.9,.8,.2
 
-SetAmbientLightColor 1,.9,.8,.2
-
-Local env =  LoadTexture("sgd://envmaps/sunnysky-cube.png", TEXTURE_FORMAT_SRGBA8, TEXTURE_FLAGS_ENVMAP)
+Local env =  LoadCubeTexture("sgd://envmaps/sunnysky-cube.png",TEXTURE_FORMAT_ANY,TEXTURE_FLAGS_DEFAULT)
 SetEnvTexture env
 
 Local skybox = CreateSkybox(env)
@@ -23,9 +22,7 @@ FitMesh levelMesh,-sz,-sz,-sz,sz,sz,sz,True
 Local levelModel = CreateModel(levelMesh)
 Local levelCollider = CreateMeshCollider(levelModel, 0, 0)
 
-Local playerMesh = CreateSphereMesh(1,48,24,CreatePBRMaterial())
-
-CreatePlayer(playerMesh)
+CreatePlayer(0)
 SetEntityPosition player,-8,0,36
 SetEntityRotation player,0,-145.5,0
 MoveEntity camera,0,.8,0
@@ -51,7 +48,6 @@ While PollEvents()<>1
 		EndIf
 	EndIf
 	
-
 	PlayerWalk(sp/60.0)
 	
 	Local 	py# = GetEntityY(player)
@@ -74,7 +70,6 @@ While PollEvents()<>1
 	Draw2DText "Player position: "+GetEntityX(player)+", "+GetEntityY(player)+", "+GetEntityZ(player),0,0
 	Draw2DText "Player rotation: "+GetEntityRX(player)+", "+GetEntityRY(player)+", "+GetEntityRZ(player),0,16
 
-	;GetCollisionCount is updated by UpdateColliders().	 OK to just first (if there is one).
 	If GetCollisionCount(playerCollider)>0
 		Draw2DText "Collision Point : "+GetCollisionX(playerCollider,0)+", "+GetCollisionY(playerCollider,0)+", "+GetCollisionZ(playerCollider,0),0,32
 		Draw2DText "Collision Normal: "+GetCollisionNX(playerCollider,0)+", "+GetCollisionNY(playerCollider,0)+", "+GetCollisionNZ(playerCollider,0),0,48

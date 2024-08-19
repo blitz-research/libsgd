@@ -135,113 +135,75 @@ void DrawList::addPoint(CVec2f v) {
 	addOval({v - hsz, v + hsz});
 }
 
-void DrawList::addRect(CRectf r) {
-	if (fillEnabled()) {
-		auto vp = allocTriangles(2, fillMaterial());
-		vp[0] = {{topLeft(r), depth()}, {0, 0, 0}, m_pmFillColor};
-		vp[1] = {{topRight(r), depth()}, {1, 0, 0}, m_pmFillColor};
-		vp[2] = {{bottomRight(r), depth()}, {1, 1, 0}, m_pmFillColor};
-		vp[3] = vp[0];
-		vp[4] = vp[2];
-		vp[5] = {{bottomLeft(r), depth()}, {0, 1, 0}, m_pmFillColor};
-		m_vertexBuffer->unlock();
-	}
-	if (outlineEnabled()) {
-		addOutline(topLeft(r), topRight(r));
-		addOutline(topRight(r), bottomRight(r));
-		addOutline(bottomRight(r), bottomLeft(r));
-		addOutline(bottomLeft(r), topLeft(r));
-	}
+void DrawList::fillQuad(CVec2f v0, CVec2f v1, CVec2f v2, CVec2f v3, CMaterial* material, CVec4f color, float frame) {
+	Vec3f tl{v0, depth()};
+	Vec3f tr{v1, depth()};
+	Vec3f br{v2, depth()};
+	Vec3f bl{v3, depth()};
+	auto vp = allocTriangles(2, material);
+	vp[0] = {tl, {0, 0, frame}, color};
+	vp[1] = {br, {1, 1, frame}, color};
+	vp[2] = {tr, {1, 0, frame}, color};
+	vp[3] = vp[0];
+	vp[4] = {bl, {0, 1, frame}, color};
+	vp[5] = vp[1];
+	m_vertexBuffer->unlock();
 }
 
-void DrawList::addImage(CImage* image, CVec2f v, float frame) {
+void DrawList::fillLine(CVec2f v0, CVec2f v1, CMaterial* material, CVec4f color, float width, float frame) {
+	auto dv = normalize(v1 - v0) * width * .5f;
+	auto tv = Vec2f(-dv.y, dv.x);
+	return fillQuad(v0 - tv, v0 + tv, v1 + tv, v1 - tv, material, color, frame);
+}
 
-	auto size = Vec2f(image->material()->mainTexture()->size());
-	auto org = v - image->handle();
-	auto r = Rectf(org, org + size);
-
-	Vec4f color(1);
-	auto vp = allocTriangles(2, image->material());
-	vp[0] = {{topLeft(r), depth()}, {0, 0, frame}, color};
-	vp[1] = {{topRight(r), depth()}, {1, 0, frame}, color};
-	vp[2] = {{bottomRight(r), depth()}, {1, 1, frame}, color};
-	vp[3] = vp[0];
-	vp[4] = vp[2];
-	vp[5] = {{bottomLeft(r), depth()}, {0, 1, frame}, color};
-	m_vertexBuffer->unlock();
-	if (outlineEnabled()) {
-		addOutline(topLeft(r), topRight(r));
-		addOutline(topRight(r), bottomRight(r));
-		addOutline(bottomRight(r), bottomLeft(r));
-		addOutline(bottomLeft(r), topLeft(r));
-	}
+void DrawList::fillRect(CRectf rect, CMaterial* material, CVec4f color, float frame) {
+	return fillQuad(topLeft(rect), topRight(rect), bottomRight(rect), bottomLeft(rect), material, color, frame);
 }
 
 void DrawList::addOutline(CVec2f v0, CVec2f v1) {
+	fillLine(v0, v1, m_whiteMaterial, m_pmOutlineColor, outlineWidth(), 0);
+}
 
-	Vec2f dv = normalize(v1 - v0) * outlineWidth() * .5f;
-	Vec3f p0{v0 - dv, depth()};
-	Vec3f p1{v1 + dv, depth()};
-	Vec3f tv{-dv.y, dv.x, 0};
+void DrawList::addOutline(CRectf rect) {
+	auto tl = topLeft(rect);
+	auto tr = topRight(rect);
+	auto br = bottomRight(rect);
+	auto bl = bottomLeft(rect);
+	addOutline(tl, tr);
+	addOutline(tr, br);
+	addOutline(br, bl);
+	addOutline(bl, tl);
+}
 
-	// Vec3f p0{v0, depth()};
-	// Vec3f p1{v1, depth()};
-	// Vec3f tv{v0.y - v1.y, v1.x - v0.x, 0};
-	// tv = normalize(tv) * (outlineWidth() * 0.5f);
+void DrawList::addImage(CImage* image, CVec2f v, float frame) {
+	auto size = Vec2f(image->texture()->size());
+	auto rect = image->rect();
+	rect.min *= size;
+	rect.max *= size;
+	rect += v;
 
-	auto vp = allocTriangles(2, m_whiteMaterial);
-	vp[0] = {p0 + tv, {0, 0, 0}, m_pmOutlineColor};
-	vp[1] = {p0 - tv, {0, 0, 0}, m_pmOutlineColor};
-	vp[2] = {p1 - tv, {0, 0, 0}, m_pmOutlineColor};
-	vp[3] = vp[0];
-	vp[4] = vp[2];
-	vp[5] = {p1 + tv, {0, 0, 0}, m_pmOutlineColor};
-	m_vertexBuffer->unlock();
+	if (fillEnabled()) fillRect(rect, image->material(), m_pmFillColor, frame);
+	//if (outlineEnabled()) addOutline(rect);
+}
+
+void DrawList::addRect(CRectf rect) {
+	if (fillEnabled()) fillRect(rect, fillMaterial(), m_pmFillColor, 0);
+	if (outlineEnabled()) addOutline(rect);
 }
 
 void DrawList::addLine(CVec2f v0, CVec2f v1) {
-
-	Vec2f dv = normalize(v1 - v0) * lineWidth() * .5f;
-	Vec3f p0{v0 - dv, depth()};
-	Vec3f p1{v1 + dv, depth()};
-	Vec3f tv{-dv.y, dv.x, 0};
-
-	if (fillEnabled()) {
-		if (lineSmoothing()) {
-			Vec4f blk(0);
-			auto vp = allocTriangles(4, fillMaterial());
-			vp[0] = {p0, {0, 0, 0}, m_pmFillColor};
-			vp[1] = {p1, {0, 0, 0}, m_pmFillColor};
-			vp[2] = {p1 + tv, {0, 0, 0}, blk};
-			vp[3] = vp[0];
-			vp[4] = vp[2];
-			vp[5] = {p0 + tv, {0, 0, 0}, blk};
-			//
-			vp[6] = {p0 - tv, {0, 0, 0}, blk};
-			vp[7] = {p1 - tv, {0, 0, 0}, blk};
-			vp[8] = {p1, {0, 0, 0}, m_pmFillColor};
-			vp[9] = vp[6];
-			vp[10] = vp[8];
-			vp[11] = {p0, {0, 0, 0}, m_pmFillColor};
-			m_vertexBuffer->unlock();
-		} else {
-			auto vp = allocTriangles(2, fillMaterial());
-			vp[0] = {p0 + tv, {0, 0, 0}, m_pmFillColor};
-			vp[1] = {p0 - tv, {0, 0, 0}, m_pmFillColor};
-			vp[2] = {p1 - tv, {0, 0, 0}, m_pmFillColor};
-			vp[3] = vp[0];
-			vp[4] = vp[2];
-			vp[5] = {p1 + tv, {0, 0, 0}, m_pmFillColor};
-			m_vertexBuffer->unlock();
-		}
-	}
-	if (outlineEnabled()) {
-		auto tv2 = Vec2f(tv);
-		addOutline(v0 + tv2, v0 - tv2);
-		addOutline(v0 - tv2, v1 - tv2);
-		addOutline(v1 - tv2, v1 + tv2);
-		addOutline(v1 + tv2, v0 + tv2);
-	}
+	auto dv = normalize(v1 - v0) * lineWidth() * .5f;
+	auto tv = Vec2f(-dv.y, dv.x);
+	auto tl = v0 - tv;
+	auto tr = v0 + tv;
+	auto br = v1 + tv;
+	auto bl = v1 - tv;
+	if (fillEnabled()) fillQuad(v0 - tv, v0 + tv, v1 + tv, v1 - tv, fillMaterial(), m_pmFillColor, 0);
+	if (!outlineEnabled()) return;
+	addOutline(tl, tr);
+	addOutline(tr, br);
+	addOutline(br, bl);
+	addOutline(bl, tl);
 }
 
 void DrawList::addOval(CRectf rect) {
@@ -258,16 +220,16 @@ void DrawList::addOval(CRectf rect) {
 
 		auto vp = allocTriangles(n, fillMaterial());
 
-		float th0 = (off)*twoPi / n;
+		float th0 = (off)*twoPi / (float)n;
 		Vec2f v0{v.x + std::cos(th0) * r.x, v.y + std::sin(th0) * r.y};
 
 		for (int i = 0; i < n; ++i) {
-			float th1 = (i + 1 + off) * twoPi / n;
+			float th1 = (i + 1 + off) * twoPi / (float)n;
 			Vec2f v1{v.x + std::cos(th1) * r.x, v.y + std::sin(th1) * r.y};
 
 			vp[0] = {{v0, depth()}, {0, 0, 0}, m_pmFillColor};
-			vp[1] = {{v1, depth()}, {0, 0, 0}, m_pmFillColor};
-			vp[2] = {{v, depth()}, {0, 0, 0}, m_pmFillColor};
+			vp[2] = {{v1, depth()}, {0, 0, 0}, m_pmFillColor};
+			vp[1] = {{v, depth()}, {0, 0, 0}, m_pmFillColor};
 
 			v0 = v1;
 			vp += 3;
@@ -276,11 +238,11 @@ void DrawList::addOval(CRectf rect) {
 	}
 	if (outlineEnabled()) {
 
-		float th0 = (off)*twoPi / n;
+		float th0 = (off)*twoPi / (float)n;
 		Vec2f v0{v.x + std::cos(th0) * r.x, v.y + std::sin(th0) * r.y};
 
 		for (int i = 0; i < n; ++i) {
-			float th1 = (i + 1 + off) * twoPi / n;
+			float th1 = (i + 1 + off) * twoPi / (float)n;
 			Vec2f v1{v.x + std::cos(th1) * r.x, v.y + std::sin(th1) * r.y};
 
 			addOutline(v0, v1);
@@ -304,11 +266,11 @@ void DrawList::addText(CString text, CVec2f v) {
 		Rectf dst = glyph.dstRect + pos;
 
 		vp[0] = {{dst.min.x, dst.min.y, depth()}, {src.min.x, src.min.y, 0}, m_pmTextColor};
-		vp[1] = {{dst.max.x, dst.min.y, depth()}, {src.max.x, src.min.y, 0}, m_pmTextColor};
-		vp[2] = {{dst.max.x, dst.max.y, depth()}, {src.max.x, src.max.y, 0}, m_pmTextColor};
+		vp[1] = {{dst.max.x, dst.max.y, depth()}, {src.max.x, src.max.y, 0}, m_pmTextColor};
+		vp[2] = {{dst.max.x, dst.min.y, depth()}, {src.max.x, src.min.y, 0}, m_pmTextColor};
 		vp[3] = vp[0];
-		vp[4] = vp[2];
-		vp[5] = {{dst.min.x, dst.max.y, depth()}, {src.min.x, src.max.y, 0}, m_pmTextColor};
+		vp[4] = {{dst.min.x, dst.max.y, depth()}, {src.min.x, src.max.y, 0}, m_pmTextColor};
+		vp[5] = vp[1];
 
 		vp += 6;
 
@@ -321,16 +283,16 @@ void DrawList::render(RenderQueue* rq) const {
 
 	uint32_t first = 0;
 
-	auto renderer= emptyBindGroup(BindGroupType::renderer);
+	auto renderer = emptyBindGroup(BindGroupType::renderer);
 
 	for (auto& drawOp : m_drawOps) {
 
 		auto count = drawOp.triangleCount * 3;
 		auto material = drawOp.material ? drawOp.material : m_whiteMaterial;
 
-		rq->addRenderOp(m_vertexBuffer, nullptr,			   //
-						material, m_bindGroup, renderer,	   //
-						count, 1, first, 0, false); //
+		rq->addRenderOp(m_vertexBuffer, nullptr,		 //
+						material, m_bindGroup, renderer, //
+						count, 1, first, 0, false);		 //
 
 		first += count;
 	}

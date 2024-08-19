@@ -6,7 +6,7 @@
 namespace sgd {
 
 struct alignas(16) MeshUniforms {
-	int32_t tangentsEnabled{0};
+	uint32_t tangentsEnabled{0};
 };
 
 enum struct MeshFlags {

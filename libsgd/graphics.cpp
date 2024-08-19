@@ -2,11 +2,81 @@
 
 // ***** Texture *****
 
-SGD_Texture SGD_DECL sgd_LoadTexture(SGD_String path, int format, int flags) {
+SGD_Texture SGD_DECL sgd_Load2DTexture(SGD_String path, int format, int flags) {
 	sgdx::started();
-	auto texture = sgd::loadTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
-	if (!texture) sgdx::error("Failed to load texture", texture.error());
+	auto texture = sgd::load2DTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
+	if (!texture) sgdx::error("Failed to load 2d texture", texture.error());
 	return sgdx::createHandle(texture.result());
+}
+
+SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, int format, int flags) {
+	sgdx::started();
+	auto texture = sgd::loadCubeTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
+	if (!texture) sgdx::error("Failed to load cube texture", texture.error());
+	return sgdx::createHandle(texture.result());
+}
+
+SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, int format, int flags) {
+	sgdx::started();
+	auto texture = sgd::loadArrayTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
+	if (!texture) sgdx::error("Failed to load array texture", texture.error());
+	return sgdx::createHandle(texture.result());
+}
+
+SGD_Texture SGD_DECL sgd_Create2DTexture(int width, int height, int format, int flags) {
+	sgdx::started();
+	auto texture = new sgd::Texture(sgd::Vec2u(width, height), 1, (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
+	return sgdx::createHandle(texture);
+}
+
+SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, int format, int flags) {
+	sgdx::started();
+	flags |= (int)sgd::TextureFlags::cube;
+	auto texture = new sgd::Texture(sgd::Vec2u(size), 6, (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
+	return sgdx::createHandle(texture);
+}
+
+SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, int format, int flags) {
+	sgdx::started();
+	flags |= (int)sgd::TextureFlags::array;
+	auto texture = new sgd::Texture(sgd::Vec2u(width,height), depth, (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
+	return sgdx::createHandle(texture);
+}
+
+int SGD_DECL sgd_GetTextureWidth(SGD_Texture htexture) {
+	return (int)sgdx::resolveHandle<sgd::Texture>(htexture)->size().x;
+}
+
+int SGD_DECL sgd_GetTextureHeight(SGD_Texture htexture) {
+	return (int)sgdx::resolveHandle<sgd::Texture>(htexture)->size().y;
+}
+
+int SGD_DECL sgd_GetTextureDepth(SGD_Texture htexture) {
+	return (int)sgdx::resolveHandle<sgd::Texture>(htexture)->depth();
+}
+
+int SGD_DECL sgd_GetTextureFormat(SGD_Texture htexture) {
+	return (int)sgdx::resolveHandle<sgd::Texture>(htexture)->format();
+}
+
+int SGD_DECL sgd_GetTextureFlags(SGD_Texture htexture) {
+	return (int)sgdx::resolveHandle<sgd::Texture>(htexture)->flags();
+}
+
+void SGD_DECL sgd_SetTexelSRGBA(SGD_Texture htexture, int x, int y, int rgba) {
+	auto texture = sgdx::resolveHandle<sgd::Texture>(htexture);
+	auto dst = sgd::texelPtr(texture->lock(), sgd::Vec2u(x, y));
+	sgd::convertTexels(&rgba, sgd::TextureFormat::srgba8, dst, texture->format(), 1);
+	texture->unlock();
+}
+
+int SGD_DECL sgd_GetTexelSRGBA(SGD_Texture htexture, int x, int y) {
+	auto texture = sgdx::resolveHandle<sgd::Texture>(htexture);
+	auto src = sgd::texelPtr(texture->lock(), sgd::Vec2u(x, y));
+	uint32_t rgba;
+	sgd::convertTexels(src, texture->format(), &rgba, sgd::TextureFormat::srgba8, 1);
+	texture->unlock();
+	return (int)rgba;
 }
 
 // ***** Material *****
@@ -50,29 +120,24 @@ void SGD_DECL sgd_SetMaterialCullMode(SGD_Material hmaterial, int cullMode) {
 }
 
 void SGD_DECL sgd_SetMaterialTexture(SGD_Material hmaterial, SGD_String property, SGD_Texture htexture) {
-	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	auto texture = sgdx::resolveHandle<sgd::Texture>(htexture);
-	material->setTexture(property, texture);
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setTexture(property, texture);
 }
 
 void SGD_DECL sgd_SetMaterialVector4f(SGD_Material hmaterial, SGD_String property, float x, float y, float z, float w) {
-	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	material->setVector4f(property, {x, y, z, w});
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setVector4f(property, {x, y, z, w});
 }
 
 void SGD_DECL sgd_SetMaterialVector3f(SGD_Material hmaterial, SGD_String property, float x, float y, float z) {
-	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	material->setVector3f(property, {x, y, z});
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setVector3f(property, {x, y, z});
 }
 
 void SGD_DECL sgd_SetMaterialVector2f(SGD_Material hmaterial, SGD_String property, float x, float y) {
-	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	material->setVector2f(property, {x, y});
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setVector2f(property, {x, y});
 }
 
 void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String property, float n) {
-	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
-	material->setFloat(property, n);
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setFloat(property, n);
 }
 
 // ***** Mesh *****
@@ -112,7 +177,7 @@ SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int segs, SGD_M
 
 //! Create a new torus mesh.
 SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs,
-											  SGD_Material hmaterial) {
+									  SGD_Material hmaterial) {
 	auto material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 	auto mesh = sgd::createTorusMesh(outerRadius, innerRadius, outerSegs, innerSegs, material);
 	return sgdx::createHandle(mesh);
@@ -143,15 +208,15 @@ void SGD_DECL sgd_UpdateMeshTangents(SGD_Mesh hmesh) {
 	updateTangents(mesh);
 }
 
-void SGD_DECL sgd_FitMesh(SGD_Mesh hmesh, float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
-								  int uniform) {
+void SGD_DECL sgd_FitMesh(SGD_Mesh hmesh, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, int uniform) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	fit(mesh, {{minX, minY, minZ}, {maxX, maxY, maxZ}}, uniform);
 }
 
-void SGD_DECL sgd_TFormMesh(SGD_Mesh hmesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz) {
+void SGD_DECL sgd_TFormMesh(SGD_Mesh hmesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy,
+							float sz) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	sgdx::transform(mesh, sgd::AffineMat4f::TRS({tx,ty,tz},{rx,ry,rz},{sx,sy,sz}));
+	sgdx::transform(mesh, sgd::AffineMat4f::TRS({tx, ty, tz}, {rx, ry, rz}, {sx, sy, sz}));
 }
 
 void SGD_DECL sgd_TFormMeshTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY, float offsetX, float offsetY) {
@@ -193,42 +258,42 @@ int SGD_DECL sgd_AddVertex(SGD_Mesh hmesh, float x, float y, float z, float nx, 
 void SGD_DECL sgd_SetVertex(SGD_Mesh hmesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s,
 							float t) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	mesh->lockVertices(vertex, 1)[0] = {{x, y, z}, {nx, ny, nz}, {s, t}};
 	mesh->unlockVertices();
 }
 
 void SGD_DECL sgd_SetVertexPosition(SGD_Mesh hmesh, int vertex, float x, float y, float z) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	mesh->lockVertices(vertex, 1)->position = {x, y, z};
 	mesh->unlockVertices();
 }
 
 void SGD_DECL sgd_SetVertexNormal(SGD_Mesh hmesh, int vertex, float x, float y, float z) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	mesh->lockVertices(vertex, 1)->normal = {x, y, z};
 	mesh->unlockVertices();
 }
 
 void SGD_DECL sgd_SetVertexTangent(SGD_Mesh hmesh, int vertex, float x, float y, float z, float w) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	mesh->lockVertices(vertex, 1)->tangent = {x, y, z, w};
 	mesh->unlockVertices();
 }
 
 void SGD_DECL sgd_SetVertexColor(SGD_Mesh hmesh, int vertex, float r, float g, float b, float a) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	mesh->lockVertices(vertex, 1)->color = {r, g, b, a};
 	mesh->unlockVertices();
 }
 
 void SGD_DECL sgd_SetVertexTexCoord0(SGD_Mesh hmesh, int vertex, float u0, float v0) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	mesh->lockVertices(vertex, 1)->texCoords = {u0, v0, 0};
 	mesh->unlockVertices();
 }
@@ -236,112 +301,112 @@ void SGD_DECL sgd_SetVertexTexCoord0(SGD_Mesh hmesh, int vertex, float u0, float
 //! Get vertex position x coordinate.
 float SGD_DECL sgd_GetVertexX(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].position.x;
 }
 
 //! Get vertex position y coordinate.
 float SGD_DECL sgd_GetVertexY(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].position.y;
 }
 
 //! Get vertex position z coordinate.
 float SGD_DECL sgd_GetVertexZ(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].position.z;
 }
 
 //! Get vertex normal x component.
 float SGD_DECL sgd_GetVertexNX(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].normal.x;
 }
 
 //! Get vertex normal y component.
 float SGD_DECL sgd_GetVertexNY(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].normal.y;
 }
 
 //! Get vertex normal z component.
 float SGD_DECL sgd_GetVertexNZ(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].normal.z;
 }
 
 //! Get vertex tangent x component.
 float SGD_DECL sgd_GetVertexTX(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].tangent.x;
 }
 
 //! Get vertex tangent y component.
 float SGD_DECL sgd_GetVertexTY(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].tangent.y;
 }
 
 //! Get vertex tangent z component.
 float SGD_DECL sgd_GetVertexTZ(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].tangent.z;
 }
 
 //! Get vertex tangent w component.
 float SGD_DECL sgd_GetVertexTW(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].tangent.w;
 }
 
 //! Get vertex color red component.
 float SGD_DECL sgd_GetVertexRed(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].color.x;
 }
 
 //! Get vertex color green component.
 float SGD_DECL sgd_GetVertexGreen(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].color.y;
 }
 
 //! Get vertex color blue component.
 float SGD_DECL sgd_GetVertexBlue(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].color.z;
 }
 
 //! Get vertex color alpha component.
 float SGD_DECL sgd_GetVertexAlpha(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].color.w;
 }
 
 //! Get vertex texture coordinate 0 u component.
 float SGD_DECL sgd_GetVertexU0(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].texCoords.x;
 }
 
 //! Get vertex tangent coorindate 1 y component.
 float SGD_DECL sgd_GetVertexV0(SGD_Mesh hmesh, int vertex) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
+	if ((uint32_t)vertex >= mesh->vertexCount()) sgdx::error("Vertex index out of range");
 	return mesh->vertices()[vertex].texCoords.y;
 }
 
@@ -362,7 +427,7 @@ int SGD_DECL sgd_GetSurfaceCount(SGD_Mesh hmesh) {
 
 SGD_Surface SGD_DECL sgd_GetSurface(SGD_Mesh hmesh, int surface) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
-	if((uint32_t)surface >= mesh->surfaces().size()) sgdx::error("Surface index out of range");
+	if ((uint32_t)surface >= mesh->surfaces().size()) sgdx::error("Surface index out of range");
 	auto surf = mesh->surfaces()[surface];
 	return sgdx::getOrCreateHandle(surf.get());
 }
@@ -393,15 +458,15 @@ int SGD_DECL sgd_AddTriangle(SGD_Surface hsurface, int v0, int v1, int v2) {
 
 void SGD_DECL sgd_SetTriangle(SGD_Surface hsurface, int triangle, int v0, int v1, int v2) {
 	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
-	if ((uint32_t)triangle  >= surf->triangleCount()) sgdx::error("Triangle index out of range");
+	if ((uint32_t)triangle >= surf->triangleCount()) sgdx::error("Triangle index out of range");
 	surf->lockTriangles(triangle, 1)[0] = {(uint32_t)v0, (uint32_t)v1, (uint32_t)v2};
 	surf->unlockTriangles();
 }
 
 int SGD_DECL sgd_GetTriangleVertex(SGD_Surface hsurface, int triangle, int vertex) {
 	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
-	if ((uint32_t)triangle  >= surf->triangleCount()) sgdx::error("Triangle index out of range");
-	if ((uint32_t)vertex >=3) sgdx::error("Vertex index must be 0, 1 or 2");
+	if ((uint32_t)triangle >= surf->triangleCount()) sgdx::error("Triangle index out of range");
+	if ((uint32_t)vertex >= 3) sgdx::error("Vertex index must be 0, 1 or 2");
 	return (int)surf->triangles()[triangle].indices[vertex];
 }
 
@@ -433,32 +498,26 @@ SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int depth) {
 	return sgdx::createHandle(image.result());
 }
 
+SGD_Image SGD_DECL sgd_CreateImage(SGD_Texture htexture) {
+	auto texture = sgdx::resolveHandle<sgd::Texture>(htexture);
+	auto image = new sgd::Image(texture);
+	return sgdx::createHandle(image);
+}
+
 void SGD_DECL sgd_SetImageViewMode(SGD_Image himage, int viewMode) {
 	sgdx::resolveHandle<sgd::Image>(himage)->viewMode = (sgd::ImageViewMode)viewMode;
+}
+
+void SGD_DECL sgd_SetImageBlendMode(SGD_Image himage, int blendMode) {
+	sgdx::resolveHandle<sgd::Image>(himage)->blendMode = (sgd::BlendMode)blendMode;
 }
 
 void SGD_DECL sgd_SetImageRect(SGD_Image himage, float minX, float minY, float maxX, float maxY) {
 	sgdx::resolveHandle<sgd::Image>(himage)->rect = {minX, minY, maxX, maxY};
 }
 
-void SGD_DECL sgd_SetImage2DHandle(SGD_Image himage, float x, float y) {
-	sgdx::resolveHandle<sgd::Image>(himage)->handle = {x, y};
-}
-
-void SGD_DECL sgd_SetImageBlendMode(SGD_Image himage, int blendMode) {
-	sgdx::resolveHandle<sgd::Image>(himage)->material()->blendMode = (sgd::BlendMode)blendMode;
-}
-
-int SGD_DECL sgd_GetImageWidth(SGD_Image himage) {
-	return (int)sgdx::resolveHandle<sgd::Image>(himage)->material()->mainTexture()->size().x;
-}
-
-int SGD_DECL sgd_GetImageHeight(SGD_Image himage) {
-	return (int)sgdx::resolveHandle<sgd::Image>(himage)->material()->mainTexture()->size().y;
-}
-
-int SGD_DECL sgd_GetImageDepth(SGD_Image himage) {
-	return (int)sgdx::resolveHandle<sgd::Image>(himage)->material()->mainTexture()->depth();
+int SGD_DECL sgd_GetImageTexture(SGD_Image himage) {
+	return sgdx::getOrCreateHandle<sgd::Texture>(sgdx::resolveHandle<sgd::Image>(himage)->texture());
 }
 
 // ***** 2D Overlay *****

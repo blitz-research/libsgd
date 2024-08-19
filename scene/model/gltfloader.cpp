@@ -95,11 +95,11 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 	}
 	if (!err.empty()) {
 		SGD_LOG << "Tiny gltf error:" << err;
-		return FileioEx("Tiny gltf error: " + err);
+		return SGD_FILEIOEX("Tiny gltf error: " + err);
 	}
 	if (!res) {
 		SGD_LOG << "Tiny gltf unknown error";
-		return FileioEx("Tiny gltf unknown error");
+		return SGD_FILEIOEX("Tiny gltf unknown error");
 	}
 
 	cachedImages.resize(gltfModel.images.size());
@@ -111,7 +111,7 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 	return true;
 }
 
-Texture* GLTFLoader::loadTexture(int id, bool srgb, bool pmAlpha) {
+Texture* GLTFLoader::loadTexture(int id, TextureFormat format, bool pmAlpha) {
 	if (cachedTextures[id]) return cachedTextures[id];
 
 	auto& gltfTex = gltfModel.textures[id];
@@ -121,26 +121,16 @@ Texture* GLTFLoader::loadTexture(int id, bool srgb, bool pmAlpha) {
 	if (gltfImage.bits != 8) SGD_ERROR("TODO: Unsupported gltfImage.bits: " + toString(gltfImage.bits));
 	if (gltfImage.component != 4) SGD_ERROR("TODO: Unsupported gltfImage.component: " + toString(gltfImage.component));
 
-	auto texFormat = srgb ? TextureFormat::srgba8 : TextureFormat::rgba8;
-	auto texFlags = TextureFlags::none;
-
-	if (!cachedImages[gltfTex.source]) {
-		if (pmAlpha) {
-			premultiplyAlpha(gltfImage.image.data(), texFormat, Vec2u(gltfImage.width, gltfImage.height),
-							 gltfImage.width * bytesPerTexel(texFormat));
-		}
-		cachedImages[gltfTex.source] = true;
-	}
-
+	auto flags = TextureFlags::none;
 	if (gltfTex.sampler >= 0) {
 		SGD_ASSERT(gltfTex.sampler < gltfModel.samplers.size());
 		auto& gltfSampler = gltfModel.samplers[gltfTex.sampler];
-		if (gltfSampler.wrapS == TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE) texFlags |= TextureFlags::clampU;
-		if (gltfSampler.wrapT == TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE) texFlags |= TextureFlags::clampV;
+		if (gltfSampler.wrapS == TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE) flags |= TextureFlags::clampU;
+		if (gltfSampler.wrapT == TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE) flags |= TextureFlags::clampV;
 
 		switch (gltfSampler.magFilter) {
 		case TINYGLTF_TEXTURE_FILTER_LINEAR:
-			texFlags |= TextureFlags::filter;
+			flags |= TextureFlags::filter;
 			break;
 		default: {
 		}
@@ -150,20 +140,22 @@ Texture* GLTFLoader::loadTexture(int id, bool srgb, bool pmAlpha) {
 		case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST:
 		case TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR:
 		case TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR:
-			texFlags |= TextureFlags::mipmap;
+			flags |= TextureFlags::mipmap;
 			break;
 		default: {
 		}
 		}
 	} else {
-		texFlags = TextureFlags::none;
+		flags = TextureFlags::none;
 	}
 
-	auto texture = cachedTextures[id] = new Texture(Vec2u(gltfImage.width, gltfImage.height), 1, texFormat, texFlags);
+	auto data = new TextureData(Vec2u(gltfImage.width, gltfImage.height), format);
+	std::memcpy(data->data(), gltfImage.image.data(), data->pitch() * data->size().y);
+	if (pmAlpha) premultiplyAlpha(data);
 
-	texture->update(gltfImage.image.data(), gltfImage.width * bytesPerTexel(texFormat));
+	if(g_loggingEnabled) SGD_LOG << "  Creating texture:"<<gltfTex.name<<"size:"<<data->size()<<"format:"<<(int)data->format()<<"flags:"<<(int)flags;
 
-	return texture;
+	return cachedTextures[id] = new Texture(data->size(), 1, data->format(), flags, data);
 }
 
 Material* GLTFLoader::loadMaterial(int id) {
@@ -175,22 +167,21 @@ Material* GLTFLoader::loadMaterial(int id) {
 	static const Map<String, BlendMode> blendModes{{"OPAQUE", BlendMode::opaque},  //
 												   {"MASK", BlendMode::alphaMask}, //
 												   {"BLEND", BlendMode::alphaBlend}};
+
 	auto it = blendModes.find(gltfMat.alphaMode);
 	material->blendMode = it != blendModes.end() ? it->second : BlendMode::opaque;
+	material->depthFunc = DepthFunc::lessEqual;
 	material->cullMode = gltfMat.doubleSided ? CullMode::none : CullMode::back;
 
 	if (g_loggingEnabled) {
-		SGD_LOG << "Creating material:" << gltfMat.name;
-		SGD_LOG << "  BlendMode:" << toString(material->blendMode());
-		SGD_LOG << "  DepthFunc:" << toString(material->depthFunc());
-		SGD_LOG << "  CullMode:" << toString(material->cullMode());
-	}
-
-	if (g_loggingEnabled) {
-		SGD_LOG << "  Material extensions:";
-		for (auto [key, value] : gltfMat.extensions) {
-			SGD_LOG << "  extension name:" << key;
-		}
+		SGD_LOG << "Creating material:" << gltfMat.name <<	   //
+			"blendMode:" << toString(material->blendMode()) << //
+			"depthFunc:" << toString(material->depthFunc()) << //
+			"cullMode:" << toString(material->cullMode());
+		//SGD_LOG << "  Material extensions:";
+		//for (auto& [key, value] : gltfMat.extensions) {
+		//	SGD_LOG << "  extension name:" << key;
+		//}
 	}
 
 	auto& pbr = gltfMat.pbrMetallicRoughness;
@@ -199,15 +190,19 @@ Material* GLTFLoader::loadMaterial(int id) {
 		auto factor = pbr.baseColorFactor.data();
 		auto alpha = (float)factor[3];
 		auto color = Vec4f((float)factor[0] * alpha, (float)factor[1] * alpha, (float)factor[2] * alpha, alpha);
-		material->setVector4f("albedoColor4f", color);
 		if (g_loggingEnabled) SGD_LOG << "  albedoColor:" << color;
+		material->setVector4f("albedoColor4f", color);
 
 		auto& texInfo = pbr.baseColorTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
-			auto texture = loadTexture(texInfo.index, true, material->blendMode() == BlendMode::alphaBlend);
-			material->setTexture("albedoTexture", texture);
 			if (g_loggingEnabled) SGD_LOG << "  albedoTexture:" << gltfModel.textures[texInfo.index].name;
+			//
+			// Note: We DO NOT premultiply alpha for alphaMask images, as this can lead to 'outlines' where filtering produces
+			// alpha < 1 but > .5, so color will be approaching black. See trees sample.
+			//
+			auto texture = loadTexture(texInfo.index, TextureFormat::srgba8, material->blendMode() != BlendMode::alphaMask);
+			material->setTexture("albedoTexture", texture);
 		}
 	}
 	{
@@ -217,22 +212,25 @@ Material* GLTFLoader::loadMaterial(int id) {
 		if (ext != gltfMat.extensions.end()) {
 			auto& val = ext->second;
 			if (val.Has("emissiveStrength")) {
-				if(val.Get("emissiveStrength").IsNumber()) {
+				if (val.Get("emissiveStrength").IsNumber()) {
 					auto strength = (float)val.Get("emissiveStrength").GetNumberAsDouble();
 					color *= strength;
 				}
 			}
 		}
 
-		material->setVector3f("emissiveColor3f", color);
 		if (g_loggingEnabled) SGD_LOG << "  emissiveColor:" << color;
+		material->setVector3f("emissiveColor3f", color);
 
 		auto& texInfo = gltfMat.emissiveTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
-			auto texture = loadTexture(texInfo.index, true, false);
-			material->setTexture("emissiveTexture", texture);
 			if (g_loggingEnabled) SGD_LOG << "  emissiveTexture:" << gltfModel.textures[texInfo.index].name;
+			//
+			// Note: We DO premultiply alpha for emissive textures.
+			//
+			auto texture = loadTexture(texInfo.index, TextureFormat::srgba8, true);
+			material->setTexture("emissiveTexture", texture);
 		}
 	}
 	{
@@ -240,8 +238,9 @@ Material* GLTFLoader::loadMaterial(int id) {
 		if (texInfo.index >= 0) {
 			if (texInfo.texCoord == 0) {
 				SGD_ASSERT(texInfo.scale == 1.0f);
-				material->setTexture("normalTexture", loadTexture(texInfo.index, false, false));
 				if (g_loggingEnabled) SGD_LOG << "  normalTexture:" << gltfModel.textures[texInfo.index].name;
+				auto texture = loadTexture(texInfo.index, TextureFormat::rgba8, false);
+				material->setTexture("normalTexture", texture);
 			} else {
 				SGD_LOG << "TODO: Skipping normal map with texInfo.texCoord=" << texInfo.texCoord;
 			}
@@ -251,24 +250,24 @@ Material* GLTFLoader::loadMaterial(int id) {
 		auto& texInfo = gltfMat.occlusionTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
-			material->setTexture("occlusionTexture", loadTexture(texInfo.index, false, false));
 			if (g_loggingEnabled) SGD_LOG << "  occlusionTexture:" << gltfModel.textures[texInfo.index].name;
+			material->setTexture("occlusionTexture", loadTexture(texInfo.index, TextureFormat::rgba8, false));
 		}
 	}
 	{
-		material->setFloat("metallicFactor1f", (float)pbr.metallicFactor);
 		if (g_loggingEnabled) SGD_LOG << "  metallicFactor:" << toString(pbr.metallicFactor);
+		material->setFloat("metallicFactor1f", (float)pbr.metallicFactor);
 
-		material->setFloat("roughnessFactor1f", (float)pbr.roughnessFactor);
 		if (g_loggingEnabled) SGD_LOG << "  roughnessFactor:" << toString(pbr.roughnessFactor);
+		material->setFloat("roughnessFactor1f", (float)pbr.roughnessFactor);
 
 		auto& texInfo = pbr.metallicRoughnessTexture;
 		if (texInfo.index >= 0) {
 			SGD_ASSERT(texInfo.texCoord == 0);
-			auto texture = loadTexture(texInfo.index, false, false);
+			if (g_loggingEnabled) SGD_LOG << "  metallicRoughnesstexture:" << gltfModel.textures[texInfo.index].name;
+			auto texture = loadTexture(texInfo.index, TextureFormat::rgba8, false);
 			material->setTexture("metallicTexture", texture);
 			material->setTexture("roughnessTexture", texture);
-			if (g_loggingEnabled) SGD_LOG << "  metallicRoughnesstexture:" << gltfModel.textures[texInfo.index].name;
 		}
 	}
 
@@ -339,7 +338,10 @@ Mesh* GLTFLoader::endMesh() {
 		mesh->addSurface(surface);
 	}
 
-	if (bool(meshFlags & MeshFlags::tangentsEnabled) && !meshHasTangents) updateTangents(mesh);
+	if (bool(meshFlags & MeshFlags::tangentsEnabled) && !meshHasTangents) {
+		SGD_LOG << "### UpdateTangents";
+		updateTangents(mesh);
+	}
 
 	mesh->updateBounds();
 
@@ -740,7 +742,7 @@ Expected<Model*, FileioEx> GLTFLoader::loadBonedModel() {
 }
 
 Expected<Model*, FileioEx> GLTFLoader::loadSkinnedModel() {
-	if (gltfModel.skins.empty()) return FileioEx{"Model contains no skins"};
+	if (gltfModel.skins.empty()) return SGD_FILEIOEX("Model contains no skins");
 
 	loadBones();
 

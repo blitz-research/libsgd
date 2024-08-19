@@ -199,6 +199,28 @@ FetchContent_MakeAvailable(stb)
 
 target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
 
+##### tinyexr #####
+
+add_library(tinyexr INTERFACE)
+
+FetchContent_Declare(tinyexr
+	GIT_REPOSITORY https://github.com/blitz-research/tinyexr.git
+	GIT_TAG release
+	GIT_SUBMODULES ""
+	GIT_SHALLOW TRUE
+	EXCLUDE_FROM_ALL
+)
+
+FetchContent_GetProperties(tinyexr)
+if(NOT tinyexr_POPULATED)
+	FetchContent_Populate(tinyexr)
+	#add_subdirectory(${tinyexr_SOURCE_DIR} ${tinyexr_BINARY_DIR})
+endif()
+
+#FetchContent_MakeAvailable(tinyexr)
+
+target_include_directories(tinyexr INTERFACE ${tinyexr_SOURCE_DIR})
+
 ##### glfw #####
 
 if (SGD_OS_EMSCRIPTEN)

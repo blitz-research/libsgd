@@ -4,9 +4,15 @@
 
 namespace sgd {
 
-Expected<Texture*, FileioEx> loadTexture(CData data, TextureFormat format, TextureFlags flags, uint32_t depth = 0);
+Expected<TextureData*, FileioEx> loadTextureData(CData data, TextureFormat format);
 
-Expected<Texture*, FileioEx> loadTexture(CPath path, TextureFormat format, TextureFlags flags, uint32_t depth = 0);
+Expected<TextureData*, FileioEx> loadTextureData(CPath path, TextureFormat format);
+
+Expected<Texture*, FileioEx> load2DTexture(CPath path, TextureFormat format, TextureFlags flags);
+
+Expected<Texture*, FileioEx> loadCubeTexture(CPath path, TextureFormat format, TextureFlags flags);
+
+Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, TextureFlags flags, uint32_t depth = 0);
 
 CTexture* rgbaTexture(uint32_t rgba, TextureFlags flags = TextureFlags::none);
 
@@ -20,10 +26,8 @@ inline CTexture* whiteTexture(TextureFlags flags = TextureFlags::none) {
 	return rgbaTexture(0xffffffff, flags);
 }
 
-inline CTexture* flatNormalTexture(TextureFlags flags = TextureFlags::none) {
+inline CTexture* flatTexture(TextureFlags flags = TextureFlags::none) {
 	return rgbaTexture(0xffff8080, flags);
 }
-
-void premultiplyAlpha(void* data, TextureFormat format, CVec2u size, uint32_t pitch);
 
 } // namespace sgd

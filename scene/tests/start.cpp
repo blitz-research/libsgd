@@ -46,17 +46,15 @@ void start(void (*entry)()) {
 	scene = new Scene();
 	scene->sceneRenderer()->ambientLightColor = Vec4f(1, .9, .8, .1);
 
-	/*
-	auto skyTexture = loadTexture(Path("sgd://envmaps/sunnysky-cube.png"), TextureFormat::srgba8,
-								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
-						  .result();
-	*/
-	auto skyTexture = loadTexture(Path("sgd://envmaps/stormy-cube.jpg"), TextureFormat::srgba8,
-								  TextureFlags::cube | TextureFlags::mipmap | TextureFlags::filter)
-						  .result();
+	//auto envPath = "~/Desktop/starmap_2020_4k.exr";
+	//auto envTexture = loadTexture(Path(envPath), TextureFormat::any, TextureFlags::filter).result();
 
-	scene->sceneRenderer()->envTexture = skyTexture;
-	skybox = new Skybox(skyTexture);
+	//auto envPath = "sgd://envmaps/stormy-cube.jpg";
+	auto envPath = "sgd://envmaps/sunnysky-cube.png";
+	auto envTexture = loadCubeTexture(Path(envPath), TextureFormat::any, TextureFlags::mipmap|TextureFlags::filter).result();
+
+	scene->sceneRenderer()->envTexture = envTexture;
+	skybox = new Skybox(envTexture);
 	scene->add(skybox);
 
 	light = new Light(LightType::directional);

@@ -1,3 +1,7 @@
+Dialect "modern"
+
+Include "start.bb"
+
 ; sequence# | frames |	description 
 ; ---------	 ------   -----------
 ; 0				 72 	 	death
@@ -12,21 +16,6 @@
 ; 9 			 32 		walk_left
 ; 10 		    29			walk_right				 	  			
 
-Const KEY_ESCAPE = 256
-Const KEY_SPACE = 32
-					
-Const KEY_RIGHT = 262
-Const KEY_LEFT = 263
-Const KEY_DOWN = 264
-Const KEY_UP = 265
-
-Const KEY_W = 87
-Const KEY_A = 65
-Const KEY_S = 83
-Const KEY_D = 68
-
-Const KEY_LEFT_SHIFT = 340
-
 Local seq0,time0#,time0Step#	;base animation
 Local seq1,time1#,time1Step#	;blend target
 Local blend#, blendStep#
@@ -35,15 +24,18 @@ Local useBlend=1
 seq0 = 1	;initially idle
 time0Step = .02
 
-CreateWindow 800,600,"Animation Blender",256
+CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Animation Blender",WINDOW_FLAGS_CENTERED
+
 camera = CreatePerspectiveCamera()
 MoveEntity camera,0,1,-3
+
 light = CreateDirectionalLight()
 TurnEntity light,-35,0,0
+
 model = LoadBonedModel ("sgd://models/base_male_animated.glb",True)
 
-While (PollEvents() And 1)=0
-	
+While Not (PollEvents() And EVENT_MASK_CLOSE_CLICKED)
+
 	If IsKeyHit(KEY_SPACE) useBlend = 1 - useBlend
 	
 	;Select new anim

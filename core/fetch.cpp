@@ -141,14 +141,14 @@ Expected<bool, FileioEx> fetch(CString url, curl_write_callback writeFunc, void*
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, writeData);
 
 	auto result = curl_easy_perform(curl);
-	if (result != CURLcode::CURLE_OK) return FileioEx("CURL error: " + toString(curl_easy_strerror(result)));
+	if (result != CURLcode::CURLE_OK) return SGD_FILEIOEX("CURL error: " + toString(curl_easy_strerror(result)));
 
 	// CURLcode::CURLE_OK
 	long httpStatus = -1;
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpStatus);
 	if (httpStatus >= 200 && httpStatus < 300) return true;
 
-	return FileioEx("CURL http request failed: " + toString(httpStatus));
+	return SGD_FILEIOEX("CURL http request failed: " + toString(httpStatus));
 }
 
 } // namespace

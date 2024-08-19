@@ -1,6 +1,10 @@
-CreateWindow 1280,720,"Hello World!",2
+Dialect "modern"
 
-env = LoadTexture("sgd://envmaps/sunnysky-cube.png",4,56)
+Include "start.bb"
+
+CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Hello World!",WINDOW_FLAGS_CENTERED
+
+env = LoadCubeTexture("sgd://envmaps/sunnysky-cube.png",TEXTURE_FORMAT_ANY,TEXTURE_FLAGS_DEFAULT)
 
 SetEnvTexture env
 

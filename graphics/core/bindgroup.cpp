@@ -70,15 +70,25 @@ CBuffer* BindGroup::getBuffer(uint32_t index) const {
 	return m_resources[index] ? m_resources[index]->as<const Buffer>() : nullptr;
 }
 
-void BindGroup::setTexture(uint32_t index, CTexture* texture) {
+void BindGroup::setTexture(uint32_t index, CTexture* texture, bool setSampler) {
 	SGD_ASSERT(index < m_desc->wgpuBindGroupLayoutEntries.size());
 	SGD_ASSERT(m_desc->wgpuBindGroupLayoutEntries[index].texture.sampleType != wgpu::TextureSampleType::Undefined);
 
 	setResource(index, texture);
-	if (index + 1 < m_desc->wgpuBindGroupLayoutEntries.size() &&
-		m_desc->wgpuBindGroupLayoutEntries[index + 1].sampler.type != wgpu::SamplerBindingType::Undefined) {
-		setResource(index + 1, texture);
-	}
+
+	if (!setSampler) return;
+
+	SGD_ASSERT(index + 1 < m_desc->wgpuBindGroupLayoutEntries.size() &&
+			   m_desc->wgpuBindGroupLayoutEntries[index + 1].sampler.type != wgpu::SamplerBindingType::Undefined);
+
+	setResource(index + 1, texture);
+}
+
+void BindGroup::setSampler(uint32_t index, CTexture* texture) {
+	SGD_ASSERT(index < m_desc->wgpuBindGroupLayoutEntries.size());
+	SGD_ASSERT(m_desc->wgpuBindGroupLayoutEntries[index].sampler.type != wgpu::SamplerBindingType::Undefined);
+
+	setResource(index, texture);
 }
 
 CTexture* BindGroup::getTexture(uint32_t index) const {
@@ -134,7 +144,7 @@ BindGroup* emptyBindGroup(BindGroupType type) {
 
 	bindGroups[index] = new BindGroup(&descs[index]);
 
-	if(isMainThread()) bindGroups[index]->validate();
+	if (isMainThread()) bindGroups[index]->validate();
 
 	return bindGroups[index];
 }

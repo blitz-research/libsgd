@@ -4,77 +4,6 @@
 
 namespace sgd {
 
-namespace {
-
-// Yikes, careful, max is 16!
-constexpr int configUniformsBinding = 0;
-constexpr int cameraUniformsBinding = 1;
-constexpr int lightingUniformsBinding = 2;
-constexpr int envTextureBinding = 3;
-constexpr int envSamplerBinding = 4;
-constexpr int csmTextureBinding = 5;
-constexpr int csmSamplerBinding = 6;
-constexpr int csmMatricesBinding = 7;
-constexpr int psmTextureBinding = 8;
-constexpr int psmSamplerBinding = 9;
-constexpr int ssmTextureBinding = 10;
-constexpr int ssmSamplerBinding = 11;
-constexpr int ssmMatricesBinding = 12;
-
-auto shaderSource{
-#include "scene.wgsl"
-};
-
-} // namespace
-
-const BindGroupDescriptor sceneBindingsDescriptor( //
-	"sceneBindings",							   //
-	BindGroupType::scene,						   //
-	{
-		bufferBindGroupLayoutEntry(configUniformsBinding, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform),
-
-		bufferBindGroupLayoutEntry(cameraUniformsBinding, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
-								   wgpu::BufferBindingType::Uniform),
-
-		bufferBindGroupLayoutEntry(lightingUniformsBinding, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform),
-
-		textureBindGroupLayoutEntry(envTextureBinding, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::Cube),
-
-		samplerBindGroupLayoutEntry(envSamplerBinding, wgpu::ShaderStage::Fragment),
-
-		textureBindGroupLayoutEntry(csmTextureBinding, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::e2DArray,
-									wgpu::TextureSampleType::Depth),
-
-		samplerBindGroupLayoutEntry(csmSamplerBinding, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison),
-
-		bufferBindGroupLayoutEntry(csmMatricesBinding, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::ReadOnlyStorage),
-
-		textureBindGroupLayoutEntry(psmTextureBinding, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::CubeArray,
-									wgpu::TextureSampleType::Depth),
-
-		samplerBindGroupLayoutEntry(psmSamplerBinding, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison),
-
-		textureBindGroupLayoutEntry(ssmTextureBinding, wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::e2DArray,
-									wgpu::TextureSampleType::Depth),
-
-		samplerBindGroupLayoutEntry(ssmSamplerBinding, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison),
-
-		bufferBindGroupLayoutEntry(ssmMatricesBinding, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::ReadOnlyStorage),
-
-	},
-	shaderSource);
-
-const BindGroupDescriptor sceneShadowBindingsDescriptor( //
-	"shadowBindings",									 //
-	BindGroupType::scene,								 //
-	{
-		bufferBindGroupLayoutEntry(configUniformsBinding, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform),
-
-		bufferBindGroupLayoutEntry(cameraUniformsBinding, wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex,
-								   wgpu::BufferBindingType::Uniform),
-	},
-	shaderSource);
-
 SceneBindings::SceneBindings()
 	: m_bindGroup(new BindGroup(&sceneBindingsDescriptor)),								  //
 	  m_configUniforms(new Buffer(BufferType::uniform, nullptr, sizeof(ConfigUniforms))), //
@@ -94,11 +23,25 @@ SceneBindings::SceneBindings()
 	m_bindGroup->setBuffer(configUniformsBinding, m_configUniforms);
 	m_bindGroup->setBuffer(cameraUniformsBinding, m_cameraUniforms);
 	m_bindGroup->setBuffer(lightingUniformsBinding, m_lightingUniforms);
-	m_bindGroup->setTexture(envTextureBinding, envTexture());
 
-	envTexture.changed.connect(nullptr, [=](CTexture* ttexture) { //
-		m_bindGroup->setTexture(envTextureBinding, ttexture);
+	envTexture.changed.connect(nullptr, [=](CTexture* ctexture) { //
+		if (!ctexture) ctexture = blackTexture(TextureFlags::cube);
+		int type;
+		if (bool(ctexture->flags() & TextureFlags::cube)) {
+			m_bindGroup->setTexture(envTextureCubeBinding, ctexture, false);
+			m_bindGroup->setTexture(envTexture2DBinding, blackTexture(), false);
+			m_bindGroup->setSampler(envSamplerBinding, ctexture);
+			type = 1;
+		} else {
+			m_bindGroup->setTexture(envTextureCubeBinding, blackTexture(TextureFlags::cube), false);
+			m_bindGroup->setTexture(envTexture2DBinding, ctexture);
+			type = 2;
+		}
+		if (type == lightingUniforms().envTextureType) return;
+		lockLightingUniforms().envTextureType = type;
+		unlockLightingUniforms();
 	});
+	envTexture.changed.emit(envTexture());
 
 	updateCSMConfig();
 	updatePSMConfig();
@@ -154,7 +97,7 @@ void SceneBindings::updateCSMConfig() const {
 	if (!m_csmTexture || m_csmTexture->size() != size || m_csmTexture->depth() != passes) {
 		m_csmTexture =
 			new Texture(size, passes, TextureFormat::depth32f, //
-						TextureFlags::filter | TextureFlags::array | TextureFlags::compare | TextureFlags::renderTarget);
+						TextureFlags::filter | TextureFlags::array | TextureFlags::renderTarget | TextureFlags::compare);
 		m_bindGroup->setTexture(csmTextureBinding, m_csmTexture);
 	}
 	m_csmShadowPasses.clear();
@@ -248,9 +191,9 @@ void SceneBindings::updatePSMConfig() const {
 	auto passes = config.maxPSMLights * 6;
 
 	if (!m_psmTexture || m_psmTexture->size() != size || m_psmTexture->depth() != passes) {
-		m_psmTexture = new Texture(size, passes, TextureFormat::depth32f, //
-								   TextureFlags::filter | TextureFlags::cube | TextureFlags::array | TextureFlags::compare |
-									   TextureFlags::renderTarget);
+		m_psmTexture = new Texture(size, passes, TextureFormat::depth32f,
+								   TextureFlags::filter | TextureFlags::cube | TextureFlags::array |
+									   TextureFlags::renderTarget | TextureFlags::compare);
 		m_bindGroup->setTexture(psmTextureBinding, m_psmTexture);
 	}
 	m_psmShadowPasses.clear();
@@ -320,7 +263,7 @@ void SceneBindings::updateSSMConfig() const {
 	if (!m_ssmTexture || m_ssmTexture->size() != size || m_ssmTexture->depth() != passes) {
 		m_ssmTexture =
 			new Texture(size, passes, TextureFormat::depth32f, //
-						TextureFlags::filter | TextureFlags::array | TextureFlags::compare | TextureFlags::renderTarget);
+						TextureFlags::filter | TextureFlags::array | TextureFlags::renderTarget | TextureFlags::compare);
 		m_bindGroup->setTexture(ssmTextureBinding, m_ssmTexture);
 	}
 	m_ssmShadowPasses.clear();

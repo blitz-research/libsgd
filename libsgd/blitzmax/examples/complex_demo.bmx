@@ -479,9 +479,9 @@ Function demo_CreateCamera:Int ()
 	
 End Function
 
-Function demo_CreateSkyBox:Int (texture:String, format:Int = SGD.TEXTURE_FORMAT_SRGBA8, flags:Int = SGD.TEXTURE_FLAGS_ENVMAP_DEFAULT)
+Function demo_CreateSkyBox:Int (texture:String, format:Int = SGD.TEXTURE_FORMAT_ANY, flags:Int = SGD.TEXTURE_FLAGS_DEFAULT)
 
-	Local sky_texture:Int = SGD.LoadTexture (texture, format, flags)
+	Local sky_texture:Int = SGD.LoadCubeTexture (texture, format, flags)
 
 	SGD.SetEnvTexture sky_texture
 

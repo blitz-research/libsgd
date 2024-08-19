@@ -57,7 +57,7 @@ Expected<Sound*, FileioEx> loadSound(CPath path) {
 
 	auto wav = new SoLoud::Wav();
 	if (wav->loadMem(data.result().data(), data.result().size(), true, false)) {
-		return FileioEx("SoLoud failed to load wav data at \"" + path.str() + "\"");
+		return SGD_FILEIOEX("SoLoud failed to load wav data at \"" + path.str() + "\"");
 	}
 
 	return new Sound(wav);

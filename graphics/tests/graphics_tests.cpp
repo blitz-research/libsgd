@@ -18,7 +18,7 @@ SceneBindingsPtr sceneBindings;
 RenderContextPtr renderContext;
 RenderQueuePtr renderQueue;
 
-SkyboxGeometryPtr skyboxGeometry;
+SkyboxBindingsPtr skyboxBindings;
 
 MeshPtr mesh;
 MeshRendererPtr meshRenderer;
@@ -68,7 +68,7 @@ void render() {
 		renderQueue->clear();
 
 #if SKYBOX
-		skyboxGeometry->render(renderQueue);
+		skyboxBindings->render(renderQueue);
 #endif
 #if MESH
 		meshRenderer->render(renderQueue, mesh, 1, 0);
@@ -147,9 +147,9 @@ int main() {
 	renderQueue = new RenderQueue();
 
 #if SKYBOX
-	auto skyTexture = loadTexture(Path("sgd://envmaps/stormy-cube.jpg"), TextureFormat::srgba8, TextureFlags::env).result();
-	skyboxGeometry = new SkyboxGeometry();
-	skyboxGeometry->skyTexture = skyTexture;
+	auto skyTexture = loadCubeTexture(Path("sgd://envmaps/stormy-cube.jpg"), TextureFormat::srgba8, TextureFlags::mipmap).result();
+	skyboxBindings = new SkyboxBindings();
+	skyboxBindings->skyTexture = skyTexture;
 #endif
 
 #if MESH

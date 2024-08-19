@@ -1,6 +1,20 @@
 
 ***** V0.13 *****
 
+Removed SetImage2DHandle. SetImageRect is now the way to set handles for sprites and 2d image drawing. Rect defaults to
+-.5, -.5, .5, .5 so images are handled by center by default. Rect is scaled by image texture size when using Draw2DImage, so you can also
+scale default image size by scaling rect.
+
+Added support for signed int8 formats and more float16 formats.
+
+Added support for exr image format for HDR textures, ie: float textures with r,g,b components potentially >1.
+
+Added support for 'equirect' 2d texture environment maps and skyboxes.
+
+Added CreateTexture, SetTexel, GetTexel.
+
+Fixed borked Blitz3D commands.
+
 Simplified bloom filter, added radius param.
 
 Fixed gltfloader setting entity names so FindEntityChild() should now work.
