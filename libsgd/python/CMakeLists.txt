@@ -67,6 +67,9 @@ create_python_lib_target(py39 ${PYTHON_DIR}/Python39/include ${PYTHON_DIR}/Pytho
 create_python_lib_target(py310 ${PYTHON_DIR}/Python310/include ${PYTHON_DIR}/Python310/libs/Python310.lib)
 create_python_lib_target(py311 ${PYTHON_DIR}/Python311/include ${PYTHON_DIR}/Python311/libs/Python311.lib)
 
-install(DIRECTORY ${SRC}/pypi/ DESTINATION python)
-install(FILES ${BIN}/sgd.py DESTINATION python/libsgd)
-install(DIRECTORY ${BIN}/libs DESTINATION python/libsgd FILES_MATCHING PATTERN "*.pyd")
+install(FILES ${SRC}/helloworld.py DESTINATION python)
+install(DIRECTORY ${SRC}/examples/ DESTINATION python/examples)
+
+install(DIRECTORY ${SRC}/pypi-package/ DESTINATION python/pypi-package)
+install(FILES ${BIN}/sgd.py DESTINATION python/pypi-package/libsgd)
+install(DIRECTORY ${BIN}/libs DESTINATION python/pypi-package/libsgd FILES_MATCHING PATTERN "*.pyd")

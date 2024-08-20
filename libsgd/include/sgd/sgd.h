@@ -342,8 +342,6 @@ SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, int axis);
 //!
 //! @param `path` is the file path of the texture to load.
 //!
-//! @param `depth` should be 1.
-//!
 //! @param `format` should be one of the following:
 //!
 //! Texture format              | Integer value | Bytes per texel | Description
@@ -406,10 +404,10 @@ SGD_API int SGD_DECL sgd_GetTextureFormat(SGD_Texture texture);
 //! Get texture flags.
 SGD_API int SGD_DECL sgd_GetTextureFlags(SGD_Texture texture);
 
-// Set texture texel.
+//! Set texture texel.
 SGD_API void SGD_DECL sgd_SetTexelSRGBA(SGD_Texture texture, int x, int y, int rgba);
 
-// Get texture texel
+//! Get texture texel
 SGD_API int SGD_DECL sgd_GetTexelSRGBA(SGD_Texture texture, int x, int y);
 
 //! @}

@@ -1,12 +1,7 @@
 #
-# Simple helloworld example.
+# The libsgd package must be installed first, eg:
 #
-# The libsgd package must be built and installed to your local python environ first, eg:
-#
-# cd libsgd
-# python311 -m build
-# python311 -m pip install .
-# python311 helloworld.py
+# python -m install libsgd
 #
 from libsgd import sgd
 

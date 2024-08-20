@@ -8,8 +8,8 @@ WORLD_SIZE = 200
 
 class Block:
 	model = None
-	xr = random.uniform(-1, 1)
-	yr = random.uniform(-1, 1)
+	xr = random.uniform(-3, 3)
+	yr = random.uniform(-3, 3)
 
 class Bullet:
 	entity = None
@@ -31,12 +31,10 @@ def resetScene():
 
 	sgd.ClearScene()
 	
-	env =  sgd.LoadTexture("sgd://envmaps/stormy-cube.jpg", 4, 56)
+	env =  sgd.LoadCubeTexture("sgd://envmaps/stormy-cube.jpg", sgd.TEXTURE_FORMAT_ANY,sgd.TEXTURE_FLAGS_DEFAULT)
 	sgd.SetEnvTexture(env)
 	
 	sgd.CreateSkybox(env)
-	
-#	sgd.SetBloomEffectRadius(sgd.CreateBloomEffect(), 5)
 	
 	light = sgd.CreateDirectionalLight()
 	sgd.SetLightColor(light, 1.0, 1.0, 1.0, .2)
@@ -141,7 +139,7 @@ def updateScene():
 		
 sgd.Init()
 
-sgd.CreateWindow( sgd.GetDesktopWidth() // 2, sgd.GetDesktopHeight() // 2, "Spinning Blocks For Some Reason!", sgd.WINDOW_FLAGS_RESIZABLE | sgd.WINDOW_FLAGS_CENTERED)
+sgd.CreateWindow( sgd.GetDesktopWidth() // 2, sgd.GetDesktopHeight() // 2, "Spinning Blocks For Some Reason!", sgd.WINDOW_FLAGS_CENTERED)
 
 resetScene()
 
