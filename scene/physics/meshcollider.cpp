@@ -41,7 +41,7 @@ Collider* MeshCollider::intersectRay(CLiner ray, CVec3f radii, Contact& contact)
 	return this;
 }
 
-void MeshCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask, CollisionResponse response,
+void MeshCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask,
 							Vector<Collision>& collisions) {
 	// Meshes don't stop for no one!
 }

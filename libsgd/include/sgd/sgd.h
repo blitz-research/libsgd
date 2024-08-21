@@ -122,29 +122,29 @@ SGD_API int SGD_DECL sgd_GetDesktopWidth();
 SGD_API int SGD_DECL sgd_GetDesktopHeight();
 
 //! @cond Event mask  constants returned by sgd_NextEvent.
-#define SGD_EVENT_MASK_CLOSE_CLICKED 1
-#define SGD_EVENT_MASK_SIZE_CHANGED  2
-#define SGD_EVENT_MASK_LOST_FOCUS    4
-#define SGD_EVENT_MASK_GOT_FOCUS     8
-#define SGD_EVENT_MASK_SUSPENDED     16
-#define SGD_EVENT_MASK_RESUMED       32
+#define SGD_EVENT_MASK_CLOSE_CLICKED 0x01
+#define SGD_EVENT_MASK_SIZE_CHANGED  0x02
+#define SGD_EVENT_MASK_LOST_FOCUS    0x04
+#define SGD_EVENT_MASK_GOT_FOCUS     0x08
+#define SGD_EVENT_MASK_SUSPENDED     0x10
+#define SGD_EVENT_MASK_RESUMED       0x20
 //! @endcond
 
-//! Poll system for events, returns bit mask of events types that occured.
+//! Poll system for events, returns a bit mask of event types that occured.
 //!
 //! The returned bit mask can contain any of the following values:
 //!
 //! Event type mask                | Integer value | Description
 //! -------------------------------|---------------|------------
-//! SGD_EVENT_MASK_CLOSE_CLICKED   | 1             | Window close button clicked
-//! SGD_EVENT_MASK_SIZE_CHANGED    | 2             | Window size changed
-//! SGD_EVENT_MASK_LOST_FOCUS      | 4             | Window lost input focus
-//! SGD_EVENT_MASK_GOT_FOCUS       | 8             | Window received input focus
-//! SGD_EVENT_MASK_SUSPENDED       | 16            | App suspended
-//! SGD_EVENT_MASK_RESUMED         | 32            | App resumed
+//! SGD_EVENT_MASK_CLOSE_CLICKED   | 0x01          | Window close button clicked
+//! SGD_EVENT_MASK_SIZE_CHANGED    | 0x02          | Window size changed
+//! SGD_EVENT_MASK_LOST_FOCUS      | 0x04          | Window lost input focus
+//! SGD_EVENT_MASK_GOT_FOCUS       | 0x08          | Window received input focus
+//! SGD_EVENT_MASK_SUSPENDED       | 0x10          | App suspended
+//! SGD_EVENT_MASK_RESUMED         | 0x20          | App resumed
 SGD_API int SGD_DECL sgd_PollEvents();
 
-//! @cond Debug memory state, does nothing in release builds.
+//! @cond Debug memory state.
 SGD_API void SGD_DECL sgd_DebugMemory();
 //! @endcond
 

@@ -45,7 +45,7 @@ struct Collider : EntityListener {
 
 	CBoxr worldBounds() const;
 
-	void update(uint32_t colliderMask, CollisionResponse response);
+	void update(uint32_t colliderMask);
 
 	virtual Collider* intersectRay(CLiner ray, float radius, Contact& contact) = 0;
 
@@ -57,7 +57,7 @@ struct Collider : EntityListener {
 
 protected:
 
-	virtual void onUpdate(const CollisionSpace* space, uint32_t colliderMask, CollisionResponse response, Vector<Collision>& collisions) = 0;
+	virtual void onUpdate(const CollisionSpace* space, uint32_t colliderMask, Vector<Collision>& collisions) = 0;
 
 	void setLocalBounds(CBoxf bounds);
 

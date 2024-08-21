@@ -7,8 +7,8 @@ namespace sgd {
 SGD_SHARED(Camera);
 
 template <class IntersectFunc>
-Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFunc intersectFunc, CollisionResponse response,
-				 Vector<Collision>& collisions) {
+Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFunc intersectFunc, uint32_t colliderMask,
+				 uint32_t colliderType, Vector<Collision>& collisions) {
 
 	static constexpr real mind = (real).0001;
 	static constexpr real eps = (real).01;
@@ -18,9 +18,8 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 	auto dir = dst - src;
 	auto dist = length(dir);
 	if (dist <= mind) return src;
-
-	auto dist_xz = length(Vec2r(dir.x, dir.z));
 	dir /= dist;
+	auto dist_xz = length(Vec2r(dir.x, dir.z));
 	auto fwd = dir;
 
 	Planer planes[3];
@@ -32,27 +31,27 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 		Contact contact(dist);
 		Line ray(src, dir);
 
-		auto collider = intersectFunc(ray, contact);
+		auto collider = intersectFunc(ray, colliderMask, contact);
 		if (!collider) return dst;
 
 		collisions.emplace_back(ray, contact, collider);
 
-		if (response == CollisionResponse::ignore) return dst;
+		auto response = space->responseForColliderTypes(colliderType, collider->colliderType());
 
-		// Hit distance/time
-		auto hitd = std::max(contact.time - eps, (real)0);
+		if (response == CollisionResponse::stop) {
+			return ray * std::max(contact.time - eps, (real)0); // stop before plane
+		}
+
+		if (response == CollisionResponse::ignore) {
+			colliderMask &= ~(1 << collider->colliderType());
+			continue;
+		}
+
+		auto hitd = std::max(contact.time - eps, (real)0); // stop before plane
 		src = ray * hitd;
 
-		if (response == CollisionResponse::stop) return src;
-
-		if (hitd > dist) SGD_LOG << "### OOPS 1:" << hitd << dist;
-		if ((dist -= hitd) <= mind) return src;
-
-		// Subtract hit distance moved from remaining distance
-		if (response == CollisionResponse::slidexz) {
-			auto d_xz = length(Vec2r(src.x - ray.o.x, src.z - ray.o.z));
-			if (d_xz > dist_xz) SGD_LOG << "### OOPS 2:" << d_xz << dist_xz;
-			dist_xz -= d_xz;
+		if (response == CollisionResponse::stop) {
+			return src;
 		}
 
 		// Avoid looping forever
@@ -62,6 +61,15 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 #endif
 			return src;
 		}
+
+		// Subtract distance moved from remaining distance
+		if (hitd > dist) SGD_LOG << "### OOPS 1:" << hitd << dist;
+		if ((dist -= hitd) <= mind) return src;
+
+		// subtract xz distance too.
+		auto d_xz = length(Vec2r(src.x - ray.o.x, src.z - ray.o.z));
+		if (d_xz > dist_xz) SGD_LOG << "### OOPS 2:" << d_xz << dist_xz;
+		dist_xz -= d_xz;
 
 		Plane plane(src, contact.normal);
 		// Plane plane(contact.point, contact.normal);
@@ -106,8 +114,8 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 
 		auto d = length(dir);
 		if (d <= mind) return src;
-
 		dir /= d;
+
 		if (d > dist) {
 			SGD_LOG << "### OOPS 3:" << d << dist;
 			dst = src + dir * dist;
@@ -128,24 +136,24 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 	}
 }
 
-Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, float radius, uint32_t colliderMask,
-				 CollisionResponse response, Vector<Collision>& collisions) {
+Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, float radius, uint32_t colliderMask, uint32_t colliderType,
+				 Vector<Collision>& collisions) {
 
-	auto intersectFunc = [=](CLiner ray, Contact& contact) -> Collider* {
+	auto intersectFunc = [=](CLiner ray, uint32_t colliderMask, Contact& contact) -> Collider* {
 		return space->intersectRay(ray, radius, colliderMask, contact);
 	};
 
-	return collideRay(space, src, dst, intersectFunc, response, collisions);
+	return collideRay(space, src, dst, intersectFunc, colliderMask, colliderType, collisions);
 }
 
-Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, CVec3f radii, uint32_t colliderMask,
-				 CollisionResponse response, Vector<Collision>& collisions) {
+Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, CVec3f radii, uint32_t colliderMask, uint32_t colliderType,
+				 Vector<Collision>& collisions) {
 
-	auto intersectFunc = [=](CLiner ray, Contact& contact) -> Collider* {
+	auto intersectFunc = [=](CLiner ray, uint32_t colliderMask, Contact& contact) -> Collider* {
 		return space->intersectRay(ray, radii, colliderMask, contact);
 	};
 
-	return collideRay(space, src, dst, intersectFunc, response, collisions);
+	return collideRay(space, src, dst, intersectFunc, colliderMask, colliderType, collisions);
 }
 
 Collider* intersectRay(Camera* camera, CVec2f windowCoords, int colliderMask, Contact& rcontact) {

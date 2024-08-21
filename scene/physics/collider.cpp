@@ -26,10 +26,9 @@ CBoxr Collider::worldBounds() const {
 	return m_worldBounds = m_entity ? m_entity->worldMatrix() * Boxr(m_localBounds) : Boxr(m_localBounds);
 }
 
-void Collider::update(uint32_t colliderMask, CollisionResponse response) {
-	SGD_ASSERT(m_collisionNode);
+void Collider::update(uint32_t colliderMask) {
 	m_collisions.clear();
-	onUpdate(m_collisionNode->space(), colliderMask, response, m_collisions);
+	onUpdate(m_collisionNode->space(), colliderMask, m_collisions);
 }
 
 void Collider::onEnable(Entity* entity) {

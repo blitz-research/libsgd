@@ -30,6 +30,10 @@ private:
 struct CollisionSpace : Shared {
 	SGD_OBJECT_TYPE(CollisionSpace, Shared);
 
+	CollisionResponse responseForColliderTypes(uint32_t srcType,uint32_t dstType) const {
+		return m_colliderInfos[srcType].responses[dstType];
+	}
+
 	void enableCollisions(uint32_t srcColliderType, uint32_t dstColliderType, CollisionResponse response);
 
 	CollisionNode* insert(Collider* collider);
@@ -44,16 +48,13 @@ struct CollisionSpace : Shared {
 private:
 	friend class CollisionNode;
 
-	struct EnabledCollision {
-		uint32_t srcType;
-		uint32_t dstType;
-		CollisionResponse response;
+	struct ColliderTypeInfo {
+		Vector<CollisionNode*> nodes;
+		uint32_t mask;
+		CollisionResponse responses[32];
 	};
 
-	Vector<EnabledCollision> m_enabledCollisions[32];
-	uint32_t m_colliderMasks[32];
-
-	Vector<CollisionNode*> m_collisionNodes[32];
+	ColliderTypeInfo m_colliderInfos[32];
 };
 
 } // namespace sgd

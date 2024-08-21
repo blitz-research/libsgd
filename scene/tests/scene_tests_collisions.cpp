@@ -1,10 +1,17 @@
 #include "start.cpp"
 
+const int COLLISION_TYPE_LEVEL = 0;
+const int COLLISION_TYPE_SPHERE = 1;
+const int COLLISION_TYPE_PLAYER = 2;
+
 void entry() {
 
 	float sz = 50;
 
-	setConfigVar("gltf.loggingEnabled","1");
+//	setConfigVar("gltf.loggingEnabled", "1");
+
+	scene->collisionSpace()->enableCollisions(COLLISION_TYPE_PLAYER, COLLISION_TYPE_LEVEL, CollisionResponse::slidexz);
+	scene->collisionSpace()->enableCollisions(COLLISION_TYPE_PLAYER, COLLISION_TYPE_SPHERE, CollisionResponse::ignore);
 
 	MeshPtr levelMesh = loadStaticMesh(Path("sgd://models/ManurewaDuplex.glb")).result();
 	fit(levelMesh, Boxf(-sz, sz), true);
@@ -12,21 +19,28 @@ void entry() {
 	ModelPtr levelModel = new Model();
 	levelModel->mesh = levelMesh;
 	scene->add(levelModel);
-	ColliderPtr levelCollider = new MeshCollider(levelModel, 0, new MeshColliderData(levelMesh));
+	ColliderPtr levelCollider = new MeshCollider(levelModel, COLLISION_TYPE_LEVEL, new MeshColliderData(levelMesh));
 
 	createPlayer(nullptr);
 	move(camera, {0, .8f, 0});
 	setPosition(player, {-8, -4, 36});
 	setRotation(player, {0, -145.5, 0});
 
-	ColliderPtr playerCollider = new EllipsoidCollider(player, 1, .2f, 1.8f);
+	ColliderPtr playerCollider = new EllipsoidCollider(player, COLLISION_TYPE_PLAYER, .2f, 1.8f);
 
-	scene->collisionSpace()->enableCollisions(1, 0, CollisionResponse::slidexz);
+	MeshPtr sphereMesh = createSphereMesh(1.5f, 48, 24, createPBRMaterial(Vec4f(1,1,0,1)));
+	ModelPtr sphere = new Model(sphereMesh);
+	scene->add(sphere);
+
+	move(sphere,{0,-6,36});
+
+	ColliderPtr sphereCollider = new MeshCollider(sphere, COLLISION_TYPE_SPHERE, new MeshColliderData(sphereMesh));
 
 	auto dc = overlay->drawList();
 
 	real gravity = -9.81 / 60.0 / 60.0;
 	real vel = 0;
+	bool jumping=false;
 
 	for (;;) {
 		pollEvents();
@@ -37,6 +51,7 @@ void entry() {
 		playerWalk(sp / 60.0f);
 
 		if (window->keyboard()->key(KeyCode::SPACE).hit()) {
+			jumping=true;
 			vel += .1f;
 		}
 
@@ -50,10 +65,15 @@ void entry() {
 
 		vel = player->worldPosition().y - py;
 
+		if(jumping && vel<0.0f) jumping = false;
+
+		if(!jumping && vel>0.0f) vel=0.0f;
+
 		dc->clear();
-		dc->addText(toString(vel)+","+toString(gravity),{0,0});
-//		dc->addText(toString(camera->worldPosition()) + ", " + toString(camera->worldPosition()), {0, 0});
-//		dc->addText(toString(scene->sceneRenderer()->RPS()), {0, 20});
+		auto& colls = playerCollider->collisions();
+		for(int i=0;i<colls.size();++i) {
+			dc->addText("Collision "+toString(i)+": colliderType "+ toString(colls[i].collider->colliderType()), Vec2u(0, i * 16));
+		}
 
 		render();
 	}

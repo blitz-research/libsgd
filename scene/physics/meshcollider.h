@@ -20,7 +20,7 @@ struct MeshCollider : Collider {
 private:
 	MeshColliderDataPtr m_data;
 
-	void onUpdate(const CollisionSpace* space, uint32_t colliderMask, CollisionResponse response, Vector<Collision>& collisions) override;
+	void onUpdate(const CollisionSpace* space, uint32_t colliderMask, Vector<Collision>& collisions) override;
 };
 
 

@@ -29,10 +29,10 @@ Collider* SphereCollider::intersectRay(CLiner ray, CVec3f radii, Contact& contac
 	return nullptr;
 }
 
-void SphereCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask, CollisionResponse response,
+void SphereCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask,
 							  Vector<Collision>& collisions) {
 
-	auto dst = collideRay(space, m_src, entity()->worldPosition(), radius(), colliderMask, response, collisions);
+	auto dst = collideRay(space, m_src, entity()->worldPosition(), radius(), colliderMask, colliderType(), collisions);
 
 	entity()->setWorldPosition(dst);
 
