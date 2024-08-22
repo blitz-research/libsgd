@@ -14,9 +14,9 @@ SGD_SHARED(Collider);
 struct Collision {
 	Liner ray;
 	Contact contact;
-	CCollider* collider;
+	ColliderPtr collider;
 
-	Collision(CLiner ray, CContact contact, CCollider* collider):ray(ray),contact(contact),collider(collider){}
+	Collision(CLiner ray, CContact contact, Collider* collider):ray(ray),contact(contact),collider(collider){}
 };
 
 enum struct CollisionResponse {

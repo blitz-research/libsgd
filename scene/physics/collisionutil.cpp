@@ -18,8 +18,8 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 	auto dir = dst - src;
 	auto dist = length(dir);
 	if (dist <= mind) return src;
+
 	dir /= dist;
-	auto dist_xz = length(Vec2r(dir.x, dir.z));
 	auto fwd = dir;
 
 	Planer planes[3];
@@ -37,10 +37,6 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 		collisions.emplace_back(ray, contact, collider);
 
 		auto response = space->responseForColliderTypes(colliderType, collider->colliderType());
-
-		if (response == CollisionResponse::stop) {
-			return ray * std::max(contact.time - eps, (real)0); // stop before plane
-		}
 
 		if (response == CollisionResponse::ignore) {
 			colliderMask &= ~(1 << collider->colliderType());
@@ -62,14 +58,8 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 			return src;
 		}
 
-		// Subtract distance moved from remaining distance
-		if (hitd > dist) SGD_LOG << "### OOPS 1:" << hitd << dist;
 		if ((dist -= hitd) <= mind) return src;
-
-		// subtract xz distance too.
-		auto d_xz = length(Vec2r(src.x - ray.o.x, src.z - ray.o.z));
-		if (d_xz > dist_xz) SGD_LOG << "### OOPS 2:" << d_xz << dist_xz;
-		dist_xz -= d_xz;
+		auto dist_xz = length(Vec2r(dst.x - src.x, dst.z - src.z));
 
 		Plane plane(src, contact.normal);
 		// Plane plane(contact.point, contact.normal);
@@ -114,24 +104,24 @@ Vec3r collideRay(const CollisionSpace* space, Vec3r src, Vec3r dst, IntersectFun
 
 		auto d = length(dir);
 		if (d <= mind) return src;
-		dir /= d;
 
 		if (d > dist) {
-			SGD_LOG << "### OOPS 3:" << d << dist;
-			dst = src + dir * dist;
-		} else {
-			dist = d;
+			SGD_LOG << "### Clip error, d:" << d << "dist:" << dist;
+			dst = src + dir / d * dist;
+			d = dist;
 		}
+		dir /= d;
 
 		if (response == CollisionResponse::slidexz) {
 			auto d_xz = length(Vec2r(dst.x - src.x, dst.z - src.z));
-			if (d_xz > dist_xz) {
-				dist *= dist_xz / d_xz;
-				if (dist <= mind) return src;
-				dst = src + dir * dist;
-			} else {
-				dist_xz = d_xz;
-			}
+			if (d_xz > dist_xz) std::swap(d_xz, dist_xz);
+			dist *= d_xz / dist_xz;
+			if (dist <= mind) return src;
+			dst = src + dir * dist;
+			dist_xz = d_xz;
+		} else {
+			dist_xz *= d / dist;
+			dist = d;
 		}
 	}
 }

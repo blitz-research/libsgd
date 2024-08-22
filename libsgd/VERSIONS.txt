@@ -1,4 +1,10 @@
 
+***** V0.13.1 *****
+
+Fixed handling of multiple collision types. Add GetCollisionCollider and GetColliderType. Added collision response consts
+to sgd.bb
+
+
 ***** V0.13 *****
 
 Removed SetImage2DHandle. SetImageRect is now the way to set handles for sprites and 2d image drawing. Rect defaults to

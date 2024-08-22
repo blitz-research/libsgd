@@ -11,7 +11,7 @@ void entry() {
 //	setConfigVar("gltf.loggingEnabled", "1");
 
 	scene->collisionSpace()->enableCollisions(COLLISION_TYPE_PLAYER, COLLISION_TYPE_LEVEL, CollisionResponse::slidexz);
-	scene->collisionSpace()->enableCollisions(COLLISION_TYPE_PLAYER, COLLISION_TYPE_SPHERE, CollisionResponse::ignore);
+	scene->collisionSpace()->enableCollisions(COLLISION_TYPE_PLAYER, COLLISION_TYPE_SPHERE, CollisionResponse::slide);
 
 	MeshPtr levelMesh = loadStaticMesh(Path("sgd://models/ManurewaDuplex.glb")).result();
 	fit(levelMesh, Boxf(-sz, sz), true);
@@ -28,7 +28,7 @@ void entry() {
 
 	ColliderPtr playerCollider = new EllipsoidCollider(player, COLLISION_TYPE_PLAYER, .2f, 1.8f);
 
-	MeshPtr sphereMesh = createSphereMesh(1.5f, 48, 24, createPBRMaterial(Vec4f(1,1,0,1)));
+	MeshPtr sphereMesh = createSphereMesh(2.5f, 48, 24, createPBRMaterial(Vec4f(1,1,0,1)));
 	ModelPtr sphere = new Model(sphereMesh);
 	scene->add(sphere);
 

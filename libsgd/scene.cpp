@@ -631,19 +631,22 @@ void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness) {
 
 // ***** Collisions *****
 
-SGD_Collider SGD_DECL sgd_CreateSphereCollider(SGD_Entity hentity, int collisionType, float radius) {
+SGD_Collider SGD_DECL sgd_CreateSphereCollider(SGD_Entity hentity, int colliderType, float radius) {
+	if((uint32_t)colliderType>31) sgdx::error("ColliderType must be in the range 0..31");
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	auto collider = new sgd::SphereCollider(entity, (uint32_t)collisionType, radius);
+	auto collider = new sgd::SphereCollider(entity, (uint32_t)colliderType, radius);
 	return sgdx::createHandle(collider);
 }
 
-SGD_Collider SGD_DECL sgd_CreateEllipsoidCollider(SGD_Entity hentity, int collisionType, float radius, float height) {
+SGD_Collider SGD_DECL sgd_CreateEllipsoidCollider(SGD_Entity hentity, int colliderType, float radius, float height) {
+	if((uint32_t)colliderType>31) sgdx::error("ColliderType must be in the range 0..31");
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	auto collider = new sgd::EllipsoidCollider(entity, (uint32_t)collisionType, radius, height);
+	auto collider = new sgd::EllipsoidCollider(entity, (uint32_t)colliderType, radius, height);
 	return sgdx::createHandle(collider);
 }
 
-SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity hentity, int collisionType, SGD_Mesh hmesh) {
+SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity hentity, int colliderType, SGD_Mesh hmesh) {
+	if((uint32_t)colliderType>31) sgdx::error("ColliderType must be in the range 0..31");
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	sgd::CMesh* mesh = hmesh ? sgdx::resolveHandle<sgd::Mesh>(hmesh) : nullptr;
 	if (!mesh) {
@@ -652,13 +655,16 @@ SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity hentity, int collisionTy
 		if (!mesh) sgdx::error("Model must have a valid mesh");
 	}
 	auto data = sgd::getOrCreateMeshColliderData(mesh);
-	auto collider = new sgd::MeshCollider(entity, (uint32_t)collisionType, data);
+	auto collider = new sgd::MeshCollider(entity, (uint32_t)colliderType, data);
 	return sgdx::createHandle(collider);
 }
 
 SGD_Entity SGD_DECL sgd_GetColliderEntity(SGD_Collider hcollider) {
-	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
-	return sgdx::getOrCreateHandle(collider->entity());
+	return sgdx::getOrCreateHandle(sgdx::resolveHandle<sgd::Collider>(hcollider)->entity());
+}
+
+int SGD_DECL sgd_GetColliderType(SGD_Collider hcollider) {
+	return (int)sgdx::resolveHandle<sgd::Collider>(hcollider)->colliderType();
 }
 
 void SGD_DECL sgd_SetColliderRadius(SGD_Collider hcollider, float radius) {
@@ -693,6 +699,12 @@ void SGD_DECL sgd_UpdateColliders() {
 int SGD_DECL sgd_GetCollisionCount(SGD_Collider hcollider) {
 	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
 	return (int)collider->collisions().size();
+}
+
+SGD_Collider SGD_DECL sgd_GetCollisionCollider(SGD_Collider hcollider, int index) {
+	auto collider = sgdx::resolveHandle<sgd::Collider>(hcollider);
+	if ((uint32_t)index >= collider->collisions().size()) sgdx::error("Collision index out of range");
+	return sgdx::getOrCreateHandle(collider->collisions()[index].collider.get());
 }
 
 SGD_Real SGD_DECL sgd_GetCollisionX(SGD_Collider hcollider, int index) {
