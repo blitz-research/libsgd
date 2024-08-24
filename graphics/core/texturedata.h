@@ -24,19 +24,18 @@ enum struct TextureFormat {
 	r32f,
 	rg32f,
 	rgba32f,
-	srgba32f,
 	// depth formats
 	depth32f,
 };
 static constexpr int numTextureFormats = 15;
 
 inline size_t bytesPerTexel(TextureFormat format) {
-	uint32_t bpp[]{0,			// undefined
-				   1, 2, 4,	 4, // unsigned
-				   1, 2, 4,		// signed
-				   2, 4, 8,		// 16f
-				   4, 8, 16,	// 32f
-				   4};			// depth
+	uint32_t bpp[]{0,			 // undefined
+				   1, 2, 4,	 4,	 // unsigned
+				   1, 2, 4,		 // signed
+				   2, 4, 8,		 // 16f
+				   4, 8, 16,	 // 32f
+				   4};			 // depth32f
 	if ((uint32_t)format >= numTextureFormats) SGD_ERROR("Invalid texel format");
 	return bpp[(uint32_t)format];
 }

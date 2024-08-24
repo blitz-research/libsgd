@@ -14,10 +14,12 @@ namespace {
 
 SGD_BOOL_CONFIG_VAR(g_vsyncEnabled, "render.vsyncEnabled", true);
 SGD_BOOL_CONFIG_VAR(g_timeStampsEnabled, "render.timeStampsEnabled", true);
+
 SGD_BOOL_CONFIG_VAR(g_shadowPassEnabled, "render.shadowPassEnabled", true);
 SGD_BOOL_CONFIG_VAR(g_opaquePassEnabled, "render.opaquePassEnabled", true);
 SGD_BOOL_CONFIG_VAR(g_blendPassEnabled, "render.blendPassEnabled", true);
 SGD_BOOL_CONFIG_VAR(g_effectPassEnabled, "render.effectPassEnabled", true);
+SGD_BOOL_CONFIG_VAR(g_overlayPassEnabled, "render.overlayPassEnabled", true);
 
 } // namespace
 
@@ -25,6 +27,7 @@ SceneRenderer::SceneRenderer()
 	: m_sceneBindings(new SceneBindings()),														   //
 	  m_renderContext(new RenderContext()),														   //
 	  m_renderQueue(new RenderQueue()),															   //
+	  m_overlayQueue(new RenderQueue()),														   //
 	  m_skyboxRenderer(new SkyboxRenderer()),													   //
 	  m_modelRenderer(new ModelRenderer()),														   //
 	  m_skinnedModelRenderer(new SkinnedModelRenderer()),										   //
@@ -242,11 +245,12 @@ void SceneRenderer::render() {
 		[=] { //
 			GraphicsResource::validateAll();
 			m_renderQueue->clear();
+			m_overlayQueue->clear();
 			m_skyboxRenderer->render(m_renderQueue);
 			m_modelRenderer->render(m_renderQueue);
 			m_skinnedModelRenderer->render(m_renderQueue);
 			m_spriteRenderer->render(m_renderQueue);
-			m_overlayRenderer->render(m_renderQueue);
+			m_overlayRenderer->render(m_overlayQueue);
 		},
 		true);
 
@@ -263,14 +267,12 @@ Texture* SceneRenderer::outputTexture() const {
 
 // ***** Async rendering *****
 
-void SceneRenderer::renderGeometry(RenderPassType rpassType, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
-								   float clearDepth, BindGroup* sceneBindings, bool enabled) {
+void SceneRenderer::renderGeometry(RenderQueue* rq, RenderPassType rpassType, Texture* colorBuffer, Texture* depthBuffer,
+								   CVec4f clearColor, float clearDepth, BindGroup* sceneBindings, bool enabled) {
 
 	m_renderContext->beginRenderPass(rpassType, colorBuffer, depthBuffer, clearColor, clearDepth, sceneBindings);
 
-	if (enabled) {
-		m_renderContext->render(m_renderQueue->renderOps(rpassType));
-	}
+	if (enabled) m_renderContext->render(rq->renderOps(rpassType));
 
 	m_renderContext->endRenderPass();
 }
@@ -285,27 +287,37 @@ void SceneRenderer::renderAsync() {
 	// Shadows
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 0);
 	for (auto& pass : m_sceneBindings->shadowPasses()) {
-		renderGeometry(RenderPassType::shadow, nullptr, pass.renderTarget, {}, 1, pass.sceneBindings, g_shadowPassEnabled);
+		renderGeometry(m_renderQueue, RenderPassType::shadow, nullptr, pass.renderTarget, {}, 1, pass.sceneBindings,
+					   g_shadowPassEnabled);
 	}
+
+	auto sceneBindGroup = m_sceneBindings->bindGroup();
 
 	// Opaque
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 1);
-	renderGeometry(RenderPassType::opaque, m_renderTarget, m_depthBuffer, clearColor(), clearDepth(),
-				   m_sceneBindings->bindGroup(), g_opaquePassEnabled);
+	renderGeometry(m_renderQueue, RenderPassType::opaque, m_renderTarget, m_depthBuffer, clearColor(), clearDepth(),
+				   sceneBindGroup, g_opaquePassEnabled);
 
 	// Blend
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 2);
-	renderGeometry(RenderPassType::blend, m_renderTarget, m_depthBuffer, clearColor(), clearDepth(),
-				   m_sceneBindings->bindGroup(), g_blendPassEnabled);
+	renderGeometry(m_renderQueue, RenderPassType::blend, m_renderTarget, m_depthBuffer, {}, {}, sceneBindGroup,
+				   g_blendPassEnabled);
 
 	// Effects
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 3);
 	if (g_effectPassEnabled) {
-		m_renderEffectStack->render(m_renderContext, m_sceneBindings->bindGroup());
+		m_renderEffectStack->render(m_renderContext, sceneBindGroup);
 	}
 
+	// Overlay - opaque and blended?
+	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 4);
+	//	renderGeometry(m_overlayQueue, RenderPassType::opaque, m_renderTarget, m_depthBuffer, {}, {}, sceneBindGroup,
+	//				   g_overlayPassEnabled);
+	renderGeometry(m_overlayQueue, RenderPassType::blend, m_renderEffectStack->outputTexture(), m_depthBuffer, {}, {},
+				   sceneBindGroup, g_overlayPassEnabled);
+
 	if (timeStampsEnabled) {
-		m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 4);
+		m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 5);
 		m_wgpuCommandEncoder.ResolveQuerySet(m_timeStampQueries, 0, timeStampCount, m_timeStampBuffer, 0);
 		m_wgpuCommandEncoder.CopyBufferToBuffer(m_timeStampBuffer, 0, m_timeStampResults, 0, timeStampCount * 8);
 	}

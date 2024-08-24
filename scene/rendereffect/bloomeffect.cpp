@@ -43,6 +43,7 @@ BloomEffect::BloomEffect() {
 	for (int pass = 0; pass < numPasses; ++pass) {
 		m_passes[pass].bindGroup = new BindGroup(bindGroupDescriptors[pass]);
 		m_passes[pass].bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(BloomEffectUniforms)));
+		m_passes[pass].bindGroup->setTexture(1, dummyTexture(TextureFormat::rgba8, TextureFlags::none));
 	}
 
 	radius.changed.connect(nullptr, [=](uint32_t) { //

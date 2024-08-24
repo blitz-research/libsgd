@@ -91,6 +91,7 @@ private:
 	SceneBindingsPtr m_sceneBindings;
 	RenderContextPtr m_renderContext;
 	RenderQueuePtr m_renderQueue;
+	RenderQueuePtr m_overlayQueue;
 
 	SkyboxRendererPtr m_skyboxRenderer;
 	ModelRendererPtr m_modelRenderer;
@@ -105,7 +106,7 @@ private:
 
 	wgpu::CommandEncoder m_wgpuCommandEncoder;
 
-	static constexpr int timeStampCount = 5;
+	static constexpr int timeStampCount = 6;
 
 	mutable bool m_timeStampsEnabled{false};
 	wgpu::QuerySet m_timeStampQueries;
@@ -119,7 +120,7 @@ private:
 	void updateCameraUniforms();
 	void updateLightingUniforms();
 
-	void renderGeometry(RenderPassType rpassType, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
+	void renderGeometry(RenderQueue* rq, RenderPassType rpassType, Texture* colorBuffer, Texture* depthBuffer, CVec4f clearColor,
 						float clearDepth, BindGroup* sceneBindings, bool enabled);
 
 	void renderAsync();

@@ -28,6 +28,7 @@ BindGroupDescriptor bindGroupDesc( //
 
 MonocolorEffect::MonocolorEffect() : m_bindGroup(new BindGroup(&bindGroupDesc)) {
 	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(MonocolorEffectUniforms)));
+	m_bindGroup->setTexture(1, dummyTexture(TextureFormat::rgba8,TextureFlags::none));
 }
 
 Texture* MonocolorEffect::onValidate(Texture* sourceTexture, Texture* depthBuffer) {

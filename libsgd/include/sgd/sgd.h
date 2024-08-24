@@ -41,6 +41,7 @@
 
 #define SGD_TRUE 1
 #define SGD_FALSE 0
+#define SGD_NULL 0
 
 //! @endcond
 

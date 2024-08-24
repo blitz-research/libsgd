@@ -35,9 +35,10 @@ BlurEffect::BlurEffect() {
 	for (auto& bindGroup : m_bindGroups) {
 		bindGroup = new BindGroup(&bindGroupDesc);
 		bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(BlurEffectUniforms)));
+		bindGroup->setTexture(1,dummyTexture(TextureFormat::rgba8,TextureFlags::none));
 	}
 
-	radius.changed.connect(nullptr, [=](uint32_t) { //
+	radius.changed.connect(nullptr, [=](uint32_t) {
 		invalidate();
 	});
 }

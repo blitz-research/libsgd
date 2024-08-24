@@ -26,7 +26,7 @@ struct DrawList : public Shared {
 	Property<bool> fillEnabled{true};
 
 	Property<Vec4f> outlineColor{Vec4f(0, 0, 0, .75f)};
-	Property<float> outlineWidth{2};
+	Property<float> outlineWidth{1};
 	Property<bool> outlineEnabled{false};
 
 	Property<bool> lineSmoothing{true};

@@ -475,7 +475,7 @@ int SGD_DECL sgd_GetTriangleVertex(SGD_Surface hsurface, int triangle, int verte
 SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height) {
 	sgdx::started();
 	auto font = sgd::loadFont(sgd::Path(path), height);
-	if (!font) sgdx::error("Failed to load font:" + font.error().message());
+	if (!font) sgdx::error("Failed to load font: " + font.error().message());
 	return sgdx::createHandle(font.result());
 }
 

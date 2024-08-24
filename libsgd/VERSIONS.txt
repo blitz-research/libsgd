@@ -1,4 +1,15 @@
 
+***** V0.13.2 *****
+
+Fixed multiframe image loading.
+
+Fixed disabled render effects crashing.
+
+Added separate pass for overly after render effects.
+
+Added ''#define SGD_NULL 0' to sgd.h
+
+
 ***** V0.13.1 *****
 
 Fixed handling of multiple collision types. Add GetCollisionCollider and GetColliderType. Added collision response consts

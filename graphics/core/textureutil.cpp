@@ -104,9 +104,9 @@ Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, 
 	if (!texData) return texData.error();
 
 	TextureDataPtr data = texData.result();
-	if (!depth) return SGD_FILEIOEX("Texture array depth must be greater than 0");
-	if (data->size().y % depth != 0) return SGD_FILEIOEX("Texture array image height must be a multiple of depth");
-	return new Texture({data->size().x, data->size().y}, depth, data->format(), flags | TextureFlags::array, data);
+	if (!depth || data->size().y % depth != 0) return SGD_FILEIOEX("Texture array image height must be a multiple of depth");
+
+	return new Texture({data->size().x, data->size().y / depth}, depth, data->format(), flags | TextureFlags::array, data);
 }
 
 CTexture* rgbaTexture(uint32_t rgba, TextureFlags flags) {

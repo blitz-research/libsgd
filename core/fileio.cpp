@@ -11,7 +11,7 @@
 namespace sgd {
 
 FileioEx::FileioEx(String message, const char* file, int line) : m_message(std::move(message)) {
-	SGD_LOG << "File IO Error:"<<message << "file:" << file << "line:" << line;
+	SGD_LOG << "File IO Error:" << m_message << "file:" << file << "line:" << line;
 }
 
 Expected<String, FileioEx> loadString(CPath path) {
