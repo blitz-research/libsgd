@@ -198,4 +198,4 @@ add_subdirectory(graphics)	# window dawn [stb]
 add_subdirectory(scene)		# graphics [tinlygltf]
 add_subdirectory(libsgd)    # scene audio
 
-add_subdirectory(skirmish)
+#add_subdirectory(skirmish)
