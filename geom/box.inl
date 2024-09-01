@@ -87,8 +87,11 @@ template <class T> std::ostream& operator<<(std::ostream& os, CBox<T> b) {
 // ***** Non-member functions *****
 
 template <class T> bool empty(CBox<T> b) {
-//	return b.max.x <= b.min.x || b.max.y <= b.min.y || b.max.z <= b.min.z;
 	return b.max.x < b.min.x || b.max.y < b.min.y || b.max.z < b.min.z;
+}
+
+template<class T> T volume(CBox<T> b) {
+	return (b.max.x-b.min.x) * (b.max.y-b.min.y) * (b.max.z-b.min.z);
 }
 
 template <class T> Vec3<T> size(CBox<T> b) {
@@ -104,7 +107,15 @@ template <class T> Vec3<T> corner(CBox<T> b, int index) {
 }
 
 template <class T> bool intersects(CBox<T>& b, CBox<T>& c) {
-	return !empty(b & c);
+	return c.min.x < b.max.x && c.max.x > b.min.x && //
+		   c.min.y < b.max.y && c.max.y > b.min.y && //
+		   c.min.z < b.max.z && c.max.z > b.min.z;
+}
+
+template <class T> bool contains(CBox<T>& b, CBox<T>& c) {
+	return c.min.x >= b.min.x && c.max.x <= b.max.x && //
+		   c.min.y >= b.min.y && c.max.y <= b.max.y && //
+		   c.min.z >= b.min.z && c.max.z <= b.max.z;
 }
 
 } // namespace sgd

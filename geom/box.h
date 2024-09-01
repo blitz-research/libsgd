@@ -51,11 +51,14 @@ template<class T> bool operator<(CBox<T> b, CBox<T> c);
 template<class T> std::ostream& operator<<(std::ostream& os, CBox<T> b);
 
 template<class T> bool empty(CBox<T> b);
+template<class T> T volume(CBox<T>& b);
 template<class T> Vec3<T> size(CBox<T> b);
 template<class T> Vec3<T> center(CBox<T> b);
 template<class T> Vec3<T> corner(CBox<T> b,int index);
 
 template<class T> bool intersects(CBox<T>& b, CBox<T>& c);
+template<class T> bool contains(CBox<T>& b, CBox<T>& c);
+
 
 } // namespace sgd
 
