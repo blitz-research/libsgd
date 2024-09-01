@@ -1,6 +1,8 @@
-#
 # Added by Mark, proxy _sgd module that loads the real _sgd.pyd depending on runtime python version.
 #
+# We don't really need this anymore as we're publishing a wheel per cpython version now so there's only _sgd.pyd,
+# but it doesn't hurt so leave it for now.
+
 import importlib.util
 import sys
 import os
