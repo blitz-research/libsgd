@@ -41,6 +41,7 @@ struct CollisionSpace : Shared {
 	void remove(CollisionNode* node);
 
 	Collider* intersectRay(const Liner& ray, real radius, uint32_t colliderMask, Contact& contact) const;
+
 	Collider* intersectRay(const Liner& ray, CVec3r radii, uint32_t colliderMask, Contact& contact) const;
 
 	void updateColliders();
