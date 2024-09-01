@@ -8,18 +8,22 @@ set(CMAKE_VERBOSE_MAKEFILE 0)
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 # The OLD behavior of this policy is for find_package(PythonInterp) and find_package(PythonLibs) to load the deprecated modules. The NEW behavior is for uses of the modules to fail as if they do not exist.
-set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
+# set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
 
 # The OLD behavior for this policy is for GIT_SUBMODULES when set to an empty string to initialize and update all git submodules. The NEW behavior for this policy is for GIT_SUBMODULES when set to an empty string to initialize and update no git submodules.
-set(CMAKE_POLICY_DEFAULT_CMP0097 NEW)
+# set(CMAKE_POLICY_DEFAULT_CMP0097 NEW)
 
+# Notes re: MSVC address sanitizer: You may need to add the folder in the MSVC installation containing 'clang_rt.asan_dynamic-x86_64.dll'
+# to your system PATH, and possibly delete the existing dll of the same name in windows/system32. I did anyway.
 
 # Options
 option(SGD_BLITZ3D_TARGET_ENABLED "Blitz3D target enabled" OFF)
 option(SGD_BLITZMAX_TARGET_ENABLED "BlitzMax target enabled" OFF)
 option(SGD_NODEJS_TARGET_ENABLED "Nodejs target enabled" OFF)
 option(SGD_PYTHON_TARGET_ENABLED "Python target enabled" OFF)
+option(SGD_ZIG_TARGET_ENABLED "Zig target enabled" OFF)
 option(SGD_DOXYGEN_TARGET_ENABLED "Doxygen target enabled" OFF)
+option(SGD_ASAN_ENABLED "Address sanitizer enabled" OFF)
 
 message("### Configuring LibSGD:")
 #
@@ -27,7 +31,9 @@ message("### SGD_BLITZ3D_TARGET_ENABLED  ${SGD_BLITZ3D_TARGET_ENABLED}")
 message("### SGD_BLITZMAX_TARGET_ENABLED ${SGD_BLITZMAX_TARGET_ENABLED}")
 message("### SGD_NODEJS_TARGET_ENABLED   ${SGD_NODEJS_TARGET_ENABLED}")
 message("### SGD_PYTHON_TARGET_ENABLED   ${SGD_PYTHON_TARGET_ENABLED}")
+message("### SGD_ZIG_TARGET_ENABLED      ${SGD_ZIG_TARGET_ENABLED}")
 message("### SGD_DOXYGEN_TARGET_ENABLED  ${SGD_DOXYGEN_TARGET_ENABLED}")
+message("### SGD_ASAN_ENABLED            ${SGD_ASAN_ENABLED}")
 #
 message("### CMAKE_SYSTEM_NAME           ${CMAKE_SYSTEM_NAME}")
 message("### CMAKE_BUILD_TYPE            ${CMAKE_BUILD_TYPE}")
@@ -100,12 +106,20 @@ add_compile_definitions(SGD_CMAKE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
 #
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
+set(SGD_ASAN_OPTS "")
+
 # Per compiler options
 #
 if (SGD_COMPILER_MSVC)
 
-    # Static CRT
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+	# Static CRT
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+	if(SGD_ASAN_ENABLED)
+		set(SGD_ASAN_CCOPTS /fsanitize=address)
+		add_compile_definitions(SGD_ASAN_ENABLED=1)
+		add_compile_definitions(_DISABLE_VECTOR_ANNOTATION=1 _DISABLE_STRING_ANNOTATION=1)
+	endif()
 
 else ()
 
@@ -198,4 +212,4 @@ add_subdirectory(graphics)	# window dawn [stb]
 add_subdirectory(scene)		# graphics [tinlygltf]
 add_subdirectory(libsgd)    # scene audio
 
-#add_subdirectory(skirmish)
+add_subdirectory(skirmish)	# libsgd

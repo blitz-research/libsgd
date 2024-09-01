@@ -23,7 +23,7 @@ else ()
 	set(CMD "")
 endif ()
 
-# Check we have npm
+# Check we have npm - have to do it this weird way as it's a script, not an exe.
 execute_process(COMMAND ${CMD} npm --version RESULT_VARIABLE RV)
 if (NOT RV EQUAL 0)
 	message(WARNING "### Can't find npm command, skipping nodejs target.")

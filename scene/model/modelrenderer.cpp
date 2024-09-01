@@ -39,6 +39,7 @@ void ModelRenderer::add(CModel* model) {
 			--m_numOpaqueInsts;
 			add(model);
 		});
+		return;
 	}
 
 	// Add to blended list
@@ -156,6 +157,7 @@ void ModelRenderer::render(RenderQueue* rq) const {
 		for (auto& kv : m_opaqueLists) {
 			auto mesh = kv.first;
 			uint32_t count = kv.second->models.size();
+			if(!count) continue;
 			if (bool(mesh->flags() & MeshFlags::blendedSurfaces)) {
 				for (Surface* surf : mesh->surfaces()) {
 					if (surf->material()->blendMode() == BlendMode::alphaBlend) continue;

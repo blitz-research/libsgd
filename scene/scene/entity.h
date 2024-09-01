@@ -124,14 +124,7 @@ struct Entity : Shared {
 
 	CAffineMat4r localMatrix() const;
 
-	Entity* findChild(CString name) { // NOLINT (recursize)
-		if (m_name == name) return this;
-		for (Entity* child : m_children) {
-			auto found = child->findChild(name);
-			if (found) return found;
-		}
-		return nullptr;
-	}
+	Entity* findChild(CString name);
 
 	template <class FuncTy> void visitChildren(FuncTy boolFunc) {
 		for (Entity* child : m_children) {

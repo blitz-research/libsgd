@@ -95,6 +95,8 @@ add_library(graphics
 	skybox/skyboxrenderer.wgsl
 )
 
+target_compile_options(graphics PRIVATE ${SGD_ASAN_CCOPTS})
+
 target_link_libraries(graphics window dawn tinyexr stb tcpp)
 
 add_subdirectory(tests)

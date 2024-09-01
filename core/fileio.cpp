@@ -6,8 +6,6 @@
 #include <fstream>
 #include <sstream>
 
-#define SGD_PATHEX(MSG, PATH) SGD_FILEIOEX(sgd::String(MSG) + " \"" + (PATH).str() + "\"")
-
 namespace sgd {
 
 FileioEx::FileioEx(String message, const char* file, int line) : m_message(std::move(message)) {

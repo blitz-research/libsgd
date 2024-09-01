@@ -199,6 +199,22 @@ FetchContent_MakeAvailable(stb)
 
 target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
 
+##### apng #####
+
+add_library(apng INTERFACE)
+
+FetchContent_Declare(apng
+	GIT_REPOSITORY https://github.com/blitz-research/uc_apng_loader.git
+	GIT_TAG master
+	GIT_SUBMODULES ""
+	GIT_SHALLOW TRUE
+	EXCLUDE_FROM_ALL
+)
+
+FetchContent_MakeAvailable(apng)
+
+target_include_directories(apng INTERFACE ${apng_SOURCE_DIR})
+
 ##### tinyexr #####
 
 add_library(tinyexr INTERFACE)

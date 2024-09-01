@@ -54,7 +54,9 @@ Expected<TextureData*, FileioEx> loadTextureData(CData fileData, TextureFormat f
 		//
 		Vec2i size{};
 		auto img = stbi_load_from_memory(fileData.data(), (int)fileData.size(), &size.x, &size.y, nullptr, 4);
-		if (!img) return SGD_FILEIOEX(String("Error decoding image file data"));
+		if (!img) {
+			return SGD_FILEIOEX(String("Error decoding image file data"));
+		}
 		//
 		if (format == TextureFormat::any) format = TextureFormat::srgba8;
 		auto srcFormat = (format == TextureFormat::srgba8) ? format : TextureFormat::rgba8;
@@ -76,12 +78,15 @@ Expected<TextureData*, FileioEx> loadTextureData(CPath path, TextureFormat forma
 	auto data = loadData(path);
 	if (!data) return data.error();
 
-	return loadTextureData(data.result(), format);
+	auto texture = loadTextureData(data.result(), format);
+	if (!texture) return SGD_PATHEX("Error loading texture", path);
+
+	return texture.result();
 }
 
 Expected<Texture*, FileioEx> load2DTexture(CPath path, TextureFormat format, TextureFlags flags) {
 	auto texData = loadTextureData(path, format);
-	if(!texData) return texData.error();
+	if (!texData) return texData.error();
 
 	TextureDataPtr data = texData.result();
 	return new Texture({data->size().x, data->size().y}, 1, data->format(), flags, data);
@@ -94,9 +99,9 @@ Expected<Texture*, FileioEx> loadCubeTexture(CPath path, TextureFormat format, T
 	TextureDataPtr data = texData.result();
 	if (data->size().y != data->size().x * 6) {
 		data = extractCubemap(data);
-		if (!data) return SGD_FILEIOEX("Invalid cubemap texture layout");
+		if (!data) return SGD_PATHEX("Invalid cubemap texture layout", path);
 	}
-	return new Texture({data->size().x, data->size().y /6}, 6, data->format(), flags | TextureFlags::cube, data);
+	return new Texture({data->size().x, data->size().y / 6}, 6, data->format(), flags | TextureFlags::cube, data);
 }
 
 Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, TextureFlags flags, uint32_t depth) {
@@ -104,8 +109,9 @@ Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, 
 	if (!texData) return texData.error();
 
 	TextureDataPtr data = texData.result();
-	if (!depth || data->size().y % depth != 0) return SGD_FILEIOEX("Texture array image height must be a multiple of depth");
-
+	if (!depth || data->size().y % depth != 0) {
+		return SGD_PATHEX("Texture array image height must be a multiple of depth", path);
+	}
 	return new Texture({data->size().x, data->size().y / depth}, depth, data->format(), flags | TextureFlags::array, data);
 }
 

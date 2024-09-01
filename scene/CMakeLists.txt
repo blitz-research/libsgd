@@ -22,6 +22,8 @@ add_library(scene
 	overlay/overlayrenderer.cpp
 	overlay/overlayrenderer.h
 
+	physics/bvhtree.cpp
+	physics/bvhtree.h
 	physics/collider.cpp
 	physics/collider.h
 	physics/collisionspace.cpp
@@ -84,6 +86,8 @@ add_library(scene
 	exports.h
 )
 
+target_compile_options(scene PRIVATE ${SGD_ASAN_CCOPTS})
+
 target_link_libraries(scene graphics tinygltf)
- 
+
 add_subdirectory(tests)

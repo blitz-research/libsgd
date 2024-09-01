@@ -39,7 +39,7 @@ SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, int format, int flags) {
 SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, int format, int flags) {
 	sgdx::started();
 	flags |= (int)sgd::TextureFlags::array;
-	auto texture = new sgd::Texture(sgd::Vec2u(width,height), depth, (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
+	auto texture = new sgd::Texture(sgd::Vec2u(width, height), depth, (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
 	return sgdx::createHandle(texture);
 }
 
@@ -227,6 +227,36 @@ void SGD_DECL sgd_TFormMeshTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY,
 void SGD_DECL sgd_FlipMesh(SGD_Mesh hmesh) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	sgd::flip(mesh);
+}
+
+float SGD_DECL sgd_GetMeshBoundsMinX(SGD_Mesh hmesh) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	return mesh->bounds().min.x;
+}
+
+float SGD_DECL sgd_GetMeshBoundsMinY(SGD_Mesh hmesh) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	return mesh->bounds().min.y;
+}
+
+float SGD_DECL sgd_GetMeshBoundsMinZ(SGD_Mesh hmesh) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	return mesh->bounds().min.z;
+}
+
+float SGD_DECL sgd_GetMeshBoundsMaxX(SGD_Mesh hmesh) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	return mesh->bounds().max.x;
+}
+
+float SGD_DECL sgd_GetMeshBoundsMaxY(SGD_Mesh hmesh) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	return mesh->bounds().max.y;
+}
+
+float SGD_DECL sgd_GetMeshBoundsMaxZ(SGD_Mesh hmesh) {
+	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
+	return mesh->bounds().max.z;
 }
 
 // ***** Mesh Creation *****

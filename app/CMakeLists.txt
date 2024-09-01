@@ -11,6 +11,8 @@ add_library(app
 	exports.h
 )
 
+target_compile_options(app PRIVATE ${SGD_ASAN_CCOPTS})
+
 target_link_libraries(app geom glfw)
 
 add_subdirectory(tests)

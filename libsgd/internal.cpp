@@ -73,7 +73,7 @@ SGD_Handle getOrCreateHandle(HandleTypeInfo* type, Shared* shared) {
 	auto it = rmap.find(shared);
 	if (it != rmap.end()) return it->second;
 	auto handle = ++g_nextHandle;
-	// SGD_LOG << "SGDX Inserting handle:" << handle<<"for shared:"<<shared;
+	//SGD_LOG << "### SGDX Inserting handle:" << handle<<"for shared:"<<shared;
 	g_handleMaps[(int)type->handleType].insert(std::make_pair(handle, shared));
 	rmap.insert(std::make_pair(shared, handle));
 	return handle;

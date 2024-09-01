@@ -14,6 +14,8 @@
 
 &bull; nodejs/ : Contains node.js wrapper module. The libsgd.node file must be in the current directory when you run a node.js app that wants to use libsgd.
 
+&bull; zig/ : Contains WIP sgd.zig wrapper for the zig language.
+
 &bull; VERSIONS.txt : Summary of version changes.
 
 &bull; README.md : This file.
@@ -43,4 +45,5 @@ Dan
 Markus Rosse
 JaviCervera
 Amon
+Seyha
 ```

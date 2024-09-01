@@ -30,6 +30,8 @@ endif ()
 
 add_library(dawn ${SRCS})
 
+target_compile_options(dawn PRIVATE ${SGD_ASAN_CCOPTS})
+
 target_link_libraries(dawn geom glfw lib-dawn)
 
 add_subdirectory(tests)

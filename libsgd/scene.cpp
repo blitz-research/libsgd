@@ -198,13 +198,14 @@ void SGD_DECL sgd_SetEntityParent(SGD_Entity hentity, SGD_Entity hparent) {
 SGD_Entity SGD_DECL sgd_GetEntityParent(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	auto parent = entity->parent();
-	return parent ? sgdx::getOrCreateHandle(parent) : 0;
+	return parent ? sgdx::getOrCreateHandle(parent) : SGD_NULL;
 }
 
 int SGD_DECL sgd_GetEntityChildCount(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	return (int)entity->children().size();
 }
+
 SGD_Entity SGD_DECL sgd_GetEntityChild(SGD_Entity hentity, int childIndex) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	if(childIndex<0 || childIndex>=entity->children().size()) sgdx::error("Child index out of range");
@@ -213,7 +214,8 @@ SGD_Entity SGD_DECL sgd_GetEntityChild(SGD_Entity hentity, int childIndex) {
 
 SGD_Entity SGD_DECL sgd_FindEntityChild(SGD_Entity hentity, SGD_String name) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	return sgdx::getOrCreateHandle(entity->findChild(name));
+	auto child = entity->findChild(name);
+	return child ? sgdx::getOrCreateHandle(child) : SGD_NULL;
 }
 
 void SGD_DECL sgd_SetEntityPosition(SGD_Entity hentity, SGD_Real tx, SGD_Real ty, SGD_Real tz) {

@@ -1,4 +1,18 @@
 
+***** V0.14.0 *****
+
+Added skirmish project. This will likely to become a standalone project one day, but for now it's more convenient being able to
+link with SGD directly.
+
+Added zig target - thanks Seyha! Use SGD_ZIG_TARGET_ENABLED=ON cmake option to enable, requires python3.
+
+Fixed FindEntityChild bug(s).
+
+Added GetMeshBoundsMinX,MinY,MinZ,MaxX,MaxY,MaxZ.
+
+Added address sanitizer to Windows version. Use SGD_ASAN_ENABLED=ON cmake option to enable.
+
+
 ***** V0.13.2 *****
 
 Fixed multiframe image loading.

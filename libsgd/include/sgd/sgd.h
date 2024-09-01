@@ -514,6 +514,9 @@ SGD_API void SGD_DECL sgd_SetMaterialTexture(SGD_Material material, SGD_String p
 //! Load a new mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path);
 
+//! Copy mesh.
+SGD_API SGD_Mesh SGD_DECL sgd_CopyMesh(SGD_Mesh mesh);
+
 //! Create a new box mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_CreateBoxMesh(float minX, float minY, float minZ, float maxX, float maxY, float maxZ,
 											SGD_Material material);
@@ -536,9 +539,6 @@ SGD_API void SGD_DECL sgd_SetMeshShadowsEnabled(SGD_Mesh mesh, SGD_Bool enabled)
 //! Get mesh shadow casting enabled.
 SGD_API SGD_Bool SGD_DECL sgd_IsMeshShadowsEnabled(SGD_Mesh mesh);
 
-//! Copy mesh.
-SGD_API SGD_Mesh SGD_DECL sgd_CopyMesh(SGD_Mesh mesh);
-
 //! Update mesh normals.
 SGD_API void SGD_DECL sgd_UpdateMeshNormals(SGD_Mesh mesh);
 
@@ -557,6 +557,24 @@ SGD_API void SGD_DECL sgd_TFormMeshTexCoords(SGD_Mesh mesh, float scaleX, float 
 
 //! Flip mesh.
 SGD_API void SGD_DECL sgd_FlipMesh(SGD_Mesh mesh);
+
+//! Get mesh bounding box min x coordinate.
+SGD_API float SGD_DECL sgd_GetMeshBoundsMinX(SGD_Mesh mesh);
+
+//! Get mesh bounding box min y coordinate.
+SGD_API float SGD_DECL sgd_GetMeshBoundsMinY(SGD_Mesh mesh);
+
+//! Get mesh bounding box min z coordinate.
+SGD_API float SGD_DECL sgd_GetMeshBoundsMinZ(SGD_Mesh mesh);
+
+//! Get mesh bounding box max x coordinate.
+SGD_API float SGD_DECL sgd_GetMeshBoundsMaxX(SGD_Mesh mesh);
+
+//! Get mesh bounding box max y coordinate.
+SGD_API float SGD_DECL sgd_GetMeshBoundsMaxY(SGD_Mesh mesh);
+
+//! Get mesh bounding box max z coordinate.
+SGD_API float SGD_DECL sgd_GetMeshBoundsMaxZ(SGD_Mesh mesh);
 
 //! @}
 

@@ -6,6 +6,7 @@
 //! @file
 
 #define SGD_FILEIOEX(MSG) sgd::FileioEx(sgd::String(MSG), __FILE__, __LINE__)
+#define SGD_PATHEX(MSG, PATH) SGD_FILEIOEX(sgd::String(MSG) + " \"" + (PATH).str() + "\"")
 
 namespace sgd {
 

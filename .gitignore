@@ -14,9 +14,6 @@ out
 # MSVC config
 .vs
 
-# Go not going yet
-libsgd/go
-
 # Ignore Blitz3d backup files
 *.bb_bak1
 *.bb_bak2
@@ -29,3 +26,6 @@ libsgd/go
 
 # Macos info
 .DS_Store
+
+# python virtual environment
+venv

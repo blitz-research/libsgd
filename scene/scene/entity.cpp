@@ -177,4 +177,12 @@ CAffineMat4r Entity::localMatrix() const { // NOLINT (recursive)
 	return m_localMatrix;
 }
 
+Entity* Entity::findChild(CString name) { // NOLINT (recursize)
+	if (m_name == name) return this;
+	for (Entity* child : m_children) {
+		if(auto found = child->findChild(name)) return found;
+	}
+	return nullptr;
+}
+
 } // namespace sgd
