@@ -95,12 +95,14 @@ void dawnLoggingCallback(WGPULoggingType type, const char* message, void*) {
 	}
 }
 
+#define LIMIT(X) SGD_LOG << #X ":" << limits.limits.X;
+
 void logAdapterProps(const wgpu::Adapter& adapter) {
 
 	wgpu::AdapterInfo info{};
 
 	adapter.GetInfo(&info);
-	SGD_LOG << "Dawn WGPU Adapter Info:";
+	SGD_LOG << "Dawn WGPU adapter Info:";
 	SGD_LOG << "Vender name:" << (info.vendor ? info.vendor : "???");
 	SGD_LOG << "Architecture:" << (info.architecture ? info.architecture : "???");
 	SGD_LOG << "Name:" << (info.device ? info.device : "???");
@@ -124,11 +126,42 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 	SGD_LOG << "Backend type:" << (backendIt!=backendTypes.end() ? backendIt->second : "???");
 	SGD_LOG << "Compatibility mode:" << info.compatibilityMode;
 
-	//wgpu::SupportedLimits limits;
-	//wgpuAdapterGetLimits(adapter.Get(), reinterpret_cast<WGPUSupportedLimits*>(&limits));
-	//SGD_LOG<<"Max bind groups:"<<limits.limits.maxBindGroups;
-	//SGD_LOG << "Max bind groups plus vertex buffers:"<<limits.limits.maxBindGroupsPlusVertexBuffers;
-	//SGD_LOG<<"Max bindings per bind group:"<<limits.limits.maxBindingsPerBindGroup;
+	SGD_LOG << "";
+	SGD_LOG << "Dawn WGPU adapter supported limits:";
+	wgpu::SupportedLimits limits;
+	wgpuAdapterGetLimits(adapter.Get(), reinterpret_cast<WGPUSupportedLimits*>(&limits));
+	LIMIT(maxTextureDimension1D);
+	LIMIT(maxTextureDimension2D);
+	LIMIT(maxTextureDimension3D);
+	LIMIT(maxTextureArrayLayers);
+	LIMIT(maxBindGroups);
+	LIMIT(maxBindGroupsPlusVertexBuffers);
+	LIMIT(maxBindingsPerBindGroup);
+	LIMIT(maxDynamicUniformBuffersPerPipelineLayout);
+	LIMIT(maxDynamicStorageBuffersPerPipelineLayout);
+	LIMIT(maxSampledTexturesPerShaderStage);
+	LIMIT(maxSamplersPerShaderStage);
+	LIMIT(maxStorageBuffersPerShaderStage);
+	LIMIT(maxStorageTexturesPerShaderStage);
+	LIMIT(maxUniformBuffersPerShaderStage);
+	LIMIT(maxUniformBufferBindingSize);
+	LIMIT(maxStorageBufferBindingSize);
+	LIMIT(minUniformBufferOffsetAlignment);
+	LIMIT(minStorageBufferOffsetAlignment);
+	LIMIT(maxVertexBuffers);
+	LIMIT(maxBufferSize);
+	LIMIT(maxVertexAttributes);
+	LIMIT(maxVertexBufferArrayStride);
+	LIMIT(maxInterStageShaderComponents);
+	LIMIT(maxInterStageShaderVariables);
+	LIMIT(maxColorAttachments);
+	LIMIT(maxColorAttachmentBytesPerSample);
+	LIMIT(maxComputeWorkgroupStorageSize);
+	LIMIT(maxComputeInvocationsPerWorkgroup);
+	LIMIT(maxComputeWorkgroupSizeX);
+	LIMIT(maxComputeWorkgroupSizeY);
+	LIMIT(maxComputeWorkgroupSizeZ);
+	LIMIT(maxComputeWorkgroupsPerDimension);
 }
 
 } // namespace
@@ -247,7 +280,7 @@ wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) 
 			surfaceDesc.nextInChain = &nativeDesc;
 
 			wgpu::Surface surface = wgpuInstanceCreateSurface(getWGPUInstance().Get(), (WGPUSurfaceDescriptor*)&surfaceDesc);
-			// Can't use hits, causes weird missing symbols errors on Linux!
+			// Can't use this, causes weird missing symbols errors on Linux!
 			// wgpu::Surface surface = getWGPUInstance().CreateSurface(&surfaceDesc);
 
 			result = surface;
