@@ -5,7 +5,16 @@
 
 namespace sgd {
 
+void Sprite::init() {
+	color.changed.connect(nullptr,[=](CVec4f ccolor){
+		auto lcolor=toLinearColor(ccolor);
+		m_pmColor = {lcolor.xyz() * lcolor.w, lcolor.w};
+	});
+	color.changed.emit(color());
+}
+
 Sprite::Sprite(Image* iimage):image(iimage){
+	init();
 }
 
 Sprite::Sprite(const Sprite* that)
@@ -13,6 +22,7 @@ Sprite::Sprite(const Sprite* that)
 	  image(that->image()),
 	  color(that->color()),
 	  frame(that->frame()) {
+	init();
 }
 
 Entity* Sprite::onCopy() const {

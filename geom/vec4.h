@@ -72,6 +72,10 @@ template <class T> std::ostream& operator<<(std::ostream& str, CVec4<T>& v);
 
 template <class T> uint32_t rgba(CVec4<T> color);
 
+template <class T> Vec4<T> toLinearColor(CVec4<T> color);
+
+template <class T> Vec4<T> toSRGBAColor(CVec4<T> color);
+
 } // namespace sgd
 
 #include "vec4.inl"

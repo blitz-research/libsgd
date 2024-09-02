@@ -8,8 +8,10 @@
 namespace sgd {
 
 void Model::init() {
-	color.changed.connect(
-		nullptr, [=](CVec4f ccolor) { m_pmColor = {ccolor.x * ccolor.w, ccolor.y * ccolor.w, ccolor.z * ccolor.w, ccolor.w}; });
+	color.changed.connect(nullptr, [=](CVec4f ccolor) { //
+		auto lcolor = toLinearColor(ccolor);
+		m_pmColor = {lcolor.xyz() * lcolor.w, lcolor.w};
+	});
 	m_pmColor = color();
 }
 

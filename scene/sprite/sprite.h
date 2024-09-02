@@ -19,10 +19,17 @@ struct Sprite : Entity {
 	Property<Vec4f> color{Vec4f(1)};
 	Property<float> frame;
 
+	CVec4f pmColor()const{
+		return m_pmColor;
+	}
+
 private:
+	Vec4f m_pmColor;
+
 	Entity* onCopy() const override;
 	void onShow() override;
 	void onHide() override;
+	void init();
 };
 
 } // namespace sgd

@@ -155,4 +155,15 @@ template <class T> uint32_t rgba(CVec4<T> color) {
 		   uint8_t(color.x * 255);
 }
 
+template <class T> Vec4<T> toLinearColor(CVec4<T> color) {
+	constexpr T e=(T)2.2;
+	return {std::pow(color.x, e), std::pow(color.y, e), std::pow(color.z, e), color.w};
+}
+
+template <class T> Vec4<T> toSRGBAColor(CVec4<T> color) {
+	constexpr T e=(T)1.0/(T)2.2;
+	return {std::pow(color.x, e), std::pow(color.y, e), std::pow(color.z, e), color.w};
+}
+
+
 } // namespace sgd

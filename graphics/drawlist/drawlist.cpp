@@ -63,19 +63,22 @@ DrawList::DrawList()
 	projectionMatrix = Mat4f::ortho(0, 1920, 1080, 0, 0, 1);
 
 	fillColor.changed.connect(this, [=](CVec4f color) { //
-		m_pmFillColor = Vec4f(Vec3f(color) * color.w, color.w);
+		auto lcolor = toLinearColor(color);
+		m_pmFillColor = {lcolor.xyz() * lcolor.w, lcolor.w};
 	});
-	m_pmFillColor = fillColor();
+	fillColor.changed.emit(fillColor());
 
 	outlineColor.changed.connect(this, [=](CVec4f color) { //
-		m_pmOutlineColor = Vec4f(Vec3f(color) * color.w, color.w);
+		auto lcolor = toLinearColor(color);
+		m_pmOutlineColor = {lcolor.xyz() * lcolor.w, lcolor.w};
 	});
-	m_pmOutlineColor = outlineColor();
+	outlineColor.changed.emit(outlineColor());
 
 	textColor.changed.connect(this, [=](CVec4f color) { //
-		m_pmTextColor = Vec4f(Vec3f(color) * color.w, color.w);
+		auto lcolor = toLinearColor(color);
+		m_pmTextColor = {lcolor.xyz() * lcolor.w, lcolor.w};
 	});
-	m_pmTextColor = textColor();
+	textColor.changed.emit(textColor());
 
 	m_drawOpCounts.push_back(0);
 	m_vertexCounts.push_back(0);
@@ -183,7 +186,7 @@ void DrawList::addImage(CImage* image, CVec2f v, float frame) {
 	rect += v;
 
 	if (fillEnabled()) fillRect(rect, image->material(), m_pmFillColor, frame);
-	//if (outlineEnabled()) addOutline(rect);
+	// if (outlineEnabled()) addOutline(rect);
 }
 
 void DrawList::addRect(CRectf rect) {
