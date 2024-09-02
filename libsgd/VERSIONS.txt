@@ -1,6 +1,10 @@
 
 ***** V0.14.0 *****
 
+Cleaned up object<->handle interface, add sgd_ReleaseHandle and sgd_ReleaseAllhandles.
+
+Changed 2D fill, outline and  text colors and 3D model and sprite colors to assume sRGB colors with unpremultiplied alpha.
+
 Added skirmish project. This will likely to become a standalone project one day, but for now it's more convenient being able to
 link with SGD directly.
 
