@@ -95,7 +95,7 @@ void SGD_DECL sgd_ReleaseHandle(SGD_Handle handle) {
 	sgdx::releaseHandle(handle);
 }
 
-void SGD_DECL sgd_ReleaseAllHandles(SGD_Handle handle) {
+void SGD_DECL sgd_ReleaseAllHandles() {
 	sgdx::releaseAllHandles();
 }
 
