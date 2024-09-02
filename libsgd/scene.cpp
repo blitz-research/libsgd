@@ -19,15 +19,19 @@ void unlockConfigUniforms() {
 
 // ***** Scene *****
 
-// Creates a new scene if none exists.
 void SGD_DECL sgd_ClearScene() {
-	if (!sgdx::g_mainScene) {
-		sgd::createGC(sgdx::mainWindow());
-		sgdx::g_mainScene = new sgd::Scene();
-	} else {
-		sgdx::mainScene()->clear();
-		sgdx::destroyAllHandles();
+	sgdx::mainScene()->clear();
+	sgdx::releaseAllHandles(sgd::Entity::staticType());
+}
+
+void SGD_DECL sgd_ResetScene(SGD_Bool releaseAllHandles) {
+	if(sgdx::g_mainScene) sgdx::g_mainScene->clear();
+	if(releaseAllHandles) {
+		sgdx::releaseAllHandles();
+	}else{
+		sgdx::releaseAllHandles(sgd::Entity::staticType());
 	}
+	sgdx::g_mainScene = new sgd::Scene();
 	sgdx::g_overlay = new sgd::Overlay();
 	sgdx::g_mainScene->add(sgdx::g_overlay);
 	sgdx::g_drawList = sgdx::g_overlay->drawList();
@@ -152,22 +156,21 @@ SGD_Bool SGD_DECL sgd_IsEntityVisible(SGD_Entity hentity) {
 void SGD_DECL sgd_DestroyEntity(SGD_Entity hentity) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 
-	sgd::Function<void(sgd::Entity*)> destroyHandles;
+	sgd::Function<void(sgd::Entity*)> releaseHandles;
 
-	destroyHandles = [&](sgd::Entity* entity) {
+	releaseHandles = [&](sgd::Entity* entity) {
 		for (sgd::Entity* child : entity->children()) {
-			destroyHandles(child);
+			releaseHandles(child);
 		}
-		if (!sgdx::destroyHandle(entity)) {} // sgd::log() << "!!! SGDX Failed to destroy handle for entity:" << entity;
+		sgdx::releaseHandle(entity);
 	};
-	destroyHandles(entity);
+	releaseHandles(entity);
 
 	sgdx::mainScene()->remove(entity);
 }
 
 void SGD_DECL sgd_ResetEntity(SGD_Entity hentity) {
-	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	entity->reset();
+	sgdx::resolveHandle<sgd::Entity>(hentity)->reset();
 }
 
 SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
@@ -178,8 +181,7 @@ SGD_Entity SGD_DECL sgd_CopyEntity(SGD_Entity hentity) {
 }
 
 void SGD_DECL sgd_SetEntityName(SGD_Entity hentity, SGD_String name) {
-	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	entity->setName(name);
+	sgdx::resolveHandle<sgd::Entity>(hentity)->setName(name);
 }
 
 SGD_String SGD_DECL sgd_GetEntityName(SGD_Entity hentity) {
@@ -579,7 +581,7 @@ SGD_Sprite SGD_DECL sgd_CreateSprite(SGD_Image himage) {
 	auto sprite = new sgdx::Sprite();
 	sgdx::mainScene()->add(sprite);
 	sprite->image = image;
-	return sgdx::createHandle<sgdx::Sprite>(sprite);
+	return sgdx::createHandle(sprite);
 }
 
 void SGD_DECL sgd_SetSpriteImage(SGD_Sprite hsprite, SGD_Image himage) {

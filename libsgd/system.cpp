@@ -91,6 +91,14 @@ int SGD_DECL sgd_PollEvents() {
 	return mask;
 }
 
+void SGD_DECL sgd_ReleaseHandle(SGD_Handle handle) {
+	sgdx::releaseHandle(handle);
+}
+
+void SGD_DECL sgd_ReleaseAllHandles(SGD_Handle handle) {
+	sgdx::releaseAllHandles();
+}
+
 void SGD_DECL sgd_DebugMemory() {
 	sgdx::started();
 

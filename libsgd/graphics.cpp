@@ -546,8 +546,8 @@ void SGD_DECL sgd_SetImageRect(SGD_Image himage, float minX, float minY, float m
 	sgdx::resolveHandle<sgd::Image>(himage)->rect = {minX, minY, maxX, maxY};
 }
 
-int SGD_DECL sgd_GetImageTexture(SGD_Image himage) {
-	return sgdx::getOrCreateHandle<sgd::Texture>(sgdx::resolveHandle<sgd::Image>(himage)->texture());
+SGD_Texture SGD_DECL sgd_GetImageTexture(SGD_Image himage) {
+	return sgdx::getOrCreateHandle(sgdx::resolveHandle<sgd::Image>(himage)->texture());
 }
 
 // ***** 2D Overlay *****

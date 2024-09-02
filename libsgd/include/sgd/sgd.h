@@ -145,6 +145,21 @@ SGD_API int SGD_DECL sgd_GetDesktopHeight();
 //! SGD_EVENT_MASK_RESUMED         | 0x20          | App resumed
 SGD_API int SGD_DECL sgd_PollEvents();
 
+//! Release an object handle.
+//!
+//! Will cause the object referenced by the handle to become available for destruction,
+//! and will also invalidate the handle.
+//!
+//! An object will not be destroyed while it is still being used by another object, eg:
+//! a model's mesh will not be destrioyed while the object is still using it.
+//!
+//! It is an error to use an invalidated handle, so once a handle is released be careful
+//! not to use it again.
+SGD_API void SGD_DECL sgd_ReleaseHandle(SGD_Handle handle);
+
+//! Release all object handles.
+SGD_API void SGD_DECL sgd_ReleaseAllHandles();
+
 //! @cond Debug memory state.
 SGD_API void SGD_DECL sgd_DebugMemory();
 //! @endcond
@@ -740,7 +755,7 @@ SGD_API void SGD_DECL sgd_SetImageBlendMode(SGD_Image image, int blendMode);
 SGD_API void SGD_DECL sgd_SetImageRect(SGD_Image image, float minX, float minY, float maxX, float maxY);
 
 //! Get texture used to create image.
-SGD_API int SGD_DECL sgd_GetImageTexture(SGD_Image image);
+SGD_API SGD_Texture SGD_DECL sgd_GetImageTexture(SGD_Image image);
 
 //! @}
 
@@ -850,8 +865,16 @@ SGD_API void SGD_DECL sgd_StopAudio(int audio);
 //! @name Scene
 //! @{
 
-//! Release SGD resources currently in use.
+//! Destroy all active entities.
 SGD_API void SGD_DECL sgd_ClearScene();
+
+//! Reset scene to default state.
+//!
+//! Destroys all active entities in the scene.
+//!
+//! If the release all handles argument is true, sgd_ReleaseAllHandles is also called, allowing
+//! you to reset to the initial app state with a single command.
+SGD_API void SGD_DECL sgd_ResetScene(SGD_Bool releaseAllHandles);
 
 //! Set scene ambient light color.
 SGD_API void SGD_DECL sgd_SetAmbientLightColor(float red, float green, float blue, float alpha);
