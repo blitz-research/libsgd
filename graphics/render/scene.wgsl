@@ -138,17 +138,6 @@ struct LightingUniforms {
 @group(0) @binding(ssmSamplerBinding) var scene_ssmSampler: sampler_comparison;
 @group(0) @binding(ssmMatricesBinding) var<storage> scene_ssmMatrices: array<mat4x4f>;
 
-/*
-var _scene_position: vec3f;
-var _scene_normal: vec3f;
-var _scene_diffuse: vec3f;
-var _scene_specular: vec3f;
-var _scene_glosiness: f32;
-var _scene_spower: f32;
-var _scene_vvec: vec3f;
-var _scene_lvec: vec3f;
-*/
-
 fn pointLightAtten(d: f32, range: f32, falloff: f32) -> f32 {
     // Attenuation - This seems like the most practially useful:
     // https://lisyarus.github.io/blog/graphics/2022/07/30/point-light-attenuation.html
@@ -335,7 +324,6 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	return vec4f(color + emissive, albedo.a);
 #if OS_MACOS
-    // WTF?
 	return vec4f(color + emissive, albedo.a);
 #endif
 }
