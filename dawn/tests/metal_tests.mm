@@ -55,11 +55,9 @@ wgpu::BindGroup wgpuBindGroup;
 
 wgpu::RenderPipeline wgpuPipeline;
 
-wgpu::Future wgpuWorkDone;
-
 auto shaderSource = R"(
 
-@group(0) @binding(0) var texture: texture_2d_array<f32>;
+//@group(0) @binding(0) var texture: texture_2d_array<f32>;
 
 @vertex fn vertexMain(@builtin(vertex_index) vertexId: u32) -> @builtin(position) vec4f {
     const verts = array<vec2f, 3>(vec2f( 0.0,  0.5), vec2f(-0.5, -0.5), vec2f( 0.5, -0.5));
@@ -241,7 +239,7 @@ int main() {
 
     createSurface();
 
-    createBindGroup();
+    if(bindGroupEnabled) createBindGroup();
 
     createPipeline();
 
@@ -273,7 +271,7 @@ int main() {
 		desc.colorAttachments = &colorAttachment;
 		auto renderPass = encoder.BeginRenderPass(&desc);
 
-		renderPass.SetBindGroup(0, wgpuBindGroup);
+		if(bindGroupEnabled) renderPass.SetBindGroup(0, wgpuBindGroup);
 
 		// Render triangle
 		renderPass.SetPipeline(wgpuPipeline);
