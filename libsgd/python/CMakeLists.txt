@@ -31,6 +31,8 @@ elseif(SGD_OS_MACOS)
 		message(WARNING "### Can't find ${CELLAR_DIR} dir, skipping python target.")
 		return()
 	endif()
+elseif(SGD_OS_LINUX)
+	set(PYTHON_CFG x86_64-linux-gnu)
 else()
 	message(WARNING "### Python target only supported on Windows and MacOS, skipping.")
 	return()
@@ -75,14 +77,22 @@ function(create_python_lib_target py_ver include_dirs libs)
 endfunction()
 
 if(SGD_OS_WINDOWS)
+
 	create_python_lib_target(py38 ${PYTHON_DIR}/Python38/include ${PYTHON_DIR}/Python38/libs/Python38.lib)
 	create_python_lib_target(py39 ${PYTHON_DIR}/Python39/include ${PYTHON_DIR}/Python39/libs/Python39.lib)
 	create_python_lib_target(py310 ${PYTHON_DIR}/Python310/include ${PYTHON_DIR}/Python310/libs/Python310.lib)
 	create_python_lib_target(py311 ${PYTHON_DIR}/Python311/include ${PYTHON_DIR}/Python311/libs/Python311.lib)
+
 elseif(SGD_OS_MACOS)
+
 	set(FW_DIR Frameworks/Python.framework/Versions)
 	set(SDK38_DIR ${CELLAR_DIR}/python@3.8/3.8.19/${FW_DIR}/3.8)
 	create_python_lib_target(py38 ${SDK38_DIR}/include/python3.8 ${SDK38_DIR}/lib/libpython3.8.dylib)
+
+elseif(SGD_OS_LINUX)
+
+	create_python_lib_target(py38 /usr/include/python3.8 /usr/lib/python3.8/config-3.8-${PYTHON_CFG}/libpython3.8.a)
+
 endif()
 
 install(FILES ${SRC}/helloworld.py DESTINATION python)

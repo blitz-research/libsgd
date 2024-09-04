@@ -9,17 +9,16 @@ function build() {
 
 	if [[ $platform == "msys" || $platform == "cygwin" ]]; then
 
-	  	# Note: You can't use an alias or var here in gitbash for some reason, python is freaking wild...
   		~/AppData/Local/Programs/Python/Python3${1}/python.exe -m build --wheel
 
   	elif [[ $platform == "Darwin" ]]; then
 
     	python3.${1} -m build --wheel
 
-	elif [[ $unamestr == 'Linux' ]]; then
+	elif [[ $platform == 'Linux' ]]; then
 
-		echo "TODO"
-		exit 1
+		/usr/bin/python3.${1} -m build --wheel
+
 	fi
 }
 
