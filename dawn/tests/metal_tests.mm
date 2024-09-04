@@ -57,7 +57,7 @@ wgpu::RenderPipeline wgpuPipeline;
 
 auto shaderSource = R"(
 
-//@group(0) @binding(0) var texture: texture_2d_array<f32>;
+@group(0) @binding(0) var texture: texture_2d_array<f32>;
 
 @vertex fn vertexMain(@builtin(vertex_index) vertexId: u32) -> @builtin(position) vec4f {
     const verts = array<vec2f, 3>(vec2f( 0.0,  0.5), vec2f(-0.5, -0.5), vec2f( 0.5, -0.5));
@@ -126,8 +126,11 @@ void createSurface(){
 	NSWindow* nsWindow = glfwGetCocoaWindow(glfwWindow);
 	NSView* view = [nsWindow contentView];
 
+    auto layer = [CAMetalLayer layer];
+    
+//    layer.displaySyncEnabled = true;
 	[view setWantsLayer:YES];
-	[view setLayer:[CAMetalLayer layer]];
+    [view setLayer:layer];
 
 	// Use retina if the window was created with retina support.
 	[[view layer] setContentsScale:[nsWindow backingScaleFactor]];
@@ -244,12 +247,14 @@ int main() {
     createPipeline();
 
 	// Render loop!
-	for (;;) {
-//	for(int i=0;i<30;++i) {
+//	for (;;) {
+	for(int i=0;i<30;++i) {
+        
+        puts("### Tick");
 
         // Note: without this, there's no vsync on MacOS
 		glfwPollEvents();
-		if (glfwWindowShouldClose(glfwWindow)) break;
+//		if (glfwWindowShouldClose(glfwWindow)) break;
 
 		// Begin rendering
 		auto encoder = wgpuDevice.CreateCommandEncoder();
