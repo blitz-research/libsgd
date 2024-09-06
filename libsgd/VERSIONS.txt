@@ -1,13 +1,16 @@
-
 ***** V0.14.0 *****
 
-Updateed Dawn to latest remote HEAD.
+Fixed gltfloader current dir when loading GLBs.
 
-Cleaned up object<->handle interface, add sgd_ReleaseHandle and sgd_ReleaseAllhandles.
+Updated Dawn to latest remote HEAD.
+
+Update sgd_ClearScene, added sgd_ResetScene.
+
+Cleaned up object<->handle interface, added sgd_ReleaseHandle and sgd_ReleaseAllhandles.
 
 Changed 2D fill, outline and  text colors and 3D model and sprite colors to assume sRGB colors with unpremultiplied alpha.
 
-Added skirmish project. This will likely to become a standalone project one day, but for now it's more convenient being able to
+Added skirmish project. This will become a stand alone project one day, but for now it's more convenient being able to
 link with SGD directly.
 
 Added zig target - thanks Seyha! Use SGD_ZIG_TARGET_ENABLED=ON cmake option to enable, requires python3.

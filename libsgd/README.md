@@ -35,15 +35,13 @@ Shane
 Simon Harrison
 MarLupin
 Medi98
-Chaduke
 Michael Denathorn
+Chaduke
 James Boyd
-Dex
-Mark Sibly
 Andy Hewco
-Dan
 Markus Rosse
+Dex
+Dan
 JaviCervera
 Amon
-Seyha
 ```
