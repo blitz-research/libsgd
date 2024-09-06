@@ -1,9 +1,6 @@
 import subprocess
 import sys
 
-from conans.client.remote_manager import uncompress_file
-
-
 def main(inc_dir, output_file):
 
     sgd_include_path = inc_dir + '/sgd/sgd.h'
