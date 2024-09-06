@@ -153,6 +153,8 @@ if (SGD_OS_LINUX)
 
 elseif (SGD_OS_MACOS)
 
+	enable_language(OBJC OBJCXX)
+
     # This defaults to "qc" but since macOS always runs ranlib right after, we can pass "Sqc" and avoid
     # the step of generating a symbol table. ranlib will do it for us.
     set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> Sqc <TARGET> <LINK_FLAGS> <OBJECTS>")

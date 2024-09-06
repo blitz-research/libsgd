@@ -29,20 +29,18 @@ void* createMetalLayer(GLFWwindow* window);
 namespace {
 
 bool g_validationEnabled = true;
-auto init0 = configVarChanged("dawn.validationEnabled").connect(nullptr,[](CString value){
-	g_validationEnabled = truthiness(value);
-});
+auto init0 =
+	configVarChanged("dawn.validationEnabled").connect(nullptr, [](CString value) { g_validationEnabled = truthiness(value); });
 
 bool g_robustnessEnabled = true;
-auto init1 = configVarChanged("dawn.robustnessEnabled").connect(nullptr,[](CString value){
-	g_validationEnabled = truthiness(value);
-});
+auto init1 =
+	configVarChanged("dawn.robustnessEnabled").connect(nullptr, [](CString value) { g_validationEnabled = truthiness(value); });
 
-//wgpu::FeatureName requiredFeatures[]{wgpu::FeatureName::TimestampQuery};
+// wgpu::FeatureName requiredFeatures[]{wgpu::FeatureName::TimestampQuery};
 //, wgpu::FeatureName::Float32Filterable};
 //, wgpu::FeatureName::TimestampQueryInsidePasses};
 
-//const char* enabledToggles[] = {"allow_unsafe_apis"};
+// const char* enabledToggles[] = {"allow_unsafe_apis"};
 //, "float32-filterable"
 
 void dawnDeviceLostCallback(WGPUDevice const* device, WGPUDeviceLostReason reason, char const* message, void* userdata) {
@@ -114,7 +112,7 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 		{wgpu::AdapterType::Unknown, "Unknown"},
 	};
 	auto adapterIt = adapterTypes.find(info.adapterType);
-	SGD_LOG << "Adapter type:" << (adapterIt!=adapterTypes.end() ? adapterIt->second : "???");
+	SGD_LOG << "Adapter type:" << (adapterIt != adapterTypes.end() ? adapterIt->second : "???");
 	Map<wgpu::BackendType, String> backendTypes{
 		{wgpu::BackendType::Undefined, "Undefined"}, {wgpu::BackendType::D3D12, "D3D12"},
 		{wgpu::BackendType::D3D11, "D3D11"},		 {wgpu::BackendType::Vulkan, "Vulkan"},
@@ -123,9 +121,10 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 		{wgpu::BackendType::WebGPU, "WebGPU"},
 	};
 	auto backendIt = backendTypes.find(info.backendType);
-	SGD_LOG << "Backend type:" << (backendIt!=backendTypes.end() ? backendIt->second : "???");
+	SGD_LOG << "Backend type:" << (backendIt != backendTypes.end() ? backendIt->second : "???");
 	SGD_LOG << "Compatibility mode:" << info.compatibilityMode;
 
+#if 0 // TODO
 	SGD_LOG << "";
 	SGD_LOG << "Dawn WGPU adapter supported limits:";
 	wgpu::SupportedLimits limits;
@@ -162,13 +161,14 @@ void logAdapterProps(const wgpu::Adapter& adapter) {
 	LIMIT(maxComputeWorkgroupSizeY);
 	LIMIT(maxComputeWorkgroupSizeZ);
 	LIMIT(maxComputeWorkgroupsPerDimension);
+#endif
 }
 
 } // namespace
 
 const wgpu::Instance& getWGPUInstance() {
 	static wgpu::Instance instance;
-	if(instance) return instance;
+	if (instance) return instance;
 
 	dawnProcSetProcs(&dawn::native::GetProcs());
 
@@ -181,9 +181,8 @@ const wgpu::Instance& getWGPUInstance() {
 void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 					   CFunction<void(const wgpu::Device& device)> callbackFunc) {
 
-	getWGPUInstance().RequestAdapter(
-		&adapterOptions,
-		wgpu::CallbackMode::AllowProcessEvents,
+	getWGPUInstance().RequestAdapter( //
+		&adapterOptions, wgpu::CallbackMode::AllowProcessEvents,
 		[=](wgpu::RequestAdapterStatus status, const wgpu::Adapter& adapter, char const* message) {
 			if (status != wgpu::RequestAdapterStatus::Success) {
 				SGD_ERROR("Dawn RequestAdapter() failed");
@@ -191,46 +190,44 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 
 			logAdapterProps(adapter);
 
-			wgpu::DeviceDescriptor devDesc{};
-			wgpu::DawnTogglesDescriptor togglesDesc{};
-
 			Vector<const char*> enabledToggles;
-			Vector<wgpu::FeatureName> requiredFeatures;
-
-			enabledToggles.push_back("allow_unsafe_apis");
-			if(!g_validationEnabled) enabledToggles.push_back("skip_validation");
-			if(!g_robustnessEnabled) enabledToggles.push_back("disable_robustness");
-
-			//for(auto s : enabledToggles) SGD_LOG << "toggle:"<<s;
-
-			if(adapter.HasFeature(wgpu::FeatureName::TimestampQuery)) {
-				requiredFeatures.push_back(wgpu::FeatureName::TimestampQuery);
+			{
+				enabledToggles.push_back("allow_unsafe_apis");
+				if (!g_validationEnabled) enabledToggles.push_back("skip_validation");
+				if (!g_robustnessEnabled) enabledToggles.push_back("disable_robustness");
 			}
 
-			devDesc.nextInChain = &togglesDesc;
-			devDesc.requiredFeatureCount = requiredFeatures.size();
-			devDesc.requiredFeatures = requiredFeatures.data();
-			devDesc.deviceLostCallbackInfo.callback = &dawnDeviceLostCallback;
-			devDesc.uncapturedErrorCallbackInfo.callback = &dawnErrorCallback;
+			Vector<wgpu::FeatureName> requiredFeatures;
+			{
+				if (adapter.HasFeature(wgpu::FeatureName::TimestampQuery)) {
+					requiredFeatures.push_back(wgpu::FeatureName::TimestampQuery);
+				}
+			}
 
-			togglesDesc.enabledToggleCount=enabledToggles.size();
-			togglesDesc.enabledToggles=enabledToggles.data();
+			wgpu::DeviceDescriptor devDesc{};
+			wgpu::DawnTogglesDescriptor togglesDesc{};
+			{
+				devDesc.nextInChain = &togglesDesc;
+				devDesc.requiredFeatureCount = requiredFeatures.size();
+				devDesc.requiredFeatures = requiredFeatures.data();
+				devDesc.deviceLostCallbackInfo.callback = &dawnDeviceLostCallback;
+				devDesc.uncapturedErrorCallbackInfo.callback = &dawnErrorCallback;
 
-			adapter.RequestDevice(
-				&devDesc,
-				wgpu::CallbackMode::AllowProcessEvents,
+				togglesDesc.enabledToggleCount = enabledToggles.size();
+				togglesDesc.enabledToggles = enabledToggles.data();
+			}
+
+			adapter.RequestDevice( //
+				&devDesc, wgpu::CallbackMode::AllowProcessEvents,
 				[=](wgpu::RequestDeviceStatus status, const wgpu::Device& device, const char* message) {
 					if (status != wgpu::RequestDeviceStatus::Success) {
 						SGD_ERROR("Dawn RequestDevice() failed");
 					}
-
 					device.SetLoggingCallback(&dawnLoggingCallback, nullptr);
-
 					callbackFunc(device);
 				});
+			getWGPUInstance().ProcessEvents();
 		});
-
-	getWGPUInstance().ProcessEvents();
 	getWGPUInstance().ProcessEvents();
 }
 
@@ -260,7 +257,6 @@ wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) 
 
 	runOnMainThread(
 		[&] {
-
 #if SGD_OS_WINDOWS
 			wgpu::SurfaceDescriptorFromWindowsHWND nativeDesc{};
 			nativeDesc.hwnd = glfwGetWin32Window(window);

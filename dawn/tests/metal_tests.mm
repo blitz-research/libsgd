@@ -1,22 +1,3 @@
-/*
-
-Minimal example of a weird problem that appears to involves textures. The app will intermittently freeze at start, with either the dreaded
-'magenta window of death' or the first frame correctly displayed.
-
-After that, it will either lock up forever and you'll have to reboot, or it will recover after 10-20 seconds, but possibly with one frame stuck at
-magenta. Sometimes it appears to recovers fully.
-
-It's pretty hard to get to occur, you may have to run it many times. Running with 'lldb' from the command line seems to work best, although I have
-had it die on me from plain shell, xcode, even CLion. You can also try only running the main loop 30 times or so (see comment) and calling
-the app repeatedly from a bash/python script.
-
-Changing the length of the array seems to have an effect too, setting it to longer values seems make the problem occur more often but that may just be
-my imagination!
-
-I've seen the problem occur with plain 2D textures too, but that seemed to be much harder to reproduce so I've left it as is.
-
-*/
-
 #include <cassert>
 #include <cstdlib>
 #include <GLFW/glfw3.h>
