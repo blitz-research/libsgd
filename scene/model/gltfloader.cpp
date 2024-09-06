@@ -84,22 +84,23 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 
 	bool res;
 	auto magic = "glTF";
+	auto baseDir = path.filePath().parent_path().u8string();
+
+	// Load!
 	if (data.size() >= 4 && !std::memcmp(data.data(), magic, 4)) {
-		res = gltfLoader.LoadBinaryFromMemory(&gltfModel, &err, &warn, data.data(), data.size());
+		res = gltfLoader.LoadBinaryFromMemory(&gltfModel, &err, &warn, data.data(), data.size(), baseDir);
 	} else {
-		auto baseDir = path.filePath().parent_path().u8string();
 		res = gltfLoader.LoadASCIIFromString(&gltfModel, &err, &warn, (char*)data.data(), data.size(), baseDir);
 	}
-	if (!warn.empty()) {
-		SGD_LOG << "Tiny gltf warning:" << warn;
-	}
-	if (!err.empty()) {
+	// Error?
+	if (!res || !err.empty()) {
+		if(err.empty()) err = "Unknown error";
 		SGD_LOG << "Tiny gltf error:" << err;
 		return SGD_FILEIOEX("Tiny gltf error: " + err);
 	}
-	if (!res) {
-		SGD_LOG << "Tiny gltf unknown error";
-		return SGD_FILEIOEX("Tiny gltf unknown error");
+	// Warning?
+	if (!warn.empty()) {
+		SGD_LOG << "Tiny gltf warning:" << warn;
 	}
 
 	cachedImages.resize(gltfModel.images.size());

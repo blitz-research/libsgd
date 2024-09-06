@@ -36,3 +36,6 @@ target_link_libraries(scene_tests_collisions scene)
 
 add_executable(scene_tests_blendtest scene_tests_blendtest.cpp)
 target_link_libraries(scene_tests_blendtest scene)
+
+add_executable(scene_tests_scratch scene_tests_scratch.cpp)
+target_link_libraries(scene_tests_scratch scene)
