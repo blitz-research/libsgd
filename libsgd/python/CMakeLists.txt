@@ -82,6 +82,7 @@ if(SGD_OS_WINDOWS)
 	create_python_lib_target(py39 ${PYTHON_DIR}/Python39/include ${PYTHON_DIR}/Python39/libs/Python39.lib)
 	create_python_lib_target(py310 ${PYTHON_DIR}/Python310/include ${PYTHON_DIR}/Python310/libs/Python310.lib)
 	create_python_lib_target(py311 ${PYTHON_DIR}/Python311/include ${PYTHON_DIR}/Python311/libs/Python311.lib)
+	create_python_lib_target(py312 ${PYTHON_DIR}/Python312/include ${PYTHON_DIR}/Python312/libs/Python312.lib)
 
 elseif(SGD_OS_MACOS)
 

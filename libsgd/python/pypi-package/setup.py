@@ -4,12 +4,8 @@ import os
 
 if sys.platform == "win32":
 	ext = "pyd"
-elif sys.platform == "darwin":
-	ext = "so"
-elif sys.platform == "linux":
-	ext = "so"
 else:
-	raise RuntimeError("Unrecognized sys.plaform '"+sys.platform+"'")
+	ext = "so"
 
 path = os.path.join("libs", "py3" + str(sys.version_info.minor), "_sgd."+ext)
 

@@ -9,12 +9,8 @@ import os
 
 if sys.platform == "win32":
     ext = "pyd"
-elif sys.platform == "darwin":
-    ext = "so"
-elif sys.platform == "linux":
-    ext = "so"
 else:
-    raise ImportError("Unrecognized sys.plaform '"+sys.platform+"'")
+    ext = "so"
 
 path = os.path.join(os.path.dirname(__file__), "libs", "py3" + str(sys.version_info.minor), "_sgd."+ext)
 
