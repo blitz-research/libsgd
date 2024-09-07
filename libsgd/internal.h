@@ -56,7 +56,8 @@ void releaseAllHandles();
 void releaseAllHandles(ObjectType* ofType);
 
 template<class T> T* resolveHandle(SGD_Handle handle) {
-	return resolveHandle(handle)->as<T>();
+	auto shared = resolveHandle(handle);
+	return shared->as<T>();
 }
 
 } // namespace sgdx
