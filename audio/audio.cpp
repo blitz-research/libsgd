@@ -46,6 +46,7 @@ auto initing = appIniting.connect(nullptr, [] {
 } // namespace
 
 Sound::~Sound() {
+	if(!g_soloud) return;	// handle delete after sgd_Terminate().
 	delete wav;
 }
 
