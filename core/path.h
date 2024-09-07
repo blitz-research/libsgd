@@ -13,16 +13,10 @@ using CPath = const Path&;
 
 struct Path {
 
-	enum struct Flags {
-		valid = 1,
-		url = 1,
-		filePath = 2,
-	};
-
 	Path() = default;
 	explicit Path(CString path);
 	explicit Path(const char* path);
-	explicit Path(std::filesystem::path path);
+	explicit Path(const std::filesystem::path& path);
 
 	bool isFilePath() const;
 	std::filesystem::path filePath() const;
@@ -30,19 +24,7 @@ struct Path {
 	bool isUrl() const;
 	String url() const;
 
-	// File functions only...
 	bool empty() const;
-	bool exists() const;
-	bool isFile() const;
-	bool isDir() const;
-
-	String name()const;
-	String stem()const;
-	String ext()const;
-
-	Path parentDir() const;
-	bool createFile(bool createParentDirs) const;
-	bool createDir(bool createParentDirs) const;
 
 	explicit operator bool() const {
 		return !empty();
@@ -51,6 +33,21 @@ struct Path {
 	String str() const {
 		return m_str;
 	}
+
+	// File or URL...
+	Path parentPath() const;
+	String name()const;
+	String stem()const;
+	String ext()const;
+
+	// File only...
+	Path absolutePath() const;
+	bool exists() const;
+	bool isFile() const;
+	bool isDir() const;
+
+	bool createFile(bool createParents) const;
+	bool createDir(bool createParents) const;
 
 private:
 	String m_str;

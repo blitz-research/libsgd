@@ -26,6 +26,7 @@ namespace {
 
 CString homeDir() {
 	static String dir;
+	if(!dir.empty()) return dir;
 #if SGD_OS_WINDOWS
 	auto home = getenv("USERPROFILE");
 	if (!home) home = getenv("HOMEPATH");
@@ -45,6 +46,7 @@ String join(CString x, CString y) {
 } // namespace
 
 void Path::init(CString str) {
+	// TODO: Better file/url validity checking
 	m_str = replace(str, "\\", "/");
 	if (m_str.find("://") != String::npos) {
 		m_url = m_str;
@@ -59,8 +61,7 @@ Path::Path(const char* path) {
 	init(path);
 }
 
-Path::Path(std::filesystem::path path) {
-	init(path.u8string());
+Path::Path(const std::filesystem::path& path) : m_str(path.u8string()) {
 }
 
 bool Path::isFilePath() const {
@@ -86,40 +87,18 @@ bool Path::empty() const {
 	return m_str.empty();
 }
 
-bool Path::exists() const {
-	return std::filesystem::exists(filePath());
-}
+Path Path::parentPath() const {
+	if (isFilePath()) return Path(filePath().parent_path());
 
-bool Path::isFile() const {
-	return std::filesystem::is_regular_file(filePath());
-}
+	// Find last '/' and remove it unless it's end of '//'.
+	auto i = m_url.find_last_of('/');
+	if (i == String::npos) return *this;
 
-bool Path::isDir() const {
-	return std::filesystem::is_directory(filePath());
-}
+	// Don't return empty string or strip trailing '//'
+	if (i==0 || m_url[i - 1] == '/') return Path(m_url.substr(0, i+1));
 
-Path Path::parentDir() const {
-	return Path(filePath().parent_path());
-}
-
-bool Path::createFile(bool createParentDirs) const {
-	if (createParentDirs) {
-		auto pdir = parentDir();
-		if (pdir && !pdir.createDir(true)) return false;
-	}
-	std::ofstream fs(filePath(), std::ios::binary | std::ios::trunc);
-	bool ok = fs.good();
-	fs.close();
-	return ok;
-}
-
-bool Path::createDir(bool createParentDirs) const { // NOLINT (Recursive)
-	if (isDir()) return true;
-	if (createParentDirs) {
-		auto pdir = parentDir();
-		if (pdir && !pdir.createDir(true)) return false;
-	}
-	return std::filesystem::create_directory(filePath());
+	// Safe to remove trailing '/'
+	return Path(m_url.substr(0, i));
 }
 
 String Path::name() const {
@@ -138,6 +117,44 @@ String Path::ext() const {
 	auto i = t.find_last_of('.');
 	return i == String::npos ? String{} : t.substr(i);
 }
+
+Path Path::absolutePath() const {
+	return Path(std::filesystem::absolute(filePath()));
+}
+
+bool Path::exists() const {
+	return std::filesystem::exists(filePath());
+}
+
+bool Path::isFile() const {
+	return std::filesystem::is_regular_file(filePath());
+}
+
+bool Path::isDir() const {
+	SGD_ASSERT(isFilePath());
+	return std::filesystem::is_directory(filePath());
+}
+
+bool Path::createFile(bool createParentDirs) const {
+	if (createParentDirs) {
+		auto pdir = parentPath();
+		if (pdir && !pdir.createDir(true)) return false;
+	}
+	std::ofstream fs(filePath(), std::ios::binary | std::ios::trunc);
+	bool ok = fs.good();
+	fs.close();
+	return ok;
+}
+
+bool Path::createDir(bool createParentDirs) const { // NOLINT (Recursive)
+	if (isDir()) return true;
+	if (createParentDirs) {
+		auto pdir = parentPath();
+		if (pdir && !pdir.createDir(true)) return false;
+	}
+	return std::filesystem::create_directory(filePath());
+}
+
 
 bool operator==(CPath x, CPath y) {
 	return x.str() == y.str();
