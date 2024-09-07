@@ -86,8 +86,6 @@ add_library(scene
 	exports.h
 )
 
-target_compile_options(scene PRIVATE ${SGD_ASAN_CCOPTS})
-
 target_link_libraries(scene graphics tinygltf)
 
 add_subdirectory(tests)

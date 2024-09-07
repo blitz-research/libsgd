@@ -23,7 +23,6 @@ set(LIBSGD_SOURCES
 
 add_library(libsgd ${LIBSGD_SOURCES})
 target_include_directories(libsgd PUBLIC ${INC})
-target_compile_options(libsgd PRIVATE ${SGD_ASAN_CCOPTS})
 target_link_libraries(libsgd scene audio)
 
 install(DIRECTORY ${INC}/sgd DESTINATION include)

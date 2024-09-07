@@ -44,8 +44,6 @@ add_library(core
 
 #target_precompile_headers(core PUBLIC exports.h)
 
-target_compile_options(core PRIVATE ${SGD_ASAN_CCOPTS})
-
 if (SGD_OS_EMSCRIPTEN)
 	target_link_options(core PUBLIC -sNO_EXIT_RUNTIME=1)
 	#    target_link_options(core PUBLIC -sNO_EXIT_RUNTIME=1 -sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=['sgfRegistry','sgfRegisterObject','sgfGetObject','sgfDeregisterObject'])

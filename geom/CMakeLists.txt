@@ -33,8 +33,6 @@ add_library(geom
         vec4.inl
 )
 
-target_compile_options(geom PRIVATE ${SGD_ASAN_CCOPTS})
-
 target_link_libraries(geom core)
 
 add_subdirectory(tests)

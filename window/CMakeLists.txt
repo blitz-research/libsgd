@@ -21,8 +21,6 @@ add_library(window
 	exports.h
 )
 
-target_compile_options(window PRIVATE ${SGD_ASAN_CCOPTS})
-
 target_link_libraries(window app)
 
 add_subdirectory(tests)
