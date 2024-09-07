@@ -167,7 +167,8 @@ Function Go (input_dir:String, out_filepath:String)
 			Output indent + indent + Tabbed ("?Not Win64")
 			Output indent + indent + Tabbed ("msg = msg + Chr (10) + Chr (10) + ~qNote standard DLL is 64-bit: make sure you are compiling in 64-bit mode!~q + Chr (10) + Chr (10) + ~q(MaxIDE 'Program' menu -> Architecture -> x64.)~q")
 			Output indent + indent + Tabbed ("?")
-			
+
+			Output indent + indent + Tabbed ("Notify msg,True")
 			Output indent + indent + Tabbed ("RuntimeError msg")
 			Output indent + indent + "EndIf"
 			
@@ -328,7 +329,7 @@ Function ParseDefine (def:String)
 
 	'Oops, fix keywords...maybe remove these entirely?
 	Select parts[0]
-	Case "TRUE", "FALSE", "PI"
+	Case "TRUE", "FALSE", "PI", "NULL"
 		parts[0] = parts[0] + "_"
 	End Select
 	
