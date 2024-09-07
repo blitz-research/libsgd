@@ -84,7 +84,7 @@ Expected<bool, FileioEx> GLTFLoader::open(CPath path) {
 
 	bool res;
 	auto magic = "glTF";
-	auto baseDir = path.filePath().parent_path().u8string();
+	auto baseDir = path.parentPath().str();
 
 	// Load!
 	if (data.size() >= 4 && !std::memcmp(data.data(), magic, 4)) {
