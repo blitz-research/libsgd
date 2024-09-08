@@ -16,15 +16,20 @@ int main() {
 
 void entry() {
 
-	MeshPtr mesh = loadStaticMesh(Path("~/Desktop/test/ambulance.glb")).result();
-	fit(mesh, {-1, 1}, true);
+	ImagePtr image = loadImage(Path("sgd://misc/light.png"),1).result();
 
-	ModelPtr model = new Model(mesh);
-	scene->add(model);
-	move(model, {0, 0, 5});
+	SpritePtr sprite = new Sprite(image);
+	scene->add(sprite);
+
+	camera = new Camera(CameraType::perspective);
+	scene->add(camera);
+
+	move(camera,{0,0,-5});
 
 	for (;;) {
+
 		pollEvents();
+
 		render();
 	}
 }

@@ -15,6 +15,7 @@ add(libsgd_tests_directionallight)
 add(libsgd_tests_pointlight)
 add(libsgd_tests_spotlight)
 add(libsgd_tests_createmesh)
+add(libsgd_tests_scratch)
 add(libsgd_tests_fogbug)
 
 add_executable(libsgd_tests_imgui libsgd_tests_imgui.cpp)

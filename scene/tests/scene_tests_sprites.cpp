@@ -3,20 +3,11 @@
 void entry() {
 
 	createPlayer(nullptr);
+	move(player,{0,1.5f,0});
 
-	//MonocolorEffectPtr monocolorEffect = new MonocolorEffect();
-	//monocolorEffect->color=Vec4f(1,1,.75f,1);
-	//scene->sceneRenderer()->add(monocolorEffect);
-
-	//BlurEffectPtr blurEffect = new BlurEffect();
-	//blurEffect->radius = 15;
-	//scene->sceneRenderer()->add(blurEffect);
-
-//	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), 1).result();
-	ImagePtr image = loadImage(Path("sgd://misc/light.png"), 1).result();
+	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), 1).result();
 	image->viewMode = ImageViewMode::fixed;
-//	image->rect = Rectf{-1, 0, 1, 1};
-	image->rect = Rectf(-.5f, -.5f, .5f, .5f);
+	image->rect = Rectf(-.5f,0,.5f,.5f);
 
 	for (int i = 0; i < 50000; ++i) {
 
@@ -24,9 +15,10 @@ void entry() {
 		scene->add(sprite);
 
 		turn(sprite, {0, rnd(360), 0});
-		move(sprite, {0, -1.5, rnd(100)});
+		move(sprite, {0, 0, rnd(100)});
 
-		setScale(sprite, {.25f, .25f, .25f});
+		auto sc = rnd(.1f,1);
+		setScale(sprite,{sc,sc,sc});
 	}
 
 	auto dc = overlay->drawList();
@@ -51,6 +43,5 @@ void entry() {
 }
 
 int main() {
-	setConfigVar("dawn.backendType","Vulkan");
 	start(entry);
 }

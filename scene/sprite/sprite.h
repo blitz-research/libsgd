@@ -11,7 +11,7 @@ SGD_SHARED(Sprite);
 struct Sprite : Entity {
 	SGD_OBJECT_TYPE(Sprite, Entity);
 
-	Sprite() = default;
+	Sprite();
 	explicit Sprite(Image* image);
 	explicit Sprite(const Sprite* that);
 

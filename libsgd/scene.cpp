@@ -22,16 +22,20 @@ void unlockConfigUniforms() {
 void SGD_DECL sgd_ClearScene() {
 	sgdx::mainScene()->clear();
 	sgdx::releaseAllHandles(sgd::Entity::staticType());
+
+	sgdx::g_overlay = new sgd::Overlay();
+	sgdx::g_mainScene->add(sgdx::g_overlay);
+	sgdx::g_drawList = sgdx::g_overlay->drawList();
 }
 
+// Called immediately after CreatedWindow.
 void SGD_DECL sgd_ResetScene(SGD_Bool releaseAllHandles) {
-	if(sgdx::g_mainScene) sgdx::g_mainScene->clear();
-	if(releaseAllHandles) {
+	sgdx::g_mainScene = new sgd::Scene();
+	if (releaseAllHandles) {
 		sgdx::releaseAllHandles();
-	}else{
+	} else {
 		sgdx::releaseAllHandles(sgd::Entity::staticType());
 	}
-	sgdx::g_mainScene = new sgd::Scene();
 	sgdx::g_overlay = new sgd::Overlay();
 	sgdx::g_mainScene->add(sgdx::g_overlay);
 	sgdx::g_drawList = sgdx::g_overlay->drawList();
@@ -210,7 +214,7 @@ int SGD_DECL sgd_GetEntityChildCount(SGD_Entity hentity) {
 
 SGD_Entity SGD_DECL sgd_GetEntityChild(SGD_Entity hentity, int childIndex) {
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	if(childIndex<0 || childIndex>=entity->children().size()) sgdx::error("Child index out of range");
+	if (childIndex < 0 || childIndex >= entity->children().size()) sgdx::error("Child index out of range");
 	return sgdx::getOrCreateHandle(entity->children()[childIndex].get());
 }
 
@@ -636,21 +640,21 @@ void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness) {
 // ***** Collisions *****
 
 SGD_Collider SGD_DECL sgd_CreateSphereCollider(SGD_Entity hentity, int colliderType, float radius) {
-	if((uint32_t)colliderType>31) sgdx::error("ColliderType must be in the range 0..31");
+	if ((uint32_t)colliderType > 31) sgdx::error("ColliderType must be in the range 0..31");
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	auto collider = new sgd::SphereCollider(entity, (uint32_t)colliderType, radius);
 	return sgdx::createHandle(collider);
 }
 
 SGD_Collider SGD_DECL sgd_CreateEllipsoidCollider(SGD_Entity hentity, int colliderType, float radius, float height) {
-	if((uint32_t)colliderType>31) sgdx::error("ColliderType must be in the range 0..31");
+	if ((uint32_t)colliderType > 31) sgdx::error("ColliderType must be in the range 0..31");
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	auto collider = new sgd::EllipsoidCollider(entity, (uint32_t)colliderType, radius, height);
 	return sgdx::createHandle(collider);
 }
 
 SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity hentity, int colliderType, SGD_Mesh hmesh) {
-	if((uint32_t)colliderType>31) sgdx::error("ColliderType must be in the range 0..31");
+	if ((uint32_t)colliderType > 31) sgdx::error("ColliderType must be in the range 0..31");
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 	sgd::CMesh* mesh = hmesh ? sgdx::resolveHandle<sgd::Mesh>(hmesh) : nullptr;
 	if (!mesh) {

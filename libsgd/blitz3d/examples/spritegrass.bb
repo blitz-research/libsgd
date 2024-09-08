@@ -6,7 +6,7 @@ Include "start.bb"
 
 CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"Sprite Grass",WINDOW_FLAGS_CENTERED
 
-env = LoadCubeTexture("sgd://envmaps/sunnysky-cube.png", TEXTURE_FORMAT_ANY,TEXTURE_FLAGS_DEFAULT)
+env = LoadCubeTexture("sgd://envmaps/sunnysky-cube.png",TEXTURE_FORMAT_ANY,TEXTURE_FLAGS_DEFAULT)
 SetEnvTexture env
 skybox = CreateSkybox(env)
 
@@ -17,23 +17,26 @@ Local far#=300
 
 CreatePlayer(0)
 SetCameraFar camera, far
+MoveEntity player,0,1.5,0
 
-grassImage = LoadImage("sgd://misc/grass1.png", 1)
-;SetImageRect grassImage,-1,0,1,1
-;SetImageRect grassImage,-.5,-.5,.5,.5
+grassImage = LoadImage("sgd://misc/grass1.png",1)
+SetImageRect grassImage,-.5,0,.5,.5
 
-Const n=30000
+Const n=50000
 
 For i=0 To n
+
 	sprite = CreateSprite(grassImage)
+	
 	TurnEntity(sprite,0,Rnd(360),0)
-	MoveEntity(sprite,0,-1.5,Rnd(far))
+	MoveEntity(sprite,0,0,Rnd(far))
+	
 	Local sc#=Rnd(.1,1)
-	ScaleEntity sprite, sc,sc,sc
+	ScaleEntity sprite,sc,sc,sc
 Next
 
 viewMode = 1 
-SetImageViewMode grassImage, viewMode
+SetImageViewMode grassImage,viewMode
 
 While Not PollEvents()
 	PlayerFly(.1)
@@ -42,9 +45,10 @@ While Not PollEvents()
 	If IsKeyHit(KEY_SPACE)
 		viewMode = viewMode + 1
 		If viewMode=4 viewMode=1
-		SetImageViewMode grassImage, viewMode
+		SetImageViewMode grassImage,viewMode
 	EndIf
-	Draw2DText "Sprite View mode:" + viewMode + " (space to toggle)", 0, 0
+	
+	Draw2DText "Sprite View mode:"+viewMode+" (space to toggle)",0,0
 	
 	RenderScene()
 	Present()

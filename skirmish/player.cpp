@@ -8,6 +8,8 @@ namespace {
 
 SGD_Mesh g_playerMesh;
 
+SGD_Sound g_shoot;
+
 float g_colliderRadius;
 float g_colliderHeight;
 
@@ -17,6 +19,8 @@ auto init = onInitActorTypes([]{
 	g_colliderHeight = std::max(-sgd_GetMeshBoundsMinY(g_playerMesh), sgd_GetMeshBoundsMaxY(g_playerMesh)) * 2;
 
 	sgd_EnableCollisions((int)ActorType::player, (int)ActorType::tower, SGD_COLLISION_RESPONSE_SLIDE);
+
+	g_shoot = sgd_LoadSound("~/Desktop/player-shoot.wav");
 });
 
 }
@@ -55,6 +59,7 @@ void Player::onUpdate() {
 
 	if(sgd_IsKeyHit(SGD_KEY_SPACE)) {
 		new Bullet(this);
+		sgd_PlaySound(g_shoot);
 	}
 }
 

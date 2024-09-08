@@ -23,13 +23,12 @@ CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"スノー Blocks",WINDOW_
 
 SetMaxPSMLights 8
 
-ResetScene()
+CreateScene()
 
 While Not (PollEvents() And EVENT_MASK_CLOSE_CLICKED)
 
 	If IsKeyHit(KEY_ESCAPE)
-		End
-		ResetScene()
+		CreateScene()
 	EndIf
 	
 	PlayerFly(.25)
@@ -39,7 +38,6 @@ While Not (PollEvents() And EVENT_MASK_CLOSE_CLICKED)
 	UpdateBlocks()
 	
 	Clear2D()
-	
 	Draw2DText "FPS:"+GetFPS(),0,0
 	
 	RenderScene()
@@ -47,11 +45,11 @@ While Not (PollEvents() And EVENT_MASK_CLOSE_CLICKED)
 	Present()
 Wend
 
-Function ResetScene() 
+Function CreateScene() 
 
 	Delete Each Bullet
 	Delete Each Block
-	ClearScene()
+	ResetScene True
 	
 	Local env =  LoadCubeTexture("sgd://envmaps/stormy-cube.jpg", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_DEFAULT)
 	SetEnvTexture env
