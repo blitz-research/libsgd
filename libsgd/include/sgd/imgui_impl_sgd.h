@@ -25,9 +25,11 @@ struct ImGuiProcs {
 	ImGuiContext* (*GetCurrentContext)();
 	ImGuiViewport* (*GetMainViewport)();
 	int (*GetMouseCursor)();
-	ImGuiIO& (*GetIO)();
 	void* (*MemAlloc)(size_t);
 	void (*MemFree)(void*);
+	bool (*DebugCheckVersionAndDataLayout)(const char* version_str, size_t sz_io, size_t sz_style, size_t sz_vec2, size_t sz_vec4, size_t sz_drawvert, size_t sz_drawidx);
+	ImGuiIO& (*GetIO)();
+	ImGuiPlatformIO& (*GetPlatformIO)();
 
 	// struct ImGuiIO members
 	void (ImGuiIO::*AddKeyEvent)(enum ImGuiKey, bool);
@@ -52,9 +54,11 @@ ImGuiProcs procs{&ImHashData, //
 				 &ImGui::GetCurrentContext,
 				 &ImGui::GetMainViewport,
 				 &ImGui::GetMouseCursor,
-				 &ImGui::GetIO,
 				 &ImGui::MemAlloc,
 				 &ImGui::MemFree,
+				 &ImGui::DebugCheckVersionAndDataLayout,
+				 &ImGui::GetIO,
+				 &ImGui::GetPlatformIO,
 				 &ImGuiIO::AddKeyEvent,
 				 &ImGuiIO::AddKeyAnalogEvent,
 				 &ImGuiIO::AddMousePosEvent,

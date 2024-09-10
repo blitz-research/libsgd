@@ -20,9 +20,11 @@ struct ImGuiProcs {
 	ImGuiContext* (*GetCurrentContext)();
 	ImGuiViewport* (*GetMainViewport)();
 	int (*GetMouseCursor)();
-	ImGuiIO& (*GetIO)();
 	void* (*MemAlloc)(size_t);
 	void (*MemFree)(void*);
+	bool (*DebugCheckVersionAndDataLayout)(const char* version_str, size_t sz_io, size_t sz_style, size_t sz_vec2, size_t sz_vec4, size_t sz_drawvert, size_t sz_drawidx);
+	ImGuiIO& (*GetIO)();
+	ImGuiPlatformIO& (*GetPlatformIO)();
 
 	// struct ImGuiIO members
 	void (ImGuiIO::*AddKeyEvent)(enum ImGuiKey, bool);
@@ -175,8 +177,16 @@ void ImGui::MemFree(void* ptr) {
 	return g_procs.MemFree(ptr);
 }
 
+bool ImGui::DebugCheckVersionAndDataLayout(const char* version_str, size_t sz_io, size_t sz_style, size_t sz_vec2, size_t sz_vec4, size_t sz_drawvert, size_t sz_drawidx) {
+	return g_procs.DebugCheckVersionAndDataLayout(version_str, sz_io, sz_style, sz_vec2, sz_vec4, sz_drawvert, sz_drawidx);
+}
+
 ImGuiIO& ImGui::GetIO() {
 	return g_procs.GetIO();
+}
+
+ImGuiPlatformIO& ImGui::GetPlatformIO() {
+	return g_procs.GetPlatformIO();
 }
 
 void ImGuiIO::AddKeyEvent(enum ImGuiKey key, bool bown) {
