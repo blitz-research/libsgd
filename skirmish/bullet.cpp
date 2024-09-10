@@ -12,8 +12,9 @@ constexpr float bulletRadius = .75f;
 
 SGD_Mesh g_bulletMesh;
 
-auto init = onInitActorTypes([] {
+SGD_Sound g_bounce;
 
+auto init = onInitActorTypes([] {
 	auto material = sgd_CreatePrelitMaterial();
 	sgd_SetMaterialBlendMode(material, SGD_BLEND_MODE_OPAQUE);
 	sgd_SetMaterialVector4f(material, "albedoColor4f", 0, .5f, 2.0, 1);
@@ -22,6 +23,8 @@ auto init = onInitActorTypes([] {
 
 	// Bullets collide with towers....
 	sgd_EnableCollisions((int)ActorType::bullet, (int)ActorType::tower, SGD_COLLISION_RESPONSE_SLIDE);
+
+	g_bounce = sgd_LoadSound("~/Desktop/bounce.wav");
 });
 
 } // namespace
@@ -47,6 +50,7 @@ void Bullet::onUpdate() {
 	}
 
 	if (sgd_GetCollisionCount(m_collider)) {
+
 		// Get collision normal
 		auto nx = sgd_GetCollisionNX(m_collider, 0);
 		auto ny = sgd_GetCollisionNY(m_collider, 0);
@@ -66,7 +70,10 @@ void Bullet::onUpdate() {
 		auto yaw = -std::atan2(vx, vz);
 
 		sgd_SetEntityRotation(m_entity, 0, yaw * radiansToDegrees, 0);
+
+		sgd_Play3DSound(g_bounce, m_entity);
 	}
+
 	static constexpr SGD_Real speed = 0.75f;
 	sgd_MoveEntity(m_entity, 0, 0, speed);
 }

@@ -33,6 +33,8 @@ void Game::update() {
 
 	sgd_UpdateColliders();
 
+	sgd_Update3DAudio();
+
 	m_world->update();
 }
 

@@ -29,11 +29,14 @@ Player::Player() : Actor(ActorType::player) {
 
 	m_entity = sgd_CreateModel(g_playerMesh);
 	sgd_MoveEntity(m_entity, 0, 2.5f, 0);
+
 	auto collider = sgd_CreateEllipsoidCollider(m_entity, (int)ActorType::player, g_colliderRadius, g_colliderHeight);
 
 	m_camera = sgd_CreatePerspectiveCamera();
 	sgd_SetEntityParent(m_camera, m_entity);
 	sgd_MoveEntity(m_camera,0,.5f,0);
+
+	sgd_Create3DAudioListener(m_entity);
 }
 
 void Player::onUpdate() {
