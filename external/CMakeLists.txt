@@ -79,22 +79,6 @@ if (NOT SGD_OS_EMSCRIPTEN)
 
 endif ()
 
-##### miniaudio #####
-
-add_library(miniaudio INTERFACE)
-
-FetchContent_Declare(miniaudio
-	GIT_REPOSITORY https://github.com/blitz-research/miniaudio.git
-	GIT_TAG master
-	GIT_SUBMODULES ""
-	GIT_SHALLOW TRUE
-	EXCLUDE_FROM_ALL
-)
-
-FetchContent_MakeAvailable(miniaudio)
-
-target_include_directories(miniaudio INTERFACE ${miniaudio_SOURCE_DIR})
-
 ##### soloud #####
 
 FetchContent_Declare(soloud

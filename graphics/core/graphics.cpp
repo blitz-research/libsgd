@@ -26,6 +26,7 @@ auto init1 = configVarChanged("debug.gpuFrees").connect(nullptr, [](CString valu
 wgpu::BackendType backendType() {
 
 	auto cfg = getConfigVar("dawn.backendType");
+	// Try to use config
 #if SGD_OS_WINDOWS
 	if (cfg == "D3D12")	return wgpu::BackendType::D3D12;
 	if (cfg == "D3D11")	return wgpu::BackendType::D3D11;
@@ -33,10 +34,9 @@ wgpu::BackendType backendType() {
 #if SGD_OS_WINDOWS || SGD_OS_LINUX
 	if (cfg == "Vulkan") return wgpu::BackendType::Vulkan;
 #elif SGD_OS_MACOS
-	 if (cfg == "Metal")return wgpu::BackendType::Metal;
-		return wgpu::BackendType::Metal;
+	if (cfg == "Metal") return wgpu::BackendType::Metal;
 #endif
-
+	// Use default
 #if SGD_OS_WINDOWS
 	OSVERSIONINFO info{sizeof(OSVERSIONINFO)};
 	GetVersionEx((OSVERSIONINFO*)&info);

@@ -1,3 +1,11 @@
+
+Removed miniaudio from external.
+
+Updated imgui, glfw, curl, soloud, stb, tinygltf repos forks.
+
+Added 3D audio commands: Set3DAudioConfig, Create3DAudioListener, Play3DSound, Update3DAudio.
+
+
 ***** V0.14.4 *****
 
 Fixed overlay not recreated after ClearScene.
@@ -20,7 +28,7 @@ Upload python package.
 
 Fixed gltfloader current dir when loading GLBs.
 
-Updated Dawn to latest remote HEAD.
+Updated dawn repos fork.
 
 Update sgd_ClearScene, added sgd_ResetScene.
 

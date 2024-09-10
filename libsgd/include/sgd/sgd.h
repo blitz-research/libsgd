@@ -861,12 +861,16 @@ SGD_API SGD_Bool SGD_DECL sgd_IsAudioValid(int audio);
 //! Stop audio.
 SGD_API void SGD_DECL sgd_StopAudio(int audio);
 
-SGD_API void SGD_DECL sgd_Set3DAudioConfig(float rolloff, float dopplerScale, float distanceScale);
+//! Set 3D audio config. All paremters default to 1.
+SGD_API void SGD_DECL sgd_Set3DAudioConfig(float rolloffScale, float dopplerScale, float distanceScale);
 
+//! Create 3D audio listener attached to entity. Only one audio listener is currently supported.
 SGD_API SGD_AudioListener SGD_DECL sgd_Create3DAudioListener(SGD_Entity entity);
 
+//! Play 3D sound at entity position and velocity.
 SGD_API int SGD_DECL sgd_Play3DSound(SGD_Sound sound, SGD_Entity entity);
 
+//! Update 3D audio. Must be called to update 3D rolloff and doppler effects.
 SGD_API void SGD_DECL sgd_Update3DAudio();
 
 //! @}
