@@ -7,11 +7,15 @@
 namespace sgd {
 
 SphereCollider::SphereCollider(Entity* entity, uint32_t colliderType, float rradius)
-	: Collider(entity, colliderType), radius(rradius), m_src(entity->worldPosition()) {
+	: Collider(colliderType), radius(rradius), m_src(entity->worldPosition()) {
 
-	this->radius.changed.connect(nullptr, [=](float r) { setLocalBounds({-r, r}); });
+	this->radius.changed.connect(nullptr, [=](float r) { //
+		setLocalBounds({-r, r});
+	});
 
 	setLocalBounds({-rradius, rradius});
+
+	attach(entity);
 }
 
 Collider* SphereCollider::intersectRay(CLiner ray, float rradius, Contact& contact) {
@@ -29,8 +33,7 @@ Collider* SphereCollider::intersectRay(CLiner ray, CVec3f radii, Contact& contac
 	return nullptr;
 }
 
-void SphereCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask,
-							  Vector<Collision>& collisions) {
+void SphereCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask, Vector<Collision>& collisions) {
 
 	auto dst = collideRay(space, m_src, entity()->worldPosition(), radius(), colliderMask, colliderType(), collisions);
 
@@ -41,9 +44,9 @@ void SphereCollider::onUpdate(const CollisionSpace* space, uint32_t colliderMask
 	for (auto& c : collisions) c.contact.point -= c.contact.normal * (real)radius();
 }
 
-void SphereCollider::onReset(Entity* entity) {
+void SphereCollider::onReset() {
 
-	m_src = entity->worldPosition();
+	m_src = entity()->worldPosition();
 }
 
 } // namespace sgd

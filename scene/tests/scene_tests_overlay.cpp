@@ -1,40 +1,5 @@
 #include "start.cpp"
 
-#if 0
-void entry() {
-
-	setConfigVar("gltf.loggingEnabled","1");
-
-	camera = new Camera(CameraType::perspective);
-	scene->add(camera);
-	move(camera,{0,0,-2});
-
-	MeshPtr mesh = loadStaticMesh(Path("sgd://models/helmet.glb")).result();
-
-	ModelPtr model = new Model(mesh);
-	scene->add(model);
-
-	for (;;) {
-		pollEvents();
-
-		if(window->keyboard()->key(KeyCode::LEFT).down()) {
-			turn(model, {0, 1, 0});
-		}else if (window->keyboard()->key(KeyCode::RIGHT).down()) {
-			turn(model, {0, -1, 0});
-		}
-		if(window->keyboard()->key(KeyCode::UP).down()) {
-			turn(model, {1, 0, 0});
-		}else if (window->keyboard()->key(KeyCode::DOWN).down()) {
-			turn(model, {-1, 0, 0});
-		}
-
-		render();
-	}
-}
-
-#endif
-
-#if 1
 void entry() {
 
 	DrawListPtr dc = overlay->drawList();
@@ -46,7 +11,7 @@ void entry() {
 
 	dc->outlineEnabled = false;
 	for (int i = 0; i < 25; ++i) {
-		//dc->lineWidth = rnd(1, 7);
+		// dc->lineWidth = rnd(1, 7);
 		dc->fillColor = Vec4f(rnd(), rnd(), rnd(), 1);
 		dc->addLine({rnd(w), rnd(h)}, {rnd(w), rnd(h)});
 	}
@@ -67,11 +32,19 @@ void entry() {
 
 	dc->pushLayer();
 
+	MaterialPtr mat = loadPrelitMaterial(Path("sgd://misc/StillLife.exr")).result();
+	mat->blendMode = BlendMode::alphaBlend;
+
+	dc->fillColor = {1.0, 0.75f, 0, 1};
+	dc->fillMaterial = mat;
+
 	float frame = 0;
 	for (;;) {
 		pollEvents();
 
 		dc->clear();
+
+		dc->addRect({0, 0, (float)window->size().x, (float)window->size().y});
 
 		dc->addImage(image, Vec2f(window->mouse()->position()), frame += .1f);
 
@@ -86,11 +59,7 @@ void entry() {
 
 	dc->popLayer();
 }
-#endif
 
 int main() {
-
-	setConfigVar("dawn.backendType", "D3D12");
-
 	start(entry);
 }

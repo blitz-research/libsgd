@@ -1,18 +1,12 @@
 #include "collider.h"
 
-#include "collisionspace.h"
 #include "../scene/scene.h"
+#include "collisionspace.h"
 
 namespace sgd {
 
-Collider::Collider(Entity* entity, uint32_t colliderType)
-	: m_entity(entity), m_colliderType(colliderType) {
-
-	SGD_ASSERT(colliderType<32);
-
-	if (m_entity->enabled()) m_collisionNode = m_entity->scene()->collisionSpace()->insert(this);
-
-	m_entity->addListener(this);
+Collider::Collider(uint32_t colliderType) : m_colliderType(colliderType) {
+	if (colliderType > 31) SGD_ERROR("Collider type must be in the range 0..31");
 }
 
 void Collider::setLocalBounds(CBoxf bounds) {
@@ -21,9 +15,9 @@ void Collider::setLocalBounds(CBoxf bounds) {
 }
 
 CBoxr Collider::worldBounds() const {
-	if(m_worldBoundsValid) return m_worldBounds;
+	if (m_worldBoundsValid) return m_worldBounds;
 	m_worldBoundsValid = true;
-	return m_worldBounds = m_entity ? m_entity->worldMatrix() * Boxr(m_localBounds) : Boxr(m_localBounds);
+	return m_worldBounds = entity() ? entity()->worldMatrix() * Boxr(m_localBounds) : Boxr(m_localBounds);
 }
 
 void Collider::update(uint32_t colliderMask) {
@@ -31,18 +25,18 @@ void Collider::update(uint32_t colliderMask) {
 	onUpdate(m_collisionNode->space(), colliderMask, m_collisions);
 }
 
-void Collider::onEnable(Entity* entity) {
-	m_collisionNode = m_entity->scene()->collisionSpace()->insert(this);
+void Collider::onEnable() {
+	m_collisionNode = entity()->scene()->collisionSpace()->insert(this);
 }
 
-void Collider::onDisable(Entity* entity) {
-	if(!m_collisionNode) return;
+void Collider::onDisable() {
+	if (!m_collisionNode) return;
 
-	m_entity->scene()->collisionSpace()->remove(m_collisionNode);
+	entity()->scene()->collisionSpace()->remove(m_collisionNode);
 	m_collisionNode = nullptr;
 }
 
-void Collider::onInvalidate(Entity* entity) {
+void Collider::onInvalidate() {
 	m_worldBoundsValid = false;
 }
 

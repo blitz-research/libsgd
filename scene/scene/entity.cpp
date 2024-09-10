@@ -11,37 +11,45 @@ Entity::Entity(const Entity* that)
 }
 
 void Entity::create(Scene* scene) {
-	m_scene=scene;
+	m_scene = scene;
 	onCreate();
-	for (EntityListener* listener : m_listeners) listener->onCreate(this);
-	if(enabled()) enable();
-	if(visible()) show();
+	for (EntityListener* listener : m_listeners) listener->onCreate();
+	if (enabled()) enable();
+	if (visible()) show();
 }
 
 void Entity::destroy() {
 	setIsVisible(false);
 	setIsEnabled(false);
-	for(EntityListener* listener : m_listeners) listener->onDestroy(this);
+	for (EntityListener* listener : m_listeners) listener->onDestroy();
 	onDestroy();
+	m_scene = nullptr;
+}
+
+void Entity::addListener(EntityListener* listener) {
+	m_listeners.emplace_back(listener);
+	if (m_scene) listener->onCreate();
+	if (enabled()) listener->onEnable();
+	if (visible()) listener->onShow();
 }
 
 void Entity::enable() {
 	onEnable();
-	for (EntityListener* listener : m_listeners) listener->onEnable(this);
+	for (EntityListener* listener : m_listeners) listener->onEnable();
 }
 
 void Entity::disable() {
-	for (EntityListener* listener : m_listeners) listener->onDisable(this);
+	for (EntityListener* listener : m_listeners) listener->onDisable();
 	onDisable();
 }
 
 void Entity::show() {
 	onShow();
-	for (EntityListener* listener : m_listeners) listener->onShow(this);
+	for (EntityListener* listener : m_listeners) listener->onShow();
 }
 
 void Entity::hide() {
-	for (EntityListener* listener : m_listeners) listener->onHide(this);
+	for (EntityListener* listener : m_listeners) listener->onHide();
 	onHide();
 }
 
@@ -50,19 +58,19 @@ void Entity::invalidate() {
 	m_invalid = true;
 	m_scene->m_invalid.push_back(this);
 	onInvalidate();
-	for(EntityListener* listener : m_listeners) listener->onInvalidate(this);
+	for (EntityListener* listener : m_listeners) listener->onInvalidate();
 }
 
 void Entity::validate() {
 	SGD_ASSERT(m_invalid);
 	m_invalid = false;
-	for(EntityListener* listener : m_listeners) listener->onValidate(this);
+	for (EntityListener* listener : m_listeners) listener->onValidate();
 	onValidate();
 }
 
 void Entity::reset() {
 	onReset();
-	for(EntityListener* listener : m_listeners) listener->onReset(this);
+	for (EntityListener* listener : m_listeners) listener->onReset();
 }
 
 void Entity::setIsEnabled(bool isEnabled) {
@@ -90,7 +98,7 @@ void Entity::setIsVisible(bool isVisible) {
 	if (isVisible == m_isVisible) return;
 	m_isVisible = isVisible;
 	if (!m_scene || (m_parent && !m_parent->visible())) return;
-	if(isVisible) {
+	if (isVisible) {
 		show();
 		visitChildren([=](Entity* child) {
 			if (!child->isVisible()) return false;
@@ -107,7 +115,7 @@ void Entity::setIsVisible(bool isVisible) {
 	}
 }
 
-// TODO: This probably has issues with visbile/enabled state.
+// TODO: This probably has issues with visible/enabled state.
 void Entity::setParent(Entity* parent) {
 
 	if (m_parent) {
@@ -130,11 +138,7 @@ void Entity::setParent(Entity* parent) {
 }
 
 void Entity::setName(CString name) {
-	m_name=name;
-}
-
-void Entity::addListener(EntityListener* listener) {
-	m_listeners.emplace_back(listener);
+	m_name = name;
 }
 
 void Entity::invalidateWorldMatrix() { // NOLINT (recursive)
@@ -180,9 +184,17 @@ CAffineMat4r Entity::localMatrix() const { // NOLINT (recursive)
 Entity* Entity::findChild(CString name) { // NOLINT (recursize)
 	if (m_name == name) return this;
 	for (Entity* child : m_children) {
-		if(auto found = child->findChild(name)) return found;
+		if (auto found = child->findChild(name)) return found;
 	}
 	return nullptr;
+}
+
+// ***** EntityListener (Component) *****
+
+void EntityListener::attach(Entity* entity) {
+	SGD_ASSERT(!m_entity);
+	m_entity = entity;
+	m_entity->addListener(this);
 }
 
 } // namespace sgd

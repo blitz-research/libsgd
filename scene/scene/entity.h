@@ -51,11 +51,11 @@ struct Entity : Shared {
 		return m_name;
 	}
 
-	void addListener(EntityListener* el);
-
 	CVector<EntityListenerPtr> listeners() const {
 		return m_listeners;
 	}
+
+	template<class T> T* getListener() const;
 
 	Scene* scene() const {
 		return m_scene;
@@ -149,6 +149,7 @@ protected:
 
 private:
 	friend class Scene;
+	friend class EntityListener;
 
 	enum struct Dirty { none = 0, localMatrix = 1, worldMatrix = 2 };
 
@@ -170,6 +171,8 @@ private:
 
 	Vector<EntityListenerPtr> m_listeners;
 
+	void addListener(EntityListener* listener);
+
 	void invalidateWorldMatrix();
 	void invalidateLocalMatrix();
 
@@ -186,24 +189,43 @@ private:
 struct EntityListener : Shared {
 	SGD_OBJECT_TYPE(EntityListener, Shared);
 
-	virtual void onCreate(Entity* entity) {
+	Entity* entity() const {
+		return m_entity;
 	}
-	virtual void onDestroy(Entity* entity) {
+
+protected:
+	friend class Entity;
+
+	void attach(Entity* entity);
+
+	virtual void onCreate() {
 	}
-	virtual void onEnable(Entity* entity) {
+	virtual void onDestroy() {
 	}
-	virtual void onDisable(Entity* entity) {
+	virtual void onEnable() {
 	}
-	virtual void onShow(Entity* entity) {
+	virtual void onDisable() {
 	}
-	virtual void onHide(Entity* entity) {
+	virtual void onShow() {
 	}
-	virtual void onInvalidate(Entity* entity) {
+	virtual void onHide() {
 	}
-	virtual void onValidate(Entity* entity) {
+	virtual void onInvalidate() {
 	}
-	virtual void onReset(Entity* entity) {
+	virtual void onValidate() {
 	}
+	virtual void onReset() {
+	}
+
+private:
+	Entity* m_entity{};
 };
+
+// ***** Inline *****
+
+template<class T> T* Entity::getListener() const {
+	for(EntityListener* l : m_listeners) if(l->is<T>()) return l->as<T>();
+	return {};
+}
 
 } // namespace sgd

@@ -12,9 +12,11 @@ Map<CMesh*, MeshColliderDataPtr> g_datas;
 }
 
 MeshCollider::MeshCollider(Entity* entity, uint32_t colliderType, MeshColliderData* data)
-	: Collider(entity, colliderType), m_data(data) {
+	: Collider(colliderType), m_data(data) {
 
 	setLocalBounds(m_data->bounds());
+
+	attach(entity);
 }
 
 Collider* MeshCollider::intersectRay(CLiner ray, float radius, Contact& contact) {

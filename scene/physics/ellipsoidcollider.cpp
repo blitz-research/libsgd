@@ -7,7 +7,7 @@
 namespace sgd {
 
 EllipsoidCollider::EllipsoidCollider(Entity* entity, uint32_t colliderType, float rradius, float hheight)
-	: Collider(entity, colliderType), radius(rradius), height(hheight), m_src(entity->worldPosition()) {
+	: Collider(colliderType), radius(rradius), height(hheight), m_src(entity->worldPosition()) {
 
 	auto updateBounds = [=] { setLocalBounds({{-radius(), -height() / 2, -radius()}, {radius(), height() / 2, radius()}}); };
 
@@ -16,6 +16,8 @@ EllipsoidCollider::EllipsoidCollider(Entity* entity, uint32_t colliderType, floa
 	this->height.changed.connect(nullptr, [=](float) { updateBounds(); });
 
 	updateBounds();
+
+	attach(entity);
 }
 
 Collider* EllipsoidCollider::intersectRay(CLiner ray, float rradius, Contact& contact) {
@@ -37,9 +39,9 @@ void EllipsoidCollider::onUpdate(const CollisionSpace* space, uint32_t colliderM
 	for (auto& c : collisions) c.contact.point -= c.contact.normal * Vec3r(radii());
 }
 
-void EllipsoidCollider::onReset(Entity* entity) {
+void EllipsoidCollider::onReset() {
 
-	m_src = entity->worldPosition();
+	m_src = entity()->worldPosition();
 }
 
 } // namespace sgd

@@ -287,8 +287,8 @@ void SceneRenderer::renderAsync() {
 	// Shadows
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 0);
 	for (auto& pass : m_sceneBindings->shadowPasses()) {
-		renderGeometry(m_renderQueue, RenderPassType::shadow, nullptr, pass.renderTarget, {}, 1, pass.sceneBindings,
-					   g_shadowPassEnabled);
+		renderGeometry(m_renderQueue, RenderPassType::shadow, nullptr, pass.renderTarget, {}, 1, //
+					   pass.sceneBindings, g_shadowPassEnabled);
 	}
 
 	auto sceneBindGroup = m_sceneBindings->bindGroup();
@@ -300,20 +300,16 @@ void SceneRenderer::renderAsync() {
 
 	// Blend
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 2);
-	renderGeometry(m_renderQueue, RenderPassType::blend, m_renderTarget, m_depthBuffer, {}, {}, sceneBindGroup,
-				   g_blendPassEnabled);
+	renderGeometry(m_renderQueue, RenderPassType::blend, m_renderTarget, m_depthBuffer, {}, {}, //
+				   sceneBindGroup, g_blendPassEnabled);
 
 	// Effects
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 3);
-	if (g_effectPassEnabled) {
-		m_renderEffectStack->render(m_renderContext, sceneBindGroup);
-	}
+	if (g_effectPassEnabled) m_renderEffectStack->render(m_renderContext, sceneBindGroup);
 
 	// Overlay - opaque and blended?
 	if (timeStampsEnabled) m_wgpuCommandEncoder.WriteTimestamp(m_timeStampQueries, 4);
-	//	renderGeometry(m_overlayQueue, RenderPassType::opaque, m_renderTarget, m_depthBuffer, {}, {}, sceneBindGroup,
-	//				   g_overlayPassEnabled);
-	renderGeometry(m_overlayQueue, RenderPassType::blend, m_renderEffectStack->outputTexture(), m_depthBuffer, {}, {},
+	renderGeometry(m_overlayQueue, RenderPassType::blend, m_renderEffectStack->outputTexture(), m_depthBuffer, {}, {}, //
 				   sceneBindGroup, g_overlayPassEnabled);
 
 	if (timeStampsEnabled) {

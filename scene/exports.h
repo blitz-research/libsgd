@@ -1,6 +1,9 @@
 #pragma once
 
 #include <graphics/exports.h>
+#include "audio/audioemitter.h"
+#include "audio/audiolistener.h"
+#include "audio/audiospace.h"
 
 #include "model/animation.h"
 #include "model/gltfloader.h"

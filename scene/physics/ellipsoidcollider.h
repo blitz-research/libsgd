@@ -28,7 +28,7 @@ private:
 
 	void onUpdate(const CollisionSpace* space, uint32_t colliderMask, Vector<Collision>& collisions) override;
 
-	void onReset(Entity* entity) override;
+	void onReset() override;
 };
 
 } // namespace sgd

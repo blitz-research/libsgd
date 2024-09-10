@@ -29,11 +29,7 @@ enum struct CollisionResponse {
 struct Collider : EntityListener {
 	SGD_OBJECT_TYPE(Collider, EntityListener);
 
-	Collider(Entity* entity, uint32_t colliderType);
-
-	Entity* entity() const {
-		return m_entity;
-	}
+	Collider(uint32_t colliderType);
 
 	uint32_t colliderType() const {
 		return m_colliderType;
@@ -62,7 +58,6 @@ protected:
 	void setLocalBounds(CBoxf bounds);
 
 private:
-	Entity* m_entity;
 	uint32_t m_colliderType;
 	Boxf m_localBounds;
 	mutable Boxr m_worldBounds;
@@ -70,9 +65,9 @@ private:
 	CollisionNode* m_collisionNode{};
 	Vector<Collision> m_collisions;
 
-	void onEnable(Entity* entity) override;
-	void onDisable(Entity* entity) override;
-	void onInvalidate(Entity* entity) override;
+	void onEnable() override;
+	void onDisable() override;
+	void onInvalidate() override;
 };
 
 }; // namespace sgd

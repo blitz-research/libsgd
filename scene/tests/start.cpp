@@ -57,9 +57,6 @@ void start(void (*entry)()) {
 	skybox = new Skybox(envTexture);
 	scene->add(skybox);
 
-	entry();
-	return;
-
 	light = new Light(LightType::directional);
 	scene->add(light);
 	turn(light, {-45, -45, 0});
@@ -68,6 +65,10 @@ void start(void (*entry)()) {
 	scene->add(overlay);
 
 	entry();
+
+	exitApp();
+
+	exit(0);
 }
 
 void createPlayer(Mesh* mesh) {

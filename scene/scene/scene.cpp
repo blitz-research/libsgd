@@ -1,16 +1,15 @@
 #include "scene.h"
 
 #include "scenerenderer.h"
-
 #include "../physics/collisionspace.h"
+#include "../audio/audiospace.h"
 
 namespace sgd {
 
 Scene::Scene() {
-
-	m_collisionSpace = new CollisionSpace();
-
 	m_sceneRenderer = new SceneRenderer();
+	m_collisionSpace = new CollisionSpace();
+	m_audioSpace = new AudioSpace();
 }
 
 void Scene::clear() {
@@ -43,7 +42,6 @@ void Scene::remove(Entity* entity) { // NOLINT (recursive)
 	while (!entity->children().empty()) {
 		remove(entity->children().back());
 	}
-
 	entity->setParent(nullptr);
 	entity->destroy();
 

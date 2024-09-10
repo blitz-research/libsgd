@@ -6,6 +6,13 @@ project(scene)
 
 add_library(scene
 
+	audio/audioemitter.cpp
+	audio/audioemitter.h
+	audio/audiolistener.cpp
+	audio/audiolistener.h
+	audio/audiospace.cpp
+	audio/audiospace.h
+
 	model/animation.cpp
 	model/animation.h
 	model/gltfloader.cpp
@@ -86,6 +93,6 @@ add_library(scene
 	exports.h
 )
 
-target_link_libraries(scene graphics tinygltf)
+target_link_libraries(scene graphics audio tinygltf)
 
 add_subdirectory(tests)

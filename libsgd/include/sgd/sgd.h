@@ -67,6 +67,7 @@ typedef SGD_Handle SGD_Sprite;
 typedef SGD_Handle SGD_Skybox;
 typedef SGD_Handle SGD_Collider;
 typedef SGD_Handle SGD_RenderEffect;
+typedef SGD_Handle SGD_AudioListener;
 
 #if UINTPTR_MAX == 0xffffffffffffffff
 typedef double SGD_Real;
@@ -859,6 +860,14 @@ SGD_API SGD_Bool SGD_DECL sgd_IsAudioValid(int audio);
 
 //! Stop audio.
 SGD_API void SGD_DECL sgd_StopAudio(int audio);
+
+SGD_API void SGD_DECL sgd_Set3DAudioConfig(float rolloff, float dopplerScale, float distanceScale);
+
+SGD_API SGD_AudioListener SGD_DECL sgd_Create3DAudioListener(SGD_Entity entity);
+
+SGD_API int SGD_DECL sgd_Play3DSound(SGD_Sound sound, SGD_Entity entity);
+
+SGD_API void SGD_DECL sgd_Update3DAudio();
 
 //! @}
 

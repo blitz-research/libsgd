@@ -7,8 +7,9 @@
 
 namespace sgd {
 
-SGD_SHARED(CollisionSpace);
 SGD_SHARED(SceneRenderer);
+SGD_SHARED(CollisionSpace);
+SGD_SHARED(AudioSpace);
 
 SGD_SHARED(Scene);
 
@@ -24,12 +25,16 @@ struct Scene : Shared {
 
 	void render();
 
+	SceneRenderer* sceneRenderer() const {
+		return m_sceneRenderer;
+	}
+
 	CollisionSpace* collisionSpace() const {
 		return m_collisionSpace;
 	}
 
-	SceneRenderer* sceneRenderer() const {
-		return m_sceneRenderer;
+	AudioSpace* audioSpace()const{
+		return m_audioSpace;
 	}
 
 private:
@@ -41,6 +46,7 @@ private:
 
 	CollisionSpacePtr m_collisionSpace;
 	SceneRendererPtr m_sceneRenderer;
+	AudioSpacePtr m_audioSpace;
 };
 
 } // namespace sgd
