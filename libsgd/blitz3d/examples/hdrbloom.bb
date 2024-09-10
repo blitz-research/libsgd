@@ -1,5 +1,8 @@
 Dialect "modern"
 
+; Note: This demo is *broken* since the overlay pass was changed to execute *after* the render effect pass!
+; Fix coming once I work out how...
+
 Include "start.bb"
 
 ; Visit https://openexr.com/en/latest/ for more exr info and samples.
@@ -7,6 +10,7 @@ Include "start.bb"
 CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"スノー Blocks",WINDOW_FLAGS_CENTERED
 
 Local mat = LoadPrelitMaterial("sgd://misc/StillLife.exr")
+SetMaterialBlendMode mat, BLEND_MODE_ALPHA_BLEND
 
 Set2DFillMaterial mat
 

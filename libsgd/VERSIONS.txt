@@ -1,3 +1,21 @@
+***** V0.14.4 *****
+
+Fixed overlay not recreated after ClearScene.
+
+Added ReleaseHandle/ReleaseAllHandles to Blitz3d.
+
+Fixed sprites broken due to sprite color change.
+
+Fixed debug mode issues with handles.
+
+Implemented parentPath for urls.
+
+
+***** V0.14.1-V0.14.3 *****
+
+Upload python package.
+
+
 ***** V0.14.0 *****
 
 Fixed gltfloader current dir when loading GLBs.
