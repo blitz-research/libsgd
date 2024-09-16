@@ -10,8 +10,8 @@ struct Player : Actor {
 
 private:
 	SGD_Camera m_camera{};
-	float m_rvy{};
-	float m_vz{};
+	SGD_Real m_rvy{};
+	SGD_Real m_vz{};
 
 	void onUpdate() override;
 

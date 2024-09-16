@@ -3,6 +3,7 @@
 #include "ground.h"
 #include "player.h"
 #include "tower.h"
+#include "saucer.h"
 
 namespace skirmish {
 
@@ -19,17 +20,26 @@ void Game::begin() {
 	sgd_RotateEntity(light, -45, -45, 0);
 
 	new Ground();
-	int size = 50;
-	int step = 10;
-	for (int z = -size; z <= size; z += step) {
-		for (int x = -size; x <= size; x += step) {
-			new Tower((float)x + size/2, (float)z + size/2);
+
+	for (int z = 0; z <= (int)gridSize; z += cellSize) {
+		for (int x = -gridSize; x <= (int)gridSize; x += cellSize) {
+			new Tower((float)x, (float)z);
 		}
 	}
+
 	new Player();
+
+	m_newSaucerTimeout = 90;
 }
 
 void Game::update() {
+
+	if (!--m_newSaucerTimeout) {
+
+		new Saucer();
+
+		m_newSaucerTimeout = 600;
+	}
 
 	sgd_UpdateColliders();
 

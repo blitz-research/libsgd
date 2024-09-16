@@ -24,7 +24,7 @@ auto init = onInitActorTypes([] {
 	// Bullets collide with towers....
 	sgd_EnableCollisions((int)ActorType::bullet, (int)ActorType::tower, SGD_COLLISION_RESPONSE_SLIDE);
 
-	g_bounce = sgd_LoadSound("~/Desktop/bounce.wav");
+	g_bounce = sgd_LoadSound("sgd://skirmish/bounce.wav");
 });
 
 } // namespace

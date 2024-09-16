@@ -7,6 +7,10 @@ namespace skirmish {
 
 struct Game {
 
+	static constexpr SGD_Real gridSize = 50.0f;
+	static constexpr SGD_Real cellSize = 10.0f;
+	static constexpr int numCells = gridSize/cellSize;
+
 	Game();
 	~Game();
 
@@ -20,6 +24,8 @@ struct Game {
 
 private:
 	World* m_world;
+
+	int m_newSaucerTimeout;
 };
 
 inline Game* game;
