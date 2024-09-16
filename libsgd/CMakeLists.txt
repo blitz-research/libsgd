@@ -71,6 +71,10 @@ if (SGD_ZIG_TARGET_ENABLED)
 	add_subdirectory(zig)
 endif ()
 
+if (SGD_LUA_TARGET_ENABLED)
+	add_subdirectory(lua)
+endif()
+
 if (SGD_DOXYGEN_TARGET_ENABLED)
 	add_subdirectory(doxygen)
 endif ()

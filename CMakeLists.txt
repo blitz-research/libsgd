@@ -22,6 +22,7 @@ option(SGD_BLITZMAX_TARGET_ENABLED "BlitzMax target enabled" OFF)
 option(SGD_NODEJS_TARGET_ENABLED "Nodejs target enabled" OFF)
 option(SGD_PYTHON_TARGET_ENABLED "Python target enabled" OFF)
 option(SGD_ZIG_TARGET_ENABLED "Zig target enabled" OFF)
+option(SGD_LUA_TARGET_ENABLED "Lua target enabled" OFF)
 option(SGD_DOXYGEN_TARGET_ENABLED "Doxygen target enabled" OFF)
 option(SGD_ASAN_ENABLED "Address sanitizer enabled" OFF)
 
