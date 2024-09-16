@@ -1,3 +1,5 @@
+# Original code by Seyha, tweaked by Mark
+
 import subprocess
 import sys
 

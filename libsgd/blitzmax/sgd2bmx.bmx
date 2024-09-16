@@ -709,35 +709,18 @@ Function BlitzParams:String (params:String)
 				p[0] = "" ' Or poss Int for bmx-ng strict mode?
 			Case "void*"
 				p[0] = ":Byte Ptr" ' Or poss Int for bmx-ng strict mode?
-			
-			Case	"SGD_Bool", ..
-					"SGD_Handle",..
-					"SGD_Texture",..
-					"SGD_Material",..
-					"SGD_Surface",..
-					"SGD_Mesh",..
-					"SGD_Entity",..
-					"SGD_Camera",..
-					"SGD_Light",..
-					"SGD_Model",..
-					"SGD_Skybox",..
-					"SGD_Sprite",..
-					"SGD_Font",..
-					"SGD_Sound",..
-					"SGD_Image",..
-					"SGD_Collider",..
-					"SGD_RenderEffect"
-				
-				p[0] = ":Int"
-
 			Case "SGD_String"
 				p[0] = ":Byte Ptr" ' I think... TODO: Test
-
 			Default
-				Print "Unhandled param type:"
-				Print p[0]
-				Print params
-				End
+				If p[0].StartsWith("SGD_")
+					'Assume all remaining types that start with "SGD_" are handles.
+					p[0]=":Int"		
+				Else
+					Print "Unhandled param type:"
+					Print p[0]
+					Print params
+					End
+				EndIf
 		End Select
 		
 		Select p[1]
