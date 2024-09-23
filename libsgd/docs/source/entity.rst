@@ -5,7 +5,7 @@ An entity is a visual element in the scene. Every entity has the following prope
 
 * Name: name of the entity, as read from file or set by user. Use :any:`sgd_SetEntityName` and :any:`sgd_GetEntityName` to get and set this property. Use :any:`sgd_FindEntityChild` to search an entity and its descendants for an entity with a specific name.
 
-* Position - position of the entity, stored as x, y, z coordinates. Use :any:`sgd_SetEntityPosition`, :any:`sgd_GetEntityX`, :any:`sgd_GetEntityY' and :any:`sgd_GetEntityZ' to set and get this property.
+* Position - position of the entity, stored as x, y, z coordinates. Use :any:`sgd_SetEntityPosition`, :any:`sgd_GetEntityX`, :any:`sgd_GetEntityY` and :any:`sgd_GetEntityZ` to set and get this property.
 
 * Rotation - rotation of the entity, stored as a 3 X 3 orthogonal, normalized 'basis' matrix. Use :any:`sgd_SetEntityRotation`, :any:`sgd_GetEntityRX`, :any:`sgd_GetEntityRY` and :any:`sgd_GetEntityRZ` to get and set entity rotation using euler angles in the range 0..360.
 
