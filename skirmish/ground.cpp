@@ -9,7 +9,7 @@ SGD_Mesh g_groundMesh;
 auto init = onInitActorTypes([] {
 
 	auto material = sgd_CreatePBRMaterial();
-	sgd_SetMaterialVector4f(material, "albedoColor4f", .25f, 1, 0, 1);
+	sgd_SetMaterialColor(material, "albedo", .25f, 1, 0, 1);
 
 	g_groundMesh = sgd_CreateBoxMesh(-100, 0, -100, 100, 0, 100, material);
 });

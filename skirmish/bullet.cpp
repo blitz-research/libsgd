@@ -17,7 +17,7 @@ SGD_Sound g_bounce;
 auto init = onInitActorTypes([] {
 	auto material = sgd_CreatePrelitMaterial();
 	sgd_SetMaterialBlendMode(material, SGD_BLEND_MODE_OPAQUE);
-	sgd_SetMaterialVector4f(material, "albedoColor4f", 0, .5f, 2.0, 1);
+	sgd_SetMaterialColor(material, "albedo", 0, .5f, 2.0, 1);
 
 	g_bulletMesh = sgd_CreateSphereMesh(bulletRadius, 24, 12, material);
 
