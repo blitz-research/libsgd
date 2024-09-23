@@ -4,12 +4,12 @@ namespace sgd {
 
 wgpu::ShaderModule createShaderModule(const wgpu::Device& device, CString source, const char* label) {
 
-	wgpu::ShaderModuleWGSLDescriptor wgslDesc;
-	wgslDesc.sType = wgpu::SType::ShaderModuleWGSLDescriptor;
-	wgslDesc.code = source.c_str();
+	wgpu::ShaderSourceWGSL wgslSource{};
+	wgslSource.sType = wgpu::SType::ShaderSourceWGSL;
+	wgslSource.code = source.c_str();
 
 	wgpu::ShaderModuleDescriptor desc;
-	desc.nextInChain = (wgpu::ChainedStruct*)&wgslDesc;
+	desc.nextInChain = (wgpu::ChainedStruct*)&wgslSource;
 	desc.label = label;
 
 	auto shaderModule = device.CreateShaderModule(&desc);

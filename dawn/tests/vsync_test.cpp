@@ -144,7 +144,7 @@ int main() {
 	{
 		// Compile shader
 		wgpu::ShaderModuleWGSLDescriptor wgslDesc{};
-		wgslDesc.sType = wgpu::SType::ShaderModuleWGSLDescriptor;
+		wgslDesc.sType = wgpu::SType::ShaderSourceWGSL;
 		wgslDesc.code = shaderSource;
 		wgpu::ShaderModuleDescriptor desc{};
 		desc.nextInChain = (wgpu::ChainedStruct*)&wgslDesc;
