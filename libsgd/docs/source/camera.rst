@@ -1,0 +1,4 @@
+Camera
+======
+
+.. doxygengroup:: Camera
