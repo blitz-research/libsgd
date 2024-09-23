@@ -11,7 +11,7 @@ Image::Image(Texture* texture)
 	  m_bindGroup(new BindGroup(&imageBindGroupDescriptor)),											 //
 	  m_uniforms(new Buffer(BufferType::uniform, nullptr, sizeof(ImageUniforms))) {
 
-	m_material->setTexture("albedoTexture", texture);
+	m_material->setTexture("albedo", texture);
 	m_material->blendMode = blendMode();
 	m_material->depthFunc = DepthFunc::lessEqual;
 	m_material->cullMode = CullMode::none;

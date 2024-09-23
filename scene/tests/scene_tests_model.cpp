@@ -8,10 +8,10 @@ void entry() {
 	float size = 330.0f;
 
 //	MaterialPtr groundMaterial=new Material(&pbrMaterialDescriptor);
-//	groundMaterial->setVector4f("albedoColor4f",{.6f,.5f,.5f,1});
-//	groundMaterial->setFloat("roughnessFactor1f",1);
+//	groundMaterial->setVector4f("albedo",{.6f,.5f,.5f,1});
+//	groundMaterial->setFloat("roughness",1);
 	MaterialPtr groundMaterial = loadPBRMaterial(Path("sgd://misc/grass1K.jpg")).result();
-	groundMaterial->setFloat("roughnessFactor1f", 1);
+	groundMaterial->setFloat("roughness", 1);
 
 	MeshPtr groundMesh = createBoxMesh({{-size, 0, -size}, {size, 0, size}}, groundMaterial);
 	transformTexCoords(groundMesh, {size / 2, size / 2}, {0, 0});
@@ -66,5 +66,6 @@ void entry() {
 }
 
 int main() {
+	setConfigVar("dawn.backendType", "Vulkan");
 	start(entry);
 }

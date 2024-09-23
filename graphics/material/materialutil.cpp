@@ -9,7 +9,7 @@ namespace sgd {
 
 Material* createPBRMaterial(CVec4f albedoColor) {
 	auto material = new Material(&pbrMaterialDescriptor);
-	material->setVector4f("albedoColor4f", albedoColor);
+	material->setColor("albedo", albedoColor);
 	return material;
 }
 
@@ -23,7 +23,7 @@ Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
 		auto texture = load2DTexture(path, TextureFormat::srgba8, texFlags);
 		if(!texture) return texture.error();
 		auto material = new Material(&pbrMaterialDescriptor);
-		material->setTexture("albedoTexture", texture.result());
+		material->setTexture("albedo", texture.result());
 		return material;
 	}
 
@@ -35,25 +35,25 @@ Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
 	auto material = new Material(&pbrMaterialDescriptor);
 
 	if (auto texture = tryLoad("_Color.jpg", TextureFormat::srgba8)) {
-		material->setTexture("albedoTexture", texture);
+		material->setTexture("albedo", texture);
 	}
 
 	if (auto texture = tryLoad("_Metalness.jpg", TextureFormat::rgba8)) {
-		material->setTexture("metallicTexture", texture);
-		material->setFloat("metallicFactor1f", 1);
+		material->setTexture("metallic", texture);
+		material->setFloat("metallic", 1);
 	}
 
 	if (auto texture = tryLoad("_Roughness.jpg", TextureFormat::rgba8)) {
-		material->setTexture("roughnessTexture", texture);
-		material->setFloat("roughnessFactor1f", 1);
+		material->setTexture("roughness", texture);
+		material->setFloat("roughness", 1);
 	}
 
 	if (auto texture = tryLoad("_AmbientOcclusion.jpg", TextureFormat::rgba8)) {
-		material->setTexture("occlusionTexture", texture);
+		material->setTexture("occlusion", texture);
 	}
 
 	if (auto texture = tryLoad("_NormalGL.jpg", TextureFormat::rgba8)) {
-		material->setTexture("normalTexture", texture);
+		material->setTexture("normal", texture);
 	}
 
 	return material;
@@ -62,7 +62,7 @@ Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
 Material* createPrelitMaterial(CVec4f albedoColor) {
 	auto material = new Material(&prelitMaterialDescriptor);
 
-	material->setVector4f("albedoColor4f", albedoColor);
+	material->setColor("albedo", albedoColor);
 
 	return material;
 }
@@ -75,7 +75,7 @@ Expected<Material*, FileioEx> loadPrelitMaterial(CPath path) {
 	if (!texture) return texture.error();
 
 	auto material = createPrelitMaterial();
-	material->setTexture("albedoTexture", texture.result());
+	material->setTexture("albedo", texture.result());
 
 	return material;
 }

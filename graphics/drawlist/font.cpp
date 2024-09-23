@@ -36,10 +36,10 @@ const MaterialDescriptor fontMaterialDescriptor( //
 	&bindGroupDescriptor,						 //
 	sizeof(FontUniforms),
 	{
-		{"atlasColor4f", {offsetof(FontUniforms, atlasColor), 4, new Vec4f(1)}},
+		{"atlasColor", {offsetof(FontUniforms, atlasColor), 4, new Vec4f(1)}},
 	},
 	{
-		{"atlasTexture", {1, whiteTexture()}},
+		{"atlas", {1, whiteTexture()}},
 	},1);
 
 } // namespace
@@ -103,7 +103,7 @@ Expected<Font*, FileioEx> loadFont(CPath path, float height) {
 	texture->update(atlasData.data(), Font::atlasSize.x);
 
 	auto atlas = new Material(&fontMaterialDescriptor);
-	atlas->setTexture("atlasTexture", texture);
+	atlas->setTexture("atlas", texture);
 	atlas->blendMode = BlendMode::alphaBlend;
 	atlas->depthFunc = DepthFunc::always;
 	atlas->cullMode = CullMode::none;

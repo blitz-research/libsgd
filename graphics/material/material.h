@@ -52,13 +52,9 @@ struct Material : GraphicsResource {
 		return m_hasNormalTexture;
 	}
 
-	void setTexture(CString name, CTexture* value);
-
-	void setVector4f(CString name, CVec4f value);
-	void setVector3f(CString name, CVec3f value);
-	void setVector2f(CString name, CVec2f value);
+	void setTexture(CString name, CTexture* texture);
+	void setColor(CString name, CVec4f color);
 	void setFloat(CString name, float value);
-	void setInt(CString name, int value);
 
 	wgpu::BindGroup wgpuBindGroup() const {
 		return m_bindGroup->wgpuBindGroup();

@@ -43,10 +43,10 @@ const MaterialDescriptor imageMaterialDescriptor( //
 	&bindGroupDescriptor,						  //
 	sizeof(ImageMaterialUniforms),				  //
 	{
-		{"albedoColor4f", {offsetof(ImageMaterialUniforms, albedoColor), 4, new Vec4f(1)}},
+		{"albedo", {offsetof(ImageMaterialUniforms, albedoColor), 4, new Vec4f(1)}},
 	},
 	{
-		{"albedoTexture", {1, whiteTexture()}},
+		{"albedo", {1, whiteTexture()}},
 
 	},
 	1); //
@@ -56,10 +56,10 @@ const MaterialDescriptor imageMaterialDescriptorMX( //
 	&bindGroupDescriptorMX,							//
 	sizeof(ImageMaterialUniforms),					//
 	{
-		{"albedoColor4f", {offsetof(ImageMaterialUniforms, albedoColor), 4, new Vec4f(1)}},
+		{"albedo", {offsetof(ImageMaterialUniforms, albedoColor), 4, new Vec4f(1)}},
 	},
 	{
-		{"albedoTexture", {1, g_defaultTextureMX}},
+		{"albedo", {1, g_defaultTextureMX}},
 
 	},
 	1); //

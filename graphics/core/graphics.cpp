@@ -23,20 +23,7 @@ auto init1 = configVarChanged("debug.gpuFrees").connect(nullptr, [](CString valu
 	g_debugGPUFrees = truthiness(value);
 });
 
-wgpu::BackendType backendType() {
-
-	auto cfg = getConfigVar("dawn.backendType");
-	// Try to use config
-#if SGD_OS_WINDOWS
-	if (cfg == "D3D12")	return wgpu::BackendType::D3D12;
-	if (cfg == "D3D11")	return wgpu::BackendType::D3D11;
-#endif
-#if SGD_OS_WINDOWS || SGD_OS_LINUX
-	if (cfg == "Vulkan") return wgpu::BackendType::Vulkan;
-#elif SGD_OS_MACOS
-	if (cfg == "Metal") return wgpu::BackendType::Metal;
-#endif
-	// Use default
+wgpu::BackendType defaultBackendType() {
 #if SGD_OS_WINDOWS
 	OSVERSIONINFO info{sizeof(OSVERSIONINFO)};
 	GetVersionEx((OSVERSIONINFO*)&info);
@@ -52,6 +39,21 @@ wgpu::BackendType backendType() {
 	return wgpu::BackendType::Metal;
 #endif
 	SGD_ABORT();
+}
+
+wgpu::BackendType backendType() {
+	auto cfg = getConfigVar("dawn.backendType");
+	// Try to use config
+#if SGD_OS_WINDOWS
+	if (cfg == "D3D12") return wgpu::BackendType::D3D12;
+	if (cfg == "D3D11") return wgpu::BackendType::D3D11;
+#endif
+#if SGD_OS_WINDOWS || SGD_OS_LINUX
+	if (cfg == "Vulkan") return wgpu::BackendType::Vulkan;
+#elif SGD_OS_MACOS
+	if (cfg == "Metal") return wgpu::BackendType::Metal;
+#endif
+	return defaultBackendType();
 }
 
 } // namespace
@@ -163,7 +165,11 @@ void GraphicsContext::present(CTexture* texture) {
 
 	requestRender([=] {
 		struct wgpu::SurfaceTexture surfaceTexture {};
+
+//		auto begin = micros();
 		m_wgpuSurface.GetCurrentTexture(&surfaceTexture);
+//		auto end = micros();
+//		SGD_LOG << "###" << (end-begin) << "micros";
 
 		if (surfaceTexture.status != wgpu::SurfaceGetCurrentTextureStatus::Success) {
 			SGD_ERROR("wgpu::Surface::GetCurrentTexture() failed.");

@@ -12,7 +12,8 @@ namespace sgd {
 
 namespace {
 
-SGD_BOOL_CONFIG_VAR(g_vsyncEnabled, "render.vsyncEnabled", true);
+// Fixed by Dawn - thanks!
+SGD_BOOL_CONFIG_VAR(g_vsyncEnabled, "render.vsyncEnabled", false);
 SGD_BOOL_CONFIG_VAR(g_timeStampsEnabled, "render.timeStampsEnabled", true);
 
 SGD_BOOL_CONFIG_VAR(g_shadowPassEnabled, "render.shadowPassEnabled", true);

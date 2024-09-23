@@ -9,7 +9,7 @@ void entry() {
 	image->viewMode = ImageViewMode::fixed;
 	image->rect = Rectf(-.5f,0,.5f,.5f);
 
-	for (int i = 0; i < 50000; ++i) {
+	for (int i = 0; i < 10000; ++i) {
 
 		SpritePtr sprite = new Sprite(image);
 		scene->add(sprite);
@@ -17,7 +17,7 @@ void entry() {
 		turn(sprite, {0, rnd(360), 0});
 		move(sprite, {0, 0, rnd(100)});
 
-		auto sc = rnd(.1f,1);
+		auto sc = rnd(1,5);
 		setScale(sprite,{sc,sc,sc});
 	}
 
@@ -43,5 +43,6 @@ void entry() {
 }
 
 int main() {
+	//setConfigVar("dawn.backendType", "Vulkan");
 	start(entry);
 }

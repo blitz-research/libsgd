@@ -8,7 +8,7 @@ namespace {
 
 struct alignas(16) PBRMaterialUniforms {
 	Vec4f albedoColor;
-	Vec3f emissiveColor;
+	Vec4f emissiveColor;
 	float metallicFactor{};
 	float roughnessFactor{};
 };
@@ -43,18 +43,18 @@ const MaterialDescriptor pbrMaterialDescriptor( //
 	&bindGroupDescriptor,						//
 	sizeof(PBRMaterialUniforms),
 	{
-		{"albedoColor4f", {offsetof(PBRMaterialUniforms, albedoColor), 4, new Vec4f(1)}},
-		{"emissiveColor3f", {offsetof(PBRMaterialUniforms, emissiveColor), 3, new Vec3f(0)}},
-		{"metallicFactor1f", {offsetof(PBRMaterialUniforms, metallicFactor), 1, new float(0)}},
-		{"roughnessFactor1f", {offsetof(PBRMaterialUniforms, roughnessFactor), 1, new float(1)}},
+		{"albedo", {offsetof(PBRMaterialUniforms, albedoColor), 4, new Vec4f(1)}},
+		{"emissive", {offsetof(PBRMaterialUniforms, emissiveColor), 4, new Vec4f(0)}},
+		{"metallic", {offsetof(PBRMaterialUniforms, metallicFactor), 1, new float(0)}},
+		{"roughness", {offsetof(PBRMaterialUniforms, roughnessFactor), 1, new float(1)}},
 	},
 	{
-		{"albedoTexture", {1, whiteTexture()}},
-		{"emissiveTexture", {3, whiteTexture()}},
-		{"metallicTexture", {5, whiteTexture()}},
-		{"roughnessTexture", {7, whiteTexture()}},
-		{"occlusionTexture", {9, whiteTexture()}},
-		{"normalTexture", {11, flatTexture()}},
+		{"albedo", {1, whiteTexture()}},
+		{"emissive", {3, whiteTexture()}},
+		{"metallic", {5, whiteTexture()}},
+		{"roughness", {7, whiteTexture()}},
+		{"occlusion", {9, whiteTexture()}},
+		{"normal", {11, flatTexture()}},
 	},
 	1);
 

@@ -4,7 +4,7 @@ R"(
 
 struct MaterialUniforms {
     albedoColor: vec4f,
-    emissiveColor: vec3f,
+    emissiveColor: vec4f,
     metallicFactor:f32,
     roughnessFactor:f32,
 }
@@ -30,22 +30,18 @@ fn evaluateMaterial(position: vec3f, tanMatrix: mat3x3f, texCoords: vec3f, color
 	let albedo = textureSample(material_albedoTexture, material_albedoSampler, texCoords2d) * material_uniforms.albedoColor * color;
 
 #if BLEND_MODE_ALPHA_MASK
-#if RENDER_PASS_OPAQUE
+//#if RENDER_PASS_OPAQUE
 	if(albedo.a < .5) { discard; }
-//#elif RENDER_PASS_BLEND
-//	if(albedo.a >= .999 || albedo.a == 0.0) { discard; }
-#endif
+//#endif
 #endif
 
-	let emissive = textureSample(material_emissiveTexture, material_emissiveSampler, texCoords2d).rgb * material_uniforms.emissiveColor;
+	let emissive = textureSample(material_emissiveTexture, material_emissiveSampler, texCoords2d).rgb * material_uniforms.emissiveColor.rgb;
 	let metallic = textureSample(material_metallicTexture, material_metallicSampler, texCoords2d).b * material_uniforms.metallicFactor;
 	let roughness = textureSample(material_roughnessTexture, material_roughnessSampler, texCoords2d).g * material_uniforms.roughnessFactor;
 	let occlusion = textureSample(material_occlusionTexture, material_occlusionSampler, texCoords2d).r;
    	let normal = textureSample(material_normalTexture, material_normalSampler, texCoords2d).rgb * 2 - 1;
 
-
     return evaluateLighting(position, normalize(tanMatrix * normal), albedo, emissive, metallic, roughness, occlusion);
-//    return evaluateLighting(position, normalize(tanMatrix * normal), albedo, emissive, 0, 0, occlusion);
 }
 
 )"

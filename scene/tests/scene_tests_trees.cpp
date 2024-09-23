@@ -19,7 +19,7 @@ void entry() {
 	meshes[1] = loadStaticMesh(Path("sgd://models/palm_tree1.glb")).result();
 	meshes[2] = loadStaticMesh(Path("sgd://models/birch_tree1.glb")).result();
 
-	int n = 10000;
+	int n = 12500;
 	for (int i = 0; i < n; ++i) {
 		ModelPtr model = new Model(meshes[(int)rnd(3)]);
 		scene->add(model);
@@ -29,15 +29,21 @@ void entry() {
 	createPlayer(nullptr);
 	move(player, {0, 1, -2});
 
+	SharedPtr dc  =overlay->drawList();
+
 	for (;;) {
 		pollEvents();
 
 		playerFly(.125f);
+
+		dc->clear();
+		dc->addText(String("FPS:")+toString(currentGC()->FPS()),{0,0});
 
 		render();
 	}
 }
 
 int main() {
+	setConfigVar("dawn.backendType", "Vulkan");
 	start(entry);
 }

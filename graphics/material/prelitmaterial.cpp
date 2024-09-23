@@ -30,10 +30,10 @@ const MaterialDescriptor prelitMaterialDescriptor( //
 	&bindGroupDescriptor,						   //
 	sizeof(PrelitMaterialUniforms),				   //
 	{
-		{"albedoColor4f", {offsetof(PrelitMaterialUniforms, albedoColor), 4, new Vec4f(1)}},
+		{"albedo", {offsetof(PrelitMaterialUniforms, albedoColor), 4, new Vec4f(1)}},
 	},
 	{
-		{"albedoTexture", {1, whiteTexture()}},
+		{"albedo", {1, whiteTexture()}},
 	},1);
 
 } // namespace sgd
