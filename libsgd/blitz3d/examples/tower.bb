@@ -24,7 +24,7 @@ Local sz#=330
 SetCSMClipRange sz * 2
 
 Local groundMaterial = LoadPBRMaterial("sgd://misc/grass1K.jpg")
-SetMaterialFloat groundMaterial,"roughnessFactor1f",1
+SetMaterialFloat groundMaterial,"roughness",1
 
 Local groundMesh = CreateBoxMesh(-sz,0,-sz,sz,0,sz,groundMaterial)
 TFormMeshTexCoords groundMesh,sz,sz,0,0

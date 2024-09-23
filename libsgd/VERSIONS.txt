@@ -1,4 +1,12 @@
 
+Simplified material parameter names: "albedo", "emissive", "metalness", "roughness", "occlusion", "normal".
+
+Removed SetMaterialVector* functions so there is now only SetMaterialTexture, SetMaterialColor and SetMaterialFloat.
+
+Changed SetMaterialVector4f to SetMaterialColor. Color assumed to be non-linear, non-premultiplied ala Sprite, Model, 2D drawing colors.
+
+
+
 Removed miniaudio from external.
 
 Updated imgui, glfw, curl, soloud, stb, tinygltf repos forks.

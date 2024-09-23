@@ -119,25 +119,17 @@ void SGD_DECL sgd_SetMaterialCullMode(SGD_Material hmaterial, int cullMode) {
 	sgdx::resolveHandle<sgd::Material>(hmaterial)->cullMode = (sgd::CullMode)cullMode;
 }
 
-void SGD_DECL sgd_SetMaterialTexture(SGD_Material hmaterial, SGD_String property, SGD_Texture htexture) {
-	auto texture = sgdx::resolveHandle<sgd::Texture>(htexture);
-	sgdx::resolveHandle<sgd::Material>(hmaterial)->setTexture(property, texture);
+void SGD_DECL sgd_SetMaterialTexture(SGD_Material hmaterial, SGD_String parameter, SGD_Texture htexture) {
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setTexture(parameter,sgdx::resolveHandle<sgd::Texture>(htexture));
 }
 
-void SGD_DECL sgd_SetMaterialVector4f(SGD_Material hmaterial, SGD_String property, float x, float y, float z, float w) {
-	sgdx::resolveHandle<sgd::Material>(hmaterial)->setVector4f(property, {x, y, z, w});
+void SGD_DECL sgd_SetMaterialColor(SGD_Material hmaterial, SGD_String parameter, float red, float green, float blue,
+										   float alpha){
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setColor(parameter, {red, green, blue, alpha});
 }
 
-void SGD_DECL sgd_SetMaterialVector3f(SGD_Material hmaterial, SGD_String property, float x, float y, float z) {
-	sgdx::resolveHandle<sgd::Material>(hmaterial)->setVector3f(property, {x, y, z});
-}
-
-void SGD_DECL sgd_SetMaterialVector2f(SGD_Material hmaterial, SGD_String property, float x, float y) {
-	sgdx::resolveHandle<sgd::Material>(hmaterial)->setVector2f(property, {x, y});
-}
-
-void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String property, float n) {
-	sgdx::resolveHandle<sgd::Material>(hmaterial)->setFloat(property, n);
+void SGD_DECL sgd_SetMaterialFloat(SGD_Material hmaterial, SGD_String parameter, float value) {
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setFloat(parameter, value);
 }
 
 // ***** Mesh *****

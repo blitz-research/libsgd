@@ -65,7 +65,7 @@ light = CreateDirectionalLight()
 ;TurnEntity light,-45,0,0	; Tilt light down 45 degrees 
 
 material = LoadPBRMaterial("sgd://misc/test-texture.png")
-SetMaterialFloat material, "roughnessFactor1f", .5
+SetMaterialFloat material, "roughness", .5
 
 mesh = CreateSphereMesh(1,96,48,material)
 model=CreateModel(mesh)

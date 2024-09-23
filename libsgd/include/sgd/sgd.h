@@ -6,12 +6,15 @@
 #include <stdint.h>
 
 //! @file
-
+//!
 //! @mainpage
 //!
 //! Welcome to the LibSGD reference documentation.
 //!
 //! Quick links: sgd.h keycodes.h
+
+//! @defgroup LibSGD LibSGD
+//! @{
 
 //! @cond
 
@@ -45,7 +48,7 @@
 
 //! @endcond
 
-//! @name Typedefs
+//! @defgroup Typedefs Typedefs
 //! @{
 
 typedef int SGD_Bool;
@@ -77,7 +80,7 @@ typedef float SGD_Real;
 
 //! @}
 
-//! @name System
+//! @defgroup System System
 //! @{
 
 //! Start up libsgd.
@@ -94,7 +97,8 @@ SGD_API void SGD_DECL sgd_Terminate();
 //! log.logfileEnabled        | "1"     | Enables logging to logfile.
 //! log.stdoutEnabled         | "1"     | Enables logging to stdout.
 //! gltf.loggingEnabled       | "0"     | Enables logging by the gltf loader.
-//! dawn.backendType          |         | Backend for Dawn to use, one of: "D3D12", "D3D11", "Vulkan", "Metal". Defaults to "D3D12" on 64 bit Windows, "D3D11" on 32 bit Windows, "Vulkan" on 64 bit Linux and "Metal" on 64 bit MacOS.
+//! dawn.backendType          |         | Backend for Dawn to use, one of: "D3D12", "D3D11", "Vulkan", "Metal". Defaults to
+//! "D3D12" on 64 bit Windows, "D3D11" on 32 bit Windows, "Vulkan" on 64 bit Linux and "Metal" on 64 bit MacOS.
 //! render.vsyncEnabled       | "1"     | Hack that fixes https://issues.chromium.org/issues/42241496#comment3
 //! render.shadowPassEnabled  | "1"     | Enables shadow rendering.
 //! render.opaquePassEnabled  | "1"     | Enables opaque rendering.
@@ -103,7 +107,7 @@ SGD_API void SGD_DECL sgd_Terminate();
 SGD_API void SGD_DECL sgd_SetConfigVar(SGD_String name, SGD_String value);
 
 //! Set global configuration variable. The returned value is valid until the next call to sgd_GetConfigVar.
-//SGD_API SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name);
+// SGD_API SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name);
 
 //! Set error handler callback.
 SGD_API void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(SGD_String error, void* context), void* context);
@@ -125,11 +129,11 @@ SGD_API int SGD_DECL sgd_GetDesktopHeight();
 
 //! @cond Event mask  constants returned by sgd_NextEvent.
 #define SGD_EVENT_MASK_CLOSE_CLICKED 0x01
-#define SGD_EVENT_MASK_SIZE_CHANGED  0x02
-#define SGD_EVENT_MASK_LOST_FOCUS    0x04
-#define SGD_EVENT_MASK_GOT_FOCUS     0x08
-#define SGD_EVENT_MASK_SUSPENDED     0x10
-#define SGD_EVENT_MASK_RESUMED       0x20
+#define SGD_EVENT_MASK_SIZE_CHANGED 0x02
+#define SGD_EVENT_MASK_LOST_FOCUS 0x04
+#define SGD_EVENT_MASK_GOT_FOCUS 0x08
+#define SGD_EVENT_MASK_SUSPENDED 0x10
+#define SGD_EVENT_MASK_RESUMED 0x20
 //! @endcond
 
 //! Poll system for events, returns a bit mask of event types that occured.
@@ -167,22 +171,22 @@ SGD_API void SGD_DECL sgd_DebugMemory();
 
 //! @}
 
-//! @name Window
+//! @defgroup Window Window
 //! @{
 
 //! @cond Window states for use with SetWindowState
-#define SGD_WINDOW_STATE_CLOSED     0
-#define SGD_WINDOW_STATE_MINIMIZED  1
-#define SGD_WINDOW_STATE_NORMAL     2
-#define SGD_WINDOW_STATE_MAXIMIZED  3
+#define SGD_WINDOW_STATE_CLOSED 0
+#define SGD_WINDOW_STATE_MINIMIZED 1
+#define SGD_WINDOW_STATE_NORMAL 2
+#define SGD_WINDOW_STATE_MAXIMIZED 3
 #define SGD_WINDOW_STATE_FULLSCREEN 4
 //! @endcond
 
 //! @cond Window flags for use with CreateWindow.
-#define SGD_WINDOW_FLAGS_NONE       0
+#define SGD_WINDOW_FLAGS_NONE 0
 #define SGD_WINDOW_FLAGS_FULLSCREEN 1
-#define SGD_WINDOW_FLAGS_RESIZABLE  2
-#define SGD_WINDOW_FLAGS_CENTERED   4
+#define SGD_WINDOW_FLAGS_RESIZABLE 2
+#define SGD_WINDOW_FLAGS_CENTERED 4
 //! @endcond
 
 //! Create a new window.
@@ -227,7 +231,6 @@ SGD_API SGD_String SGD_DECL sgd_GetWindowTitle();
 //! Set fullscreen mode.
 SGD_API void SGD_DECL sgd_SetFullscreenMode(int width, int height, int hertz);
 
-
 //! Set window state.
 //!
 //! `state` should be one of the following values:
@@ -246,7 +249,7 @@ SGD_API int SGD_DECL sgd_GetWindowState();
 
 //! @}
 
-//! @name User Input
+//! @defgroup UserInput User Input
 //! @{
 
 //! True if key is currently held down.
@@ -321,37 +324,37 @@ SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, int axis);
 
 //! @}
 
-//! @name Texture
+//! @defgroup Texture Texture
 //! @{
 
 //! @cond Texture format constants
-#define SGD_TEXTURE_FORMAT_ANY     0
+#define SGD_TEXTURE_FORMAT_ANY 0
 
-#define SGD_TEXTURE_FORMAT_R8      1
-#define SGD_TEXTURE_FORMAT_RG8     2
-#define SGD_TEXTURE_FORMAT_RGBA8   3
-#define SGD_TEXTURE_FORMAT_SRGBA8  4
+#define SGD_TEXTURE_FORMAT_R8 1
+#define SGD_TEXTURE_FORMAT_RG8 2
+#define SGD_TEXTURE_FORMAT_RGBA8 3
+#define SGD_TEXTURE_FORMAT_SRGBA8 4
 
-#define SGD_TEXTURE_FORMAT_R8S     5
-#define SGD_TEXTURE_FORMAT_RG8S    6
-#define SGD_TEXTURE_FORMAT_RGBA8S  7
+#define SGD_TEXTURE_FORMAT_R8S 5
+#define SGD_TEXTURE_FORMAT_RG8S 6
+#define SGD_TEXTURE_FORMAT_RGBA8S 7
 
-#define SGD_TEXTURE_FORMAT_R16F    8
-#define SGD_TEXTURE_FORMAT_RG16F   9
+#define SGD_TEXTURE_FORMAT_R16F 8
+#define SGD_TEXTURE_FORMAT_RG16F 9
 #define SGD_TEXTURE_FORMAT_RGBA16F 10
 
 //! @endcond
 
 //! @cond Texture flag constants
-#define SGD_TEXTURE_FLAGS_NONE         0x00
-#define SGD_TEXTURE_FLAGS_CLAMP_U      0x01
-#define SGD_TEXTURE_FLAGS_CLAMP_V      0x02
-#define SGD_TEXTURE_FLAGS_CLAMP_W      0x04
-#define SGD_TEXTURE_FLAGS_CLAMP		   0x07
-#define SGD_TEXTURE_FLAGS_FILTER       0x08
-#define SGD_TEXTURE_FLAGS_MIPMAP       0x10
-#define SGD_TEXTURE_FLAGS_DEFAULT	   0x18
-#define SGD_TEXTURE_FLAGS_IMAGE        0x1f
+#define SGD_TEXTURE_FLAGS_NONE 0x00
+#define SGD_TEXTURE_FLAGS_CLAMP_U 0x01
+#define SGD_TEXTURE_FLAGS_CLAMP_V 0x02
+#define SGD_TEXTURE_FLAGS_CLAMP_W 0x04
+#define SGD_TEXTURE_FLAGS_CLAMP 0x07
+#define SGD_TEXTURE_FLAGS_FILTER 0x08
+#define SGD_TEXTURE_FLAGS_MIPMAP 0x10
+#define SGD_TEXTURE_FLAGS_DEFAULT 0x18
+#define SGD_TEXTURE_FLAGS_IMAGE 0x1f
 
 //! @endcond
 
@@ -375,7 +378,8 @@ SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, int axis);
 //! SGD_TEXTURE_FORMAT_RG16F    | 9             | 4               | 16 bit float per component linear red/green.
 //! SGD_TEXTURE_FORMAT_RGBA16F  | 10            | 8               | 16 bit float per component linear red/green/blue/alpha
 //!
-//! (*) SGD_TEXTURE_FORMAT_ANY can be used with texture and material loading functions to let SGD pick a suitable texture format.
+//! (*) SGD_TEXTURE_FORMAT_ANY can be used with texture and material loading functions to let SGD pick a suitable texture
+//! format.
 //!
 //! @param `flags` should be one or more of the following bitmasks:
 //!
@@ -429,30 +433,30 @@ SGD_API int SGD_DECL sgd_GetTexelSRGBA(SGD_Texture texture, int x, int y);
 
 //! @}
 
-//! @name Material
+//! @defgroup Material Material
 //! @{
 
 //! @cond blend mode constants
-#define SGD_BLEND_MODE_OPAQUE      1
-#define SGD_BLEND_MODE_ALPHA_MASK  2
+#define SGD_BLEND_MODE_OPAQUE 1
+#define SGD_BLEND_MODE_ALPHA_MASK 2
 #define SGD_BLEND_MODE_ALPHA_BLEND 3
 //! @endcond
 
 //! @cond depth func constants
-#define SGD_DEPTH_FUNC_NEVER         1
-#define SGD_DEPTH_FUNC_LESS          2
-#define SGD_DEPTH_FUNC_EQUAL         3
-#define SGD_DEPTH_FUNC_LESS_EQUAL    4
-#define SGD_DEPTH_FUNC_GREATER       5
-#define SGD_DEPTH_FUNC_NOT_EQUAL     6
+#define SGD_DEPTH_FUNC_NEVER 1
+#define SGD_DEPTH_FUNC_LESS 2
+#define SGD_DEPTH_FUNC_EQUAL 3
+#define SGD_DEPTH_FUNC_LESS_EQUAL 4
+#define SGD_DEPTH_FUNC_GREATER 5
+#define SGD_DEPTH_FUNC_NOT_EQUAL 6
 #define SGD_DEPTH_FUNC_GREATER_EQUAL 7
-#define SGD_DEPTH_FUNC_ALWAYS        8
+#define SGD_DEPTH_FUNC_ALWAYS 8
 //! @endcond
 
 //! @cond cull mode constants
-#define SGD_CULL_MODE_NONE  1
+#define SGD_CULL_MODE_NONE 1
 #define SGD_CULL_MODE_FRONT 2
-#define SGD_CULL_MODE_BACK  3
+#define SGD_CULL_MODE_BACK 3
 //! @endcond
 
 //!
@@ -507,24 +511,19 @@ SGD_API void SGD_DECL sgd_SetMaterialDepthFunc(SGD_Material material, int depthF
 //! SGD_CULL_MODE_BACK  | 3             | Cull back facing primitives
 SGD_API void SGD_DECL sgd_SetMaterialCullMode(SGD_Material material, int cullMode);
 
-//! Set material vector4 property.
-SGD_API void SGD_DECL sgd_SetMaterialVector4f(SGD_Material material, SGD_String property, float x, float y, float z, float w);
+//! Set material texture parameter.
+SGD_API void SGD_DECL sgd_SetMaterialTexture(SGD_Material material, SGD_String parameter, SGD_Texture texture);
 
-//! Set material vector3 property.
-SGD_API void SGD_DECL sgd_SetMaterialVector3f(SGD_Material material, SGD_String property, float x, float y, float z);
+//! Set material color parameter.
+SGD_API void SGD_DECL sgd_SetMaterialColor(SGD_Material material, SGD_String parameter, float red, float green, float blue,
+										   float alpha);
 
-//! Set material vector2 property.
-SGD_API void SGD_DECL sgd_SetMaterialVector2f(SGD_Material material, SGD_String property, float x, float y);
-
-//! Set material float property.
-SGD_API void SGD_DECL sgd_SetMaterialFloat(SGD_Material material, SGD_String property, float n);
-
-//! Set material texture property.
-SGD_API void SGD_DECL sgd_SetMaterialTexture(SGD_Material material, SGD_String property, SGD_Texture texture);
+//! Set material float parameter.
+SGD_API void SGD_DECL sgd_SetMaterialFloat(SGD_Material material, SGD_String parameter, float value);
 
 //! @}
 
-//! @name Mesh
+//! @defgroup Mesh Mesh
 //! @{
 
 //! Load a new mesh.
@@ -547,7 +546,8 @@ SGD_API SGD_Mesh SGD_DECL sgd_CreateCylinderMesh(float height, float radius, int
 SGD_API SGD_Mesh SGD_DECL sgd_CreateConeMesh(float height, float radius, int segs, SGD_Material material);
 
 //! Create a new torus mesh.
-SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs, SGD_Material material);
+SGD_API SGD_Mesh SGD_DECL sgd_CreateTorusMesh(float outerRadius, float innerRadius, int outerSegs, int innerSegs,
+											  SGD_Material material);
 
 //! Set mesh shadow casting enabled, defaults to true.
 SGD_API void SGD_DECL sgd_SetMeshShadowsEnabled(SGD_Mesh mesh, SGD_Bool enabled);
@@ -566,7 +566,8 @@ SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh mesh, float minX, float minY, float m
 								  SGD_Bool uniform);
 
 //! Transform mesh by translation, rotation, scale.
-SGD_API void SGD_DECL sgd_TFormMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy, float sz);
+SGD_API void SGD_DECL sgd_TFormMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx,
+									float sy, float sz);
 
 //! Transform mesh texture coordinates.
 SGD_API void SGD_DECL sgd_TFormMeshTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
@@ -594,7 +595,7 @@ SGD_API float SGD_DECL sgd_GetMeshBoundsMaxZ(SGD_Mesh mesh);
 
 //! @}
 
-//! @name Mesh Building
+//! @defgroup MeshBuilding Mesh Building
 //! @{
 
 //! Create a new custom mesh.
@@ -610,7 +611,8 @@ SGD_API int SGD_DECL sgd_GetVertexCount(SGD_Mesh mesh);
 SGD_API int SGD_DECL sgd_AddVertex(SGD_Mesh mesh, float x, float y, float z, float nx, float ny, float nz, float s, float t);
 
 //! Set vertex.
-SGD_API void SGD_DECL sgd_SetVertex(SGD_Mesh mesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s, float t);
+SGD_API void SGD_DECL sgd_SetVertex(SGD_Mesh mesh, int vertex, float x, float y, float z, float nx, float ny, float nz, float s,
+									float t);
 
 //! Set vertex position.
 SGD_API void SGD_DECL sgd_SetVertexPosition(SGD_Mesh mesh, int vertex, float x, float y, float z);
@@ -704,10 +706,9 @@ SGD_API void SGD_DECL sgd_SetTriangle(SGD_Surface surface, int triangle, int v0,
 //! Get mesh vertex index of a triangle corner. Vertex must be 0, 1 or 2.
 SGD_API int SGD_DECL sgd_GetTriangleVertex(SGD_Surface surface, int triangle, int vertex);
 
-
 //! @}
 
-//! @name Font
+//! @defgroup Font Font
 //! @{
 
 //! Load a new font
@@ -721,7 +722,7 @@ SGD_API float SGD_DECL sgd_GetFontHeight(SGD_Font font);
 
 //! @}
 
-//! @name Image
+//! @defgroup Image Image
 //! @{
 
 //! Load an image for use with 3D sprites or Draw2DImage.
@@ -746,7 +747,8 @@ SGD_API SGD_Image SGD_DECL sgd_CreateImage(SGD_Texture texture);
 //!-----------------------------|---------------|------------
 //! SGD_IMAGE_VIEW_MODE_FIXED   | 1             | Image is rotated to face camera when rendered.
 //! SGD_IMAGE_VIEW_MODE_FREE    | 2             | Image is rendered without taking camera position into account.
-//! SGD_IMAGE_VIEW_MODE_UPRIGHT | 3             | Image is rotated around local Y axis to face camera, useful for tree like sprites.
+//! SGD_IMAGE_VIEW_MODE_UPRIGHT | 3             | Image is rotated around local Y axis to face camera, useful for tree like
+//! sprites.
 SGD_API void SGD_DECL sgd_SetImageViewMode(SGD_Image image, int viewMode);
 
 //! Set image blend mode.
@@ -760,7 +762,7 @@ SGD_API SGD_Texture SGD_DECL sgd_GetImageTexture(SGD_Image image);
 
 //! @}
 
-//! @name 2D Overlay
+//! @defgroup 2DOverlay 2D Overlay
 //! @{
 
 //! Set current fill color for drawing shapes.
@@ -824,11 +826,11 @@ SGD_API void SGD_DECL sgd_Draw2DImage(SGD_Image image, float x, float y, float f
 SGD_API void SGD_DECL sgd_Draw2DOval(float minX, float minY, float maxX, float maxY);
 
 //! Draw text using current text color.
-SGD_API void SGD_DECL sgd_Draw2DText(SGD_String text, float x,float y);
+SGD_API void SGD_DECL sgd_Draw2DText(SGD_String text, float x, float y);
 
 //! @}
 
-//! @name Audio
+//! @defgroup Audio Audio
 //! @{
 
 //! Load a new sound.
@@ -875,7 +877,7 @@ SGD_API void SGD_DECL sgd_Update3DAudio();
 
 //! @}
 
-//! @name Scene
+//! @defgroup Scene Scene
 //! @{
 
 //! Destroy all active entities.
@@ -913,7 +915,8 @@ SGD_API void SGD_DECL sgd_SetCSMSplitDistances(float sklit0, float split1, float
 //! Set max range of potential CSM obscurers. Defaults to 1000.
 SGD_API void SGD_DECL sgd_SetCSMClipRange(float range);
 
-//! Set depth bia for CSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.0001.
+//! Set depth bia for CSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to
+//! 0.0001.
 SGD_API void SGD_DECL sgd_SetCSMDepthBias(float bias);
 
 //! Set point light shadow map texture size. Defaults to 1024, must be a power of 2.
@@ -925,7 +928,8 @@ SGD_API void SGD_DECL sgd_SetMaxPSMLights(int maxLights);
 //! Set near clip plane distance for PSM shadows. Default to .01.
 SGD_API void SGD_DECL sgd_SetPSMClipNear(float near);
 
-//! Set depth bias for PSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.0001.
+//! Set depth bias for PSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults
+//! to 0.0001.
 SGD_API void SGD_DECL sgd_SetPSMDepthBias(float bias);
 
 //! Set spot light shadow map texture size. Defaults to 1024, must be a power of 2.
@@ -937,7 +941,8 @@ SGD_API void SGD_DECL sgd_SetMaxSSMLights(int maxLights);
 //! Set near clip plane distance for SSM shadows. Default to .01.
 SGD_API void SGD_DECL sgd_SetSSMClipNear(float near);
 
-//! Set depth bias for SSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to 0.0001.
+//! Set depth bias for SSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults
+//! to 0.0001.
 SGD_API void SGD_DECL sgd_SetSSMDepthBias(float bias);
 
 //! Render scene.
@@ -954,7 +959,7 @@ SGD_API float SGD_DECL sgd_GetRPS();
 
 //! @}
 
-//! @name Entity
+//! @defgroup Entity Entity
 //! @{
 
 //! Enable or diasable entity.
@@ -1103,7 +1108,7 @@ SGD_API SGD_Real SGD_DECL sgd_GetTFormedZ();
 
 //! @}
 
-//! @name Camera
+//! @defgroup Camera Camera
 //! @{
 
 //! Create a perspective camera.
@@ -1144,7 +1149,7 @@ SGD_API SGD_Real SGD_DECL sgd_GetUnprojectedZ();
 
 //! @}
 
-//! @name Light
+//! @defgroup Light Light
 //! @{
 
 //! Create a directional light. Max directional lights is currently hardcoded at 4.
@@ -1182,7 +1187,7 @@ SGD_API void SGD_DECL sgd_SetLightPriority(SGD_Light light, int priority);
 
 //! @}
 
-//! @name Model
+//! @defgroup Model Model
 //! @{
 
 //! @cond Animation mode constants used by sgd_AnimateModel
@@ -1222,7 +1227,7 @@ SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float tim
 
 //! @}
 
-//! @name Skybox
+//! @defgroup Skybox Skybox
 //! @{
 
 //! Load a skybox.
@@ -1239,7 +1244,7 @@ SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox skybox, float roughness)
 
 //! @}
 
-//! @name Sprite
+//! @defgroup Sprite Sprite
 //! @{
 
 //! Create a new sprite.
@@ -1256,7 +1261,7 @@ SGD_API void SGD_DECL sgd_SetSpriteFrame(SGD_Sprite sprite, float frame);
 
 //! @}
 
-//! @name Collisions
+//! @defgroup Collisions Collisions
 //! @{
 
 //! @cond
@@ -1293,10 +1298,11 @@ SGD_API void SGD_DECL sgd_SetColliderHeight(SGD_Collider collider, float height)
 //!
 //! Response                       | Integer value | Description
 //! -------------------------------|---------------|------------
-//! SGD_COLLISION_RESPONSE_NONE    | 0             | Source collider should do nothing when it collides with destination collider.
-//! SGD_COLLISION_RESPONSE_STOP    | 1             | Source collider should stop when it collides with destination collider.
-//! SGD_COLLISION_RESPONSE_SLIDE   | 2             | Source collider should slide along geometry when it collides with destination collider.
-//! SGD_COLLISION_RESPONSE_SLIDEXZ | 3             | Source collider should slide along XZ plane when it collides with destination collider.
+//! SGD_COLLISION_RESPONSE_NONE    | 0             | Source collider should do nothing when it collides with destination
+//! collider. SGD_COLLISION_RESPONSE_STOP    | 1             | Source collider should stop when it collides with destination
+//! collider. SGD_COLLISION_RESPONSE_SLIDE   | 2             | Source collider should slide along geometry when it collides with
+//! destination collider. SGD_COLLISION_RESPONSE_SLIDEXZ | 3             | Source collider should slide along XZ plane when it
+//! collides with destination collider.
 SGD_API void SGD_DECL sgd_EnableCollisions(int srcColliderType, int dstColliderType, int response);
 
 //! Update enabled colliders.
@@ -1306,7 +1312,7 @@ SGD_API void SGD_DECL sgd_UpdateColliders();
 SGD_API int SGD_DECL sgd_GetCollisionCount(SGD_Collider collider);
 
 //! Get the collider a collision was with.
-SGD_API SGD_Collider SGD_DECL sgd_GetCollisionCollider(SGD_Collider collider,int index);
+SGD_API SGD_Collider SGD_DECL sgd_GetCollisionCollider(SGD_Collider collider, int index);
 
 //! Get collision X coordinate.
 SGD_API SGD_Real SGD_DECL sgd_GetCollisionX(SGD_Collider collider, int index);
@@ -1328,14 +1334,15 @@ SGD_API SGD_Real SGD_DECL sgd_GetCollisionNZ(SGD_Collider collider, int index);
 
 //! @}
 
-//! @name Collider picking
+//! @defgroup ColliderPicking Collider Picking
 //! @{
 
 //! Pick first collider along ray passing from camera eye through window coordinates.
 SGD_API SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera camera, float windowX, float windowY, int colliderMask);
 
 //! Pick first collider along line.
-SGD_API SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Real x1, SGD_Real y1, SGD_Real z1, SGD_Real radius, int colliderMask);
+SGD_API SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Real x1, SGD_Real y1, SGD_Real z1,
+										   SGD_Real radius, int colliderMask);
 
 //! X coordinate of pick contact point in world space.
 SGD_API SGD_Real SGD_DECL sgd_GetPickedX();
@@ -1357,7 +1364,7 @@ SGD_API SGD_Real SGD_DECL sgd_GetPickedNZ();
 
 //! @}
 
-//! @name Render effects
+//! @defgroup RenderEffects RenderEffects
 //! @{
 
 //! Create a new bloom effect and add it to the scene.
@@ -1404,7 +1411,7 @@ SGD_API SGD_Bool SGD_DECL sgd_IsRenderEffectEnabled(SGD_RenderEffect effect);
 
 //! @}
 
-//! @name ImGui
+//! @defgroup ImGui ImGui
 //! @{
 
 #if SGD_DYNAMIC
@@ -1415,6 +1422,8 @@ SGD_API void SGD_DECL sgd_ImGui_ImplSGD_NewFrame();
 SGD_API void SGD_DECL sgd_ImGui_ImplSGD_RenderDrawData(void* imguiDrawData);
 //! @endcond
 #endif
+
+//! @}
 
 //! @}
 

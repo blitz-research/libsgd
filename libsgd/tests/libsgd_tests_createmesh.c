@@ -60,7 +60,7 @@ void entry() {
 	sgd_SetLightRange(light0, 50);
 
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://misc/test-texture.png");
-	sgd_SetMaterialFloat(material, "roughnessFactor1f", .5f);
+	sgd_SetMaterialFloat(material, "roughness", .5f);
 
 	SGD_Mesh mesh = sgd_CreateSphereMesh(1, 96, 48, material);
 

@@ -19,7 +19,7 @@ SetLightRange light0, 10
 SetLightShadowsEnabled light0,True
 
 Local groundMaterial = CreatePBRMaterial()
-SetMaterialVector4f groundMaterial,"albedoColor4f",.6,.5,.5,1
+SetMaterialVector4f groundMaterial,"albedo",.6,.5,.5,1
 
 Local groundMesh = CreateBoxMesh(-5,-.1,-5,5,0,5,groundMaterial)
 SetMeshShadowsEnabled groundMesh, True

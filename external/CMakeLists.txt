@@ -5,7 +5,7 @@ project(external)
 include(FetchContent)
 
 # set(FETCHCONTENT_QUIET OFF)
-
+#
 # Do the big scary one first in case it fails...
 #
 ##### target: lib-dawn #####
@@ -22,7 +22,9 @@ else ()
 
 	FetchContent_Declare(dawn
 		GIT_REPOSITORY https://github.com/blitz-research/dawn.git
-		GIT_TAG openxr-dev
+#		GIT_TAG openxr-dev
+#		GIT_TAG vsync-test
+		GIT_TAG vulkan-vsync-fix
 		GIT_SUBMODULES ""
 		GIT_SHALLOW TRUE
 		EXCLUDE_FROM_ALL
@@ -58,7 +60,7 @@ if (NOT SGD_OS_EMSCRIPTEN)
 
 	FetchContent_Declare(libcurl
 		GIT_REPOSITORY https://github.com/blitz-research/curl.git
-		GIT_TAG master #ea7322ed14e26eb9ea715f4637b28fdecbefe2a1
+		GIT_TAG master
 		GIT_SUBMODULES ""
 		GIT_SHALLOW TRUE
 		EXCLUDE_FROM_ALL
@@ -67,6 +69,8 @@ if (NOT SGD_OS_EMSCRIPTEN)
 	set(BUILD_CURL_EXE OFF)
 	set(BUILD_SHARED_LIBS OFF)
 	set(CURL_DISABLE_TESTS ON)
+
+	set(CURL_USE_LIBPSL OFF)	# Do we want Public Suffix List?
 
 	if (SGD_OS_WINDOWS)
 		set(CURL_USE_SCHANNEL ON)
@@ -309,5 +313,7 @@ add_library(imgui-backends
 	${imgui_SOURCE_DIR}/backends/imgui_impl_wgpu.cpp
 )
 target_include_directories(imgui-backends PUBLIC ${imgui_SOURCE_DIR} ${imgui_SOURCE_DIR}/backends)
+
+target_compile_definitions(imgui-backends PUBLIC IMGUI_IMPL_WEBGPU_BACKEND_DAWN=1)
 
 target_link_libraries(imgui-backends lib-dawn glfw)

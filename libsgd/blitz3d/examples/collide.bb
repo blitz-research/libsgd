@@ -30,7 +30,7 @@ Local levelModel = CreateModel(levelMesh)
 Local levelCollider = CreateMeshCollider(levelModel, COLLIDER_TYPE_LEVEL, 0)
 
 Local sphereMesh = CreateSphereMesh(2.5,48,23,CreatePBRMaterial());
-SetMaterialVector4f(GetSurfaceMaterial(GetSurface(sphereMesh,0)),"albedoColor4f",1,.75,0,1)
+SetMaterialVector4f(GetSurfaceMaterial(GetSurface(sphereMesh,0)),"albedo",1,.75,0,1)
 
 Local sphereModel = CreateModel(sphereMesh)
 MoveEntity sphereModel,0,-6,36

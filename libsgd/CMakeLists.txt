@@ -79,6 +79,10 @@ if (SGD_DOXYGEN_TARGET_ENABLED)
 	add_subdirectory(doxygen)
 endif ()
 
+if (SGD_DOCS_TARGET_ENABLED)
+	add_subdirectory(docs)
+endif ()
+
 ##### Tests #####
 
 add_subdirectory(tests)
