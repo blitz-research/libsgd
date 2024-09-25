@@ -2,32 +2,27 @@ cmake_minimum_required(VERSION 3.16)
 
 project(libsgd_blitzmax)
 
-# 64 bit only for now
-if (NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+find_package(Python3 COMPONENTS Interpreter)
+if (NOT Python3_FOUND)
+	message(WARNING "### Can't find python3 interpreter, skipping blitzmax target...")
 	return()
 endif ()
 
-# Check we have sgd2bmx.exe
-find_program(SGD2BMX sgd2bmx)
-if (SGD2BMX STREQUAL SGD2BMX-NOTFOUND)
-	message(WARNING "### Can't find sgd2bmx program, skipping blitzmax target.")
-	return()
-endif ()
-
-message("### Found SGD2BMX: ${SGD2BMX}")
+# Assumes pycparser module present
 
 message("### Configuring blitzmax target...")
 
-set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/sgd.bmx)
+set(SRC ${CMAKE_CURRENT_SOURCE_DIR})
+set(BIN ${CMAKE_CURRENT_BINARY_DIR})
+set(INC ${CMAKE_SOURCE_DIR}/libsgd/include)
+set(OUT ${BIN}/sgd.bmx)
 
-add_custom_command(
-	COMMAND sgd2bmx ${CMAKE_SOURCE_DIR}/libsgd/include/sgd ${OUTPUT_FILE}
-	DEPENDS libsgd_dynamic
-	OUTPUT ${OUTPUT_FILE}
+add_custom_target(libsgd_blitzmax ALL
+	COMMAND	${Python3_EXECUTABLE} ${SRC}/apigen.py ${INC} ${OUT}
+	DEPENDS libsgd_dynamic ${SRC}/apigen.py ${SRC}/apigen_bmx.py
+	WORKING_DIRECTORY ${BIN}
 	VERBATIM)
 
-add_custom_target(libsgd_blitzmax ALL DEPENDS ${OUTPUT_FILE})
+install(FILES ${OUT} ${SRC}/helloworld.bmx DESTINATION blitzmax)
 
-install(FILES ${OUTPUT_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.bmx DESTINATION blitzmax)
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/examples DESTINATION blitzmax FILES_MATCHING PATTERN "*.bmx")
+install(DIRECTORY ${SRC}/examples DESTINATION blitzmax FILES_MATCHING PATTERN "*.bmx")

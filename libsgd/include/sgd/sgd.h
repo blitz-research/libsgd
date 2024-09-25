@@ -3,7 +3,9 @@
 
 #include "keycodes.h"
 
+#if !SGD_GENAPI
 #include <stdint.h>
+#endif
 
 //! @file
 //!
@@ -12,9 +14,6 @@
 //! Welcome to the LibSGD reference documentation.
 //!
 //! Quick links: sgd.h keycodes.h
-
-//! @defgroup LibSGD LibSGD
-//! @{
 
 //! @cond
 
@@ -48,12 +47,17 @@
 
 //! @endcond
 
-//! @defgroup Typedefs Typedefs
+//! @defgroup Types Types
 //! @{
 
 typedef int SGD_Bool;
 typedef int SGD_Handle;
 typedef const char* SGD_String;
+#if UINTPTR_MAX == 0xffffffffffffffff
+typedef double SGD_Real;
+#else
+typedef float SGD_Real;
+#endif
 
 typedef SGD_Handle SGD_Font;
 typedef SGD_Handle SGD_Sound;
@@ -71,12 +75,6 @@ typedef SGD_Handle SGD_Skybox;
 typedef SGD_Handle SGD_Collider;
 typedef SGD_Handle SGD_RenderEffect;
 typedef SGD_Handle SGD_AudioListener;
-
-#if UINTPTR_MAX == 0xffffffffffffffff
-typedef double SGD_Real;
-#else
-typedef float SGD_Real;
-#endif
 
 //! @}
 
@@ -127,28 +125,18 @@ SGD_API int SGD_DECL sgd_GetDesktopWidth();
 //! Return height of desktop in pixels.
 SGD_API int SGD_DECL sgd_GetDesktopHeight();
 
-//! @cond Event mask  constants returned by sgd_NextEvent.
-#define SGD_EVENT_MASK_CLOSE_CLICKED 0x01
-#define SGD_EVENT_MASK_SIZE_CHANGED 0x02
-#define SGD_EVENT_MASK_LOST_FOCUS 0x04
-#define SGD_EVENT_MASK_GOT_FOCUS 0x08
-#define SGD_EVENT_MASK_SUSPENDED 0x10
-#define SGD_EVENT_MASK_RESUMED 0x20
-//! @endcond
+//! Mask containg events that occured in sgd_PollEvent.
+typedef enum SGD_EventMask {
+	SGD_EVENT_MASK_CLOSE_CLICKED = 0x01,
+	SGD_EVENT_MASK_SIZE_CHANGED = 0x02,
+	SGD_EVENT_MASK_LOST_FOCUS = 0x04,
+	SGD_EVENT_MASK_GOT_FOCUS = 0x08,
+	SGD_EVENT_MASK_SUSPENDED = 0x10,
+	SGD_EVENT_MASK_RESUMED = 0x20
+} SGD_EventMask;
 
 //! Poll system for events, returns a bit mask of event types that occured.
-//!
-//! The returned bit mask can contain any of the following values:
-//!
-//! Event type mask                | Integer value | Description
-//! -------------------------------|---------------|------------
-//! SGD_EVENT_MASK_CLOSE_CLICKED   | 0x01          | Window close button clicked
-//! SGD_EVENT_MASK_SIZE_CHANGED    | 0x02          | Window size changed
-//! SGD_EVENT_MASK_LOST_FOCUS      | 0x04          | Window lost input focus
-//! SGD_EVENT_MASK_GOT_FOCUS       | 0x08          | Window received input focus
-//! SGD_EVENT_MASK_SUSPENDED       | 0x10          | App suspended
-//! SGD_EVENT_MASK_RESUMED         | 0x20          | App resumed
-SGD_API int SGD_DECL sgd_PollEvents();
+SGD_API SGD_EventMask SGD_DECL sgd_PollEvents();
 
 //! Release an object handle.
 //!
@@ -174,32 +162,25 @@ SGD_API void SGD_DECL sgd_DebugMemory();
 //! @defgroup Window Window
 //! @{
 
-//! @cond Window states for use with SetWindowState
-#define SGD_WINDOW_STATE_CLOSED 0
-#define SGD_WINDOW_STATE_MINIMIZED 1
-#define SGD_WINDOW_STATE_NORMAL 2
-#define SGD_WINDOW_STATE_MAXIMIZED 3
-#define SGD_WINDOW_STATE_FULLSCREEN 4
-//! @endcond
+//! Window states.
+typedef enum SGD_WindowState {
+	SGD_WINDOW_STATE_CLOSED= 0,
+	SGD_WINDOW_STATE_MINIMIZED= 1,
+	SGD_WINDOW_STATE_NORMAL= 2,
+	SGD_WINDOW_STATE_MAXIMIZED= 3,
+	SGD_WINDOW_STATE_FULLSCREEN= 4
+} SGD_WindowState;
 
-//! @cond Window flags for use with CreateWindow.
-#define SGD_WINDOW_FLAGS_NONE 0
-#define SGD_WINDOW_FLAGS_FULLSCREEN 1
-#define SGD_WINDOW_FLAGS_RESIZABLE 2
-#define SGD_WINDOW_FLAGS_CENTERED 4
-//! @endcond
+//! Window flags.
+typedef enum SGD_WindowFlags {
+	SGD_WINDOW_FLAGS_NONE= 0,
+	SGD_WINDOW_FLAGS_FULLSCREEN= 1,
+	SGD_WINDOW_FLAGS_RESIZABLE= 2,
+	SGD_WINDOW_FLAGS_CENTERED= 4
+} SGD_WindowFlags;
 
 //! Create a new window.
-//!
-//! `flags` should be one or more of the following bit mask values:
-//!
-//! Window flag                      | Integer value | Description
-//! ---------------------------------|---------------|------------
-//! SGD_WINDOW_FLAGS_FULLSCREEN      | 1             | Create a fullscreen window
-//! SGD_WINDOW_FLAGS_RESIZABLE       | 2             | Create a resizable window
-//! SGD_WINDOW_FLAGS_CENTERED        | 4             | Open window centered on desktop
-//! SGD_WINDOW_FLAGS_FULLSCREEN_60HZ | 8             | Create a fullscreen 60 hz window
-SGD_API void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flags);
+SGD_API void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, SGD_WindowFlags flags);
 
 //! Destroy window.
 SGD_API void SGD_DECL sgd_DestroyWindow();
@@ -232,20 +213,10 @@ SGD_API SGD_String SGD_DECL sgd_GetWindowTitle();
 SGD_API void SGD_DECL sgd_SetFullscreenMode(int width, int height, int hertz);
 
 //! Set window state.
-//!
-//! `state` should be one of the following values:
-//!
-//! State                          | Integer value | Description
-//! -------------------------------|---------------|------------
-//! SGD_WINDOW_STATE_CLOSED        | 0             | Ignored - returned by sgd_GetWindowState only
-//! SGD_WINDOW_STATE_MINIMIZED     | 1             | Minimize window
-//! SGD_WINDOW_STATE_NORMAL        | 2			   | Restore minimized or maximized window, or exit fullscreen mode
-//! SGD_WINDOW_STATE_MAXIMIZED     | 3             | Maximize window
-//! SGD_WINDOW_STATE_FULLSCREEN    | 4             | Re-enter fullscreen mode
-SGD_API void SGD_DECL sgd_SetWindowState(int state);
+SGD_API void SGD_DECL sgd_SetWindowState(SGD_WindowState state);
 
 //! Get window state. See sgd_SetWindowState.
-SGD_API int SGD_DECL sgd_GetWindowState();
+SGD_API SGD_WindowState SGD_DECL sgd_GetWindowState();
 
 //! @}
 
@@ -253,10 +224,10 @@ SGD_API int SGD_DECL sgd_GetWindowState();
 //! @{
 
 //! True if key is currently held down.
-SGD_API SGD_Bool SGD_DECL sgd_IsKeyDown(int keyCode);
+SGD_API SGD_Bool SGD_DECL sgd_IsKeyDown(SGD_Key key);
 
 //! True if key was pressed down last frame.
-SGD_API SGD_Bool SGD_DECL sgd_IsKeyHit(int keyCode);
+SGD_API SGD_Bool SGD_DECL sgd_IsKeyHit(SGD_Key key);
 
 //! Get next unicode character from keyboard input queue.
 SGD_API int SGD_DECL sgd_GetChar();
@@ -285,130 +256,93 @@ SGD_API float SGD_DECL sgd_GetMouseVZ();
 //! Set Mouse Z (scrollwheel) position.
 SGD_API void SGD_DECL sgd_SetMouseZ(float z);
 
-//! @cond Cursor modes for use with SetMouseCursorMode.
-#define SGD_MOUSE_CURSOR_MODE_NORMAL 1
-#define SGD_MOUSE_CURSOR_MODE_HIDDEN 2
-#define SGD_MOUSE_CURSOR_MODE_DISABLED 3
-#define SGD_MOUSE_CURSOR_MODE_CAPTURED 4
-//! @endcond
+//! Mouse cursor modes.
+typedef enum SGD_MouseCursorMode {
+	SGD_MOUSE_CURSOR_MODE_NORMAL= 1,
+	SGD_MOUSE_CURSOR_MODE_HIDDEN= 2,
+	SGD_MOUSE_CURSOR_MODE_DISABLED= 3,
+	SGD_MOUSE_CURSOR_MODE_CAPTURED= 4
+} SGD_MouseCursorMode;
 
 //! Set mouse cursor mode.
-//!
-//! `cursorMode` should be one or more of the following bit mask values:
-//!
-//! Cursor mode                    | Integer value | Description
-//! -------------------------------|---------------|------------
-//! SGD_MOUSE_CURSOR_MODE_NORMAL   | 1             | Normal mouse cursor behaviour
-//! SGD_MOUSE_CURSOR_MODE_HIDDEN   | 2             | Mouse cursor is hidden
-//! SGD_MOUSE_CURSOR_MODE_DISABLED | 3             | Mouse cursor is hidden and locked to window
-//! SGD_MOUSE_CURSOR_MODE_CAPTURED | 4             | Mouse cursor is locked to window
-SGD_API void SGD_DECL sgd_SetMouseCursorMode(int cursorMode);
+SGD_API void SGD_DECL sgd_SetMouseCursorMode(SGD_MouseCursorMode cursorMode);
 
 //! True if mouse button is curently held down.
-SGD_API SGD_Bool SGD_DECL sgd_IsMouseButtonDown(int button);
+SGD_API SGD_Bool SGD_DECL sgd_IsMouseButtonDown(SGD_MouseButton button);
 
 //! True if mouse button was pressed down last frame.
-SGD_API SGD_Bool SGD_DECL sgd_IsMouseButtonHit(int button);
+SGD_API SGD_Bool SGD_DECL sgd_IsMouseButtonHit(SGD_MouseButton button);
 
 //! True if gamepad is currently connected.
 SGD_API SGD_Bool SGD_DECL sgd_IsGamepadConnected(int gamepad);
 
 //! True if gamepad button currently held down.
-SGD_API SGD_Bool SGD_DECL sgd_IsGamepadButtonDown(int gamepad, int button);
+SGD_API SGD_Bool SGD_DECL sgd_IsGamepadButtonDown(int gamepad, SGD_GamepadButton button);
 
 //! True if gamepad button was pressed down last frame.
-SGD_API SGD_Bool SGD_DECL sgd_IsGamepadButtonHit(int gamepad, int button);
+SGD_API SGD_Bool SGD_DECL sgd_IsGamepadButtonHit(int gamepad, SGD_GamepadButton button);
 
 //! Value in the range -1 to 1 representing joystick axis position.
-SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, int axis);
+SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, SGD_GamepadAxis axis);
 
 //! @}
 
 //! @defgroup Texture Texture
 //! @{
 
-//! @cond Texture format constants
-#define SGD_TEXTURE_FORMAT_ANY 0
+//! Texture formats
+//!
+//! SGD_TEXTURE_FORMAT_ANY can only be used with texture and material loading functions to let SGD pick a suitable texture format.
+typedef enum SGD_TextureFormat {
+	SGD_TEXTURE_FORMAT_ANY= 0,
 
-#define SGD_TEXTURE_FORMAT_R8 1
-#define SGD_TEXTURE_FORMAT_RG8 2
-#define SGD_TEXTURE_FORMAT_RGBA8 3
-#define SGD_TEXTURE_FORMAT_SRGBA8 4
+	SGD_TEXTURE_FORMAT_R8= 1,
+	SGD_TEXTURE_FORMAT_RG8= 2,
+	SGD_TEXTURE_FORMAT_RGBA8= 3,
+	SGD_TEXTURE_FORMAT_SRGBA8= 4,
 
-#define SGD_TEXTURE_FORMAT_R8S 5
-#define SGD_TEXTURE_FORMAT_RG8S 6
-#define SGD_TEXTURE_FORMAT_RGBA8S 7
+	SGD_TEXTURE_FORMAT_R8S= 5,
+	SGD_TEXTURE_FORMAT_RG8S= 6,
+	SGD_TEXTURE_FORMAT_RGBA8S= 7,
 
-#define SGD_TEXTURE_FORMAT_R16F 8
-#define SGD_TEXTURE_FORMAT_RG16F 9
-#define SGD_TEXTURE_FORMAT_RGBA16F 10
+	SGD_TEXTURE_FORMAT_R16F= 8,
+	SGD_TEXTURE_FORMAT_RG16F= 9,
+	SGD_TEXTURE_FORMAT_RGBA16F= 10
+} SGD_TextureFormat;
 
-//! @endcond
-
-//! @cond Texture flag constants
-#define SGD_TEXTURE_FLAGS_NONE 0x00
-#define SGD_TEXTURE_FLAGS_CLAMP_U 0x01
-#define SGD_TEXTURE_FLAGS_CLAMP_V 0x02
-#define SGD_TEXTURE_FLAGS_CLAMP_W 0x04
-#define SGD_TEXTURE_FLAGS_CLAMP 0x07
-#define SGD_TEXTURE_FLAGS_FILTER 0x08
-#define SGD_TEXTURE_FLAGS_MIPMAP 0x10
-#define SGD_TEXTURE_FLAGS_DEFAULT 0x18
-#define SGD_TEXTURE_FLAGS_IMAGE 0x1f
-
-//! @endcond
+//! Texture flags
+typedef enum SGD_TextureFlags {
+	SGD_TEXTURE_FLAGS_NONE= 0x0,
+	SGD_TEXTURE_FLAGS_CLAMP_U= 0x01,
+	SGD_TEXTURE_FLAGS_CLAMP_V= 0x02,
+	SGD_TEXTURE_FLAGS_CLAMP_W= 0x04,
+	SGD_TEXTURE_FLAGS_FILTER= 0x08,
+	SGD_TEXTURE_FLAGS_MIPMAP= 0x10,
+	SGD_TEXTURE_FLAGS_DEFAULT= 0x18,
+	SGD_TEXTURE_FLAGS_IMAGE= 0x01f
+} SGD_TextureFlags;
 
 //! Load a new 2D texture.
 //!
-//! @param `path` is the file path of the texture to load.
-//!
-//! @param `format` should be one of the following:
-//!
-//! Texture format              | Integer value | Bytes per texel | Description
-//! ----------------------------|---------------|-----------------|------------
-//! SGD_TEXTURE_FORMAT_ANY      | 0             | NA              | Any (*).
-//! SGD_TEXTURE_FORMAT_R8       | 1             | 1               | Unsigned byte per component linear red.
-//! SGD_TEXTURE_FORMAT_RG8      | 2             | 2               | Unsigned byte per component linear red/green.
-//! SGD_TEXTURE_FORMAT_RGBA8    | 3             | 4               | Unsigned byte per component linear red/green/blue/alpha
-//! SGD_TEXTURE_FORMAT_SRGBA8   | 4             | 4               | Unsigned byte per component standard red/green/blue/alpha
-//! SGD_TEXTURE_FORMAT_R8S      | 5             | 1               | Signed byte per component linear red.
-//! SGD_TEXTURE_FORMAT_RG8S     | 6             | 2               | Signed byte per component linear red/green.
-//! SGD_TEXTURE_FORMAT_RGBA8    | 7             | 4               | Signed byte per component linear red/green/blue/alpha
-//! SGD_TEXTURE_FORMAT_R16F     | 8             | 2               | 16 bit float per component linear red.
-//! SGD_TEXTURE_FORMAT_RG16F    | 9             | 4               | 16 bit float per component linear red/green.
-//! SGD_TEXTURE_FORMAT_RGBA16F  | 10            | 8               | 16 bit float per component linear red/green/blue/alpha
-//!
-//! (*) SGD_TEXTURE_FORMAT_ANY can be used with texture and material loading functions to let SGD pick a suitable texture
-//! format.
-//!
-//! @param `flags` should be one or more of the following bitmasks:
-//!
-//! Texture flags                   | Integer value | Description
-//! --------------------------------|---------------|------------
-//! SGD_TEXTURE_FLAGS_NONE          | 0x00          | No texture flags.
-//! SGD_TEXTURE_FLAGS_CLAMP_U       | 0x01          | Clamp texture U, V, W coordinates.
-//! SGD_TEXTURE_FLAGS_CLAMP_V       | 0x02          | Clamp texture U, V, W coordinates.
-//! SGD_TEXTURE_FLAGS_CLAMP_W       | 0x04          | Clamp texture U, V, W coordinates.
-//! SGD_TEXTURE_FLAGS_FILTER		| 0x08          | Enable filtering of magnified textures.
-//! SGD_TEXTURE_FLAGS_MIPMAP        | 0x10          | Enable mipmapping of minified textures.
-//! SGD_TEXTURE_FLAGS_DEFAULT		| 0x18			| Convenience flag that combines mipmap and filter.
-//! SGD_TEXTURE_FLAGS_IMAGE         | 0x01f         | Convenience flag that combines mipmap, filter and clamp.
-SGD_API SGD_Texture SGD_DECL sgd_Load2DTexture(SGD_String path, int format, int flags);
+//! @param path is the file path of the texture to load.
+//! @param format is a texture format constant. @ref TextureFormat.
+//! @param flags should be one or more of the following bitmasks:
+SGD_API SGD_Texture SGD_DECL sgd_Load2DTexture(SGD_String path, SGD_TextureFormat format, SGD_TextureFlags flags);
 
 //! Load a new cube texture.
-SGD_API SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, int format, int flags);
+SGD_API SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, SGD_TextureFormat format, SGD_TextureFlags flags);
 
-//! Load an new array texture.
-SGD_API SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, int format, int flags);
+//! Load a new array texture.
+SGD_API SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, SGD_TextureFormat format, SGD_TextureFlags flags);
 
 //! Create a new 2D texture.
-SGD_API SGD_Texture SGD_DECL sgd_Create2DTexture(int width, int height, int format, int flags);
+SGD_API SGD_Texture SGD_DECL sgd_Create2DTexture(int width, int height, SGD_TextureFormat format, SGD_TextureFlags flags);
 
 //! Create a new cube texture.
-SGD_API SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, int format, int flags);
+SGD_API SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, SGD_TextureFormat format, SGD_TextureFlags flags);
 
 //! Create a new array texture.
-SGD_API SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, int format, int flags);
+SGD_API SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, SGD_TextureFormat format, SGD_TextureFlags flags);
 
 //! Get width of texture.
 SGD_API int SGD_DECL sgd_GetTextureWidth(SGD_Texture texture);
@@ -436,80 +370,52 @@ SGD_API int SGD_DECL sgd_GetTexelSRGBA(SGD_Texture texture, int x, int y);
 //! @defgroup Material Material
 //! @{
 
-//! @cond blend mode constants
-#define SGD_BLEND_MODE_OPAQUE 1
-#define SGD_BLEND_MODE_ALPHA_MASK 2
-#define SGD_BLEND_MODE_ALPHA_BLEND 3
-//! @endcond
+//! Blend mode.
+typedef enum SGD_BlendMode {
+	SGD_BLEND_MODE_OPAQUE= 1,
+	SGD_BLEND_MODE_ALPHA_MASK= 2,
+	SGD_BLEND_MODE_ALPHA_BLEND= 3
+} SGD_BlendMode;
 
-//! @cond depth func constants
-#define SGD_DEPTH_FUNC_NEVER 1
-#define SGD_DEPTH_FUNC_LESS 2
-#define SGD_DEPTH_FUNC_EQUAL 3
-#define SGD_DEPTH_FUNC_LESS_EQUAL 4
-#define SGD_DEPTH_FUNC_GREATER 5
-#define SGD_DEPTH_FUNC_NOT_EQUAL 6
-#define SGD_DEPTH_FUNC_GREATER_EQUAL 7
-#define SGD_DEPTH_FUNC_ALWAYS 8
-//! @endcond
+//! Depth Comparison function.
+typedef enum SGD_DepthFunc {
+	SGD_DEPTH_FUNC_NEVER= 1,
+	SGD_DEPTH_FUNC_LESS= 2,
+	SGD_DEPTH_FUNC_EQUAL= 3,
+	SGD_DEPTH_FUNC_LESS_EQUAL= 4,
+	SGD_DEPTH_FUNC_GREATER= 5,
+	SGD_DEPTH_FUNC_NOT_EQUAL= 6,
+	SGD_DEPTH_FUNC_GREATER_EQUAL= 7,
+	SGD_DEPTH_FUNC_ALWAYS= 8
+} SGD_DepthFunc;
 
-//! @cond cull mode constants
-#define SGD_CULL_MODE_NONE 1
-#define SGD_CULL_MODE_FRONT 2
-#define SGD_CULL_MODE_BACK 3
-//! @endcond
-
-//!
-
-//! Create a new PBR material.
-SGD_API SGD_Material SGD_DECL sgd_CreatePBRMaterial();
+//! Cull modes.
+typedef enum SGD_CullMode {
+	SGD_CULL_MODE_NONE= 1,
+	SGD_CULL_MODE_FRONT= 2,
+	SGD_CULL_MODE_BACK= 3
+} SGD_CullMode;
 
 //! Load a new PBR material.
 SGD_API SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path);
 
-//! Create a new prelit material.
-SGD_API SGD_Material SGD_DECL sgd_CreatePrelitMaterial();
+//! Create a new PBR material.
+SGD_API SGD_Material SGD_DECL sgd_CreatePBRMaterial();
 
 //! Load a new prelit material.
 SGD_API SGD_Material SGD_DECL sgd_LoadPrelitMaterial(SGD_String path);
 
+//! Create a new prelit material.
+SGD_API SGD_Material SGD_DECL sgd_CreatePrelitMaterial();
+
 //! Set material blend mode.
-//!
-//! `blendMode` should be one of the following:
-//!
-//! Blend mode                 | Integer value | Description
-//! ---------------------------|---------------|------------
-//! SGD_BLEND_MODE_OPAQUE      | 1             | Opaque
-//! SGD_BLEND_MODE_ALPHA_MASK  | 2             | Alpha mask - fragments with alpha >= 0.5 are rendered, others are discarded
-//! SGD_BLEND_MODE_ALPHA_BLEND | 3             | Alpha blend - fragments are blended ing using premultipled alpha
-SGD_API void SGD_DECL sgd_SetMaterialBlendMode(SGD_Material material, int blendMode);
+SGD_API void SGD_DECL sgd_SetMaterialBlendMode(SGD_Material material, SGD_BlendMode blendMode);
 
 //! Set material depth comparison function.
-//!
-//! `depthFunc` should be one of the following:
-//!
-//! Depth function               | Integer value
-//! -----------------------------|--------------
-//! SGD_DEPTH_FUNC_NEVER         | 1
-//! SGD_DEPTH_FUNC_LESS          | 2
-//! SGD_DEPTH_FUNC_EQUAL         | 3
-//! SGD_DEPTH_FUNC_LESS_EQUAL    | 4
-//! SGD_DEPTH_FUNC_GREATER       | 5
-//! SGD_DEPTH_FUNC_NOT_EQUAL     | 6
-//! SGD_DEPTH_FUNC_GREATER_EQUAL | 7
-//! SGD_DEPTH_FUNC_ALWAYS        | 8
-SGD_API void SGD_DECL sgd_SetMaterialDepthFunc(SGD_Material material, int depthFunc);
+SGD_API void SGD_DECL sgd_SetMaterialDepthFunc(SGD_Material material, SGD_DepthFunc depthFunc);
 
-//! Set material primitive culling mode.
-//!
-//! `cullMode` should be one of the following:
-//!
-//! Cull mode           | Integer value | Description
-//! --------------------| --------------|------------
-//! SGD_CULL_MODE_NONE  | 1             | Don't cull any primitives
-//! SGD_CULL_MODE_FRONT | 2             | Cull front facing primitives
-//! SGD_CULL_MODE_BACK  | 3             | Cull back facing primitives
-SGD_API void SGD_DECL sgd_SetMaterialCullMode(SGD_Material material, int cullMode);
+//! Set material cull mode.
+SGD_API void SGD_DECL sgd_SetMaterialCullMode(SGD_Material material, SGD_CullMode cullMode);
 
 //! Set material texture parameter.
 SGD_API void SGD_DECL sgd_SetMaterialTexture(SGD_Material material, SGD_String parameter, SGD_Texture texture);
@@ -598,8 +504,14 @@ SGD_API float SGD_DECL sgd_GetMeshBoundsMaxZ(SGD_Mesh mesh);
 //! @defgroup MeshBuilding Mesh Building
 //! @{
 
+typedef enum SGD_MeshFlags {
+	SGD_MESH_FLAGS_NONE= 0,
+	SGD_MESH_FLAGS_TANGENTS_ENABLED=1,
+	SGD_MESH_FLAGS_BLENDED_SURFACES=2,
+} SGD_MeshFlags;
+
 //! Create a new custom mesh.
-SGD_API SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, int flags);
+SGD_API SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, SGD_MeshFlags flags);
 
 //! Add uninitialized vertices to a mesh, returning index of the first new vertex.
 SGD_API void SGD_DECL sgd_ResizeVertices(SGD_Mesh mesh, int count);
@@ -733,26 +645,18 @@ SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int depth);
 //! Create an image with an existing texture.
 SGD_API SGD_Image SGD_DECL sgd_CreateImage(SGD_Texture texture);
 
-//! @cond
-#define SGD_IMAGE_VIEW_MODE_FIXED 1
-#define SGD_IMAGE_VIEW_MODE_FREE 2
-#define SGD_IMAGE_VIEW_MODE_UPRIGHT 3
-//! @endcond
+//! Image view modes.
+typedef enum SGD_ImageViewMode {
+	SGD_IMAGE_VIEW_MODE_FIXED= 1,
+	SGD_IMAGE_VIEW_MODE_FREE= 2,
+	SGD_IMAGE_VIEW_MODE_UPRIGHT= 3
+} SGD_ImageViewMode;
 
 //! Set view mode for use with 3D sprites.
-//!
-//! `imageViewMode` should be one of the following values:
-//!
-//! Image view mode             | Integer value | Description
-//!-----------------------------|---------------|------------
-//! SGD_IMAGE_VIEW_MODE_FIXED   | 1             | Image is rotated to face camera when rendered.
-//! SGD_IMAGE_VIEW_MODE_FREE    | 2             | Image is rendered without taking camera position into account.
-//! SGD_IMAGE_VIEW_MODE_UPRIGHT | 3             | Image is rotated around local Y axis to face camera, useful for tree like
-//! sprites.
-SGD_API void SGD_DECL sgd_SetImageViewMode(SGD_Image image, int viewMode);
+SGD_API void SGD_DECL sgd_SetImageViewMode(SGD_Image image, SGD_ImageViewMode viewMode);
 
 //! Set image blend mode.
-SGD_API void SGD_DECL sgd_SetImageBlendMode(SGD_Image image, int blendMode);
+SGD_API void SGD_DECL sgd_SetImageBlendMode(SGD_Image image, SGD_BlendMode blendMode);
 
 //! Set rect for use with 3D sprites.
 SGD_API void SGD_DECL sgd_SetImageRect(SGD_Image image, float minX, float minY, float maxX, float maxY);
@@ -1190,11 +1094,12 @@ SGD_API void SGD_DECL sgd_SetLightPriority(SGD_Light light, int priority);
 //! @defgroup Model Model
 //! @{
 
-//! @cond Animation mode constants used by sgd_AnimateModel
-#define SGD_ANIMATION_MODE_ONE_SHOT 1
-#define SGD_ANIMATION_MODE_LOOP 2
-#define SGD_ANIMATION_MODE_PING_PONG 3
-//! @endcond
+//! Animation modes.
+typedef enum SGD_AnimationMode {
+	SGD_ANIMATION_MODE_ONE_SHOT= 1,
+	SGD_ANIMATION_MODE_LOOP= 2,
+	SGD_ANIMATION_MODE_PING_PONG= 3
+} SGD_AnimationMode;
 
 //! Load a model.
 SGD_API SGD_Model SGD_DECL sgd_LoadModel(SGD_String path);
@@ -1215,15 +1120,7 @@ SGD_API SGD_Mesh SGD_DECL sgd_GetModelMesh(SGD_Model model);
 SGD_API void SGD_DECL sgd_SetModelColor(SGD_Model model, float red, float green, float blue, float alpha);
 
 //! Animate a model.
-//!
-//! `mode` should be one of the following:
-//!
-//! Animation mode              | Integer value | meaning
-//! ----------------------------|---------------|--------
-//! SGD_ANIMATION_MODE_ONE_SHOT | 1             | Animation plays forward once then ends.
-//! SGD_ANIMATION_MODE_LOOP     | 2             | Animation plays forward repeatedly.
-//! SGD_ANIMATION_PING_PING     | 3             | Animation plays forward then backwards repeatedly.
-SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float time, int mode, float weight);
+SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float time, SGD_AnimationMode animationMode, float weight);
 
 //! @}
 
@@ -1264,12 +1161,13 @@ SGD_API void SGD_DECL sgd_SetSpriteFrame(SGD_Sprite sprite, float frame);
 //! @defgroup Collisions Collisions
 //! @{
 
-//! @cond
-#define SGD_COLLISION_RESPONSE_NONE 0
-#define SGD_COLLISION_RESPONSE_STOP 1
-#define SGD_COLLISION_RESPONSE_SLIDE 2
-#define SGD_COLLISION_RESPONSE_SLIDEXZ 3
-//! @endcond
+//! Collision responses
+typedef enum SGD_CollisionResponse {
+	SGD_COLLISION_RESPONSE_NONE= 0,
+	SGD_COLLISION_RESPONSE_STOP= 1,
+	SGD_COLLISION_RESPONSE_SLIDE= 2,
+	SGD_COLLISION_RESPONSE_SLIDEXZ= 3
+} SGD_CollisionResponse;
 
 //! Create a new sphere collider and attach it to entity.
 SGD_API SGD_Collider SGD_DECL sgd_CreateSphereCollider(SGD_Entity entity, int colliderType, float radius);
@@ -1293,17 +1191,7 @@ SGD_API void SGD_DECL sgd_SetColliderRadius(SGD_Collider collider, float radius)
 SGD_API void SGD_DECL sgd_SetColliderHeight(SGD_Collider collider, float height);
 
 //! Enable collisons between 2 collider types.
-//!
-//! `response` should be one of the following:
-//!
-//! Response                       | Integer value | Description
-//! -------------------------------|---------------|------------
-//! SGD_COLLISION_RESPONSE_NONE    | 0             | Source collider should do nothing when it collides with destination
-//! collider. SGD_COLLISION_RESPONSE_STOP    | 1             | Source collider should stop when it collides with destination
-//! collider. SGD_COLLISION_RESPONSE_SLIDE   | 2             | Source collider should slide along geometry when it collides with
-//! destination collider. SGD_COLLISION_RESPONSE_SLIDEXZ | 3             | Source collider should slide along XZ plane when it
-//! collides with destination collider.
-SGD_API void SGD_DECL sgd_EnableCollisions(int srcColliderType, int dstColliderType, int response);
+SGD_API void SGD_DECL sgd_EnableCollisions(int srcColliderType, int dstColliderType, SGD_CollisionResponse response);
 
 //! Update enabled colliders.
 SGD_API void SGD_DECL sgd_UpdateColliders();
@@ -1422,8 +1310,6 @@ SGD_API void SGD_DECL sgd_ImGui_ImplSGD_NewFrame();
 SGD_API void SGD_DECL sgd_ImGui_ImplSGD_RenderDrawData(void* imguiDrawData);
 //! @endcond
 #endif
-
-//! @}
 
 //! @}
 

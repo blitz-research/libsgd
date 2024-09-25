@@ -70,7 +70,7 @@ Example
 
         sgd.SetClearColor 1, .5, 0, 1
 
-        while (PollEvents() And sgd.EVENT_MASK_CLOSE_CLICKED) = 0
+        while (PollEvents() & sgd.EVENT_MASK_CLOSE_CLICKED) = 0
 
             sgd.RenderScene()
 

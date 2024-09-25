@@ -548,9 +548,9 @@ SGD_Model SGD_DECL sgd_LoadBonedModel(SGD_String path, SGD_Bool skinned) {
 	return sgdx::createHandle(model);
 }
 
-void SGD_DECL sgd_AnimateModel(SGD_Model hmodel, int animation, float time, int mode, float weight) {
+void SGD_DECL sgd_AnimateModel(SGD_Model hmodel, int animation, float time, SGD_AnimationMode animationMode, float weight) {
 	auto model = sgdx::resolveHandle<sgd::Model>(hmodel);
-	model->animate(animation, time, (sgdx::AnimationMode)mode, weight);
+	model->animate(animation, time, (sgdx::AnimationMode)animationMode, weight);
 }
 
 SGD_Model SGD_DECL sgd_CreateModel(SGD_Mesh hmesh) {
@@ -695,7 +695,7 @@ void SGD_DECL sgd_SetColliderHeight(SGD_Collider hcollider, float height) {
 	}
 }
 
-void SGD_DECL sgd_EnableCollisions(int srcColliderType, int dstColliderType, int collisionRepsonse) {
+void SGD_DECL sgd_EnableCollisions(int srcColliderType, int dstColliderType, SGD_CollisionResponse collisionRepsonse) {
 	sgdx::mainScene()->collisionSpace()->enableCollisions(srcColliderType, dstColliderType,
 														  (sgd::CollisionResponse)collisionRepsonse);
 }

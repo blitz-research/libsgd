@@ -19,7 +19,7 @@ int main(int, char**) {
 
 	sgd_Init();
 
-	sgd_CreateWindow(1280, 720, "Hello World!", 2);
+	sgd_CreateWindow(1280, 720, "Hello World!", SGD_WINDOW_FLAGS_RESIZABLE);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();

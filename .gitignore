@@ -27,5 +27,6 @@ out
 # Macos info
 .DS_Store
 
-# python virtual environment
+# python cache and virtual environment
+__pycache__
 venv

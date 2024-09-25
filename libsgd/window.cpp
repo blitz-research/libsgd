@@ -1,6 +1,6 @@
 #include "internal.h"
 
-void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, int flags) {
+void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, SGD_WindowFlags flags) {
 	if (sgdx::g_mainWindow) sgd_Error("Window has already been created");
 	sgdx::started();
 
@@ -73,28 +73,26 @@ int SGD_DECL sgd_GetWindowHeight() {
 	return (int)sgdx::mainWindow()->size().y;
 }
 
-
-
 void SGD_DECL sgd_SetFullscreenMode(int width, int height, int hertz) {
 	sgdx::mainWindow()->setFullscreenMode(sgd::Vec2u(width, height), hertz);
 }
 
-void SGD_DECL sgd_SetWindowState(int state) {
+void SGD_DECL sgd_SetWindowState(SGD_WindowState state) {
 	sgdx::mainWindow()->setState((sgd::WindowState)state);
 }
 
-int SGD_DECL sgd_GetWindowState() {
-	return (int)sgdx::mainWindow()->state();
+SGD_WindowState SGD_DECL sgd_GetWindowState() {
+	return (SGD_WindowState)sgdx::mainWindow()->state();
 }
 
-SGD_Bool SGD_DECL sgd_IsKeyDown(int keyCode) {
-	if ((uint32_t)keyCode > SGD_KEY_LAST) sgd_Error("Key code out of range");
-	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)keyCode).down();
+SGD_Bool SGD_DECL sgd_IsKeyDown(SGD_Key key) {
+	if ((uint32_t)key > SGD_KEY_LAST) sgd_Error("Key code out of range");
+	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)key).down();
 }
 
-SGD_Bool SGD_DECL sgd_IsKeyHit(int keyCode) {
-	if ((uint32_t)keyCode > SGD_KEY_LAST) sgd_Error("Key code out of range");
-	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)keyCode).hit();
+SGD_Bool SGD_DECL sgd_IsKeyHit(SGD_Key key) {
+	if ((uint32_t)key > SGD_KEY_LAST) sgd_Error("Key code out of range");
+	return sgdx::mainWindow()->keyboard()->key((sgd::KeyCode)key).hit();
 }
 
 int SGD_DECL sgd_GetChar() {
@@ -142,11 +140,11 @@ void SGD_DECL sgd_SetMouseCursorMode(int cursorMode) {
 	sgdx::mainWindow()->mouse()->cursorMode = (sgd::CursorMode)cursorMode;
 }
 
-SGD_Bool SGD_DECL sgd_IsMouseButtonDown(int button) {
+SGD_Bool SGD_DECL sgd_IsMouseButtonDown(SGD_MouseButton button) {
 	return sgdx::mainWindow()->mouse()->button(button).down();
 }
 
-SGD_Bool SGD_DECL sgd_IsMouseButtonHit(int button) {
+SGD_Bool SGD_DECL sgd_IsMouseButtonHit(SGD_MouseButton button) {
 	return sgdx::mainWindow()->mouse()->button(button).hit();
 }
 
@@ -158,7 +156,7 @@ SGD_Bool SGD_DECL sgd_IsGamepadConnected(int gamepad) {
 	return sgdx::Gamepad::getGamepad(gamepad)->connected();
 }
 
-SGD_Bool SGD_DECL sgd_IsGamepadButtonDown(int gamepad, int button) {
+SGD_Bool SGD_DECL sgd_IsGamepadButtonDown(int gamepad, SGD_GamepadButton button) {
 	sgdx::mainWindow();
 
 	if ((uint32_t)gamepad >= sgdx::Window::maxGamepads) sgd_Error("Gamepad index out of range");
@@ -167,7 +165,7 @@ SGD_Bool SGD_DECL sgd_IsGamepadButtonDown(int gamepad, int button) {
 	return sgdx::Gamepad::getGamepad(gamepad)->button(button).down();
 }
 
-SGD_Bool SGD_DECL sgd_IsGamepadButtonHit(int gamepad, int button) {
+SGD_Bool SGD_DECL sgd_IsGamepadButtonHit(int gamepad, SGD_GamepadButton button) {
 	sgdx::mainWindow();
 
 	if ((uint32_t)gamepad >= sgdx::Window::maxGamepads) sgd_Error("Gamepad index out of range");
@@ -176,7 +174,7 @@ SGD_Bool SGD_DECL sgd_IsGamepadButtonHit(int gamepad, int button) {
 	return sgdx::Gamepad::getGamepad(gamepad)->button(button).hit();
 }
 
-float SGD_DECL sgd_GetGamepadAxis(int gamepad, int axis) {
+float SGD_DECL sgd_GetGamepadAxis(int gamepad, SGD_GamepadAxis axis) {
 	sgdx::mainWindow();
 
 	if ((uint32_t)gamepad >= sgdx::Window::maxGamepads) sgd_Error("Gamepad index out of range");

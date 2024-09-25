@@ -80,7 +80,7 @@ int SGD_DECL sgd_GetDesktopHeight() {
 	return (int)sgd::desktopSize().y;
 }
 
-int SGD_DECL sgd_PollEvents() {
+SGD_EventMask SGD_DECL sgd_PollEvents() {
 	sgdx::started();
 
 	sgd::pollEvents();
@@ -88,7 +88,7 @@ int SGD_DECL sgd_PollEvents() {
 	getEventQueue(g_eventQueue);
 	int mask = 0;
 	for (auto& ev : g_eventQueue) mask |= ev.type;
-	return mask;
+	return (SGD_EventMask)mask;
 }
 
 void SGD_DECL sgd_ReleaseHandle(SGD_Handle handle) {

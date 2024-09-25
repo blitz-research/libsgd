@@ -5,7 +5,7 @@ Materials are used when creating mesh surfaces, and affect how the surface appea
 
 There are several kinds of materials available, and each material supports different parameters that are set using one of :any:`sgd_SetMaterialTexture`, :any:`sgd_SetMaterialColor` and :any:`sgd_SetMaterialFloat`.
 
-Material's also have a :any:`BlendMode`, :any:`DepthFunc` and :any:`CullMode`.
+Material's also have a :any:`SGD_BlendMode`, :any:`SGD_DepthFunc` and :any:`SGD_CullMode`.
 
 
 PBR Materials
@@ -49,5 +49,8 @@ Prelit Materials
 
 Prelit materials are the simplest type of material you can use. Prelit materials support a single "emissive" texture and a single "emissive" color, which are multiplied together to produce a final surface color. Prelit materials are completed unaffecrted by scene lighting.
 
+
+API
+---
 
 .. doxygengroup:: Material
