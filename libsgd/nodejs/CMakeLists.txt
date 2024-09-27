@@ -32,10 +32,14 @@ endif ()
 
 message("### Configuring nodejs target...")
 
+set(SRC ${CMAKE_CURRENT_SOURCE_DIR})
+set(BIN ${CMAKE_CURRENT_BINARY_DIR})
+set(INC ${CMAKE_SOURCE_DIR}/libsgd/include)
+
 # Install npm packages
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/package.json ${CMAKE_CURRENT_BINARY_DIR})
+configure_file(${SRC}/package.json ${BIN})
 execute_process(
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+	WORKING_DIRECTORY ${BIN}
 	COMMAND ${CMD} npm update)
 
 # Generate binding.gyp
@@ -44,7 +48,7 @@ if (SGD_OS_WINDOWS)
 else ()
 	set(SGD_NODE_GYP_LIBS "\"${CMAKE_BINARY_DIR}/libsgd/libsgd_static.a\"")
 endif ()
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/binding.gyp.template ${CMAKE_CURRENT_BINARY_DIR}/binding.gyp)
+configure_file(${SRC}/binding.gyp.template ${BIN}/binding.gyp)
 
 if (SGD_CONFIG_DEBUG)
 	set(NODEGYP_DEBUG --debug)
@@ -52,20 +56,18 @@ endif ()
 
 # node-gyp configure
 execute_process(
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+	WORKING_DIRECTORY ${BIN}
 	COMMAND ${CMD} npx node-gyp configure ${NODEGYP_DEBUG}
 )
 
-set(OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/build/Release/sgd.node)
+set(OUTPUT_FILE ${BIN}/build/Release/sgd.node)
 
-add_custom_command(
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-	COMMAND swig -c++ -javascript -napi -outcurrentdir -I${CMAKE_SOURCE_DIR}/libsgd/include ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
-	COMMAND npx node-gyp --silent build ${NODEGYP_DEBUG}
-	DEPENDS libsgd_static ${CMAKE_CURRENT_SOURCE_DIR}/sgd.i
-	OUTPUT ${OUTPUT_FILE}
+add_custom_target(libsgd_nodejs ALL
+	WORKING_DIRECTORY ${BIN}
+	COMMAND python ${SRC}/genrenames.py ${INC} ${BIN}/renames.i &&
+			swig -c++ -javascript -napi -fcompact -O -outcurrentdir -I${INC} -I${BIN} ${SRC}/sgd.i &&
+			npx node-gyp --silent build ${NODEGYP_DEBUG}
+	DEPENDS libsgd_static ${SRC}/sgd.i ${SRC}/genrenames.py
 	VERBATIM)
 
-add_custom_target(libsgd_nodejs ALL DEPENDS ${OUTPUT_FILE})
-
-install(FILES ${OUTPUT_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.js DESTINATION nodejs)
+install(FILES ${OUTPUT_FILE} ${SRC}/helloworld.js DESTINATION nodejs)
