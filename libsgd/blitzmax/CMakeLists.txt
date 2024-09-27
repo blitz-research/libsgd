@@ -8,8 +8,6 @@ if (NOT Python3_FOUND)
 	return()
 endif ()
 
-# Assumes pycparser module present
-
 message("### Configuring blitzmax target...")
 
 set(SRC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -19,7 +17,7 @@ set(OUT ${BIN}/sgd.bmx)
 
 add_custom_target(libsgd_blitzmax ALL
 	COMMAND	${Python3_EXECUTABLE} ${SRC}/apigen.py ${INC} ${OUT}
-	DEPENDS libsgd_dynamic ${SRC}/apigen.py ${SRC}/apigen_bmx.py
+	DEPENDS libsgd ${SRC}/apigen.py ${SRC}/apigen_bmx.py
 	WORKING_DIRECTORY ${BIN}
 	VERBATIM)
 

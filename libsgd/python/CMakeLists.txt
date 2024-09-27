@@ -45,8 +45,9 @@ set(BIN ${CMAKE_CURRENT_BINARY_DIR})
 set(INC ${CMAKE_SOURCE_DIR}/libsgd/include)
 
 add_custom_command(
-	COMMAND swig -python -outcurrentdir -I${INC} ${SRC}/sgd.i
-	DEPENDS libsgd ${SRC}/sgd.i
+	COMMAND python ${SRC}/genrenames.py ${INC} ${BIN}/renames.i &&
+			swig -python -fcompact -O -outcurrentdir -I${INC} -I${BIN} ${SRC}/sgd.i
+	DEPENDS libsgd ${SRC}/genrenames.py ${SRC}/sgd.i
 	OUTPUT sgd_wrap.c sgd.py
 	VERBATIM)
 

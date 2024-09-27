@@ -1,69 +1,58 @@
-# Alas, SWIG's rename mechanism isn't quite sophisticated enough to handle stripping SGD_|sgd_ prefix AND converting the
-# reset to snake case, which is where this beast comes in, written mostly by my chatGPT 'Buddy'!
-#
 import re
-from pathlib import Path
 import sys
+from pathlib import Path
 
+# Insane convert CapitalCase to snake_case, with hacks for seqs of caps like NX, CSM etc and 2D
+# regex = r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z][A-Z])(?=[A-Z][a-z])|(?<=2D)(?=[A-Z])|(?<=[a-z])(?=2D)";
 
-def extract_and_convert_identifiers(text):
-    """
-    Extract identifiers after 'SGD_DECL' that start with 'sgd_' or 'SGD_',
-    convert them to snake_case, and generate SWIG %rename statements.
-    """
-    rename_statements = []
+def findRenames(inFile):
 
-    # Regex pattern to match identifiers after 'SGD_DECL' that start with 'sgd_' or 'SGD_'
-    pattern = re.compile(r'(SGD_DECL|#define)\s+(sgd_|SGD_)([A-Za-z_][A-Za-z0-9_]*)')
+	with open(inFile, 'r') as file:
+		text = file.read()
 
-    for match in pattern.finditer(text):
-        decl = match.group(1)  # 'SGD_DECL' or '#define'
-        prefix = match.group(2)  # The 'sgd_' or 'SGD_' prefix
-        identifier = match.group(3)  # The rest of the identifier
+	renames = []
 
-        if identifier == "SGD_H_INCLUDED" or identifier == "EXTERN" or identifier == "API" or identifier == "DECL":
-            continue
+	# Functions, eg: SGD_API SGD_EventMask SGD_DECL sgd_PollEvents();
+	#
+	pattern = r'^\s*SGD_API\s+\w+\s+SGD_DECL\s+sgd_(\w+)'
+	for match in re.finditer(pattern, text, flags=re.MULTILINE):
+		ident = match.group(1)  # 'ident with sgd_ prefix stripped'
 
-        output_name = identifier
+		lcident = ident[:1].lower() + ident[1:]
 
-        if decl == "SGD_DECL":
-            # Convert CamelCase to snake_case, with hacks for seqs of caps like NX, CSM etc and 2D
-            regex = r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z][A-Z])(?=[A-Z][a-z])|(?<=2D)(?=[A-Z])|(?<=[a-z])(?=2D)";
+		renames.append(f'%rename({lcident}) sgd_{ident};')
 
-            #            snake_case_name = re.sub(r'(?<=[a-z])(?=[A-Z])|(?<=[^a-z][A-Z])(?=[A-Z][a-z])|(?=2D)', '_', identifier).lower()
-            snake_case_name = re.sub(regex, '_', identifier).lower()
+	# Typedefs, eg: typedef enum SGD_EventMask
+	#
+	pattern = r'^\s*typedef\s+\w+\s+SGD_(\w+)'
+	for match in re.finditer(pattern, text, flags=re.MULTILINE):
+		ident = match.group(1)
 
-            # Remove the prefix for the output name
-            output_name = snake_case_name
+		renames.append(f'%rename({ident}) SGD_{ident};')
 
-        # Create the %rename statement
-        rename_statement = f'%rename({output_name}) {prefix + identifier};'
-        rename_statements.append(rename_statement)
+	# Enum members, eg: SGD_EVENT_MASK_CLOSE_CLICKED = 0x01
+	#
+	pattern = r'^\s*SGD_(\w+)\s+=\s+'
+	for match in re.finditer(pattern, text, flags=re.MULTILINE):
+		ident = match.group(1)
 
-    return rename_statements
+		renames.append(f'%rename({ident}) SGD_{ident};')
 
-
-def process_files(input_file, output_file):
-    with open(input_file, 'r') as file:
-        text = file.read()
-
-    rename_statements = extract_and_convert_identifiers(text)
-
-    output_path = Path(output_file)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with output_path.open('w') as file:
-        file.write('\n'.join(rename_statements))
-
-    print(f"Generated SWIG %rename statements and saved to {output_file}")
+	return renames
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print("Usage: python script.py <input_file> <output_file>")
-        sys.exit(1)
 
-    input_file = sys.argv[1]
-    output_file = sys.argv[2]
+	if len(sys.argv) != 3:
+		print("Usage: python script.py incDir, outFile")
+		sys.exit(1)
 
-    process_files(input_file, output_file)
+	incDir = sys.argv[1]
+
+	renames = []
+
+	renames.extend(findRenames(incDir + "/sgd/sgd.h"))
+	renames.extend(findRenames(incDir + "/sgd/keycodes.h"))
+
+	with open(sys.argv[2], 'w') as file:
+		file.write("\n".join(renames))

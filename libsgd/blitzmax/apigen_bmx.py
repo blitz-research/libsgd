@@ -1,6 +1,9 @@
 import sys
 
-template="""
+template = """// BlitzMax wrapper for LibSGD
+//
+// Auto-generated : ${NOW}
+
 Type SGD
 	${ENUMS}
 	${FUNCS}
@@ -25,22 +28,23 @@ Type SGD
 End Type
 """
 
+
 ##### BMX Backend #####
 
-def genApi(enums, funcs):
 
+def genApi(enums, funcs):
 	def transName(name):
 		if name.startswith("sgd_"):
 			return name[4:]
 
-		print("Invalid name",name)
+		print("Invalid name", name)
 		sys.exit(1)
 
 	def transType(name):
 		if name == "SGD_String":
 			return ":String"
 
-        # TODO: Need to pass arch to apigen?
+		# TODO: Need to pass arch to apigen?
 		if name == "SGD_Real":
 			return ":Double"
 
@@ -48,26 +52,26 @@ def genApi(enums, funcs):
 			return ":Int"
 
 		if name == "int" or name == "float":
-			return ":"+name.capitalize()
+			return ":" + name.capitalize()
 
 		if name == "void":
 			return ""
 
-		print("Invalid name",name)
+		print("Invalid name", name)
 		sys.exit(1)
 
 	# Outputs
 	ENUMS = []
 	FUNCS = []
 	INITS = []
-	
+
 	for enum in enums:
 
 		name = enum.name
 		if name.startswith("SGD_"):
 			name = name[4:]
-			
-			ENUMS.append("\t'Enum "+name)
+
+			ENUMS.append("\t'Enum " + name)
 
 		for m in enum.members:
 			mname = m.name
@@ -76,10 +80,9 @@ def genApi(enums, funcs):
 
 			value = m.value
 			if value.startswith("0x"):
-				value="$" + value[2:]
+				value = "$" + value[2:]
 
 			ENUMS.append("\tConst " + mname + ":Int = " + value)
-
 
 	for func in funcs:
 

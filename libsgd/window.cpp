@@ -1,6 +1,6 @@
 #include "internal.h"
 
-void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, SGD_WindowFlags flags) {
+void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, SGD_Flags flags) {
 	if (sgdx::g_mainWindow) sgd_Error("Window has already been created");
 	sgdx::started();
 
@@ -136,8 +136,8 @@ void SGD_DECL sgd_SetMouseZ(float z) {
 	sgdx::mainWindow()->mouse()->setPositionZ(z);
 }
 
-void SGD_DECL sgd_SetMouseCursorMode(int cursorMode) {
-	sgdx::mainWindow()->mouse()->cursorMode = (sgd::CursorMode)cursorMode;
+void SGD_DECL sgd_SetMouseCursorMode(SGD_MouseCursorMode mode) {
+	sgdx::mainWindow()->mouse()->cursorMode = (sgd::CursorMode)mode;
 }
 
 SGD_Bool SGD_DECL sgd_IsMouseButtonDown(SGD_MouseButton button) {

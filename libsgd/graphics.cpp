@@ -2,42 +2,42 @@
 
 // ***** Texture *****
 
-SGD_Texture SGD_DECL sgd_Load2DTexture(SGD_String path, SGD_TextureFormat format, SGD_TextureFlags flags) {
+SGD_Texture SGD_DECL sgd_Load2DTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
 	auto texture = sgd::load2DTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
 	if (!texture) sgdx::error("Failed to load 2d texture", texture.error());
 	return sgdx::createHandle(texture.result());
 }
 
-SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, SGD_TextureFormat format, SGD_TextureFlags flags) {
+SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
 	auto texture = sgd::loadCubeTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
 	if (!texture) sgdx::error("Failed to load cube texture", texture.error());
 	return sgdx::createHandle(texture.result());
 }
 
-SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, SGD_TextureFormat format, SGD_TextureFlags flags) {
+SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
 	auto texture = sgd::loadArrayTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
 	if (!texture) sgdx::error("Failed to load array texture", texture.error());
 	return sgdx::createHandle(texture.result());
 }
 
-SGD_Texture SGD_DECL sgd_Create2DTexture(int width, int height, SGD_TextureFormat format, SGD_TextureFlags flags) {
+SGD_Texture SGD_DECL sgd_Create2DTexture(int width, int height, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
 	auto texture = new sgd::Texture(sgd::Vec2u(width, height), 1, (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
 	return sgdx::createHandle(texture);
 }
 
-SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, SGD_TextureFormat format, SGD_TextureFlags flags) {
+SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
-	auto texture = new sgd::Texture(sgd::Vec2u(size), 6, (sgd::TextureFormat)format, (sgd::TextureFlags)flags | sgd::TextureFlags::cube);
+	auto texture = new sgd::Texture(sgd::Vec2u(width, height), depth, (sgd::TextureFormat)format, (sgd::TextureFlags)flags | sgd::TextureFlags::array);
 	return sgdx::createHandle(texture);
 }
 
-SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, SGD_TextureFormat format, SGD_TextureFlags flags) {
+SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
-	auto texture = new sgd::Texture(sgd::Vec2u(width, height), depth, (sgd::TextureFormat)format, (sgd::TextureFlags)flags | sgd::TextureFlags::array);
+	auto texture = new sgd::Texture(sgd::Vec2u(size), 6, (sgd::TextureFormat)format, (sgd::TextureFlags)flags | sgd::TextureFlags::cube);
 	return sgdx::createHandle(texture);
 }
 
@@ -53,12 +53,12 @@ int SGD_DECL sgd_GetTextureDepth(SGD_Texture htexture) {
 	return (int)sgdx::resolveHandle<sgd::Texture>(htexture)->depth();
 }
 
-int SGD_DECL sgd_GetTextureFormat(SGD_Texture htexture) {
-	return (int)sgdx::resolveHandle<sgd::Texture>(htexture)->format();
+SGD_TextureFormat SGD_DECL sgd_GetTextureFormat(SGD_Texture htexture) {
+	return (SGD_TextureFormat)sgdx::resolveHandle<sgd::Texture>(htexture)->format();
 }
 
-int SGD_DECL sgd_GetTextureFlags(SGD_Texture htexture) {
-	return (int)sgdx::resolveHandle<sgd::Texture>(htexture)->flags();
+SGD_TextureFlags SGD_DECL sgd_GetTextureFlags(SGD_Texture htexture) {
+	return (SGD_TextureFlags)sgdx::resolveHandle<sgd::Texture>(htexture)->flags();
 }
 
 void SGD_DECL sgd_SetTexelSRGBA(SGD_Texture htexture, int x, int y, int rgba) {
@@ -203,13 +203,13 @@ void SGD_DECL sgd_FitMesh(SGD_Mesh hmesh, float minX, float minY, float minZ, fl
 	fit(mesh, {{minX, minY, minZ}, {maxX, maxY, maxZ}}, uniform);
 }
 
-void SGD_DECL sgd_TFormMesh(SGD_Mesh hmesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy,
+void SGD_DECL sgd_TransformMesh(SGD_Mesh hmesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy,
 							float sz) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	sgdx::transform(mesh, sgd::AffineMat4f::TRS({tx, ty, tz}, {rx, ry, rz}, {sx, sy, sz}));
 }
 
-void SGD_DECL sgd_TFormMeshTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY, float offsetX, float offsetY) {
+void SGD_DECL sgd_TransformTexCoords(SGD_Mesh hmesh, float scaleX, float scaleY, float offsetX, float offsetY) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	sgdx::transformTexCoords(mesh, sgd::Vec2f(scaleX, scaleY), sgdx::Vec2f(offsetX, offsetY));
 }
@@ -251,7 +251,7 @@ float SGD_DECL sgd_GetMeshBoundsMaxZ(SGD_Mesh hmesh) {
 
 // ***** Mesh Creation *****
 
-SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, SGD_MeshFlags flags) {
+SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, SGD_Flags flags) {
 	sgdx::started();
 	auto mesh = new sgd::Mesh(vertexCount, (sgd::MeshFlags)flags);
 	return sgdx::createHandle(mesh);

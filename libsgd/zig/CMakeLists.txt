@@ -8,19 +8,17 @@ if (NOT Python3_FOUND)
 	return()
 endif ()
 
+message("### Configuring zig target...")
+
 set(SRC ${CMAKE_CURRENT_SOURCE_DIR})
 set(BIN ${CMAKE_CURRENT_BINARY_DIR})
 set(INC ${CMAKE_SOURCE_DIR}/libsgd/include)
+set(OUT ${BIN}/sgd.zig)
 
-set(OUTPUT_FILE ${BIN}/sgd.zig)
-
-add_custom_command(
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-	COMMAND ${Python3_EXECUTABLE} ${SRC}/bindgen.py ${INC} ${OUTPUT_FILE}
-	OUTPUT ${OUTPUT_FILE}
-	DEPENDS libsgd_dynamic
+add_custom_target(libsgd_zig ALL
+	COMMAND ${Python3_EXECUTABLE} ${SRC}/apigen.py ${INC} ${OUT}
+	DEPENDS libsgd ${SRC}/apigen.py ${SRC}/apigen_zig.py
+	WORKING_DIRECTORY ${BIN}
 	VERBATIM)
 
-add_custom_target(libsgd_zig ALL DEPENDS ${OUTPUT_FILE})
-
-install(FILES ${OUTPUT_FILE} ${SRC}/helloworld.zig DESTINATION zig)
+install(FILES ${OUT} ${SRC}/helloworld.zig DESTINATION zig)

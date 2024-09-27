@@ -1,6 +1,6 @@
 Texture
 =======
 
-To load a texture from a file, use :ref:`sgd_Load2DTexture` or :ref:`sgd_LoadCubeTexture`.
+To load a texture from a file, use :any:`sgd_Load2DTexture` or :any:`sgd_LoadCubeTexture`.
 
 .. doxygengroup:: Texture

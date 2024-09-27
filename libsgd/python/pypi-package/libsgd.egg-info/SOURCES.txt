@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+setup.py
+libsgd/__init__.py
+libsgd/_sgd.py
+libsgd.egg-info/PKG-INFO
+libsgd.egg-info/SOURCES.txt
+libsgd.egg-info/dependency_links.txt
+libsgd.egg-info/top_level.txt

@@ -1,5 +1,5 @@
+import apigen_zig
 import sys
-import apigen_bmx
 
 from pycparser import parse_file, c_ast
 
@@ -84,7 +84,7 @@ def main(includeDir, outputFile):
 
 	enumer.visit(ast)
 
-	r = apigen_bmx.genApi(enumer.enums, enumer.funcs)
+	r = apigen_zig.genApi(enumer.enums, enumer.funcs)
 
 	with open(outputFile, 'w') as file:
 		file.write(r)

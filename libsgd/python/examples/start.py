@@ -16,9 +16,9 @@ def createPlayer(mesh):
 	global player
 	global camera
 	
-	player = sgd.CreateModel(mesh)
-	camera = sgd.CreatePerspectiveCamera()
-	sgd.SetEntityParent(camera, player)
+	player = sgd.createModel(mesh)
+	camera = sgd.createPerspectiveCamera()
+	sgd.setEntityParent(camera, player)
 	
 	
 def flyPlayer(speed):
@@ -31,39 +31,39 @@ def flyPlayer(speed):
 	global player_vz
 	global camera
 
-	if sgd.IsKeyDown(sgd.KEY_LEFT):
+	if sgd.isKeyDown(sgd.KEY_LEFT):
 		player_rvy = player_rvy + (1.5 - player_rvy) * .3
-	elif sgd.IsKeyDown(sgd.KEY_RIGHT):
+	elif sgd.isKeyDown(sgd.KEY_RIGHT):
 		player_rvy = player_rvy + (-1.5 - player_rvy) * .3
 	else:
 		player_rvy = player_rvy * .9
 		
-	sgd.RotateEntity(player, 0, player_rvy, 0)
-	sgd.SetEntityRotation(camera, 0, 0, player_rvy * -15)
+	sgd.rotateEntity(player, 0, player_rvy, 0)
+	sgd.setEntityRotation(camera, 0, 0, player_rvy * -15)
 	
-	if sgd.IsKeyDown(sgd.KEY_UP):
+	if sgd.isKeyDown(sgd.KEY_UP):
 		player_rvx = player_rvx + (-1.5 - player_rvx) * .3
-	elif sgd.IsKeyDown(sgd.KEY_DOWN):
+	elif sgd.isKeyDown(sgd.KEY_DOWN):
 		player_rvx = player_rvx + (1.5 - player_rvx) * .3
 	else:
 		player_rvx = player_rvx * .9
 		
-	sgd.TurnEntity(player,player_rvx, 0, 0)
+	sgd.turnEntity(player,player_rvx, 0, 0)
 
-	if sgd.IsKeyDown(sgd.KEY_W):
+	if sgd.isKeyDown(sgd.KEY_W):
 		player_vz = player_vz + (speed - player_vz) * .3
-	elif sgd.IsKeyDown(sgd.KEY_S):
+	elif sgd.isKeyDown(sgd.KEY_S):
 		player_vz = player_vz + (-speed - player_vz) * .3
 	else:
 		player_vz = player_vz * .9
 		
-	sgd.MoveEntity(player, 0, 0, player_vz)
+	sgd.moveEntity(player, 0, 0, player_vz)
 
-	if sgd.IsKeyDown(sgd.KEY_A):
+	if sgd.isKeyDown(sgd.KEY_A):
 		player_vx = player_vx + (-speed - player_vx) * .3
-	elif sgd.IsKeyDown(sgd.KEY_D):
+	elif sgd.isKeyDown(sgd.KEY_D):
 		player_vx = player_vx + (speed - player_vx) * .3
 	else:
 		player_vx = player_vx * .9
 		
-	sgd.MoveEntity(player, player_vx, 0, 0)
+	sgd.moveEntity(player, player_vx, 0, 0)

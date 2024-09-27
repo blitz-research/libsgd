@@ -171,7 +171,7 @@ typedef enum SGD_GamepadButton {
 	SGD_GAMEPAD_BUTTON_TRIANGLE = 3,	// SGD_GAMEPAD_BUTTON_Y,
 } SGD_GamepadButton;
 
-typedef enum GamepadAxis {
+typedef enum SGD_GamepadAxis {
 	SGD_GAMEPAD_AXIS_LEFT_X = 0,
 	SGD_GAMEPAD_AXIS_LEFT_Y = 1,
 	SGD_GAMEPAD_AXIS_RIGHT_X = 2,

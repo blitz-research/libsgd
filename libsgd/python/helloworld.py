@@ -5,19 +5,19 @@
 #
 from libsgd import sgd
 
-sgd.Init()
+sgd.init()
 
-sgd.CreateWindow(640, 480, "Hello World!", sgd.WINDOW_FLAGS_RESIZABLE)
+sgd.createWindow(640, 480, "Hello World!", sgd.WINDOW_FLAGS_RESIZABLE)
 
-sgd.SetClearColor(1,.5,0,1)
+sgd.setClearColor(1,.5,0,1)
 
-while not (sgd.PollEvents() & sgd.EVENT_MASK_CLOSE_CLICKED):
+while not (sgd.pollEvents() & sgd.EVENT_MASK_CLOSE_CLICKED):
 
-    if sgd.IsKeyHit(sgd.KEY_ESCAPE):
+    if sgd.isKeyHit(sgd.KEY_ESCAPE):
         break
 
-    sgd.RenderScene()
+    sgd.renderScene()
 
-    sgd.Present()
+    sgd.present()
 
-sgd.Terminate()
+sgd.terminate()

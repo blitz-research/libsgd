@@ -365,7 +365,7 @@ void SGD_DECL sgd_AimEntityAtPoint(SGD_Entity hentity, SGD_Real x, SGD_Real y, S
 	sgd::aim(entity, {x, y, z}, roll);
 }
 
-void SGD_DECL sgd_TFormPoint(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrcEntity, SGD_Entity hdstEntity) {
+void SGD_DECL sgd_TransformPoint(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrcEntity, SGD_Entity hdstEntity) {
 	auto src = sgdx::resolveHandle<sgd::Entity>(hsrcEntity);
 	auto dst = sgdx::resolveHandle<sgd::Entity>(hdstEntity);
 	auto tv = src ? src->worldMatrix() * sgd::Vec3r(x, y, z) : sgd::Vec3r(x, y, z);
@@ -373,7 +373,7 @@ void SGD_DECL sgd_TFormPoint(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrc
 }
 
 // Includes entity scale, maybe add a bool param?
-void SGD_DECL sgd_TFormVector(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrcEntity, SGD_Entity hdstEntity) {
+void SGD_DECL sgd_TransformVector(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrcEntity, SGD_Entity hdstEntity) {
 	auto src = sgdx::resolveHandle<sgd::Entity>(hsrcEntity);
 	auto dst = sgdx::resolveHandle<sgd::Entity>(hdstEntity);
 	auto tv = src ? src->worldMatrix().r * sgd::Vec3r(x, y, z) : sgd::Vec3r(x, y, z);
@@ -381,22 +381,22 @@ void SGD_DECL sgd_TFormVector(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsr
 }
 
 // Does no normalization.
-void SGD_DECL sgd_TFormNormal(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrcEntity, SGD_Entity hdstEntity) {
+void SGD_DECL sgd_TransformNormal(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity hsrcEntity, SGD_Entity hdstEntity) {
 	auto src = sgdx::resolveHandle<sgd::Entity>(hsrcEntity);
 	auto dst = sgdx::resolveHandle<sgd::Entity>(hdstEntity);
 	auto tv = src ? cofactor(src->worldBasis()) * sgd::Vec3r(x, y, z) : sgd::Vec3r(x, y, z);
 	g_tformed = dst ? cofactor(inverse(dst->worldBasis())) * tv : tv;
 }
 
-SGD_Real SGD_DECL sgd_GetTFormedX() {
+SGD_Real SGD_DECL sgd_GetTransformedX() {
 	return g_tformed.x;
 }
 
-SGD_Real SGD_DECL sgd_GetTFormedY() {
+SGD_Real SGD_DECL sgd_GetTransformedY() {
 	return g_tformed.y;
 }
 
-SGD_Real SGD_DECL sgd_GetTFormedZ() {
+SGD_Real SGD_DECL sgd_GetTransformedZ() {
 	return g_tformed.z;
 }
 

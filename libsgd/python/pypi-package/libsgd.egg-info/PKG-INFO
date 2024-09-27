@@ -1,0 +1,54 @@
+Metadata-Version: 2.1
+Name: libsgd
+Version: 0.14.4
+Summary: Simple Game Development library
+Author-email: Mark Sibly <marksibly@zohomail.com>
+Project-URL: Homepage, https://skirmish-dev.net/forum
+Project-URL: Issues, https://skirmish-dev.net/forum/category/10/libsgd-bug-reports
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: zlib/libpng License
+Classifier: Operating System :: Microsoft :: Windows
+Requires-Python: <3.13,>=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# LibSGD 
+
+## Simple Game Development Library
+
+LibSGD is a game development library that provides a high level, easy to use 'scene graph' style API for writing games and apps.
+
+LibSGD is open source software licensed under the Zlib/PNG license.
+
+The LibSGD github repository is here: https://github.com/blitz-research/libsgd
+
+The API reference can be found here: https://skirmish-dev.net/libsgd/help/html/sgd_8h.html
+
+You can support the LibSGD project through its Patreon page: https://www.patreon.com/libsgd
+
+Feel free to drop in to the LibSGD community here: https://skirmish-dev.net/forum
+
+Here is an example of a minimal LibSGD app:
+
+```python
+from libsgd import sgd
+
+sgd.Init()
+
+sgd.CreateWindow(640, 480, "Hello World!", sgd.WINDOW_FLAGS_RESIZABLE)
+
+sgd.SetClearColor(1,.5,0,1)
+
+while not (sgd.PollEvents() & sgd.EVENT_MASK_CLOSE_CLICKED):
+
+    if sgd.IsKeyHit(sgd.KEY_ESCAPE):
+        break
+
+    sgd.RenderScene()
+
+    sgd.Present()
+
+sgd.Terminate()
+```
+
+LibSGD is not yet at V1.0 so please be aware that there will be changes made before then, although hopefully nothing major!

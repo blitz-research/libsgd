@@ -28,14 +28,17 @@ set(SOURCE_DIR ${SRC}/source)
 set(TARGET_DIR ${BIN}/source)
 
 file(MAKE_DIRECTORY ${TARGET_DIR})
+file(MAKE_DIRECTORY ${TARGET_DIR}/_static)
 
 configure_file(${SOURCE_DIR}/conf.py ${TARGET_DIR}/conf.py)
 
 file(GLOB RST_FILES ${SOURCE_DIR}/*.rst)
+file(GLOB CSS_FILES ${SOURCE_DIR}/_static/*)
 
 add_custom_target(libsgd_docs ALL
 	COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE} &&
 			${CMAKE_COMMAND} -E copy ${RST_FILES} ${TARGET_DIR} &&
+			${CMAKE_COMMAND} -E copy ${CSS_FILES} ${TARGET_DIR}/_static &&
 			sphinx-build -b html ${BIN}/source ${BIN}/build
 	WORKING_DIRECTORY ${BIN}
 	VERBATIM

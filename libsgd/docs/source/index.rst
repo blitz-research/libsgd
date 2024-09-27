@@ -13,7 +13,8 @@ documentation for details.
 .. toctree::
    :maxdepth: 1
    :caption: Contents:
-   
+
+   types
    system
    window
    scene

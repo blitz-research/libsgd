@@ -11,8 +11,7 @@
 #include <sgd/sgd.h>
 %}
 
-// This removes sgd_ SGD_ prefix
-%rename("%(regex:/(sgd_|SGD_)(.*)/\\2/)s") "";
+%include "renames.i"
 
 %include <sgd/sgd.h>
 %include <sgd/keycodes.h>

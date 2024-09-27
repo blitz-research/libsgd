@@ -26,8 +26,16 @@ breathe_projects = {
 }
 breathe_default_project = "LibSGD"
 
+breathe_show_enumvalue_initializer = True
+
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'sphinxdoc'
+html_theme = 'nature'
+html_theme_options = {
+	"sidebarwidth": "320"
+}
+
 html_static_path = ['_static']
+html_css_files = ["custom.css"]
+html_show_sourcelink = False

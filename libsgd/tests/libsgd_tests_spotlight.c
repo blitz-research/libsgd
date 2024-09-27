@@ -9,7 +9,7 @@ void entry() {
 
 	SGD_Material material = sgd_LoadPBRMaterial("sgd://materials/Bricks076C_1K-JPG");
 	SGD_Mesh mesh = sgd_CreateBoxMesh(-10, -10, -1, 10, 10, 1, material);
-	sgd_TFormMeshTexCoords(mesh, 2,2,0,0);
+	sgd_TransformTexCoords(mesh, 2,2,0,0);
 	SGD_Model model = sgd_CreateModel(mesh);
 	sgd_MoveEntity(model, 0, 0, 10);
 
