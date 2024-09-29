@@ -5,7 +5,7 @@ void entry() {
 	createPlayer(nullptr);
 	move(player,{0,1.5f,0});
 
-	ImagePtr image = loadImage(Path("sgd://misc/grass1.png"), 1).result();
+	ImagePtr image = loadImage(Path("sgd://misc/grass1.png")).result();
 	image->viewMode = ImageViewMode::fixed;
 	image->rect = Rectf(-.5f,0,.5f,.5f);
 

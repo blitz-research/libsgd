@@ -2,7 +2,7 @@
 
 void entry() {
 
-	SGD_Image image = sgd_LoadImage("sgd://misc/light.png",1);
+	SGD_Image image = sgd_LoadImage("sgd://misc/light.png");
 
 	SGD_Sprite sprite = sgd_CreateSprite(image);
 

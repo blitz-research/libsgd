@@ -110,7 +110,7 @@ Local ground:Int			= SGD.CreateModel (ground_mesh)
 
 Local ground_scale:Float = 50.0
 
-SGD.TFormMeshTexCoords (ground_mesh, ground_scale, ground_scale, 0.0, 0.0)
+SGD.TransformTexCoords (ground_mesh, ground_scale, ground_scale, 0.0, 0.0)
 
 ' ------
 ' CUBE:

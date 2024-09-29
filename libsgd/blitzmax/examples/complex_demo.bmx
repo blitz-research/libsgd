@@ -532,7 +532,7 @@ Function demo_CreateScene (num_cubes:Int = 10000, ground_scale:Float = 1.0, grou
 
 	' Scale texture...
 	
-	SGD.TFormMeshTexCoords (ground_mesh, ground_scale, ground_scale, 0.0, 0.0)
+	SGD.TransformTexCoords (ground_mesh, ground_scale, ground_scale, 0.0, 0.0)
 
 	SGD.MoveEntity ground, 0, -21, 0
 
@@ -563,7 +563,7 @@ End Function
 
 Function CreateBulletSprite (sprite_path:String = "sgd://misc/light.png")
 
-	Local img:Int = SGD.LoadImage (sprite_path, 1)
+	Local img:Int = SGD.LoadImage (sprite_path)
 	Local sprite:Int = SGD.CreateSprite (img)
 
 	SGD.MoveEntity sprite, 0, -50, 0

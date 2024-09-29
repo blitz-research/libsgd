@@ -58,69 +58,10 @@ void SGD_DECL sgd_SetEnvTexture(SGD_Texture htexture) {
 	sgdx::mainScene()->sceneRenderer()->envTexture = texture;
 }
 
-void SGD_DECL sgd_SetCSMTextureSize(int textureSize) {
-	lockConfigUniforms().csmTextureSize = textureSize;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetMaxCSMLights(int maxLights) {
-	lockConfigUniforms().maxCSMLights = maxLights;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetCSMSplitDistances(float split0, float split1, float split2, float split3) {
-	lockConfigUniforms().csmSplitDistances = {split0, split1, split2, split3};
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetCSMClipRange(float range) {
-	lockConfigUniforms().csmClipRange = range;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetCSMDepthBias(float bias) {
-	lockConfigUniforms().csmDepthBias = bias;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetPSMTextureSize(int textureSize) {
-	lockConfigUniforms().psmTextureSize = textureSize;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetMaxPSMLights(int maxLights) {
-	lockConfigUniforms().maxPSMLights = maxLights;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetPSMClipNear(float near) {
-	lockConfigUniforms().psmClipNear = near;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetPSMDepthBias(float bias) {
-	lockConfigUniforms().psmDepthBias = bias;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetSSMTextureSize(int textureSize) {
-	lockConfigUniforms().ssmTextureSize = textureSize;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetMaxSSMLights(int maxLights) {
-	lockConfigUniforms().maxSSMLights = maxLights;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetSSMClipNear(float near) {
-	lockConfigUniforms().ssmClipNear = near;
-	unlockConfigUniforms();
-}
-
-void SGD_DECL sgd_SetSSMDepthBias(float bias) {
-	lockConfigUniforms().ssmDepthBias = bias;
-	unlockConfigUniforms();
+SGD_API void SGD_DECL sgd_UpdateShadowMappingConfig() {
+	auto bindings =sgdx::mainScene()->sceneRenderer()->sceneBindings();
+	bindings->lockConfigUniforms() = sgd::getConfigUniformsFromConfigVars();
+	bindings->unlockConfigUniforms();
 }
 
 void SGD_DECL sgd_RenderScene() {

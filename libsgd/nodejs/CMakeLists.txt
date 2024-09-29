@@ -55,6 +55,8 @@ if (SGD_CONFIG_DEBUG)
 endif ()
 
 # node-gyp configure
+file(REMOVE_RECURSE ${BIN}/build)
+
 execute_process(
 	WORKING_DIRECTORY ${BIN}
 	COMMAND ${CMD} npx node-gyp configure ${NODEGYP_DEBUG}
@@ -64,7 +66,10 @@ set(OUTPUT_FILE ${BIN}/build/Release/sgd.node)
 
 add_custom_target(libsgd_nodejs ALL
 	WORKING_DIRECTORY ${BIN}
-	COMMAND python ${SRC}/genrenames.py ${INC} ${BIN}/renames.i &&
+
+	COMMAND	#${CMAKE_COMMAND} -E rm -rf ${BIN}/build &&
+			#npx node-gyp configure ${NODEGYP_DEBUG} &&
+			python ${SRC}/genrenames.py ${INC} ${BIN}/renames.i &&
 			swig -c++ -javascript -napi -fcompact -O -outcurrentdir -I${INC} -I${BIN} ${SRC}/sgd.i &&
 			npx node-gyp --silent build ${NODEGYP_DEBUG}
 	DEPENDS libsgd_static ${SRC}/sgd.i ${SRC}/genrenames.py

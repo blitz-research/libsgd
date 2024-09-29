@@ -104,15 +104,59 @@ Expected<Texture*, FileioEx> loadCubeTexture(CPath path, TextureFormat format, T
 	return new Texture({data->size().x, data->size().y / 6}, 6, data->format(), flags | TextureFlags::cube, data);
 }
 
-Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, TextureFlags flags, uint32_t depth) {
+Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, TextureFlags flags) {
 	auto texData = loadTextureData(path, format);
 	if (!texData) return texData.error();
 
 	TextureDataPtr data = texData.result();
-	if (!depth || data->size().y % depth != 0) {
-		return SGD_PATHEX("Texture array image height must be a multiple of depth", path);
-	}
+	uint32_t depth = 1;
+
 	return new Texture({data->size().x, data->size().y / depth}, depth, data->format(), flags | TextureFlags::array, data);
+}
+
+Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, TextureFlags flags, uint32_t frameCount, uint32_t framesX, uint32_t framesY,
+											  uint32_t frameSpacing) {
+	if (!frameCount || !framesX || !framesY) SGD_ERROR("Invalid frame layout parameters");
+	
+	auto tdata = loadTextureData(path, format);
+	if (!tdata) return tdata.error();
+	
+	TextureDataPtr srcData = tdata.result();
+	auto size = srcData->size();
+	auto frameSize = Vec2u((size.x - (framesX - 1) * frameSpacing) / framesX, //
+						   (size.y - (framesY - 1) * frameSpacing) / framesY);
+
+	if(!frameSize.x || !frameSize.y) return SGD_PATHEX("Invalid frame layout parameters", path);
+
+	Vector<Vec2u> orgs;
+	Vec2u pos;
+	for (auto i = 0; i < frameCount; ++i) {
+		orgs.push_back(pos);
+		pos.x += frameSize.x + frameSpacing;
+		if (pos.x + frameSize.x > size.x) {
+			pos.x = 0;
+			pos.y += frameSize.y + frameSpacing;
+		}
+	}
+
+	auto texture = new Texture(frameSize, frameCount, srcData->format(), flags);
+
+	auto dstData = texture->lock();
+
+	auto dst = dstData->data();
+	auto bpr = size.x * dstData->bpp();
+
+	for (auto i = 0; i < frameCount; ++i) {
+		auto src = srcData->data() + orgs[i].y * srcData->pitch() + orgs[i].x * srcData->bpp();
+		for (auto y = 0u; y < frameSize.y; ++y) {
+			std::memcpy(dst, src, bpr);
+			dst += dstData->pitch();
+			src += srcData->pitch();
+		}
+	}
+	texture->unlock();
+
+	return texture;
 }
 
 CTexture* rgbaTexture(uint32_t rgba, TextureFlags flags) {

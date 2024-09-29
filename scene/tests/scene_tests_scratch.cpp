@@ -16,7 +16,7 @@ int main() {
 
 void entry() {
 
-	ImagePtr image = loadImage(Path("sgd://misc/light.png"),1).result();
+	ImagePtr image = loadImage(Path("sgd://misc/light.png")).result();
 
 	SpritePtr sprite = new Sprite(image);
 	scene->add(sprite);

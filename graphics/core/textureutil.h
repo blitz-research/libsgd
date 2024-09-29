@@ -10,9 +10,12 @@ Expected<TextureData*, FileioEx> loadTextureData(CPath path, TextureFormat forma
 
 Expected<Texture*, FileioEx> load2DTexture(CPath path, TextureFormat format, TextureFlags flags);
 
-Expected<Texture*, FileioEx> loadCubeTexture(CPath path, TextureFormat format, TextureFlags flags);
+Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, TextureFlags flags);
 
-Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, TextureFlags flags, uint32_t depth = 0);
+Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, TextureFlags flags, uint32_t frameCount,
+											  uint32_t framesX, uint32_t framesY, uint32_t frameSpacing);
+
+Expected<Texture*, FileioEx> loadCubeTexture(CPath path, TextureFormat format, TextureFlags flags);
 
 CTexture* rgbaTexture(uint32_t rgba, TextureFlags flags = TextureFlags::none);
 

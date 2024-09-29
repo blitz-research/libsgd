@@ -98,7 +98,7 @@ def genApi(enums, funcs):
 		FUNCS.append("pub const " + name + " = " + func.name + ";")
 
 	r = template
-	r = r.replace("${NOW}", str(datetime.now()));
+	r = r.replace("${NOW}", str(datetime.now()))
 	r = r.replace("${CONSTS}", "\n".join(CONSTS))
 	r = r.replace("${FUNCS}", "\n".join(FUNCS))
 

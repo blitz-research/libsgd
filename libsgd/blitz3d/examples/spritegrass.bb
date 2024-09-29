@@ -19,7 +19,7 @@ CreatePlayer(0)
 SetCameraFar camera, far
 MoveEntity player,0,1.5,0
 
-grassImage = LoadImage("sgd://misc/grass1.png",1)
+grassImage = LoadImage("sgd://misc/grass1.png")
 SetImageRect grassImage,-.5,0,.5,.5
 
 Const n=50000

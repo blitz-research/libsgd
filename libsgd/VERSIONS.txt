@@ -1,4 +1,12 @@
-Rename TFormMesh to TransformMesh and TFormMeshTexCoords to TransformTexCoords.
+***** V0.15.0 *****
+
+Added LoadArrayImage for loading multiframe images, removed frameCount param from loadImage. This is really just a fudge until proper 2d atlas support is added, which will be post 1.0
+
+Renamed GetSurfaceMaterial to GetMaterial.
+
+Renamed GetTFormedBlah to GetTransformedBlah.
+
+Renamed TFormBlah to TransformBlah and TFormMeshTexCoords to TransformTexCoords.
 
 Changed node js and python identifier style to lower camel case.
 

@@ -13,8 +13,6 @@ void entry() {
 	sgd_FlipMesh(mesh);
 	SGD_Model model = sgd_CreateModel(mesh);
 
-	sgd_SetMaxCSMLights(2);
-
 	SGD_Mesh mesh2 = sgd_CreateSphereMesh(1, 24, 12, material);
 	sgd_SetMeshShadowsEnabled(mesh2, 1);
 

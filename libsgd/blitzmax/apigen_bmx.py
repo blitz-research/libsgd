@@ -1,8 +1,9 @@
 import sys
+from datetime import datetime
 
-template = """// BlitzMax wrapper for LibSGD
-//
-// Auto-generated : ${NOW}
+template = """' BlitzMax wrapper for LibSGD
+'
+' Auto-generated : ${NOW}
 
 Type SGD
 	${ENUMS}
@@ -140,6 +141,7 @@ def genApi(enums, funcs):
 			INITS.append("\t\t" + name + " = GetProcAddress(sgd_lib, \"" + func.name + "\")")
 
 	r = template
+	r = r.replace("${NOW}", str(datetime.now()))
 	r = r.replace("${ENUMS}", "\n" + "\n".join(ENUMS))
 	r = r.replace("${FUNCS}", "\n" + "\n".join(FUNCS))
 	r = r.replace("${INITS}", "\n" + "\n".join(INITS))

@@ -12,7 +12,7 @@ function build() {
 
   		~/AppData/Local/Programs/Python/Python3${1}/python.exe -m build --wheel
 
-  	elif [[ $OSTYPE == "darwin" ]]; then
+  	elif [[ $(uname) == "Darwin" ]]; then
 
     	python3.${1} -m build --wheel
 

@@ -163,7 +163,7 @@ int main() {
 #endif
 
 #if IMAGE
-	image = loadImage(Path("sgd://misc/light.png"), 1).result();
+	image = loadImage(Path("sgd://misc/light.png")).result();
 	imageRenderer = new ImageRenderer();
 #endif
 

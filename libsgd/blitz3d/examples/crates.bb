@@ -20,7 +20,7 @@ TurnEntity light,-90,0,0
 Local sz#=32
 Local groundMaterial = LoadPBRMaterial("sgd://misc/brownish-grass.jpg")
 Local groundMesh = CreateBoxMesh(-sz, -1, -sz, sz, 0, sz, groundMaterial)
-TFormMeshTexCoords groundMesh, sz, sz, 0,0
+TransformTexCoords groundMesh, sz, sz, 0,0
 Local groundModel = CreateModel(groundMesh)
 
 Local crateMesh = LoadMesh("sgd://models/sci-fi_crate.glb")

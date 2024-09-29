@@ -4,8 +4,8 @@
 
 namespace sgd {
 
-Expected<Image*, FileioEx> loadImage(CPath path, uint32_t depth);
+Expected<Image*, FileioEx> loadImage(CPath path);
 
-Expected<Image*, FileioEx> loadImageEx(CPath path, uint32_t frameCount, uint32_t frameCountX, uint32_t frameCountY, uint32_t frameSpacing);
+Expected<Image*, FileioEx> loadArrayImage(CPath path, uint32_t frameCount, uint32_t framesX, uint32_t framesY, uint32_t frameSpacing);
 
 }

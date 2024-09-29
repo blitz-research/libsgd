@@ -48,7 +48,7 @@ def resetScene():
 	sgd.setLightColor(light, 1.0, 1.0, 1.0, 1.0)
 	sgd.setLightRange(light, 50.0)
 	
-	bulletImage = sgd.loadImage("sgd://misc/light.png", 1)
+	bulletImage = sgd.loadImage("sgd://misc/light.png")
 	
 	slimeBall = sgd.loadSound("sgd://audio/slimeball.wav")
 
@@ -137,7 +137,7 @@ def updateScene():
 	bullets = alive
 	
 		
-sgd.Init()
+sgd.init()
 
 sgd.createWindow( sgd.getDesktopWidth() // 2, sgd.getDesktopHeight() // 2, "Spinning Blocks For Some Reason!", sgd.WINDOW_FLAGS_CENTERED)
 

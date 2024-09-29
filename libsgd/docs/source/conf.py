@@ -9,7 +9,7 @@
 project = 'LibSGD'
 copyright = '2024, Blitz Research'
 author = 'Blitz Research'
-release = 'V0.15'
+release = 'v0.15.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -33,7 +33,7 @@ breathe_show_enumvalue_initializer = True
 
 html_theme = 'nature'
 html_theme_options = {
-	"sidebarwidth": "320"
+	"sidebarwidth": "280"
 }
 
 html_static_path = ['_static']

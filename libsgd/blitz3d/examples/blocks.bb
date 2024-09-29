@@ -21,8 +21,6 @@ Global slimeball
 
 CreateWindow GetDesktopWidth()/2,GetDesktopHeight()/2,"スノー Blocks",WINDOW_FLAGS_CENTERED
 
-SetMaxPSMLights 8
-
 CreateScene()
 
 While Not (PollEvents() And EVENT_MASK_CLOSE_CLICKED)
@@ -56,7 +54,7 @@ Function CreateScene()
 	
 	Local skybox = CreateSkybox(env)
 	
-	bulletImage = LoadImage("sgd://misc/light.png", 1)
+	bulletImage = LoadImage("sgd://misc/light.png")
 
 	Local light = CreateDirectionalLight()
 	SetLightColor light,1,1,1,.2
@@ -136,7 +134,7 @@ Function CreateGround()
 	Local material = LoadPBRMaterial("sgd://materials/Gravel023_1K-JPG")
 
 	Local mesh = CreateBoxMesh(-WORLD_SIZE * 2,-1,-WORLD_SIZE*2,WORLD_SIZE*2,0,WORLD_SIZE*2,material)
-	TFormMeshTexCoords(mesh,100,100,0,0)
+	TransformTexCoords mesh,100,100,0,0
 
 	Local model = CreateModel(mesh)
 	

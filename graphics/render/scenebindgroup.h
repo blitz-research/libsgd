@@ -102,4 +102,6 @@ using CLightingUniforms = const LightingUniforms&;
 extern const BindGroupDescriptor sceneBindingsDescriptor;
 extern const BindGroupDescriptor sceneShadowBindingsDescriptor;
 
+ConfigUniforms getConfigUniformsFromConfigVars();
+
 }

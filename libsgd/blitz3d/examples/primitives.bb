@@ -10,8 +10,9 @@ SetEnvTexture env
 Local skybox = CreateSkybox(env)
 SetSkyboxRoughness skybox, .3
 
-SetPSMTextureSize 4096
-SetMaxPSMLights 6
+SetConfigVar "psm.textureSize", 4096
+SetConfigVar "psm.maxLights", 6
+UpdateShadowMappingConfig()
 
 Local light0 = CreatePointLight()
 SetEntityPosition light0,0,5,-2.5
@@ -19,7 +20,7 @@ SetLightRange light0, 10
 SetLightShadowsEnabled light0,True
 
 Local groundMaterial = CreatePBRMaterial()
-SetMaterialVector4f groundMaterial,"albedo",.6,.5,.5,1
+SetMaterialColor groundMaterial,"albedo",.6,.5,.5,1
 
 Local groundMesh = CreateBoxMesh(-5,-.1,-5,5,0,5,groundMaterial)
 SetMeshShadowsEnabled groundMesh, True

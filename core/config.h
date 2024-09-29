@@ -9,7 +9,10 @@ namespace sgd {
 Signal<CString>& configVarChanged(CString name);
 
 void setConfigVar(CString name, CString value);
-String getConfigVar(CString name);
+
+String getConfigVar(CString name, CString orvalue = {});
+
+bool configVarExists(CString name);
 
 // clang-format off
 #define SGD_BOOL_CONFIG_VAR(IDENT, NAME, DEFAULT) \

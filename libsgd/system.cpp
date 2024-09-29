@@ -27,15 +27,20 @@ void SGD_DECL sgd_Init() {
 	sgd::appResuming.connect(nullptr, [] { sgdx::postEvent({SGD_EVENT_MASK_RESUMED}); });
 }
 
+SGD_String SGD_DECL sgd_GetVersion() {
+	static const char* version = SGD_VERSION;
+	return version;
+}
+
 void SGD_DECL sgd_Terminate() {
 	if (sgdx::g_terminated || !sgdx::g_started) return;
 	sgdx::g_terminated = true;
 
-	if(sgdx::g_mainWindow) {
-		if(sgdx::g_mainScene) {
-			sgdx::g_mainScene=nullptr;
-			sgdx::g_overlay=nullptr;
-			sgdx::g_drawList=nullptr;
+	if (sgdx::g_mainWindow) {
+		if (sgdx::g_mainScene) {
+			sgdx::g_mainScene = nullptr;
+			sgdx::g_overlay = nullptr;
+			sgdx::g_drawList = nullptr;
 			sgd::destroyGC();
 		}
 		sgdx::g_mainWindow->close();
@@ -55,9 +60,7 @@ SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name) {
 }
 
 void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(SGD_String error, void* context), void* context) {
-	sgd::setErrorHandler([=](sgd::CString msg, const char *file, int line){
-		handler(msg.c_str(), context);
-	});
+	sgd::setErrorHandler([=](sgd::CString msg, const char* file, int line) { handler(msg.c_str(), context); });
 }
 
 void SGD_DECL sgd_Error(SGD_String error) {

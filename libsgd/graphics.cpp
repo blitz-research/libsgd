@@ -9,17 +9,17 @@ SGD_Texture SGD_DECL sgd_Load2DTexture(SGD_String path, SGD_TextureFormat format
 	return sgdx::createHandle(texture.result());
 }
 
-SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags) {
-	sgdx::started();
-	auto texture = sgd::loadCubeTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
-	if (!texture) sgdx::error("Failed to load cube texture", texture.error());
-	return sgdx::createHandle(texture.result());
-}
-
 SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
 	auto texture = sgd::loadArrayTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
 	if (!texture) sgdx::error("Failed to load array texture", texture.error());
+	return sgdx::createHandle(texture.result());
+}
+
+SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags) {
+	sgdx::started();
+	auto texture = sgd::loadCubeTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
+	if (!texture) sgdx::error("Failed to load cube texture", texture.error());
 	return sgdx::createHandle(texture.result());
 }
 
@@ -452,7 +452,7 @@ SGD_Surface SGD_DECL sgd_GetSurface(SGD_Mesh hmesh, int surface) {
 	return sgdx::getOrCreateHandle(surf.get());
 }
 
-SGD_Material SGD_DECL sgd_GetSurfaceMaterial(SGD_Surface hsurface) {
+SGD_Material SGD_DECL sgd_GetMaterial(SGD_Surface hsurface) {
 	auto surf = sgdx::resolveHandle<sgd::Surface>(hsurface);
 	return sgdx::getOrCreateHandle((sgd::Material*)surf->material());
 }
@@ -511,9 +511,16 @@ float SGD_DECL sgd_GetFontHeight(SGD_Font hfont) {
 
 // ***** Image *****
 
-SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int depth) {
+SGD_Image SGD_DECL sgd_LoadImage(SGD_String path) {
 	sgdx::started();
-	auto image = sgd::loadImage(sgd::Path(path), depth);
+	auto image = sgd::loadImage(sgd::Path(path));
+	if (!image) sgdx::error("Failed to load image:" + image.error().message());
+	return sgdx::createHandle(image.result());
+}
+
+SGD_Image SGD_DECL sgd_LoadArrayImage(SGD_String path, int frameCount, int framesX, int framesY, int frameSpacing) {
+	sgdx::started();
+	auto image = sgd::loadArrayImage(sgd::Path(path), frameCount, framesX, framesY, frameSpacing);
 	if (!image) sgdx::error("Failed to load image:" + image.error().message());
 	return sgdx::createHandle(image.result());
 }

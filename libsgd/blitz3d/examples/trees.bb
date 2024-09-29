@@ -15,7 +15,7 @@ Local skybox = CreateSkybox(env)
 Local sz#=200
 Local groundMaterial = LoadPBRMaterial("sgd://misc/brownish-grass.jpg")
 Local groundMesh = CreateBoxMesh(-sz,-1,-sz,sz,0,sz,groundMaterial)
-TFormMeshTexCoords groundMesh,sz,sz,0,0
+TransformTexCoords groundMesh,sz,sz,0,0
 Local ground = CreateModel(groundMesh)
 
 Dim treeMeshes(3)

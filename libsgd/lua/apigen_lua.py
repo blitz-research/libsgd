@@ -78,7 +78,7 @@ def genApi(enums, funcs):
 		DECLS.append(transName(func.name) + " = lib." + func.name + ",")
 
 	r = template
-	r = r.replace("${NOW}", str(datetime.now()));
+	r = r.replace("${NOW}", str(datetime.now()))
 	r = r.replace("${CONSTS}", "\n".join(CONSTS))
 	r = r.replace("${FUNCS}", "\n".join(FUNCS))
 	r = r.replace("${DECLS}", "\n".join(DECLS))

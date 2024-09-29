@@ -21,13 +21,14 @@ SetClearColor .3,.6,1,1
 ; Actual height of eiffel tower, fact fans!
 Local sz#=330
 
-SetCSMClipRange sz * 2
+SetConfigVar "csm.clipRange", sz*2
+UpdateShadowMappingConfig()
 
 Local groundMaterial = LoadPBRMaterial("sgd://misc/grass1K.jpg")
 SetMaterialFloat groundMaterial,"roughness",1
 
 Local groundMesh = CreateBoxMesh(-sz,0,-sz,sz,0,sz,groundMaterial)
-TFormMeshTexCoords groundMesh,sz,sz,0,0
+TransformTexCoords groundMesh,sz,sz,0,0
 Local ground = CreateModel(groundMesh)
 CreateMeshCollider(ground, 0, 0)
 

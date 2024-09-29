@@ -75,10 +75,6 @@ if (SGD_LUA_TARGET_ENABLED)
 	add_subdirectory(lua)
 endif()
 
-if (SGD_DOXYGEN_TARGET_ENABLED)
-	add_subdirectory(doxygen)
-endif ()
-
 if (SGD_DOCS_TARGET_ENABLED)
 	add_subdirectory(docs)
 endif ()

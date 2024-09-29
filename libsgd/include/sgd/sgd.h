@@ -5,6 +5,11 @@
 
 //! @cond
 
+#define SGD_VERSION_MAJOR 0
+#define SGD_VERSION_MINOR 15
+#define SGD_VERSION_PATCH 0
+#define SGD_VERSION "0.15.0" // Need some Macro Magic!
+
 #if SGD_GENAPI
 
 #define SGD_API
@@ -86,6 +91,11 @@ typedef float SGD_Real;
 
 //! Start up libsgd.
 SGD_API void SGD_DECL sgd_Init();
+
+//! Get current runtime LibSGD version.
+//!
+//! Returns the value of SGD_VERSION macro at the time the runtime was built.
+SGD_API SGD_String SGD_DECL sgd_GetVersion();
 
 //! Shut down libsgd.
 SGD_API void SGD_DECL sgd_Terminate();
@@ -310,20 +320,20 @@ typedef SGD_Handle SGD_Texture;
 //! SGD_TEXTURE_FORMAT_ANY can be used with loading functions to let SGD pick a suitable texture format
 //! depending on the content of the data being loaded.
 typedef enum SGD_TextureFormat {
-	SGD_TEXTURE_FORMAT_ANY = 0,		//!< Let SGD loaders choose format.
+	SGD_TEXTURE_FORMAT_ANY = 0, //!< Let SGD loaders choose format.
 
-	SGD_TEXTURE_FORMAT_R8 = 1,		//!< 8 bit unsigned normalized red.
-	SGD_TEXTURE_FORMAT_RG8 = 2,		//!< 8 bit unsigned normalized red, green.
-	SGD_TEXTURE_FORMAT_RGBA8 = 3,	//!< 8 bit unsigned normalized red, green, blue, alpha.
-	SGD_TEXTURE_FORMAT_SRGBA8 = 4,	//!< 8 bit unsigned normalized red, green, blue, alpha. Non-linear
+	SGD_TEXTURE_FORMAT_R8 = 1,	   //!< 8 bit unsigned normalized red.
+	SGD_TEXTURE_FORMAT_RG8 = 2,	   //!< 8 bit unsigned normalized red, green.
+	SGD_TEXTURE_FORMAT_RGBA8 = 3,  //!< 8 bit unsigned normalized red, green, blue, alpha.
+	SGD_TEXTURE_FORMAT_SRGBA8 = 4, //!< 8 bit unsigned normalized red, green, blue, alpha. Non-linear
 
-	SGD_TEXTURE_FORMAT_R8S = 5,		//!< 8 bit signed normalized red.
-	SGD_TEXTURE_FORMAT_RG8S = 6,	//!< 8 bit signed normalized red, green.
-	SGD_TEXTURE_FORMAT_RGBA8S = 7,	//!< 8 bit signed normalized red, green, blue, alpha.
+	SGD_TEXTURE_FORMAT_R8S = 5,	   //!< 8 bit signed normalized red.
+	SGD_TEXTURE_FORMAT_RG8S = 6,   //!< 8 bit signed normalized red, green.
+	SGD_TEXTURE_FORMAT_RGBA8S = 7, //!< 8 bit signed normalized red, green, blue, alpha.
 
-	SGD_TEXTURE_FORMAT_R16F = 8,	//!< 16 bit floating point red only.
-	SGD_TEXTURE_FORMAT_RG16F = 9,	//!< 16 bit floating point red only.
-	SGD_TEXTURE_FORMAT_RGBA16F = 10,//!< 16 bit floating point red only.
+	SGD_TEXTURE_FORMAT_R16F = 8,	 //!< 16 bit floating point red only.
+	SGD_TEXTURE_FORMAT_RG16F = 9,	 //!< 16 bit floating point red only.
+	SGD_TEXTURE_FORMAT_RGBA16F = 10, //!< 16 bit floating point red only.
 } SGD_TextureFormat;
 
 //! Texture flags
@@ -332,14 +342,14 @@ typedef enum SGD_TextureFormat {
 //!
 //! Textures are always linear filtered whe minimized.
 typedef enum SGD_TextureFlags {
-	SGD_TEXTURE_FLAGS_NONE = 0x0,		//!< No texture flags.
-	SGD_TEXTURE_FLAGS_CLAMP_U = 0x01,	//!< Clamp texture U coordinates.
-	SGD_TEXTURE_FLAGS_CLAMP_V = 0x02,	//!< Clamp texture V coordinates.
-	SGD_TEXTURE_FLAGS_CLAMP_W = 0x04,	//!< Clamp texture W coordinates.
-	SGD_TEXTURE_FLAGS_FILTER = 0x08,	//!< Perform bilinear filtering on texels that cover more than screen pixel.
-	SGD_TEXTURE_FLAGS_MIPMAP = 0x10,	//!< Create and perform mipmapping.
-	SGD_TEXTURE_FLAGS_DEFAULT = 0x18,	//!< Combination of SGD_TEXTURE_FLAGS_FILTER and SGD_TEXTURE_FLAGS_MIPMAP
-	SGD_TEXTURE_FLAGS_IMAGE = 0x01f,	//!< Combination of SGD_TEXTURE_FLAGS_FILTER, SGD_TEXTURE_FLAGS_MIPMAP and all clamp flags.
+	SGD_TEXTURE_FLAGS_NONE = 0x0,	  //!< No texture flags.
+	SGD_TEXTURE_FLAGS_CLAMP_U = 0x01, //!< Clamp texture U coordinates.
+	SGD_TEXTURE_FLAGS_CLAMP_V = 0x02, //!< Clamp texture V coordinates.
+	SGD_TEXTURE_FLAGS_CLAMP_W = 0x04, //!< Clamp texture W coordinates.
+	SGD_TEXTURE_FLAGS_FILTER = 0x08,  //!< Perform bilinear filtering on texels that cover more than screen pixel.
+	SGD_TEXTURE_FLAGS_MIPMAP = 0x10,  //!< Create and perform mipmapping.
+	SGD_TEXTURE_FLAGS_DEFAULT = 0x18, //!< Combination of SGD_TEXTURE_FLAGS_FILTER and SGD_TEXTURE_FLAGS_MIPMAP
+	SGD_TEXTURE_FLAGS_IMAGE = 0x01f, //!< Combination of SGD_TEXTURE_FLAGS_FILTER, SGD_TEXTURE_FLAGS_MIPMAP and all clamp flags.
 } SGD_TextureFlags;
 
 //! Load a new 2D texture. See also @ref SGD_TextureFlags.
@@ -349,17 +359,18 @@ typedef enum SGD_TextureFlags {
 //! @param flags is a valid combination of SGD_TextureFlags values.
 SGD_API SGD_Texture SGD_DECL sgd_Load2DTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags);
 
-//! Load a new cube texture. See also @ref SGD_TextureFlags.
-SGD_API SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags);
-
 //! Load a new array texture. See also @ref SGD_TextureFlags.
 SGD_API SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags);
+
+//! Load a new cube texture. See also @ref SGD_TextureFlags.
+SGD_API SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags);
 
 //! Create a new 2D texture. See also @ref SGD_TextureFlags.
 SGD_API SGD_Texture SGD_DECL sgd_Create2DTexture(int width, int height, SGD_TextureFormat format, SGD_Flags flags);
 
 //! Create a new array texture. See also @ref SGD_TextureFlags.
-SGD_API SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, SGD_TextureFormat format,	SGD_Flags flags);
+SGD_API SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, SGD_TextureFormat format,
+													SGD_Flags flags);
 
 //! Create a new cube texture. See also @ref SGD_TextureFlags.
 SGD_API SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, SGD_TextureFormat format, SGD_Flags flags);
@@ -495,7 +506,7 @@ SGD_API void SGD_DECL sgd_FitMesh(SGD_Mesh mesh, float minX, float minY, float m
 
 //! Transform mesh by translation, rotation, scale.
 SGD_API void SGD_DECL sgd_TransformMesh(SGD_Mesh mesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx,
-									float sy, float sz);
+										float sy, float sz);
 
 //! Transform mesh texture coordinates.
 SGD_API void SGD_DECL sgd_TransformTexCoords(SGD_Mesh mesh, float scaleX, float scaleY, float offsetX, float offsetY);
@@ -528,9 +539,9 @@ SGD_API float SGD_DECL sgd_GetMeshBoundsMaxZ(SGD_Mesh mesh);
 
 //! Mesh flags.
 typedef enum SGD_MeshFlags {
-	SGD_MESH_FLAGS_NONE = 0,	//!< No special mesh flags.
-	SGD_MESH_FLAGS_TANGENTS_ENABLED = 1,	//!< Mesh contains materials with normal maps.
-	SGD_MESH_FLAGS_BLENDED_SURFACES = 2,	//!< Mesh contains materials that use alphaBlend blend mode.
+	SGD_MESH_FLAGS_NONE = 0,			 //!< No special mesh flags.
+	SGD_MESH_FLAGS_TANGENTS_ENABLED = 1, //!< Mesh contains materials with normal maps.
+	SGD_MESH_FLAGS_BLENDED_SURFACES = 2, //!< Mesh contains materials that use alphaBlend blend mode.
 } SGD_MeshFlags;
 
 //! Create a new custom mesh. See also @ref SGD_MeshFlags.
@@ -627,7 +638,7 @@ SGD_API int SGD_DECL sgd_GetSurfaceCount(SGD_Mesh mesh);
 SGD_API SGD_Surface SGD_DECL sgd_GetSurface(SGD_Mesh mesh, int surface);
 
 //! Get surface material.
-SGD_API SGD_Material SGD_DECL sgd_GetSurfaceMaterial(SGD_Surface surface);
+SGD_API SGD_Material SGD_DECL sgd_GetMaterial(SGD_Surface surface);
 
 //! Add empty triangles to surface, returning index of first new triangle.
 SGD_API void SGD_DECL sgd_ResizeTriangles(SGD_Surface surface, int count);
@@ -670,9 +681,10 @@ SGD_API float SGD_DECL sgd_GetFontHeight(SGD_Font font);
 typedef SGD_Handle SGD_Image;
 
 //! Load an image for use with 3D sprites or Draw2DImage.
-//!
-//! Multiframe images must be layed out in a vertical strip.
-SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path, int depth);
+SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path);
+
+//! Load an array image for use with 3D sprites or Draw2DImage.
+SGD_API SGD_Image SGD_DECL sgd_LoadArrayImage(SGD_String path, int frameCount, int framesX, int framesY, int frameSpacing);
 
 //! Create an image with an existing texture.
 SGD_API SGD_Image SGD_DECL sgd_CreateImage(SGD_Texture texture);
@@ -792,47 +804,26 @@ SGD_API void SGD_DECL sgd_SetClearDepth(float depth);
 //! Set scene environment texture.
 SGD_API void SGD_DECL sgd_SetEnvTexture(SGD_Texture texture);
 
-//! Set cascading shadow map texture size. Defaults to 2048, must be a power of 2.
-SGD_API void SGD_DECL sgd_SetCSMTextureSize(int textureSize);
-
-//! Set max shadow casting directional lights. Defaults to 4, must be <= max directional lights (4).
-SGD_API void SGD_DECL sgd_SetMaxCSMLights(int maxLights);
-
-//! Set split distances for CSM shadow, last value should match camera far. Defaults to 16, 64, 256, 1024.
-SGD_API void SGD_DECL sgd_SetCSMSplitDistances(float sklit0, float split1, float split2, float split3);
-
-//! Set max range of potential CSM obscurers. Defaults to 1000.
-SGD_API void SGD_DECL sgd_SetCSMClipRange(float range);
-
-//! Set depth bia for CSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults to
-//! 0.0001.
-SGD_API void SGD_DECL sgd_SetCSMDepthBias(float bias);
-
-//! Set point light shadow map texture size. Defaults to 1024, must be a power of 2.
-SGD_API void SGD_DECL sgd_SetPSMTextureSize(int textureSize);
-
-//! Set max shadow casting point lights. Defaults to 32, mus be <= max points lights (32).
-SGD_API void SGD_DECL sgd_SetMaxPSMLights(int maxLights);
-
-//! Set near clip plane distance for PSM shadows. Default to .01.
-SGD_API void SGD_DECL sgd_SetPSMClipNear(float near);
-
-//! Set depth bias for PSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults
-//! to 0.0001.
-SGD_API void SGD_DECL sgd_SetPSMDepthBias(float bias);
-
-//! Set spot light shadow map texture size. Defaults to 1024, must be a power of 2.
-SGD_API void SGD_DECL sgd_SetSSMTextureSize(int textureSize);
-
-//! Set max shadow casting spot lights. Defaults to 16, must be <= max directional lights (16).
-SGD_API void SGD_DECL sgd_SetMaxSSMLights(int maxLights);
-
-//! Set near clip plane distance for SSM shadows. Default to .01.
-SGD_API void SGD_DECL sgd_SetSSMClipNear(float near);
-
-//! Set depth bias for SSM shadows, increase to reduce 'shadow acne', but not too much or you'll get 'Peter Panning'. Defaults
-//! to 0.0001.
-SGD_API void SGD_DECL sgd_SetSSMDepthBias(float bias);
+//! Update scene shadow mapping config from config vars.
+//!
+//! This function will update shadow mapping config variables from the current config vars, see sgd_SetConfigVar.
+//!
+//! Config Var         | Type  | Default          | Description
+//! -------------------|-------|------------------|------------
+//! csm.textureSize    | int   | "2048"           | Texture size of each of the 4 cascading shadow map textures.
+//! csm.maxLights      | int   | "4"              | Max directional light shadow casters.
+//! csm.clipRange      | float | "330.0"          | Max offscreen distance to render shadow casters.
+//! csm.depthBias      | float | "0.0001"         | Depth bias for cascading shadow maps.
+//! csm.SplitDistances | Vec4f | "16,64,256,1024" | Cascading shadow map split distances from the eye.
+//! psm.textureSize    | int   | "1024"           | Texture size of point light cube shadow textures.
+//! psm.maxLights      | int   | "32"             | Max point light shadow casters.
+//! psm.clipNear       | float | "0.25"           | Near clipping plane for point light shadow maps.
+//! psm.depthBias      | float | "0.0001"         | Depth bias value for p[oint light shadow maps.
+//! ssm.textureSize    | int   | "1024"           | Texture size of each spot light 2D shadow map.
+//! ssm.maxLights      | int   | "16"             | Max spot light shadow casters.
+//! ssm.clipNear       | float | "0.25"           | Max distance to render shadow casters.
+//! ssm.depthBias      | float | "0.0001"         | Depth bias value to prevent shadow acne.
+SGD_API void SGD_DECL sgd_UpdateShadowMappingConfig();
 
 //! Render scene.
 SGD_API void SGD_DECL sgd_RenderScene();
@@ -989,13 +980,13 @@ SGD_API void SGD_DECL sgd_TransformVector(SGD_Real x, SGD_Real y, SGD_Real z, SG
 //! Transform 3d normal from one entity coordinate space to another.
 SGD_API void SGD_DECL sgd_TransformNormal(SGD_Real x, SGD_Real y, SGD_Real z, SGD_Entity srcEntity, SGD_Entity dstEntity);
 
-//! X component of most recent sgd_TransfromPoint result.
+//! X component of most recent sgd_TransformPoint result.
 SGD_API SGD_Real SGD_DECL sgd_GetTransformedX();
 
-//! Y component of most recent sgd_TransfromPoint result.
+//! Y component of most recent sgd_TransformPoint result.
 SGD_API SGD_Real SGD_DECL sgd_GetTransformedY();
 
-//! Z component of most recent sgd_TransfromPoint result.
+//! Z component of most recent sgd_TransformPoint result.
 SGD_API SGD_Real SGD_DECL sgd_GetTransformedZ();
 
 //! @}

@@ -4,9 +4,7 @@ void entry() {
 
 	DrawListPtr dc = overlay->drawList();
 
-//	ImagePtr image = loadImage(Path("sgd://misc/explode64_vstrip.png"), 16).result();
-
-	ImagePtr image = loadImageEx(Path("sgd://misc/explode64_vstrip.png"), 16, 1, 16, 0).result();
+	ImagePtr image = loadArrayImage(Path("sgd://misc/explode64_vstrip.png"), 16, 1, 16, 0).result();
 
 	auto w = (float)window->size().x;
 	auto h = (float)window->size().y;

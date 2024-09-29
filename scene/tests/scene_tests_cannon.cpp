@@ -58,7 +58,7 @@ void entry() {
 	createPlayer(nullptr);
 	move(player, {0, 1, -20});
 
-	ImagePtr image = loadImage(Path("~/Desktop/StillLife.exr"), 1).result();
+	ImagePtr image = loadImage(Path("~/Desktop/StillLife.exr")).result();
 	image->rect = {-.1,-.1,.1,.1};
 
 	auto dc = overlay->drawList();
