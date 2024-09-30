@@ -180,8 +180,8 @@ void createBindGroup() {	// Create BindGroupLayout and BindGroup
 // Create pipeline
 void createPipeline()	{
 	// Compile shader
-	wgpu::ShaderModuleWGSLDescriptor wgslDesc{};
-	wgslDesc.sType = wgpu::SType::ShaderModuleWGSLDescriptor;
+	wgpu::ShaderSourceWGSL wgslDesc{};
+	wgslDesc.sType = wgpu::SType::ShaderSourceWGSL;
 	wgslDesc.code = shaderSource;
 	wgpu::ShaderModuleDescriptor desc{};
 	desc.nextInChain = (wgpu::ChainedStruct*)&wgslDesc;

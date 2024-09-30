@@ -10,6 +10,12 @@ if (NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
 	return()
 endif ()
 
+find_package(Python3 COMPONENTS Interpreter)
+if (NOT Python3_FOUND)
+	message(WARNING "### Can't find python3 interpreter, skipping python target...")
+	return()
+endif ()
+
 # Check we have SWIG
 find_program(SWIG_PATH swig)
 if (SWIG_PATH STREQUAL SWIG_PATH-NOTFOUND)
@@ -56,7 +62,6 @@ endif ()
 
 # node-gyp configure
 file(REMOVE_RECURSE ${BIN}/build)
-
 execute_process(
 	WORKING_DIRECTORY ${BIN}
 	COMMAND ${CMD} npx node-gyp configure ${NODEGYP_DEBUG}
@@ -66,10 +71,9 @@ set(OUTPUT_FILE ${BIN}/build/Release/sgd.node)
 
 add_custom_target(libsgd_nodejs ALL
 	WORKING_DIRECTORY ${BIN}
-
 	COMMAND	#${CMAKE_COMMAND} -E rm -rf ${BIN}/build &&
 			#npx node-gyp configure ${NODEGYP_DEBUG} &&
-			python ${SRC}/genrenames.py ${INC} ${BIN}/renames.i &&
+			${Python3_EXECUTABLE} ${SRC}/genrenames.py ${INC} ${BIN}/renames.i &&
 			swig -c++ -javascript -napi -fcompact -O -outcurrentdir -I${INC} -I${BIN} ${SRC}/sgd.i &&
 			npx node-gyp --silent build ${NODEGYP_DEBUG}
 	DEPENDS libsgd_static ${SRC}/sgd.i ${SRC}/genrenames.py
