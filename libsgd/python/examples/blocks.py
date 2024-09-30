@@ -57,7 +57,7 @@ def resetScene():
 	material = sgd.loadPBRMaterial("sgd://materials/Gravel023_1K-JPG")
 
 	mesh = sgd.createBoxMesh(-WORLD_SIZE * 2, -1, -WORLD_SIZE * 2, WORLD_SIZE * 2, 0, WORLD_SIZE * 2, material)
-	sgd.tFormMeshTexCoords(mesh,100,100,0,0)
+	sgd.transformTexCoords(mesh,100,100,0,0)
 
 	sgd.createModel(mesh)
 	

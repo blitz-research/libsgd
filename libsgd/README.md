@@ -4,21 +4,21 @@
 
 &bull; blitzmax/ : Contains BlitzMax module file and examples.  
 
-&bull; html/ : Contains Doxygen generated help files.
+&bull; html/ : Contains Sphinx generated htmlhelp files.
 
 &bull; include/ : Contains header files for C/C++ apps. This directory should be added to your C/C++ compiler's 'include directories' setting.
 
 &bull; lib/ : Contains dynamic library for C/C++ apps. This directory should be added to your C/C++ compiler's 'library directories' setting. To use LibSGD in your C/C++ app, your app must link with libsgd_dynamic.lib, and libsgd_dynamic.dll must be copied to your executable's path so it can be found at runtime.
 
-&bull; python/ : Contains helloworld.py and examples. The python libsgd package can be installed using pip, eg: ``python -m pip install --upgrade libsgd``
-
 &bull; nodejs/ : Contains node.js wrapper module. The libsgd.node file must be in the current directory when you run a node.js app that wants to use libsgd.
+
+&bull; python/ : Contains helloworld.py and examples. The python libsgd package can be installed using pip on Windows, eg: ``python -m pip install --upgrade libsgd``
 
 &bull; zig/ : Contains WIP sgd.zig wrapper for the zig language.
 
-&bull; VERSIONS.txt : Summary of version changes.
-
 &bull; README.md : This file.
+
+&bull; VERSIONS.txt : Summary of version changes.
 
 
 ### Notes
@@ -30,13 +30,13 @@ Most folders contain simple 'helloworld' demos to get you started. See source co
 
 Big shout out to my awesome Patreon supporters!
 ```
-Martin
 Shane
+Martin
 Simon Harrison
 MarLupin
 Medi98
-Michael Denathorn
 Chaduke
+Michael Denathorn
 James Boyd
 Andy Hewco
 Markus Rosse
@@ -44,4 +44,5 @@ Dex
 Dan
 JaviCervera
 Amon
+William Soennichsen
 ```

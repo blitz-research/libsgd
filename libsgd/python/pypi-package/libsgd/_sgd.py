@@ -14,8 +14,6 @@ else:
 
 path = os.path.join(os.path.dirname(__file__), "libs", "py3" + str(sys.version_info.minor), "_sgd."+ext)
 
-print("### Path:["+path+"]")
-
 if not os.path.exists(path):
     raise ImportError("_sgd."+ext+" not found")
 

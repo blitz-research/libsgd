@@ -10,7 +10,7 @@ Renamed TFormBlah to TransformBlah and TFormMeshTexCoords to TransformTexCoords.
 
 Changed node js and python identifier style to lower camel case.
 
-Move doc system to much nicer sphinx/breathe.
+Changed doc system to much nicer sphinx/breathe.
 
 Simplified material parameter names: "albedo", "emissive", "metalness", "roughness", "occlusion", "normal".
 
