@@ -46,7 +46,6 @@ struct Varying {
         let u = atan2(wvec.x, wvec.z) / pi * 0.5 + 0.5;
         let v = -atan2(wvec.y, length(wvec.xz)) / pi + 0.5;
 
-//        return textureSampleBias(scene_envTexture2D, scene_envSampler, vec2f(u, v), geometry_uniforms.mipmapBias);
         return textureSampleLevel(scene_envTexture2D, scene_envSampler, vec2f(u, v), geometry_uniforms.mipmapBias);
     }
 }

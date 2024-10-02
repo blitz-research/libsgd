@@ -43,7 +43,8 @@ void seedRnd() {
 }
 
 float rnd() {
-	return float(rndval(&r) & 0xffffff) / float(0x1000000);
+	// 23 - 23 mantissa bits in 32 bit float.
+	return float(rndval(&r) & ((1<23)-1)) / float(1<<23);
 }
 
 float rnd(float max) {

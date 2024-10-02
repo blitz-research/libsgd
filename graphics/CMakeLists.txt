@@ -93,6 +93,12 @@ add_library(graphics
 	skybox/skyboxbindings.cpp
 	skybox/skyboxbindings.h
 	skybox/skyboxrenderer.wgsl
+
+	terrain/terrainbindgroup.cpp
+	terrain/terrainbindgroup.h
+	terrain/terrainbindings.cpp
+	terrain/terrainbindings.h
+	terrain/terrainrenderer.wgsl
 )
 
 target_link_libraries(graphics window dawn tinyexr stb tcpp)

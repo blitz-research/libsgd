@@ -1,3 +1,18 @@
+***** V0.15.3 *****
+
+Updated PyPi README.md links
+
+
+***** V0.15.2 *****
+
+Updated PyPi README.md example
+
+
+***** V0.15.1 *****
+
+Fixed PyPi package.
+
+
 ***** V0.15.0 *****
 
 Added LoadArrayImage for loading multiframe images, removed frameCount param from loadImage. This is really just a fudge until proper 2d atlas support is added, which will be post 1.0

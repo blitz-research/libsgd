@@ -3,9 +3,10 @@
 #include <thread>
 
 #define SKYBOX 1
+#define TERRAIN 1
 #define MESH 1
-#define DRAWLIST 1
 #define IMAGE 1
+#define DRAWLIST 1
 
 using namespace sgd;
 
@@ -18,12 +19,22 @@ SceneBindingsPtr sceneBindings;
 RenderContextPtr renderContext;
 RenderQueuePtr renderQueue;
 
+#if SKYBOX
 SkyboxBindingsPtr skyboxBindings;
+#endif
 
+#if TERRAIN
+TerrainBindingsPtr terrainBindings;
+#endif
+
+#if MESH
 MeshPtr mesh;
 MeshRendererPtr meshRenderer;
+#endif
 
+#if DRAWLIST
 DrawListPtr drawList;
+#endif
 
 #if IMAGE
 ImagePtr image;
@@ -40,6 +51,15 @@ void render() {
 		meshRenderer->unlockInstances();
 	}
 #endif
+#if IMAGE
+	{
+		auto instp = imageRenderer->lockInstances(1);
+		instp->worldMatrix = AffineMat4f::TRS({0, 0, 1});
+		instp->color = Vec4f(1);
+		instp->frame = 0;
+		imageRenderer->unlockInstances();
+	}
+#endif
 #if DRAWLIST
 	{
 		drawList->clear();
@@ -48,15 +68,6 @@ void render() {
 		drawList->fillColor = Vec4f(1, .5, 0, 1);
 		drawList->addRect({0, 16, 1920, 32});
 		drawList->flush();
-	}
-#endif
-#if IMAGE
-	{
-		auto instp = imageRenderer->lockInstances(1);
-		instp->worldMatrix = AffineMat4f::TRS({0, 0, 1});
-		instp->color = Vec4f(1);
-		instp->frame = 0;
-		imageRenderer->unlockInstances();
 	}
 #endif
 
@@ -70,14 +81,17 @@ void render() {
 #if SKYBOX
 		skyboxBindings->render(renderQueue);
 #endif
+#if TERRAIN
+		terrainBindings->render(renderQueue);
+#endif
 #if MESH
 		meshRenderer->render(renderQueue, mesh, 1, 0);
 #endif
-#if DRAWLIST
-		drawList->render(renderQueue);
-#endif
 #if IMAGE
 		imageRenderer->render(renderQueue, image, 0, 1);
+#endif
+#if DRAWLIST
+		drawList->render(renderQueue);
 #endif
 
 		renderContext->beginRender();
@@ -150,6 +164,10 @@ int main() {
 	auto skyTexture = loadCubeTexture(Path("sgd://envmaps/stormy-cube.jpg"), TextureFormat::srgba8, TextureFlags::mipmap).result();
 	skyboxBindings = new SkyboxBindings();
 	skyboxBindings->skyTexture = skyTexture;
+#endif
+
+#if TERRAIN
+	terrainBindings = new TerrainBindings();
 #endif
 
 #if MESH

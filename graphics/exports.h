@@ -36,3 +36,5 @@
 #include "render/scenebindings.h"
 
 #include "skybox/skyboxbindings.h"
+
+#include "terrain/terrainbindings.h"

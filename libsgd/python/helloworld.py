@@ -7,7 +7,7 @@ from libsgd import sgd
 
 sgd.init()
 
-sgd.createWindow(640, 480, "Hello World!", sgd.WINDOW_FLAGS_RESIZABLE)
+sgd.createWindow(640, 480, "Hello World!", sgd.WINDOW_FLAGS_CENTERED | sgd.WINDOW_FLAGS_RESIZABLE)
 
 sgd.setClearColor(1,.5,0,1)
 

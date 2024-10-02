@@ -1,9 +1,10 @@
 #pragma once
 
 #include <cassert>
-#include <vector>
-#include <functional>
 #include <cinttypes>
+#include <cmath>
+#include <functional>
+#include <vector>
 
 #include <sgd/sgd.h>
 
@@ -31,14 +32,14 @@ float rnd(float max);
 //! Generate a pseudo random number from [min, max).
 float rnd(float min, float max);
 
-//! Same as mod but handles negative x value so there's no 'hole' around 0, y should still be positive.
+//! Same as '%' mod but handles negative x values so there's no 'hole' around 0, y should still be positive.
 inline int floorMod(int x, int y) {
 	return x >= 0 ? x % y : x - ((x - y + 1) / y) * y;
 }
 
-//! Same as std::fmod but handles negative x value so there's no 'hole' around 0, y should still be positive.
+//! Same as std::fmod but handles negative x values so there's no 'hole' around 0, y should still be positive.
 inline float floorMod(float x, float y) {
 	return x - std::floor(float(x) / float(y)) * y;
 }
 
-}
+} // namespace skirmish
