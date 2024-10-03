@@ -7,6 +7,7 @@
 #include "../overlay/overlayrenderer.h"
 #include "../skybox/skyboxrenderer.h"
 #include "../sprite/spriterenderer.h"
+#include "../terrain/terrainrenderer.h"
 
 namespace sgd {
 
@@ -30,6 +31,7 @@ SceneRenderer::SceneRenderer()
 	  m_renderQueue(new RenderQueue()),															   //
 	  m_overlayQueue(new RenderQueue()),														   //
 	  m_skyboxRenderer(new SkyboxRenderer()),													   //
+	  m_terrainRenderer(new TerrainRenderer()),													   //
 	  m_modelRenderer(new ModelRenderer()),														   //
 	  m_skinnedModelRenderer(new SkinnedModelRenderer()),										   //
 	  m_spriteRenderer(new SpriteRenderer()),													   //
@@ -236,6 +238,7 @@ void SceneRenderer::render() {
 	m_sceneBindings->envTexture = envTexture();
 
 	m_skyboxRenderer->update(m_eye);
+	m_terrainRenderer->update(m_eye);
 	m_modelRenderer->update(m_eye);
 	m_skinnedModelRenderer->update(m_eye);
 	m_spriteRenderer->update(m_eye);
@@ -248,6 +251,7 @@ void SceneRenderer::render() {
 			m_renderQueue->clear();
 			m_overlayQueue->clear();
 			m_skyboxRenderer->render(m_renderQueue);
+			m_terrainRenderer->render(m_renderQueue);
 			m_modelRenderer->render(m_renderQueue);
 			m_skinnedModelRenderer->render(m_renderQueue);
 			m_spriteRenderer->render(m_renderQueue);

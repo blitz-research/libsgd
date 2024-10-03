@@ -7,14 +7,11 @@ namespace sgd {
 SGD_SHARED(SceneBindings);
 SGD_SHARED(RenderContext);
 SGD_SHARED(SkyboxRenderer);
-SGD_SHARED(Skybox);
+SGD_SHARED(TerrainRenderer);
 SGD_SHARED(ModelRenderer);
 SGD_SHARED(SkinnedModelRenderer);
-SGD_SHARED(Model);
 SGD_SHARED(SpriteRenderer);
-SGD_SHARED(Sprite);
 SGD_SHARED(OverlayRenderer);
-SGD_SHARED(Overlay);
 SGD_SHARED(RenderEffect);
 SGD_SHARED(RenderEffectStack);
 
@@ -42,6 +39,10 @@ struct SceneRenderer : Shared {
 
 	SkyboxRenderer* skyboxRenderer() const {
 		return m_skyboxRenderer;
+	}
+
+	TerrainRenderer* terrainRenderer() const {
+		return m_terrainRenderer;
 	}
 
 	ModelRenderer* modelRenderer() const {
@@ -94,6 +95,7 @@ private:
 	RenderQueuePtr m_overlayQueue;
 
 	SkyboxRendererPtr m_skyboxRenderer;
+	TerrainRendererPtr m_terrainRenderer;
 	ModelRendererPtr m_modelRenderer;
 	SkinnedModelRendererPtr m_skinnedModelRenderer;
 	SpriteRendererPtr m_spriteRenderer;

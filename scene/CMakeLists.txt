@@ -90,6 +90,11 @@ add_library(scene
 	sprite/spriterenderer.cpp
 	sprite/spriterenderer.h
 
+	terrain/terrain.cpp
+	terrain/terrain.h
+	terrain/terrainrenderer.cpp
+	terrain/terrainrenderer.h
+
 	exports.h
 )
 
