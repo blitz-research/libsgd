@@ -7,15 +7,23 @@ namespace sgd {
 //! TextureFormat enum
 enum struct TextureFormat {
 	any,
-	// 8 bit unsigned formats
+	// 8 bit unsigned normalized formats
 	r8,
 	rg8,
 	rgba8,
 	srgba8,
-	// 8 bit signed formats (note: no srgba8s in dawn)
+	// 8 bit signed normalized formats (note: no srgba8s in dawn)
 	r8s,
 	rg8s,
 	rgba8s,
+	// 16 bit unsigned normalized formats
+	r16,
+	rg16,
+	rgba16,
+	// 16 bit signed normalized formats
+	r16s,
+	rg16s,
+	rgba16s,
 	// 16 bit float formats
 	r16f,
 	rg16f,
@@ -27,12 +35,14 @@ enum struct TextureFormat {
 	// depth formats
 	depth32f,
 };
-static constexpr int numTextureFormats = 15;
+static constexpr int numTextureFormats = 21;
 
 inline size_t bytesPerTexel(TextureFormat format) {
 	uint32_t bpp[]{0,			 // undefined
-				   1, 2, 4,	 4,	 // unsigned
-				   1, 2, 4,		 // signed
+				   1, 2, 4,	 4,	 // 8 bit unsigned
+				   1, 2, 4,		 // 8 bit signed
+				   2, 4, 8,		 // 16 bit unsigned
+				   2, 4, 8,		 // 16 bit signed
 				   2, 4, 8,		 // 16f
 				   4, 8, 16,	 // 32f
 				   4};			 // depth32f

@@ -10,22 +10,17 @@ template <class T, class S> T convert(S comp) {
 	return comp;
 }
 
-// To: int8_t
-template <> int8_t convert<int8_t>(uint8_t comp) { // NOTE: Returns positive numbers only.
-	return (int8_t)std::min((uint32_t)comp, 127u);
+// ***** To: uint8_t *****
+template <> uint8_t convert<uint8_t>(int8_t comp) {
+	return comp > 0 ? comp * 255 / 127 : 0;
 }
 
-template <> int8_t convert<int8_t>(float16 comp) {
-	return (int8_t)std::round(std::clamp(float16ToFloat(comp), -1.0f, 1.0f) * 127.0f);
+template <> uint8_t convert<uint8_t>(uint16_t comp) {
+	return comp * 255 / 65535;
 }
 
-template <> int8_t convert<int8_t>(float comp) {
-	return (int8_t)std::round(std::clamp(comp, -1.0f, 1.0f) * 127.0f);
-}
-
-// To: uint8_t
-template <> uint8_t convert<uint8_t>(int8_t comp) { // NOTE: Return positive numbers only.
-	return (uint8_t)std::max((int32_t)comp, 0);
+template <> uint8_t convert<uint8_t>(int16_t comp) {
+	return comp > 0 ? comp * 255 / 32767 : 0;
 }
 
 template <> uint8_t convert<uint8_t>(float16 comp) {
@@ -36,31 +31,112 @@ template <> uint8_t convert<uint8_t>(float comp) {
 	return (uint8_t)std::round(std::clamp(comp, 0.0f, 1.0f) * 255.0f);
 }
 
-// To: float16
-template <> float16 convert<float16>(int8_t comp) {
-	return floatToFloat16((float)(comp) / 127.0f);
+// ***** To: int8_t *****
+template <> int8_t convert<int8_t>(uint8_t comp) {
+	return (int8_t)(comp * 127 / 255);
 }
 
+template <> int8_t convert<int8_t>(uint16_t comp) {
+	return (int8_t)(comp * 127 / 65535);
+}
+
+template <> int8_t convert<int8_t>(int16_t comp) {
+	return (int8_t)(comp > 0 ? comp * 127 / 32767 : comp * -128 / -32768);
+}
+
+template <> int8_t convert<int8_t>(float16 comp) {
+	return (int8_t)(std::round(std::clamp(float16ToFloat(comp), -1.0f, 1.0f) * 127.5f) - 0.5f);
+}
+
+template <> int8_t convert<int8_t>(float comp) {
+	return (int8_t)(std::round(std::clamp(comp, -1.0f, 1.0f) * 127.5f) - 0.5f);
+}
+
+// ***** To: uint16_t *****
+template <> uint16_t convert<uint16_t>(uint8_t comp) {
+	return comp * 65535 / 255;
+}
+
+template <> uint16_t convert<uint16_t>(int8_t comp) {
+	return comp > 0 ? comp * 65535 / 127 : 0;
+}
+
+template <> uint16_t convert<uint16_t>(int16_t comp) {
+	return comp > 0 ? comp * 65535 / 32767 : 0;
+}
+
+template <> uint16_t convert<uint16_t>(float16 comp) {
+	return (uint16_t)std::round(std::clamp(float16ToFloat(comp), 0.0f, 1.0f) * 65535.0f);
+}
+
+template <> uint16_t convert<uint16_t>(float comp) {
+	return (uint16_t)std::round(std::clamp(comp, 0.0f, 1.0f) * 65535.0f);
+}
+
+// ***** To: int16_t *****
+template <> int16_t convert<int16_t>(uint8_t comp) {
+	return (int16_t)(comp > 0 ? comp * 32767 / 255 : 0);
+}
+
+template <> int16_t convert<int16_t>(int8_t comp) {
+	return (int16_t)(comp > 0 ? comp * 32767 / 127 : comp * -32768 / -128);
+}
+
+template <> int16_t convert<int16_t>(uint16_t comp) {
+	return (int16_t)(comp * 32767 / 65535);
+}
+
+template <> int16_t convert<int16_t>(float16 comp) {
+	return (int16_t)(std::round(std::clamp(float16ToFloat(comp), -1.0f, 1.0f) * 32767.5f) - .5f);
+}
+
+template <> int16_t convert<int16_t>(float comp) {
+	return (int16_t)(std::round(std::clamp(comp, -1.0f, 1.0f) * 32767.5f) - .5f);
+}
+
+// ***** To: float16 *****
 template <> float16 convert<float16>(uint8_t comp) {
 	return floatToFloat16(float(comp) / 255.0f);
+}
+
+template <> float16 convert<float16>(int8_t comp) {
+	return floatToFloat16(((float)comp + 0.5f) / 127.5f);
+}
+
+template <> float16 convert<float16>(uint16_t comp) {
+	return floatToFloat16(float(comp) / 65535.0f);
+}
+
+template <> float16 convert<float16>(int16_t comp) {
+	return floatToFloat16(((float)comp + 0.5f) / 32767.5f);
 }
 
 template <> float16 convert<float16>(float comp) {
 	return floatToFloat16(comp);
 }
 
-// To: float
-template <> float convert<float>(int8_t comp) {
-	return (float)comp / 127.0f;
-}
-
+// ***** To: float *****
 template <> float convert<float>(uint8_t comp) {
 	return (float)comp / 255.0f;
+}
+
+template <> float convert<float>(int8_t comp) {
+	return ((float)comp + 0.5f) / 127.5f;
+}
+
+template <> float convert<float>(uint16_t comp) {
+	return float(comp) / 65535.0f;
+}
+
+template <> float convert<float>(int16_t comp) {
+	return ((float)comp + 0.5f) / 32767.5f;
 }
 
 template <> float convert<float>(float16 comp) {
 	return float16ToFloat(comp);
 }
+
+// ***** END conversions *****
 
 template <TextureFormat> constexpr bool is_srgba8() {
 	return false;
@@ -89,6 +165,12 @@ TEXEL_TRAITS(srgba8, uint8_t, 4);
 TEXEL_TRAITS(r8s, int8_t, 1);
 TEXEL_TRAITS(rg8s, int8_t, 2);
 TEXEL_TRAITS(rgba8s, int8_t, 4);
+TEXEL_TRAITS(r16, uint16_t, 1);
+TEXEL_TRAITS(rg16, uint16_t, 2);
+TEXEL_TRAITS(rgba16, uint16_t, 4);
+TEXEL_TRAITS(r16s, int16_t, 1);
+TEXEL_TRAITS(rg16s, int16_t, 2);
+TEXEL_TRAITS(rgba16s, int16_t, 4);
 TEXEL_TRAITS(r16f, float16, 1);
 TEXEL_TRAITS(rg16f, float16, 2);
 TEXEL_TRAITS(rgba16f, float16, 4);
@@ -112,7 +194,7 @@ void convert(const void* srcTexels, void* dstTexels, uint32_t count) {
 		static Vector<float> tmp;
 		if (count * srcCount > tmp.size()) tmp.resize(count * srcCount + 1023 & ~1023);
 
-		constexpr float e = is_srgba8<DstFormat>() ? 2.2f : 1.0f / 2.2f;
+		constexpr float e = is_srgba8<DstFormat>() ? 1.0 / 2.2f : 2.2f;
 
 		auto src = (SrcType*)srcTexels;
 		auto dst = tmp.data();
@@ -142,19 +224,19 @@ void convert(const void* srcTexels, void* dstTexels, uint32_t count) {
 	for (auto i = 0u; i < count; ++i) {
 		dst[0] = convert<DstType>(src[0]);
 		if constexpr (srcCount > 1) {
-			dst[1] = convert<DstType>(src[1]);
+			if constexpr (dstCount > 1) dst[1] = convert<DstType>(src[1]);
 		} else if constexpr (dstCount > 1) {
 			dst[1] = zero;
 		}
 		if constexpr (srcCount > 2) {
-			dst[2] = convert<DstType>(src[2]);
+			if constexpr (dstCount > 2) dst[2] = convert<DstType>(src[2]);
 		} else if constexpr (dstCount > 2) {
 			dst[2] = zero;
 		}
 		if constexpr (srcCount > 3) {
-			dst[3] = convert<DstType>(src[3]);
+			if constexpr (dstCount > 3) dst[3] = convert<DstType>(src[3]);
 		} else if constexpr (dstCount > 3) {
-			dst[3] = zero;
+			dst[3] = one;
 		}
 		src += srcCount;
 		dst += dstCount;
@@ -177,6 +259,18 @@ template <TextureFormat SrcFormat> void convert(const void* src, void* dst, Text
 		return convert<SrcFormat, TextureFormat::rg8s>(src, dst, count);
 	case TextureFormat::rgba8s:
 		return convert<SrcFormat, TextureFormat::rgba8s>(src, dst, count);
+	case TextureFormat::r16:
+		return convert<SrcFormat, TextureFormat::r16>(src, dst, count);
+	case TextureFormat::rg16:
+		return convert<SrcFormat, TextureFormat::rg16>(src, dst, count);
+	case TextureFormat::rgba16:
+		return convert<SrcFormat, TextureFormat::rgba16>(src, dst, count);
+	case TextureFormat::r16s:
+		return convert<SrcFormat, TextureFormat::r16s>(src, dst, count);
+	case TextureFormat::rg16s:
+		return convert<SrcFormat, TextureFormat::rg16s>(src, dst, count);
+	case TextureFormat::rgba16s:
+		return convert<SrcFormat, TextureFormat::rgba16s>(src, dst, count);
 	case TextureFormat::r16f:
 		return convert<SrcFormat, TextureFormat::r16f>(src, dst, count);
 	case TextureFormat::rg16f:
@@ -219,6 +313,18 @@ void convertTexels(const void* src, TextureFormat srcFormat, void* dst, TextureF
 		return convert<TextureFormat::rg8s>(src, dst, dstFormat, count);
 	case TextureFormat::rgba8s:
 		return convert<TextureFormat::rgba8s>(src, dst, dstFormat, count);
+	case TextureFormat::r16:
+		return convert<TextureFormat::r16>(src, dst, dstFormat, count);
+	case TextureFormat::rg16:
+		return convert<TextureFormat::rg16>(src, dst, dstFormat, count);
+	case TextureFormat::rgba16:
+		return convert<TextureFormat::rgba16>(src, dst, dstFormat, count);
+	case TextureFormat::r16s:
+		return convert<TextureFormat::r16s>(src, dst, dstFormat, count);
+	case TextureFormat::rg16s:
+		return convert<TextureFormat::rg16s>(src, dst, dstFormat, count);
+	case TextureFormat::rgba16s:
+		return convert<TextureFormat::rgba16s>(src, dst, dstFormat, count);
 	case TextureFormat::r16f:
 		return convert<TextureFormat::r16f>(src, dst, dstFormat, count);
 	case TextureFormat::rg16f:
@@ -325,6 +431,10 @@ void premultiplyAlpha(TextureData* data) {
 		return premultiplyAlphaSRGBA<uint8_t>(data);
 	case TextureFormat::rgba8s:
 		return premultiplyAlpha<int8_t>(data);
+	case TextureFormat::rgba16:
+		return premultiplyAlpha<uint16_t>(data);
+	case TextureFormat::rgba16s:
+		return premultiplyAlpha<int16_t>(data);
 	case TextureFormat::rgba16f:
 		return premultiplyAlpha<float16>(data);
 	case TextureFormat::rgba32f:

@@ -30,6 +30,7 @@ Expected<TextureData*, FileioEx> loadTextureData(CData fileData, TextureFormat f
 		if (LoadEXRFromMemory(&img, &size.x, &size.y, fileData.data(), fileData.size(), &err)) {
 			return SGD_FILEIOEX(String("Failed to decode image file data: ") + (err ? err : "unknown error"));
 		}
+		//
 		if (format == TextureFormat::any) format = TextureFormat::rgba16f;
 		//
 		dataPtr = new TextureData(size, TextureFormat::rgba32f, img);
@@ -66,6 +67,7 @@ Expected<TextureData*, FileioEx> loadTextureData(CData fileData, TextureFormat f
 		//
 	}
 	if (format != dataPtr->format()) {
+		SGD_LOG << "### Converting from:"<<(int)dataPtr->format() << "to:"<<(int)format;
 		dataPtr = convert(dataPtr, format);
 	}
 	if (format == TextureFormat::srgba8) {

@@ -17,6 +17,14 @@ wgpu::TextureFormat getFormat(TextureFormat format) {
 				{TextureFormat::rg8s, wgpu::TextureFormat::RG8Snorm},
 				{TextureFormat::rgba8s, wgpu::TextureFormat::RGBA8Snorm},
 				//
+				{TextureFormat::r16, wgpu::TextureFormat::R16Unorm},
+				{TextureFormat::rg16, wgpu::TextureFormat::RG16Unorm},
+				{TextureFormat::rgba16, wgpu::TextureFormat::RGBA16Unorm},
+				//
+				{TextureFormat::r16s, wgpu::TextureFormat::R16Snorm},
+				{TextureFormat::rg16s, wgpu::TextureFormat::RG16Snorm},
+				{TextureFormat::rgba16s, wgpu::TextureFormat::RGBA16Snorm},
+				//
 				{TextureFormat::r16f, wgpu::TextureFormat::R16Float},
 				{TextureFormat::rg16f, wgpu::TextureFormat::RG16Float},
 				{TextureFormat::rgba16f, wgpu::TextureFormat::RGBA16Float},
@@ -42,6 +50,14 @@ TextureFormat getFormat(wgpu::TextureFormat format) {
 				{wgpu::TextureFormat::R8Snorm, TextureFormat::rg8s},
 				{wgpu::TextureFormat::RG8Snorm, TextureFormat::rgba8s},
 				{wgpu::TextureFormat::RGBA8Snorm, TextureFormat::rgba8s},
+				//
+				{wgpu::TextureFormat::R16Unorm,TextureFormat::r16},
+				{wgpu::TextureFormat::RG16Unorm, TextureFormat::rg16},
+				{wgpu::TextureFormat::RGBA16Unorm, TextureFormat::rgba16},
+				//
+				{wgpu::TextureFormat::R16Snorm,TextureFormat::r16s},
+				{wgpu::TextureFormat::RG16Snorm, TextureFormat::rg16s},
+				{wgpu::TextureFormat::RGBA16Snorm, TextureFormat::rgba16s},
 				//
 				{wgpu::TextureFormat::R16Float, TextureFormat::r16f},
 				{wgpu::TextureFormat::RG16Float, TextureFormat::rg16f},

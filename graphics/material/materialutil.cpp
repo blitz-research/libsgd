@@ -18,10 +18,11 @@ Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
 
 	auto texFlags = TextureFlags::mipmap | TextureFlags::filter;
 
-	Set<String> exts{".png",".jpg",".jpeg",".bmp",".tga",".gif"};
-	if(exts.find(path.ext())!=exts.end()) {
-		auto texture = load2DTexture(path, TextureFormat::srgba8, texFlags);
-		if(!texture) return texture.error();
+	Set<String> exts{".png", ".jpg", ".jpeg", ".bmp", ".tga", ".gif", ".exr"};
+	if (exts.find(path.ext()) != exts.end()) {
+		auto texture = load2DTexture(path, TextureFormat::any, texFlags);
+		if (!texture) return texture.error();
+		SGD_LOG << "Texture"<<path.str()<<"loaded, format:"<<(int)texture.result()->format();
 		auto material = new Material(&pbrMaterialDescriptor);
 		material->setTexture("albedo", texture.result());
 		return material;
@@ -34,7 +35,7 @@ Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
 
 	auto material = new Material(&pbrMaterialDescriptor);
 
-	if (auto texture = tryLoad("_Color.jpg", TextureFormat::srgba8)) {
+	if (auto texture = tryLoad("_Color.jpg", TextureFormat::any)) {
 		material->setTexture("albedo", texture);
 	}
 

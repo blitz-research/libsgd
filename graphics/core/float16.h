@@ -14,7 +14,14 @@ namespace sgd {
 
 // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0,
 // +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
-using float16 = uint16_t;
+struct float16 {
+	uint16_t data;
+	float16(uint16_t data):data(data){	// NOLINT (explicit)
+	}
+	operator uint16_t(){	// NOLINT (explicit)
+		return data;
+	}
+};
 
 inline uint32_t bitsAsUint(const float x) {
 	return *(uint32_t*)&x;
