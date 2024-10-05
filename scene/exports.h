@@ -40,3 +40,6 @@
     
 #include "sprite/sprite.h"
 #include "sprite/spriterenderer.h"
+
+#include "terrain/terrain.h"
+#include "terrain/terrainrenderer.h"

@@ -24,8 +24,9 @@ private:
 
 	Terrain* onCopy() const override;
 
-	void onHide() override;
 	void onShow() override;
+	void onHide() override;
+
 	void init();
 };
 

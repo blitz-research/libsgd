@@ -6,15 +6,16 @@ namespace sgd {
 
 struct TerrainVertex {
 	Vec3f position;
-	Vec3f color{};	// TODO: uint32_t-ize
+	uint32_t color{};
 
 	TerrainVertex() = default;
-	TerrainVertex(CVec3f position, CVec3f color) : position(position), color(color) {
+	TerrainVertex(CVec3f position, uint32_t color) : position(position), color(color) {
 	}
 };
 using CTerrainVertex = const TerrainVertex;
 
 struct alignas(16) TerrainUniforms {
+	Mat4f worldMatrix;
 	uint32_t lodLevels;
 	uint32_t quadsPerTile;
 //	float meshScale;

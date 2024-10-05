@@ -1,6 +1,7 @@
 R"(
 
 struct TerrainUniforms {
+    worldMatrix: mat4x4f,
     lodLevels: u32,
     quadsPerTile: u32,
 //    meshScale: f32,
@@ -21,13 +22,14 @@ struct Vertex {
 struct Varying {
     @builtin(position) clipPosition: vec4f,
     @location(0) position: vec3f,
-    @location(1) normal: vec3f,
-    @location(2) texCoords: vec2f,
-    @location(3) color: vec4f
+	@location(1) tanMatrix0: vec3f,
+	@location(2) tanMatrix1: vec3f,
+	@location(3) tanMatrix2: vec3f,
+    @location(4) texCoords: vec2f,
+    @location(5) color: vec4f
 }
 
-/*
-const lods = array<vec2f>(
+const lods = array<vec2f, 65>(
 	vec2f(0.0, 0.0), vec2f(0.0, 1.0),
 
 	vec2f(1.0, 0.0), vec2f(1.0, 1.0),
@@ -47,27 +49,70 @@ const lods = array<vec2f>(
 	vec2f(6.0, 0.0)
 );
 
-const offs = array<vec4f>(
-	vec4f(0.0), vec4f(-1.0,0.0, 1.0,0.0), vec4f(0.0),
+const offs = array<vec4f, 13>(
+	vec4f(0.0),  vec4f(-1.0,0.0, 1.0,0.0), vec4f(0.0),
 	vec4f(0.0,-1.0, 0.0,1.0), vec4f(0.0), vec4f(0.0,-1.0, 0.0,1.0),
 	vec4f(0.0), vec4f(-1.0,0.0, 1.0,0.0), vec4f(0.0),
 	vec4f(-.5,.5f, .5,-.5), vec4f(-.5,-.5, .5,.5),
 	vec4f(-.5,-.5, .5,.5), vec4f(-.5,.5, .5,-.5)
 );
-*/
 
 @vertex fn vertexMain(vertex: Vertex, @builtin(vertex_index) vertexId: u32) -> Varying {
 
-    let position = vertex.position;
-    let texCoords = position.xz;
+    let mvpMatrix = scene_camera.viewProjectionMatrix * terrainUniforms.worldMatrix;
 
+    let tileSize = f32(terrainUniforms.quadsPerTile);
+
+    var color = vertex.color;
+
+    // ***** Compute position *****
+
+    let eye = -terrainUniforms.worldMatrix[3].xyz;
+
+    var pos = round(eye / tileSize) * tileSize + vertex.position;
+    pos.y = 0.0;
+
+    // ***** Compute LODs *****
+
+    let v = pos - eye;
+    let d = max(abs(v.x), abs(v.z)) / tileSize - 0.5;
+
+    let i = min(i32(floor(d)) + 1, 64);
+
+    var lodNear = lods[i].x;
+    var tween = lods[i].y * fract(d);
+
+	if(lodNear == vertex.position.y + 1 && tween == 0) {
+		lodNear = vertex.position.y;
+		tween = 1;
+	}else if(lodNear != vertex.position.y) {
+	    color = vec3f(1,0,1);
+	}
+	let lodFar = lodNear + 1;
+
+    // ***** Compute height *****
+
+    let off = offs[vertexId % 13] * exp2(lodNear);
+
+    let texCoords = pos.xz;
+
+    let heightNear = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, texCoords / 2048.0 + 0.5, lodNear).r;
+    let height0 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.xy) / 2048.0 + 0.5, lodFar).r;
+    let height1 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.zw) / 2048.0 + 0.5, lodFar).r;
+    let heightFar = mix(height0, height1, .5);
+
+    pos.y = mix(heightNear, heightFar, tween) * 1000.0f;
+    //pos.y = 0.0;
+
+	// Output fragment
+    //
     var out: Varying;
-    out.clipPosition = scene_camera.viewProjectionMatrix * vec4f(position, 1);
-    out.position = position;
-    out.normal = vec3f(0, 1, 0);
-    out.texCoords = texCoords;
-    out.color = vec4f(vertex.color, 1);
-
+    out.clipPosition = mvpMatrix * vec4f(pos, 1.0);
+    out.position = pos;
+    out.tanMatrix2 = vec3f(0.0, 1.0, 0.0);
+    out.texCoords = texCoords / 2048.0 + 0.5;
+    out.color = vec4f(color, 1.0);
+    //
     return out;
 /*
 
@@ -110,24 +155,22 @@ const offs = array<vec4f>(
     let heightFar = mix(height0, height1, .5);
 
     pos.y = mix(heightNear, heightFar, tween);
-
-    // ***** Done! *****
-    //
-    var out: VertexOut;
-    out.clipPosition = camera.viewProjectionMatrix * pos;
-    out.positon = pos;
-    out.normal = vec3f(0, 1, 0);
-    out.tCoords = texCoords;
-    out.color = vec4f(vertex.color, 1);
 */
 }
 
 @fragment fn fragmentMain(in: Varying) -> @location(0) vec4f {
 
+    var tanMatrix: mat3x3f;
+    tanMatrix[2] = in.tanMatrix2;
+
+    let color = evaluateMaterial(in.position, tanMatrix, vec3f(in.texCoords, 0.0), vec4f(1));//in.color);
+
+    return color;
+
 //    let fragColor = evaluateFragment(in.wPosition, normalize(in.wNormal), in.tCoords, in.color);
 
 //    return fragColor;
-    return in.color;
+//    return in.color;
 //    return vec4(1,1,0,1);
 }
 

@@ -13,12 +13,17 @@ void TerrainRenderer::remove(CTerrain* terrain) {
 }
 
 void TerrainRenderer::update(CVec3r eye) {
+	for (CTerrain* tp : m_terrains) {
+		auto matrix = tp->worldMatrix();
+		matrix.t -= eye;
+		tp->bindings()->worldMatrix = matrix;
+	}
 }
 
 void TerrainRenderer::render(RenderQueue* rq) const {
-	for(CTerrain* tp : m_terrains) {
+	for (CTerrain* tp : m_terrains) {
 		tp->bindings()->render(rq);
 	}
 }
 
-}
+} // namespace sgd

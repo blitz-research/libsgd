@@ -14,9 +14,10 @@ struct TerrainBindings : GraphicsResource {
 
 	TerrainBindings();
 
+	Property<AffineMat4f> worldMatrix;
+
 	Property<uint32_t> lodLevels;
 
-	// There are 4X4 tiles per lod, so quadsPerLod = quadsPerTile *4
 	Property<uint32_t> quadsPerTile;
 
 	Property<CTexturePtr> heightTexture;
