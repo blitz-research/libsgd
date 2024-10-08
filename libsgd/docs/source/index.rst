@@ -17,6 +17,7 @@ documentation for details.
    types
    system
    window
+   input
    scene
    entity
    camera
@@ -24,7 +25,12 @@ documentation for details.
    model
    sprite
    skybox
+   terrain
+   overlay
    mesh
    image
    material
    texture
+   collision
+   picking
+   audio

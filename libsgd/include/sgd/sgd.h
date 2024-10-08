@@ -189,13 +189,13 @@ typedef enum SGD_WindowState {
 
 //! Window flags.
 typedef enum SGD_WindowFlags {
-	SGD_WINDOW_FLAGS_NONE = 0,		 //!< No special flags.
-	SGD_WINDOW_FLAGS_FULLSCREEN = 1, //!< Create fullscreen window.
-	SGD_WINDOW_FLAGS_RESIZABLE = 2,	 //!< Create resizable window.
-	SGD_WINDOW_FLAGS_CENTERED = 4	 //!< Create window centered on desktop.
+	SGD_WINDOW_FLAGS_NONE = 0x00,		 //!< No special flags.
+	SGD_WINDOW_FLAGS_FULLSCREEN = 0x01, //!< Create fullscreen window.
+	SGD_WINDOW_FLAGS_RESIZABLE = 0x02,	 //!< Create resizable window.
+	SGD_WINDOW_FLAGS_CENTERED = 0x04	 //!< Create window centered on desktop.
 } SGD_WindowFlags;
 
-//! Create a new window. See also @ref SGD_WindowFlags.
+//! Create a new window. See @ref SGD_WindowFlags for possible values for `flags`.
 SGD_API void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, SGD_Flags flags);
 
 //! Destroy window.
@@ -236,7 +236,7 @@ SGD_API SGD_WindowState SGD_DECL sgd_GetWindowState();
 
 //! @}
 
-//! @defgroup UserInput User Input
+//! @defgroup Input Input
 //! @{
 
 //! True if key is currently held down.
@@ -710,7 +710,7 @@ SGD_API SGD_Texture SGD_DECL sgd_GetImageTexture(SGD_Image image);
 
 //! @}
 
-//! @defgroup 2DOverlay 2D Overlay
+//! @defgroup Overlay Overlay
 //! @{
 
 //! Set current fill color for drawing shapes.
@@ -1251,13 +1251,23 @@ SGD_API SGD_Real SGD_DECL sgd_GetCollisionNZ(SGD_Collider collider, int index);
 
 //! @}
 
-//! @defgroup ColliderPicking Collider Picking
+//! @defgroup Picking Picking
 //! @{
 
 //! Pick first collider along ray passing from camera eye through window coordinates.
+//!
+//! Note that the colliderMask parameter is a 'bitmask' value, where each '1' bit in the value's binary representation
+//! repesents a collider type you want to be included in the pick, allowing you to pick more than 1 collider type in a single pick.
+//!
+//! For example, if you want the pick to include collider types 0 and 3, you would set bits 0 and 3 in the colliderMask,
+//! resuling in a value of 2^0 | 2^3 == 9.
+//!
+//! If you want the pick to include *all* collider types, use a colliderMask of -1, a bitmask value with all bits set.
 SGD_API SGD_Collider SGD_DECL sgd_CameraPick(SGD_Camera camera, float windowX, float windowY, int colliderMask);
 
 //! Pick first collider along line.
+//!
+//! Please see @ref sgd_CameraPick for more information about the colliderMask parameter.
 SGD_API SGD_Collider SGD_DECL sgd_LinePick(SGD_Real x0, SGD_Real y0, SGD_Real z0, SGD_Real x1, SGD_Real y1, SGD_Real z1,
 										   SGD_Real radius, int colliderMask);
 

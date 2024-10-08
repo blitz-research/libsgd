@@ -1,0 +1,4 @@
+Collider Picking
+================
+
+.. doxygengroup:: Picking

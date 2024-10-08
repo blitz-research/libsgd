@@ -1,0 +1,4 @@
+User Input
+==========
+
+.. doxygengroup:: Input
