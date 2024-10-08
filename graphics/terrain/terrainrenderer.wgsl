@@ -7,6 +7,7 @@ struct TerrainUniforms {
     quadsPerTile: u32,
     debugMode: u32,
     materialTexelSize: f32,
+    heightTexelSize: f32,
 };
 
 @group(2) @binding(0) var<uniform> terrainUniforms: TerrainUniforms;
@@ -100,6 +101,7 @@ const offs = array<vec4f, 13>(
     let height0 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.xy) * texelSize + 0.5, lodFar).r;
     let height1 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.zw) * texelSize + 0.5, lodFar).r;
     let heightFar = mix(height0, height1, .5);
+
     pos.y = mix(heightNear, heightFar, tween);
 
 	// Output fragment

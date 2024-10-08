@@ -793,6 +793,8 @@ Expected<Model*, FileioEx> GLTFLoader::loadSkinnedModel() {
 	return model;
 }
 
+#include <json11.hpp>
+
 Expected<Mesh*, FileioEx> loadStaticMesh(CPath path) {
 	GLTFLoader loader;
 
@@ -801,7 +803,10 @@ Expected<Mesh*, FileioEx> loadStaticMesh(CPath path) {
 
 	if (g_loggingEnabled) SGD_LOG << "Loading static mesh" << path.str();
 
-	return loader.loadStaticMesh();
+	auto mesh= loader.loadStaticMesh();
+	if(mesh) mesh.result()->path = path;
+
+	return mesh;
 }
 
 Expected<Model*, FileioEx> loadBonedModel(CPath path) {

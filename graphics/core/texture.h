@@ -18,6 +18,8 @@ enum struct TextureFlags {
 	filter = 0x08,
 	mipmap = 0x10,
 	default_ = mipmap | filter,
+	image = default_ | clamp,
+	allMask = 0x1f,
 	//
 	// TODO: Move to texture type enum.
 	//
@@ -37,6 +39,8 @@ struct Texture : GraphicsResource {
 	Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags, TextureData* data);
 	Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags);
 	Texture(Texture* texture, uint32_t layer);
+
+	Property<Path> path;
 
 	CVec2u size() const {
 		return m_size;

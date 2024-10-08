@@ -46,6 +46,10 @@ template <class T> struct Property : public Object {
 		return m_value;
 	}
 
+	void update() {
+		changed.emit(m_value);
+	}
+
 	friend std::ostream& operator<<(std::ostream& str, const Property& property) {
 		return str << property.m_value;
 	}

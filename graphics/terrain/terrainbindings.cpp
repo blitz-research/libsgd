@@ -49,14 +49,14 @@ TerrainBindings::TerrainBindings()
 		lockUniforms().worldMatrix = m;
 		unlockUniforms();
 	});
-	worldMatrix.changed.emit(worldMatrix());
+	worldMatrix.update();
 
-	size.changed.connect(nullptr, [=](uint32_t n) {
+	size.changed.connect(nullptr, [=](uint32_t n){
 		lockUniforms().size = n;
 		unlockUniforms();
 		invalidate();
 	});
-	size.changed.emit(size());
+	size.update();
 
 	lods.changed.connect(nullptr, [=](uint32_t n) {
 		if (n < 1 || n > 6) SGD_ERROR("Terrain LODs must be in the range 1..6 inclusive");
@@ -64,14 +64,14 @@ TerrainBindings::TerrainBindings()
 		unlockUniforms();
 		invalidate();
 	});
-	lods.changed.emit(lods());
+	lods.update();
 
 	materialSize.changed.connect(nullptr, [=](uint32_t n) {
 		lockUniforms().materialTexelSize = 1.0f / (float)n;
 		unlockUniforms();
 		invalidate();
 	});
-	materialSize.changed.emit(materialSize());
+	materialSize.update();
 
 	debugMode.changed.connect(nullptr, [=](int mode) {
 		lockUniforms().debugMode = mode;
@@ -79,10 +79,18 @@ TerrainBindings::TerrainBindings()
 	});
 	debugMode.changed.emit(debugMode());
 
-	heightTexture.changed.connect(nullptr, [=](CTexture* ttexture) { m_bindGroup->setTexture(1, ttexture); });
+	heightTexture.changed.connect(nullptr, [=](CTexture* ttexture) { //
+//		auto size = ttexture->size().x;
+		//if(size!=ttexture->size().y) SGD_ERROR("Terrain height texture must be square");
+//		if(size & (size - 1)) SGD_ERROR("Terrain height texture size must be a power of 2");
+//		if(size<512) SGD_ERROR("Terrain height texture size must be at least 512");
+		m_bindGroup->setTexture(1, ttexture);
+	});
 	heightTexture = blackTexture(TextureFlags::none);
 
-	normalTexture.changed.connect(nullptr, [=](CTexture* ttexture) { m_bindGroup->setTexture(3, ttexture); });
+	normalTexture.changed.connect(nullptr, [=](CTexture* ttexture) { //
+		m_bindGroup->setTexture(3, ttexture);
+	});
 	normalTexture = flatTexture(TextureFlags::none);
 
 	material = new Material(&prelitMaterialDescriptor);

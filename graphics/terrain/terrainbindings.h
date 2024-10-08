@@ -16,7 +16,7 @@ struct TerrainBindings : GraphicsResource {
 
 	Property<AffineMat4f> worldMatrix;
 
-	Property<uint32_t> size{4};
+	Property<uint32_t> size{1024};
 	Property<uint32_t> lods{4};
 	Property<uint32_t> materialSize{1024};
 	Property<int> debugMode{0};

@@ -21,6 +21,7 @@ struct alignas(16) TerrainUniforms {
 	uint32_t quadsPerTile{16};
 	uint32_t debugMode{0};
 	float materialTexelSize{1.0 / 1024.0f};
+	float heightTexelSize{1.0 / 1024.0};
 };
 using CTerrainUniforms = const TerrainUniforms;
 

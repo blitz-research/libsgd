@@ -24,6 +24,8 @@ struct Mesh : GraphicsResource {
 
 	Property<bool> shadowsEnabled;
 
+	Property<Path> path;
+
 	MeshFlags flags() const {
 		return m_flags;
 	}

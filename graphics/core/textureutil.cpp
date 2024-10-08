@@ -309,7 +309,10 @@ Expected<Texture*, FileioEx> load2DTexture(CPath path, TextureFormat format, Tex
 	if (!texData) return texData.error();
 
 	TextureDataPtr data = texData.result();
-	return new Texture({data->size().x, data->size().y}, 1, data->format(), flags, data);
+
+	auto texture = new Texture({data->size().x, data->size().y}, 1, data->format(), flags, data);
+	texture->path=path;
+	return texture;
 }
 
 Expected<Texture*, FileioEx> loadCubeTexture(CPath path, TextureFormat format, TextureFlags flags) {
@@ -321,7 +324,10 @@ Expected<Texture*, FileioEx> loadCubeTexture(CPath path, TextureFormat format, T
 		data = extractCubemap(data);
 		if (!data) return SGD_PATHEX("Invalid cubemap texture layout", path);
 	}
-	return new Texture({data->size().x, data->size().y / 6}, 6, data->format(), flags | TextureFlags::cube, data);
+
+	auto texture = new Texture({data->size().x, data->size().y / 6}, 6, data->format(), flags | TextureFlags::cube, data);
+	texture->path=path;
+	return texture;
 }
 
 Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, TextureFlags flags) {
@@ -331,7 +337,9 @@ Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, 
 	TextureDataPtr data = texData.result();
 	uint32_t depth = 1;
 
-	return new Texture({data->size().x, data->size().y / depth}, depth, data->format(), flags | TextureFlags::array, data);
+	auto texture = new Texture({data->size().x, data->size().y / depth}, depth, data->format(), flags | TextureFlags::array, data);
+	texture->path = path;
+	return texture;
 }
 
 Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, TextureFlags flags, uint32_t frameCount,
@@ -360,6 +368,8 @@ Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, 
 	}
 
 	auto texture = new Texture(frameSize, frameCount, srcData->format(), flags);
+
+	texture->path=path;
 
 	auto dstData = texture->lock();
 

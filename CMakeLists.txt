@@ -213,6 +213,7 @@ add_subdirectory(window)    # app
 add_subdirectory(audio)     # app [soloud]
 add_subdirectory(graphics)	# window dawn [stb]
 add_subdirectory(scene)		# graphics audio [tinlygltf]
+add_subdirectory(serialize) # scene
 add_subdirectory(libsgd)    # scene
 
 add_subdirectory(skirmish)	# libsgd
