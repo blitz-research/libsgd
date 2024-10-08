@@ -25,6 +25,10 @@ struct Scene : Shared {
 
 	void render();
 
+	CVector<EntityPtr> rootEntities() const {
+		return m_entities;
+	}
+
 	SceneRenderer* sceneRenderer() const {
 		return m_sceneRenderer;
 	}

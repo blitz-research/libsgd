@@ -25,11 +25,11 @@ const BindGroupDescriptor terrainBindGroupDescriptor( //
 	"terrainGeometry",								  //
 	BindGroupType::geometry,						  //
 	{
-		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform),
+		bufferBindGroupLayoutEntry(0, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform),
 		textureBindGroupLayoutEntry(1, wgpu::ShaderStage::Vertex, wgpu::TextureViewDimension::e2D),
 		samplerBindGroupLayoutEntry(2, wgpu::ShaderStage::Vertex),
-		textureBindGroupLayoutEntry(3, wgpu::ShaderStage::Vertex, wgpu::TextureViewDimension::e2D),
-		samplerBindGroupLayoutEntry(4, wgpu::ShaderStage::Vertex),
+		textureBindGroupLayoutEntry(3, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment, wgpu::TextureViewDimension::e2D),
+		samplerBindGroupLayoutEntry(4, wgpu::ShaderStage::Vertex | wgpu::ShaderStage::Fragment),
 	},
 	shaderSource,		  //
 	{vertexBufferLayout}, //

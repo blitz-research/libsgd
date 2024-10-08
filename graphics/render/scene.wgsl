@@ -204,7 +204,10 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 
 	    // Shadow
         let vpos = (scene_camera.viewMatrix * vec4f(position, 1.0)).xyz;
-        if vpos.z >= scene_config.csmSplitDistances.w {continue;}
+
+        if vpos.z < 0.0 || vpos.z >= scene_config.csmSplitDistances.w {
+            return vec4(1,1,0,1);
+        }
 
         var split = i * 4;
         if vpos.z >= scene_config.csmSplitDistances.x {
@@ -219,7 +222,6 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
         let wpos = scene_csmMatrices[split] * vec4f(position, 1);
         let spos = wpos.xyz / wpos.w;
         let tcoords = spos.xy * vec2f(0.5, -0.5) + 0.5;
-//       let tcoords = spos.xy * vec2f(0.5, -0.5) + 0.5 + 0.5 / scene_config.csmTextureSize;
         var atten = textureSampleCompareLevel(scene_csmTexture, scene_csmSampler, tcoords, split, spos.z - scene_config.csmDepthBias);
         if atten == 0.0 {continue;}
 

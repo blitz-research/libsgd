@@ -9,35 +9,41 @@
 namespace sgd {
 
 String toString(RenderPassType rpassType) {
-	static const Map<RenderPassType, String> types {
-		{RenderPassType::shadow,"SHADOW"},
-			{RenderPassType::opaque,"OPAQUE"},
-			{RenderPassType::blend,"BLEND"},
+	static const Map<RenderPassType, String> types{
+		{RenderPassType::shadow, "SHADOW"},
+		{RenderPassType::opaque, "OPAQUE"},
+		{RenderPassType::blend, "BLEND"},
 	};
 	return types.find(rpassType)->second;
 }
 
 String toString(BlendMode blendMode) {
-	static const Map<BlendMode, String> modes {
-		{BlendMode::undefined,"UNDEFINED"},
-		{BlendMode::opaque,"OPAQUE"},
-		{BlendMode::alphaMask,"ALPHA_MASK"},
-		{BlendMode::alphaBlend,"ALPHA_BLEND"},
+	static const Map<BlendMode, String> modes{
+		{BlendMode::undefined, "UNDEFINED"},
+		{BlendMode::opaque, "OPAQUE"},
+		{BlendMode::alphaMask, "ALPHA_MASK"},
+		{BlendMode::alphaBlend, "ALPHA_BLEND"},
 	};
 	return modes.find(blendMode)->second;
 }
 
 String toString(DepthFunc depthFunc) {
-	static const Map<DepthFunc, String> funcs {
-		{DepthFunc::undefined, "UNDEFINED"}, {DepthFunc::never, "NEVER"}, {DepthFunc::less, "LESS"},
-		{DepthFunc::equal, "EQUAL"}, {DepthFunc::lessEqual, "LESS_EQUAL"}, {DepthFunc::greater, "GREATER"},
-		{DepthFunc::notEqual, "NOT_EQUAL"}, {DepthFunc::greaterEqual, "GREATER_EQUAL"}, {DepthFunc::always, "ALWAYS"},
+	static const Map<DepthFunc, String> funcs{
+		{DepthFunc::undefined, "UNDEFINED"},
+		{DepthFunc::never, "NEVER"},
+		{DepthFunc::less, "LESS"},
+		{DepthFunc::equal, "EQUAL"},
+		{DepthFunc::lessEqual, "LESS_EQUAL"},
+		{DepthFunc::greater, "GREATER"},
+		{DepthFunc::notEqual, "NOT_EQUAL"},
+		{DepthFunc::greaterEqual, "GREATER_EQUAL"},
+		{DepthFunc::always, "ALWAYS"},
 	};
 	return funcs.find(depthFunc)->second;
 }
 
 String toString(CullMode cullMode) {
-	static const Map<CullMode, String> modes {
+	static const Map<CullMode, String> modes{
 		{CullMode::undefined, "UNDEFINED"},
 		{CullMode::none, "NONE"},
 		{CullMode::front, "FRONT"},
@@ -137,7 +143,7 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
 	if (rpassType == RenderPassType::shadow) {
 		SGD_ASSERT(blendMode == BlendMode::opaque || blendMode == BlendMode::alphaMask);
 	} else {
-		switch(blendMode) {
+		switch (blendMode) {
 		case BlendMode::undefined:
 			SGD_ABORT();
 		case BlendMode::opaque:
@@ -158,13 +164,13 @@ wgpu::RenderPipeline getOrCreateRenderPipeline(RenderPassType rpassType,
 
 	// Depth stencil state
 	wgpu::DepthStencilState depthStencilState;
-	if(depthFunc != DepthFunc::undefined) {	// hack for no depth buffer
+	if (depthFunc != DepthFunc::undefined) { // hack for no depth buffer
 		depthStencilState.format = wgpu::TextureFormat::Depth32Float;
 		depthStencilState.depthCompare = (wgpu::CompareFunction)depthFunc;
 		switch (rpassType) {
 		case RenderPassType::shadow:
 		case RenderPassType::opaque:
-			depthStencilState.depthWriteEnabled = depthFunc != DepthFunc::always;	// hack for no depth write
+			depthStencilState.depthWriteEnabled = depthFunc != DepthFunc::always; // hack for no depth write
 			break;
 		case RenderPassType::blend:
 			depthStencilState.depthWriteEnabled = false;

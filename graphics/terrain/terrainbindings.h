@@ -16,16 +16,14 @@ struct TerrainBindings : GraphicsResource {
 
 	Property<AffineMat4f> worldMatrix;
 
-	Property<uint32_t> lodLevels;
-
-	Property<uint32_t> quadsPerTile;
+	Property<uint32_t> size{4};
+	Property<uint32_t> lods{4};
+	Property<uint32_t> materialSize{1024};
+	Property<int> debugMode{0};
 
 	Property<CTexturePtr> heightTexture;
-
 	Property<CTexturePtr> normalTexture;
-
 	Property<MaterialPtr> material;
-
 	Property<bool> shadowsEnabled;
 
 	void render(RenderQueue* rq) const;
@@ -41,10 +39,11 @@ private:
 		return *(CTerrainUniforms*)m_uniformBuffer->data();
 	}
 
-	TerrainUniforms& lockUniforms() {
+	TerrainUniforms& lockUniforms() const {
 		return *(TerrainUniforms*)m_uniformBuffer->lock();
 	}
-	void unlockUniforms() {
+
+	void unlockUniforms() const {
 		m_uniformBuffer->unlock();
 	}
 

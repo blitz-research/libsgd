@@ -1133,6 +1133,37 @@ SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox skybox, float roughness)
 
 //! @}
 
+//! @defgroup Terrain Terrain
+
+//! Terrain handle type.
+typedef SGD_Entity SGD_Terrain;
+
+//! Create a new terrain.
+SGD_API SGD_Terrain SGD_DECL sgd_CreateTerrain();
+
+//! Set terrain size.
+SGD_API void SGD_DECL sgd_SetTerrainSize(SGD_Terrain terrain, int size);
+
+//! Set terrain level-of-details.
+SGD_API void SGD_DECL sgd_SetTerrainLODs(SGD_Terrain terrain, int lods);
+
+//! Set terrain material.
+SGD_API void SGD_DECL sgd_SetTerrainMaterial(SGD_Terrain terrain, SGD_Material material);
+
+//! Set terrain material size.
+SGD_API void SGD_DECL sgd_SetTerrainMaterialSize(SGD_Terrain terrain, int materialSize);
+
+//! Set terrain height texture.
+SGD_API void SGD_DECL sgd_SetTerrainHeightTexture(SGD_Terrain terrain, SGD_Texture texture);
+
+//! Set terrain normal texture.
+SGD_API void SGD_DECL sgd_SetTerrainNormalTexture(SGD_Terrain terrain, SGD_Texture texture);
+
+//! Set terrain debug mode.
+SGD_API void SGD_DECL sgd_SetTerrainDebugMode(SGD_Terrain terrain, int debugMode);
+
+//! @}
+
 //! @defgroup Sprite Sprite
 //! @{
 

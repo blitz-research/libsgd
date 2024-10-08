@@ -36,12 +36,8 @@ bool g_robustnessEnabled = true;
 auto init1 =
 	configVarChanged("dawn.robustnessEnabled").connect(nullptr, [](CString value) { g_validationEnabled = truthiness(value); });
 
-// wgpu::FeatureName requiredFeatures[]{wgpu::FeatureName::TimestampQuery};
-//, wgpu::FeatureName::Float32Filterable};
-//, wgpu::FeatureName::TimestampQueryInsidePasses};
-
-// const char* enabledToggles[] = {"allow_unsafe_apis"};
-//, "float32-filterable"
+Vector<const char*> g_enabledToggles;
+Vector<wgpu::FeatureName> g_requiredFeatures;
 
 void dawnDeviceLostCallback(WGPUDevice const* device, WGPUDeviceLostReason reason, char const* message, void* userdata) {
 	static const char* names[] = {"Undefined", "Unknown", "Destroyed", "InstanceDropped", "FailedCreation"};
@@ -190,17 +186,20 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 
 			logAdapterProps(adapter);
 
-			Vector<const char*> enabledToggles;
 			{
-				enabledToggles.push_back("allow_unsafe_apis");
-				if (!g_validationEnabled) enabledToggles.push_back("skip_validation");
-				if (!g_robustnessEnabled) enabledToggles.push_back("disable_robustness");
+				g_enabledToggles.push_back("allow_unsafe_apis");
+				if (!g_validationEnabled) g_enabledToggles.push_back("skip_validation");
+				if (!g_robustnessEnabled) g_enabledToggles.push_back("disable_robustness");
 			}
 
-			Vector<wgpu::FeatureName> requiredFeatures;
 			{
-				if (adapter.HasFeature(wgpu::FeatureName::TimestampQuery)) {
-					requiredFeatures.push_back(wgpu::FeatureName::TimestampQuery);
+				for (auto feature : {wgpu::FeatureName::TimestampQuery,		   //
+									 wgpu::FeatureName::Float32Filterable,	   //
+									 wgpu::FeatureName::Unorm16TextureFormats, //
+									 wgpu::FeatureName::Snorm16TextureFormats}) {
+					if (adapter.HasFeature(feature)) {
+						g_requiredFeatures.push_back(feature);
+					}
 				}
 			}
 
@@ -208,13 +207,13 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions,
 			wgpu::DawnTogglesDescriptor togglesDesc{};
 			{
 				devDesc.nextInChain = &togglesDesc;
-				devDesc.requiredFeatureCount = requiredFeatures.size();
-				devDesc.requiredFeatures = requiredFeatures.data();
+				devDesc.requiredFeatureCount = g_requiredFeatures.size();
+				devDesc.requiredFeatures = g_requiredFeatures.data();
 				devDesc.deviceLostCallbackInfo.callback = &dawnDeviceLostCallback;
 				devDesc.uncapturedErrorCallbackInfo.callback = &dawnErrorCallback;
 
-				togglesDesc.enabledToggleCount = enabledToggles.size();
-				togglesDesc.enabledToggles = enabledToggles.data();
+				togglesDesc.enabledToggleCount = g_enabledToggles.size();
+				togglesDesc.enabledToggles = g_enabledToggles.data();
 			}
 
 			adapter.RequestDevice( //
@@ -248,6 +247,14 @@ wgpu::Device createWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions)
 	ready.waiteq(true);
 	SGD_ASSERT(result);
 	return result;
+}
+
+CVector<const char*> wgpuEnabledToggles() {
+	return g_enabledToggles;
+}
+
+CVector<wgpu::FeatureName> wgpuRequiredFeatures() {
+	return g_requiredFeatures;
 }
 
 wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window) {

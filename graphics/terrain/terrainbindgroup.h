@@ -16,10 +16,11 @@ using CTerrainVertex = const TerrainVertex;
 
 struct alignas(16) TerrainUniforms {
 	Mat4f worldMatrix;
-	uint32_t lodLevels;
-	uint32_t quadsPerTile;
-//	float meshScale;
-//	float heightScale;
+	uint32_t size{1024};
+	uint32_t lods{4};
+	uint32_t quadsPerTile{16};
+	uint32_t debugMode{0};
+	float materialTexelSize{1.0 / 1024.0f};
 };
 using CTerrainUniforms = const TerrainUniforms;
 

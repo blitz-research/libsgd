@@ -138,11 +138,15 @@ template <> float convert<float>(float16 comp) {
 
 // ***** END conversions *****
 
-template <TextureFormat> constexpr bool is_srgba8() {
+template <TextureFormat> constexpr bool is_srgba() {
 	return false;
 }
 
-template <> constexpr bool is_srgba8<TextureFormat::srgba8>() {
+template <> constexpr bool is_srgba<TextureFormat::srgba8>() {
+	return true;
+}
+
+template <> constexpr bool is_srgba<TextureFormat::srgba16>() {
 	return true;
 }
 
@@ -168,6 +172,7 @@ TEXEL_TRAITS(rgba8s, int8_t, 4);
 TEXEL_TRAITS(r16, uint16_t, 1);
 TEXEL_TRAITS(rg16, uint16_t, 2);
 TEXEL_TRAITS(rgba16, uint16_t, 4);
+TEXEL_TRAITS(srgba16, uint16_t, 4);
 TEXEL_TRAITS(r16s, int16_t, 1);
 TEXEL_TRAITS(rg16s, int16_t, 2);
 TEXEL_TRAITS(rgba16s, int16_t, 4);
@@ -188,13 +193,12 @@ void convert(const void* srcTexels, void* dstTexels, uint32_t count) {
 	constexpr int srcCount = SrcTraits::compCount;
 	constexpr int dstCount = DstTraits::compCount;
 
-	if constexpr (is_srgba8<SrcFormat>() != is_srgba8<DstFormat>() && (is_srgba8<SrcFormat>() || is_srgba8<DstFormat>())) {
-		SGD_ASSERT(srcCount == 4 && dstCount == 4);
+	if constexpr (is_srgba<SrcFormat>() != is_srgba<DstFormat>()) {
 
 		static Vector<float> tmp;
 		if (count * srcCount > tmp.size()) tmp.resize(count * srcCount + 1023 & ~1023);
 
-		constexpr float e = is_srgba8<DstFormat>() ? 1.0 / 2.2f : 2.2f;
+		constexpr float e = is_srgba<DstFormat>() ? 1.0 / 2.2f : 2.2f;
 
 		auto src = (SrcType*)srcTexels;
 		auto dst = tmp.data();
@@ -208,7 +212,7 @@ void convert(const void* srcTexels, void* dstTexels, uint32_t count) {
 			src += srcCount;
 		}
 
-		if constexpr (is_srgba8<DstFormat>()) {
+		if constexpr (is_srgba<DstFormat>()) {
 			return convert<TextureFormat::rgba32f, TextureFormat::rgba8>(tmp.data(), dstTexels, count);
 		} else {
 			return convert<TextureFormat::rgba32f, DstFormat>(tmp.data(), dstTexels, count);
@@ -265,6 +269,8 @@ template <TextureFormat SrcFormat> void convert(const void* src, void* dst, Text
 		return convert<SrcFormat, TextureFormat::rg16>(src, dst, count);
 	case TextureFormat::rgba16:
 		return convert<SrcFormat, TextureFormat::rgba16>(src, dst, count);
+	case TextureFormat::srgba16:
+		return convert<SrcFormat, TextureFormat::srgba16>(src, dst, count);
 	case TextureFormat::r16s:
 		return convert<SrcFormat, TextureFormat::r16s>(src, dst, count);
 	case TextureFormat::rg16s:
@@ -319,6 +325,8 @@ void convertTexels(const void* src, TextureFormat srcFormat, void* dst, TextureF
 		return convert<TextureFormat::rg16>(src, dst, dstFormat, count);
 	case TextureFormat::rgba16:
 		return convert<TextureFormat::rgba16>(src, dst, dstFormat, count);
+	case TextureFormat::srgba16:
+		return convert<TextureFormat::srgba16>(src, dst, dstFormat, count);
 	case TextureFormat::r16s:
 		return convert<TextureFormat::r16s>(src, dst, dstFormat, count);
 	case TextureFormat::rg16s:
@@ -433,6 +441,8 @@ void premultiplyAlpha(TextureData* data) {
 		return premultiplyAlpha<int8_t>(data);
 	case TextureFormat::rgba16:
 		return premultiplyAlpha<uint16_t>(data);
+	case TextureFormat::srgba16:
+		return premultiplyAlphaSRGBA<uint16_t>(data);
 	case TextureFormat::rgba16s:
 		return premultiplyAlpha<int16_t>(data);
 	case TextureFormat::rgba16f:

@@ -22,10 +22,13 @@ struct SceneRenderer : Shared {
 
 	SceneRenderer();
 
-	Property<Vec4f> ambientLightColor{Vec4f(1, 1, 1, 0)};
-	Property<CTexturePtr> envTexture;
 	Property<Vec4f> clearColor{Vec4f(0, 0, 0, 1)};
+
 	Property<float> clearDepth{1};
+
+	Property<Vec4f> ambientLightColor{Vec4f(1, 1, 1, 0)};
+
+	Property<CTexturePtr> envTexture;
 
 	Signal<CVec2u> renderTargetSizeChanged;
 

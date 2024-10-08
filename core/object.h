@@ -97,7 +97,7 @@ struct Object {
 
 	template <class T> const T* as() const {
 		SGD_ASSERT(is<T>());
-		return static_cast<T*>(this);
+		return static_cast<const T*>(this);
 	}
 };
 

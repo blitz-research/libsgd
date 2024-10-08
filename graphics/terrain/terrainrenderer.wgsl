@@ -2,17 +2,18 @@ R"(
 
 struct TerrainUniforms {
     worldMatrix: mat4x4f,
-    lodLevels: u32,
+    size: u32,
+    lods: u32,
     quadsPerTile: u32,
-//    meshScale: f32,
-//    heightScale: f32,
+    debugMode: u32,
+    materialTexelSize: f32,
 };
 
 @group(2) @binding(0) var<uniform> terrainUniforms: TerrainUniforms;
 @group(2) @binding(1) var terrainHeightTexture: texture_2d<f32>;
 @group(2) @binding(2) var terrainHeightSampler: sampler;
-//@group(2) @binding(3) var terrainNormalTexture: texture_2d<f32>;
-//@group(2) @binding(4) var terrainNormalSampler: sampler;
+@group(2) @binding(3) var terrainNormalTexture: texture_2d<f32>;
+@group(2) @binding(4) var terrainNormalSampler: sampler;
 
 struct Vertex {
     @location(0) position: vec3f,
@@ -22,11 +23,10 @@ struct Vertex {
 struct Varying {
     @builtin(position) clipPosition: vec4f,
     @location(0) position: vec3f,
-	@location(1) tanMatrix0: vec3f,
-	@location(2) tanMatrix1: vec3f,
-	@location(3) tanMatrix2: vec3f,
-    @location(4) texCoords: vec2f,
-    @location(5) color: vec4f
+    @location(1) normalTexCoords: vec2f,
+    @location(2) materialTexCoords: vec2f,
+    @location(3) lod: f32,
+    @location(4) color: vec4f
 }
 
 const lods = array<vec2f, 65>(
@@ -68,7 +68,6 @@ const offs = array<vec4f, 13>(
     // ***** Compute position *****
 
     let eye = -terrainUniforms.worldMatrix[3].xyz;
-
     var pos = round(eye / tileSize) * tileSize + vertex.position;
     pos.y = 0.0;
 
@@ -95,83 +94,44 @@ const offs = array<vec4f, 13>(
     let off = offs[vertexId % 13] * exp2(lodNear);
 
     let texCoords = pos.xz;
+    let texelSize = 1.0 / vec2f(textureDimensions(terrainHeightTexture));
 
-    let heightNear = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, texCoords / 2048.0 + 0.5, lodNear).r;
-    let height0 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.xy) / 2048.0 + 0.5, lodFar).r;
-    let height1 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.zw) / 2048.0 + 0.5, lodFar).r;
+    let heightNear = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, texCoords * texelSize + 0.5, lodNear).r;
+    let height0 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.xy) * texelSize + 0.5, lodFar).r;
+    let height1 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.zw) * texelSize + 0.5, lodFar).r;
     let heightFar = mix(height0, height1, .5);
-
-    pos.y = mix(heightNear, heightFar, tween) * 1000.0f;
-    //pos.y = 0.0;
+    pos.y = mix(heightNear, heightFar, tween);
 
 	// Output fragment
     //
     var out: Varying;
     out.clipPosition = mvpMatrix * vec4f(pos, 1.0);
-    out.position = pos;
-    out.tanMatrix2 = vec3f(0.0, 1.0, 0.0);
-    out.texCoords = texCoords / 2048.0 + 0.5;
+    out.position = (terrainUniforms.worldMatrix * vec4f(pos, 1.0)).xyz;
+    out.normalTexCoords = texCoords / vec2f(textureDimensions(terrainNormalTexture)) + 0.5;
+    out.materialTexCoords = texCoords * terrainUniforms.materialTexelSize + 0.5;
+    out.lod = lodNear + tween;
     out.color = vec4f(color, 1.0);
     //
     return out;
-/*
-
-    let tileSize = float(terrain.quadsPerTile);
-
-    let eye = camera.world[3].xyz;
-
-    let pos = round(eye / tileSize) * tileSize + vertex.position;
-    pos.y = 0.0;
-
-    // ***** Compute LODs *****
-
-    let v = pos - eye;
-    let d = max(abs(v.x), abs(v.z)) / tileSize - 0.5;
-
-    let i = min(int(floor(d)) + 1, 64);
-
-    let lodNear = lods[i].s;
-    let tween = lods[i].t * fract(d);
-
-	if(lodNear == vertex.position.y + 1 && tween == 0) {
-		lodNear = vertex.position.y;
-		tween = 1;
-	}else if(lodNear != vertex.position.y) {
-		out.color = vec3f(1, 0, 0);
-		return;
-	}
-
-	let lodFar = lodNear + 1;
-
-    // ***** Compute height *****
-    //
-    let off = offs[vertexId % 13] * exp2(lodNear);
-
-    let texCoords = pos.xz;
-
-    let heightNear = textureSampleLevel(terrain_heightTexture, terrain_heightSampler, texCoords0, lodNear).r;
-    let height0 = textureSampleLevel(terrain_heightTexture, terrain_heightSampler, (texCoords0 + off.xy), lodFar).r;
-    let height1 = textureSampleLevel(terrain_heightTexture, terrain_heightSampler, (texCoords0 + off.zw), lodFar).r;
-    let heightFar = mix(height0, height1, .5);
-
-    pos.y = mix(heightNear, heightFar, tween);
-*/
 }
 
 @fragment fn fragmentMain(in: Varying) -> @location(0) vec4f {
+#if !RENDER_PASS_SHADOW
+
+    if terrainUniforms.debugMode != 0 {
+        return in.color;
+    }
 
     var tanMatrix: mat3x3f;
-    tanMatrix[2] = in.tanMatrix2;
+    tanMatrix[2] = normalize(textureSampleLevel(terrainNormalTexture, terrainNormalSampler, in.normalTexCoords, in.lod).rgb * 2.0 - 1.0).xzy;
 
-    let color = evaluateMaterial(in.position, tanMatrix, vec3f(in.texCoords, 0.0), vec4f(1));//in.color);
+    let color = evaluateMaterial(in.position, tanMatrix, vec3f(in.materialTexCoords, 0.0), vec4f(1));
 
     return color;
 
-//    let fragColor = evaluateFragment(in.wPosition, normalize(in.wNormal), in.tCoords, in.color);
-
-//    return fragColor;
-//    return in.color;
-//    return vec4(1,1,0,1);
+#else
+    return vec4f(0);
+#endif
 }
 
 )"

@@ -59,7 +59,7 @@ void SGD_DECL sgd_SetEnvTexture(SGD_Texture htexture) {
 }
 
 SGD_API void SGD_DECL sgd_UpdateShadowMappingConfig() {
-	auto bindings =sgdx::mainScene()->sceneRenderer()->sceneBindings();
+	auto bindings = sgdx::mainScene()->sceneRenderer()->sceneBindings();
 	bindings->lockConfigUniforms() = sgd::getConfigUniformsFromConfigVars();
 	bindings->unlockConfigUniforms();
 }
@@ -576,6 +576,49 @@ void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness) {
 	auto skybox = sgdx::resolveHandle<sgdx::Skybox>(hskybox);
 	if (roughness < -1 || roughness > 1) sgdx::error("Skybox roughness outside of range -1 to 1");
 	skybox->roughness = roughness;
+}
+
+// ***** Terrains *****
+
+SGD_API SGD_Terrain SGD_DECL sgd_CreateTerrain() {
+	sgdx::started();
+	auto terrain = new sgd::Terrain();
+	sgdx::mainScene()->add(terrain);
+	return sgdx::createHandle(terrain);
+}
+
+//! Set terrain size.
+SGD_API void SGD_DECL sgd_SetTerrainSize(SGD_Terrain hterrain, int size) {
+	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->size = size;
+}
+
+//! Set terrain level-of-details.
+SGD_API void SGD_DECL sgd_SetTerrainLODs(SGD_Terrain hterrain, int lods) {
+	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->lods = lods;
+}
+
+SGD_API void SGD_DECL sgd_SetTerrainMaterial(SGD_Terrain hterrain, SGD_Material hmaterial) {
+	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->material = sgdx::resolveHandle<sgd::Material>(hmaterial);
+}
+
+//! Set terrain material size.
+SGD_API void SGD_DECL sgd_SetTerrainMaterialSize(SGD_Terrain hterrain, int materialSize) {
+	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->materialSize = materialSize;
+}
+
+//! Set terrain height texture.
+SGD_API void SGD_DECL sgd_SetTerrainHeightTexture(SGD_Terrain hterrain, SGD_Texture htexture) {
+	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->heightTexture = sgdx::resolveHandle<sgd::Texture>(htexture);
+}
+
+//! Set terrain normal texture.
+SGD_API void SGD_DECL sgd_SetTerrainNormalTexture(SGD_Terrain hterrain, SGD_Texture htexture) {
+	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->normalTexture = sgdx::resolveHandle<sgd::Texture>(htexture);
+}
+
+//! Set terrain debug mode.
+SGD_API void SGD_DECL sgd_SetTerrainDebugMode(SGD_Terrain hterrain, int debugMode) {
+	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->debugMode = debugMode;
 }
 
 // ***** Collisions *****

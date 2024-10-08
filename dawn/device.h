@@ -14,6 +14,10 @@ void requestWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions, CFunct
 
 wgpu::Device createWGPUDevice(const wgpu::RequestAdapterOptions& adapterOptions);
 
+CVector<const char*> wgpuEnabledToggles();
+
+CVector<wgpu::FeatureName> wgpuRequiredFeatures();
+
 wgpu::Surface createWGPUSurface(const wgpu::Device& device, GLFWwindow* window);
 
 void requestRender(CFunction<void()> renderFunc);

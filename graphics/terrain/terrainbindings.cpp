@@ -9,7 +9,7 @@ namespace sgd {
 namespace {
 
 uint32_t rndColor(uint32_t lod) {
-	auto r = (uint32_t)rnd(128)+128;
+	auto r = (uint32_t)rnd(128) + 128;
 	uint32_t color;
 	switch (lod) {
 	case 0:
@@ -45,33 +45,47 @@ TerrainBindings::TerrainBindings()
 
 	m_bindGroup->setBuffer(0, m_uniformBuffer);
 
-	(void)worldMatrix.changed.connect(nullptr, [=](CAffineMat4f m){
+	worldMatrix.changed.connect(nullptr, [=](CAffineMat4f m) {
 		lockUniforms().worldMatrix = m;
 		unlockUniforms();
 	});
+	worldMatrix.changed.emit(worldMatrix());
 
-	(void)lodLevels.changed.connect(nullptr, [=](uint32_t n) {
-		lockUniforms().lodLevels = n;
+	size.changed.connect(nullptr, [=](uint32_t n) {
+		lockUniforms().size = n;
 		unlockUniforms();
 		invalidate();
 	});
-	lodLevels = 4;
+	size.changed.emit(size());
 
-	(void)quadsPerTile.changed.connect(nullptr, [=](uint32_t n) {
-		lockUniforms().quadsPerTile = n;
+	lods.changed.connect(nullptr, [=](uint32_t n) {
+		if (n < 1 || n > 6) SGD_ERROR("Terrain LODs must be in the range 1..6 inclusive");
+		lockUniforms().lods = n;
 		unlockUniforms();
 		invalidate();
 	});
-	quadsPerTile = 16;
+	lods.changed.emit(lods());
 
-	(void)heightTexture.changed.connect(nullptr, [=](CTexture* ttexture) { m_bindGroup->setTexture(1, ttexture); });
+	materialSize.changed.connect(nullptr, [=](uint32_t n) {
+		lockUniforms().materialTexelSize = 1.0f / (float)n;
+		unlockUniforms();
+		invalidate();
+	});
+	materialSize.changed.emit(materialSize());
+
+	debugMode.changed.connect(nullptr, [=](int mode) {
+		lockUniforms().debugMode = mode;
+		unlockUniforms();
+	});
+	debugMode.changed.emit(debugMode());
+
+	heightTexture.changed.connect(nullptr, [=](CTexture* ttexture) { m_bindGroup->setTexture(1, ttexture); });
 	heightTexture = blackTexture(TextureFlags::none);
 
-	(void)normalTexture.changed.connect(nullptr, [=](CTexture* ttexture) { m_bindGroup->setTexture(3, ttexture); });
+	normalTexture.changed.connect(nullptr, [=](CTexture* ttexture) { m_bindGroup->setTexture(3, ttexture); });
 	normalTexture = flatTexture(TextureFlags::none);
 
 	material = new Material(&prelitMaterialDescriptor);
-	material()->cullMode=CullMode::none;
 }
 
 void TerrainBindings::onValidate() const {
@@ -84,9 +98,12 @@ void TerrainBindings::onValidate() const {
 	vertices.reserve(1024 * 1024 * 16);
 	indices.reserve(1024 * 1024 * 16);
 
-	auto quadsPerTile = this->quadsPerTile();
+	auto quadsPerTile = (size() >> (lods() - 1)) / 4;
 
-	for (uint32_t lod = 0; lod < lodLevels(); ++lod) {
+	lockUniforms().quadsPerTile = quadsPerTile;
+	unlockUniforms();
+
+	for (uint32_t lod = 0; lod < lods(); ++lod) {
 
 		auto scale = float(1 << lod);
 		auto tileSize = float(quadsPerTile * 4) * scale;
@@ -111,10 +128,6 @@ void TerrainBindings::onValidate() const {
 							1,10,2, 2,10,5, 5,10,4, 4,10,1,
 							3,11,4, 4,11,7, 7,11,6, 6,11,3,
 							4,12,5, 5,12,8, 8,12,7, 7,12,4
-							//0,1,9,1,4,9,4,3,9,3,0,9,
-							//1,2,10,2,5,10,5,4,10,4,1,10,
-							//3,4,11,4,7,11,7,6,11,6,3,11,
-							//4,5,12,5,8,12,8,7,12,7,4,12
 							// clang-format on
 						};
 						uint32_t v0 = vertices.size();
@@ -142,7 +155,8 @@ void TerrainBindings::onValidate() const {
 		}
 	}
 
-	log() << "### Terrain mesh vertices:" << vertices.size() << "triangles:" << indices.size() / 3;
+	log() << "### Terrain mesh quadsPerTile: " << quadsPerTile << "vertices:" << vertices.size()
+		  << "triangles:" << indices.size() / 3;
 
 	m_vertexBuffer = new Buffer(BufferType::vertex, vertices.data(), sizeof(Vertex) * vertices.size());
 
@@ -152,7 +166,8 @@ void TerrainBindings::onValidate() const {
 }
 
 void TerrainBindings::render(RenderQueue* rq) const {
-	rq->addRenderOp(m_vertexBuffer, m_indexBuffer, material(), m_bindGroup, emptyBindGroup(BindGroupType::renderer), //
+	rq->addRenderOp(m_vertexBuffer, m_indexBuffer,									  //
+					material(), m_bindGroup, emptyBindGroup(BindGroupType::renderer), //
 					m_indexCount, 1, 0, 0, shadowsEnabled());
 }
 

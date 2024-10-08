@@ -17,6 +17,9 @@ enum struct TextureFlags {
 	clamp = 0x07,
 	filter = 0x08,
 	mipmap = 0x10,
+	default_ = mipmap | filter,
+	//
+	// TODO: Move to texture type enum.
 	//
 	cube = 0x00100,
 	array = 0x00200,
@@ -58,16 +61,6 @@ struct Texture : GraphicsResource {
 	TextureData* lock() {
 		return m_data;
 	}
-
-	/*
-	const void* data(CVec2u origin) const {
-		return m_data + origin.y * m_data->pitch + origin.x * m_data->bpp;
-	}
-
-	void* lock(CVec2u origin) {
-		return m_data + origin.y * m_data->pitch + origin.x * m_data->bpp;
-	}
-	*/
 
 	void unlock() {
 		if (m_dirty) return;

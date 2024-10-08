@@ -20,6 +20,7 @@ enum struct TextureFormat {
 	r16,
 	rg16,
 	rgba16,
+	srgba16,	// Pseudo format to deal with 16 bit png loaders
 	// 16 bit signed normalized formats
 	r16s,
 	rg16s,
@@ -35,13 +36,13 @@ enum struct TextureFormat {
 	// depth formats
 	depth32f,
 };
-static constexpr int numTextureFormats = 21;
+static constexpr int numTextureFormats = 22;
 
 inline size_t bytesPerTexel(TextureFormat format) {
 	uint32_t bpp[]{0,			 // undefined
-				   1, 2, 4,	 4,	 // 8 bit unsigned
+				   1, 2, 4,	4,	 // 8 bit unsigned
 				   1, 2, 4,		 // 8 bit signed
-				   2, 4, 8,		 // 16 bit unsigned
+				   2, 4, 8, 8,	 // 16 bit unsigned
 				   2, 4, 8,		 // 16 bit signed
 				   2, 4, 8,		 // 16f
 				   4, 8, 16,	 // 32f
