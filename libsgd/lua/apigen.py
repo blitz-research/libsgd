@@ -78,7 +78,7 @@ class Enumerator(c_ast.NodeVisitor):
 
 
 def main(includeDir, outputFile):
-	ast = parse_file(includeDir + "/sgd/sgd.h", use_cpp=True, cpp_args="-DSGD_GENAPI=1")
+	ast = parse_file(includeDir + "/sgd/sgd.h", use_cpp=True, cpp_path="gcc", cpp_args=["-E", "-DSGD_GENAPI=1"])
 
 	enumer = Enumerator()
 
