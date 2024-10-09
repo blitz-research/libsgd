@@ -24,9 +24,10 @@ struct Vertex {
 struct Varying {
     @builtin(position) clipPosition: vec4f,
     @location(0) position: vec3f,
-    @location(1) normalTexCoords: vec2f,
-    @location(2) materialTexCoords: vec2f,
-    @location(3) color: vec4f,
+    @location(1) heightTexCoords: vec2f,
+    @location(2) normalTexCoords: vec2f,
+    @location(3) materialTexCoords: vec2f,
+    @location(4) color: vec4f,
 }
 
 const lods = array<vec2f, 65>(
@@ -108,6 +109,7 @@ const offs = array<vec4f, 13>(
     var out: Varying;
     out.clipPosition = mvpMatrix * vec4f(pos, 1.0);
     out.position = (terrainUniforms.worldMatrix * vec4f(pos, 1.0)).xyz;
+    out.heightTexCoords = texCoords * texelSize + 0.5;
     out.normalTexCoords = texCoords / vec2f(textureDimensions(terrainNormalTexture)) + 0.5;
     out.materialTexCoords = texCoords * terrainUniforms.materialTexelSize + 0.5;
     out.color = vec4f(color, 1.0);
@@ -120,6 +122,10 @@ const offs = array<vec4f, 13>(
 
     if terrainUniforms.debugMode != 0 {
         return in.color;
+    }
+
+    if in.heightTexCoords.x < 0.0 || in.heightTexCoords.y < 0.0 || in.heightTexCoords.x >= 1.0 || in.heightTexCoords.y >= 1.0 {
+        discard;
     }
 
     var tanMatrix: mat3x3f;

@@ -16,7 +16,14 @@ CreateSkybox(env)
 
 Local heightTexture = Load2DTexture("sgd://terrains/canyon/height.exr", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_DEFAULT)
 Local normalTexture = Load2DTexture("sgd://terrains/canyon/normal.png", TEXTURE_FORMAT_RGBA8, TEXTURE_FLAGS_DEFAULT)
-Local material = LoadPBRMaterial("sgd://terrains/canyon/albedo.png")
+Local albedoTexture = Load2DTexture("sgd://terrains/canyon/albedo.png", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_DEFAULT)
+
+;Local heightTexture = Load2DTexture("~/Desktop/rocky/height.exr", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_IMAGE)
+;Local normalTexture = Load2DTexture("~/Desktop/rocky/normal.png", TEXTURE_FORMAT_RGBA8, TEXTURE_FLAGS_IMAGE)
+;Local albedoTexture = Load2DTexture("~/Desktop/rocky/albedo.png", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_IMAGE)
+
+Local material=CreatePBRMaterial()
+SetMaterialTexture material,"albedo",albedoTexture
 
 Local terrain = CreateTerrain()
 
@@ -30,7 +37,7 @@ SetTerrainMaterial terrain,material
 SetEntityScale terrain, 1,512,1
 
 createPlayer(0)
-MoveEntity player,0,256,0
+MoveEntity player,0,512,0
 
 Local debug=0
 

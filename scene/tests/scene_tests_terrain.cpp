@@ -21,7 +21,7 @@ void entry() {
 	scene->add(terrain);
 
 	terrain->bindings()->size = 4096;
-	terrain->bindings()->lods = 6;
+	terrain->bindings()->lods = 5;
 	terrain->bindings()->material = material;
 	terrain->bindings()->materialSize = 4096;
 	terrain->bindings()->debugMode = 0;
@@ -38,10 +38,10 @@ void entry() {
 	setScale(terrain, {1, 512, 1});
 
 	createPlayer(nullptr);
-	move(player, {0, 256, 88});
+	move(player, {0, 512, 88});
 
 	camera->near= 1;
-	camera->far = 2000;
+	camera->far = 3072;
 
 	DrawListPtr dc = overlay->drawList();
 

@@ -97,7 +97,7 @@ void SceneBindings::updateCSMConfig() const {
 	if (!m_csmTexture || m_csmTexture->size() != size || m_csmTexture->depth() != passes) {
 		m_csmTexture =
 			new Texture(size, passes, TextureFormat::depth32f, //
-						TextureFlags::filter | TextureFlags::array | TextureFlags::renderTarget | TextureFlags::compare);
+						TextureFlags::filter | TextureFlags::clamp | TextureFlags::array | TextureFlags::renderTarget | TextureFlags::compare);
 		m_bindGroup->setTexture(csmTextureBinding, m_csmTexture);
 	}
 	m_csmShadowPasses.clear();
