@@ -90,29 +90,39 @@ if(SGD_OS_WINDOWS)
 	create_python_lib_target(py310 ${PYTHON_DIR}/Python310/include ${PYTHON_DIR}/Python310/libs/Python310.lib)
 	create_python_lib_target(py311 ${PYTHON_DIR}/Python311/include ${PYTHON_DIR}/Python311/libs/Python311.lib)
 	create_python_lib_target(py312 ${PYTHON_DIR}/Python312/include ${PYTHON_DIR}/Python312/libs/Python312.lib)
+	create_python_lib_target(py313 ${PYTHON_DIR}/Python313/include ${PYTHON_DIR}/Python313/libs/Python313.lib)
 
 elseif(SGD_OS_MACOS)
 	set(FW_DIR Frameworks/Python.framework/Versions)
 
+	#[[
 	# I have no idea how to automate this...
 	set(SDK38_DIR ${CELLAR_DIR}/python@3.8/3.8.20/${FW_DIR}/3.8)
 	set(SDK39_DIR ${CELLAR_DIR}/python@3.9/3.9.20/${FW_DIR}/3.9)
 	set(SDK310_DIR ${CELLAR_DIR}/python@3.10/3.10.15/${FW_DIR}/3.10)
 	set(SDK311_DIR ${CELLAR_DIR}/python@3.11/3.11.10/${FW_DIR}/3.11)
 	set(SDK312_DIR ${CELLAR_DIR}/python@3.12/3.12.6/${FW_DIR}/3.12)
+	set(SDK313_DIR ${CELLAR_DIR}/python@3.13/3.13.0/${FW_DIR}/3.13)
 
 	create_python_lib_target(py38 ${SDK38_DIR}/include/python3.8 ${SDK38_DIR}/lib/libpython3.8.dylib)
 	create_python_lib_target(py39 ${SDK39_DIR}/include/python3.9 ${SDK39_DIR}/lib/libpython3.9.dylib)
 	create_python_lib_target(py310 ${SDK310_DIR}/include/python3.10 ${SDK310_DIR}/lib/libpython3.10.dylib)
 	create_python_lib_target(py311 ${SDK311_DIR}/include/python3.11 ${SDK311_DIR}/lib/libpython3.11.dylib)
 	create_python_lib_target(py312 ${SDK312_DIR}/include/python3.12 ${SDK312_DIR}/lib/libpython3.12.dylib)
+	create_python_lib_target(py312 ${SDK313_DIR}/include/python3.13 ${SDK312_DIR}/lib/libpython3.13.dylib)
+	#]]
 
 elseif(SGD_OS_LINUX)
+
+	#[[
 	create_python_lib_target(py38 /usr/include/python3.8 /usr/lib/python3.8/config-3.8-${PYTHON_CFG}/libpython3.8.a)
 	create_python_lib_target(py39 /usr/include/python3.9 /usr/lib/python3.9/config-3.9-${PYTHON_CFG}/libpython3.9.a)
 	create_python_lib_target(py310 /usr/include/python3.10 /usr/lib/python3.10/config-3.10-${PYTHON_CFG}/libpython3.10.a)
 	create_python_lib_target(py311 /usr/include/python3.11 /usr/lib/python3.11/config-3.11-${PYTHON_CFG}/libpython3.11.a)
 	create_python_lib_target(py312 /usr/include/python3.12 /usr/lib/python3.12/config-3.12-${PYTHON_CFG}/libpython3.12.a)
+	create_python_lib_target(py313 /usr/include/python3.13 /usr/lib/python3.13/config-3.13-${PYTHON_CFG}/libpython3.13.a)
+	#]]
+
 endif()
 
 install(FILES ${SRC}/helloworld.py DESTINATION python)

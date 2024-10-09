@@ -9,7 +9,7 @@
 project = 'LibSGD'
 copyright = '2024, Blitz Research'
 author = 'Blitz Research'
-release = 'v0.15.0'
+release = 'v0.16.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -10,11 +10,13 @@
 
 &bull; lib/ : Contains dynamic library for C/C++ apps. This directory should be added to your C/C++ compiler's 'library directories' setting. To use LibSGD in your C/C++ app, your app must link with libsgd_dynamic.lib, and libsgd_dynamic.dll must be copied to your executable's path so it can be found at runtime.
 
+&bull; lua/ : Contains WIP sgd.lua wrapper for the Lua language using the 'luaJIT' environment. 
+
 &bull; nodejs/ : Contains node.js wrapper module. The libsgd.node file must be in the current directory when you run a node.js app that wants to use libsgd.
 
-&bull; python/ : Contains helloworld.py and examples. The python libsgd package can be installed using pip on Windows, eg: ``python -m pip install --upgrade libsgd``
+&bull; python/ : Contains helloworld.py and examples. The Python libsgd package can be installed using pip on Windows, eg: ``python -m pip install --upgrade libsgd``
 
-&bull; zig/ : Contains WIP sgd.zig wrapper for the zig language.
+&bull; zig/ : Contains WIP sgd.zig wrapper for the Zig language.
 
 &bull; README.md : This file.
 
@@ -38,11 +40,11 @@ Medi98
 Chaduke
 Michael Denathorn
 James Boyd
-Andy Hewco
-Markus Rosse
 Dex
+Andy Hewco
 Dan
-JaviCervera
+Markus Rosse
 Amon
+JaviCervera
 William Soennichsen
 ```

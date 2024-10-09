@@ -1,5 +1,7 @@
 #include "internal.h"
 
+void sgd_CreateDefaultScene();
+
 void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, SGD_Flags flags) {
 	if (sgdx::g_mainWindow) sgd_Error("Window has already been created");
 	sgdx::started();
@@ -30,7 +32,7 @@ void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, SGD_Flag
 
 	sgd::createGC(window);
 
-	sgd_ResetScene(false);
+	sgd_CreateDefaultScene();
 }
 
 void SGD_DECL sgd_DestroyWindow() {

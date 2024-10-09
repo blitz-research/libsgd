@@ -35,7 +35,9 @@
 #include "scene/light.h"
 #include "scene/scene.h"
 #include "scene/scenerenderer.h"
-    
+
+#include "serialize/serialize.h"
+
 #include "skybox/skybox.h"
     
 #include "sprite/sprite.h"

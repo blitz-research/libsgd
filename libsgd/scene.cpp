@@ -15,30 +15,65 @@ void unlockConfigUniforms() {
 	sgdx::mainScene()->sceneRenderer()->sceneBindings()->unlockConfigUniforms();
 }
 
+void createOverlay() {
+	sgdx::g_overlay = new sgd::Overlay();
+	sgdx::g_drawList = sgdx::g_overlay->drawList();
+}
+
+void clearMainScene() {
+	sgdx::mainScene()->clear();
+	sgdx::releaseAllHandles();
+}
+
+void setMainScene(sgd::Scene* scene) {
+	if(sgdx::g_mainScene) clearMainScene();
+	sgdx::g_mainScene = scene;
+	createOverlay();
+}
+
 } // namespace
 
 // ***** Scene *****
 
+// INTERNAL
+// Note: Internal. Also called immediately after CreateWindow.
+void sgd_CreateDefaultScene() {
+	setMainScene(new sgd::Scene());
+}
+
 void SGD_DECL sgd_ClearScene() {
 	sgdx::mainScene()->clear();
 	sgdx::releaseAllHandles(sgd::Entity::staticType());
-
-	sgdx::g_overlay = new sgd::Overlay();
-	sgdx::g_mainScene->add(sgdx::g_overlay);
-	sgdx::g_drawList = sgdx::g_overlay->drawList();
+	createOverlay();
 }
 
-// Called immediately after CreatedWindow.
 void SGD_DECL sgd_ResetScene(SGD_Bool releaseAllHandles) {
-	sgdx::g_mainScene = new sgd::Scene();
+	sgdx::mainScene()->clear();
 	if (releaseAllHandles) {
 		sgdx::releaseAllHandles();
-	} else {
+	}else{
 		sgdx::releaseAllHandles(sgd::Entity::staticType());
 	}
-	sgdx::g_overlay = new sgd::Overlay();
-	sgdx::g_mainScene->add(sgdx::g_overlay);
-	sgdx::g_drawList = sgdx::g_overlay->drawList();
+	sgd_CreateDefaultScene();
+}
+
+void SGD_DECL sgd_LoadScene(SGD_String path) {
+	sgdx::mainScene();
+
+	auto jsrc = sgd::loadString(sgd::Path(path));
+	if (!jsrc) sgdx::error(jsrc.error());
+
+	auto obj = sgd::deserialize(jsrc.result());
+	if (!obj->is<sgd::Scene>()) sgdx::error("Object is not a Scene");
+
+	setMainScene(obj->as<sgd::Scene>());
+}
+
+void SGD_DECL sgd_SaveScene(SGD_String path) {
+	auto jsrc = sgd::serialize(sgdx::mainScene());
+
+	auto r = sgd::saveString(jsrc,sgd::Path(path));
+	if(!r) sgdx::error(r.error());
 }
 
 void SGD_DECL sgd_SetClearColor(float red, float green, float blue, float alpha) {

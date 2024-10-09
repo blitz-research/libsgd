@@ -6,9 +6,9 @@
 //! @cond
 
 #define SGD_VERSION_MAJOR 0
-#define SGD_VERSION_MINOR 15
+#define SGD_VERSION_MINOR 16
 #define SGD_VERSION_PATCH 0
-#define SGD_VERSION "0.15.0" // Need some Macro Magic!
+#define SGD_VERSION "0.16.0" // How to macro-ize this?
 
 #if SGD_GENAPI
 
@@ -53,19 +53,18 @@
 
 #endif
 
-#define SGD_FLAGS(NAME)
-
-#define SGD_TRUE 1
-#define SGD_FALSE 0
-#define SGD_NULL 0
-
 //! @endcond
 
 //! @defgroup Types Types
 //! @{
 
+static const int SGD_NULL = 0;
+
 //! Boolean type. Non-0 values indicate true, 0 indicates false.
-typedef int SGD_Bool;
+typedef enum SGD_Bool {
+	SGD_FALSE = 0,
+	SGD_TRUE = 1
+} SGD_Bool;
 
 //! Flags type used to pass bitmask style enums to functions.
 typedef int SGD_Flags;
@@ -791,6 +790,12 @@ SGD_API void SGD_DECL sgd_ClearScene();
 //! If the release all handles argument is true, sgd_ReleaseAllHandles is also called, allowing
 //! you to reset to the initial app state with a single command.
 SGD_API void SGD_DECL sgd_ResetScene(SGD_Bool releaseAllHandles);
+
+//! Experimental JSON loader!
+SGD_API void SGD_DECL sgd_LoadScene(SGD_String path);
+
+//! Experimental JSON saver!
+SGD_API void SGD_DECL sgd_SaveScene(SGD_String path);
 
 //! Set scene ambient light color.
 SGD_API void SGD_DECL sgd_SetAmbientLightColor(float red, float green, float blue, float alpha);

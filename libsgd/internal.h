@@ -21,6 +21,7 @@ inline OverlayPtr g_overlay;
 inline DrawListPtr g_drawList;
 
 [[noreturn]] void error(CString message);
+[[noreturn]] void error(CFileioEx fileioEx);
 [[noreturn]] void error(CString error, CString message);
 [[noreturn]] void error(CString error, CFileioEx& ex);
 

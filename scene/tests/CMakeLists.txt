@@ -42,3 +42,6 @@ target_link_libraries(scene_tests_blendtest scene)
 
 add_executable(scene_tests_terrain scene_tests_terrain.cpp)
 target_link_libraries(scene_tests_terrain scene)
+
+add_executable(scene_tests_serialize scene_tests_serialize.cpp)
+target_link_libraries(scene_tests_serialize scene)

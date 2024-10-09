@@ -80,6 +80,9 @@ add_library(scene
 	scene/scenerenderer.cpp
 	scene/scenerenderer.h
 
+	serialize/serialize.cpp
+	serialize/serialize.h
+
 	skybox/skybox.cpp
 	skybox/skybox.h
 	skybox/skyboxrenderer.cpp

@@ -22,6 +22,10 @@ void error(CString message) {
 	sgd_Error(message.c_str());
 }
 
+void error(CFileioEx fileioEx) {
+	sgdx::error(fileioEx.message());
+}
+
 void error(CString error, CString message) {
 	sgdx::error(error + ": " + message);
 }
