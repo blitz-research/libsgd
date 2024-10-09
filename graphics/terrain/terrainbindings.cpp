@@ -163,7 +163,7 @@ void TerrainBindings::onValidate() const {
 		}
 	}
 
-	log() << "### Terrain mesh quadsPerTile: " << quadsPerTile << "vertices:" << vertices.size()
+	log() << "### Terrain mesh, quadsPerTile:" << quadsPerTile << "vertices:" << vertices.size()
 		  << "triangles:" << indices.size() / 3;
 
 	m_vertexBuffer = new Buffer(BufferType::vertex, vertices.data(), sizeof(Vertex) * vertices.size());

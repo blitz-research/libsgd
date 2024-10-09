@@ -14,29 +14,32 @@ Local env =  LoadCubeTexture("sgd://envmaps/sunnysky-cube.png",TEXTURE_FORMAT_AN
 SetEnvTexture env
 CreateSkybox(env)
 
-Local heightTexture = Load2DTexture("~/Desktop/Canyon/Canyon Height Map EXR.exr", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_DEFAULT)
-Local normalTexture = Load2DTexture("~/Desktop/Canyon/Canyon Normal Map.png", TEXTURE_FORMAT_RGBA8, TEXTURE_FLAGS_DEFAULT)
-Local material = LoadPBRMaterial("~/Desktop/Canyon/Canyon Diffuse.png")
+Local heightTexture = Load2DTexture("sgd://terrains/canyon/height.exr", TEXTURE_FORMAT_ANY, TEXTURE_FLAGS_DEFAULT)
+Local normalTexture = Load2DTexture("sgd://terrains/canyon/normal.png", TEXTURE_FORMAT_RGBA8, TEXTURE_FLAGS_DEFAULT)
+Local material = LoadPBRMaterial("sgd://terrains/canyon/albedo.png")
 
 Local terrain = CreateTerrain()
 
-SetTerrainSize terrain,3072
-SetTerrainLODs terrain,4
+SetTerrainSize terrain,4096
+SetTerrainLODs terrain,5
 SetTerrainMaterialSize terrain,4096
 SetTerrainHeightTexture terrain,heightTexture
 SetTerrainNormalTexture terrain,normalTexture
 SetTerrainMaterial terrain,material
 
-SetEntityScale terrain, 1,2048,1
+SetEntityScale terrain, 1,512,1
 
 createPlayer(0)
-MoveEntity player,0,512,0
+MoveEntity player,0,256,0
 
 Local debug=0
 
 While (PollEvents() And 1)<>1
 
-	PlayerFly(.5)
+	Local speed#=.25
+	If IsKeyDown(KEY_LEFT_SHIFT) speed = 2.5
+	
+	PlayerFly(speed)
 	
 	If IsKeyHit(KEY_SPACE)
 		debug=1-debug

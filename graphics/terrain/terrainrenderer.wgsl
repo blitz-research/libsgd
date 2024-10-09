@@ -26,8 +26,7 @@ struct Varying {
     @location(0) position: vec3f,
     @location(1) normalTexCoords: vec2f,
     @location(2) materialTexCoords: vec2f,
-    @location(3) lod: f32,
-    @location(4) color: vec4f
+    @location(3) color: vec4f,
 }
 
 const lods = array<vec2f, 65>(
@@ -54,7 +53,7 @@ const offs = array<vec4f, 13>(
 	vec4f(0.0),  vec4f(-1.0,0.0, 1.0,0.0), vec4f(0.0),
 	vec4f(0.0,-1.0, 0.0,1.0), vec4f(0.0), vec4f(0.0,-1.0, 0.0,1.0),
 	vec4f(0.0), vec4f(-1.0,0.0, 1.0,0.0), vec4f(0.0),
-	vec4f(-.5,.5f, .5,-.5), vec4f(-.5,-.5, .5,.5),
+	vec4f(-.5,.5, .5,-.5), vec4f(-.5,-.5, .5,.5),
 	vec4f(-.5,-.5, .5,.5), vec4f(-.5,.5, .5,-.5)
 );
 
@@ -77,13 +76,13 @@ const offs = array<vec4f, 13>(
     let v = pos - eye;
     let d = max(abs(v.x), abs(v.z)) / tileSize - 0.5;
 
-    let i = min(i32(floor(d)) + 1, 64);
+    let i = i32(min(floor(d) + 1, 64));
 
     var lodNear = lods[i].x;
     var tween = lods[i].y * fract(d);
 
 	if(lodNear == vertex.position.y + 1 && tween == 0) {
-		lodNear = vertex.position.y;
+		lodNear -= 1.0;//= vertex.position.y;
 		tween = 1;
 	}else if(lodNear != vertex.position.y) {
 	    color = vec3f(1,0,1);
@@ -92,15 +91,15 @@ const offs = array<vec4f, 13>(
 
     // ***** Compute height *****
 
-    let off = offs[vertexId % 13] * exp2(lodNear);
+    var off = offs[vertexId % 13] * exp2(lodNear);
 
     let texCoords = pos.xz;
     let texelSize = 1.0 / vec2f(textureDimensions(terrainHeightTexture));
 
     let heightNear = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, texCoords * texelSize + 0.5, lodNear).r;
-    let height0 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.xy) * texelSize + 0.5, lodFar).r;
-    let height1 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.zw) * texelSize + 0.5, lodFar).r;
-    let heightFar = mix(height0, height1, .5);
+    let heightFar0 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.xy) * texelSize + 0.5, lodFar).r;
+    let heightFar1 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.zw) * texelSize + 0.5, lodFar).r;
+    let heightFar = mix(heightFar0, heightFar1, .5);
 
     pos.y = mix(heightNear, heightFar, tween);
 
@@ -111,7 +110,6 @@ const offs = array<vec4f, 13>(
     out.position = (terrainUniforms.worldMatrix * vec4f(pos, 1.0)).xyz;
     out.normalTexCoords = texCoords / vec2f(textureDimensions(terrainNormalTexture)) + 0.5;
     out.materialTexCoords = texCoords * terrainUniforms.materialTexelSize + 0.5;
-    out.lod = lodNear + tween;
     out.color = vec4f(color, 1.0);
     //
     return out;
@@ -125,7 +123,7 @@ const offs = array<vec4f, 13>(
     }
 
     var tanMatrix: mat3x3f;
-    tanMatrix[2] = normalize(textureSampleLevel(terrainNormalTexture, terrainNormalSampler, in.normalTexCoords, in.lod).rgb * 2.0 - 1.0).xzy;
+    tanMatrix[2] = normalize(textureSample(terrainNormalTexture, terrainNormalSampler, in.normalTexCoords).rgb * 2.0 - 1.0).xzy;
 
     let color = evaluateMaterial(in.position, tanMatrix, vec3f(in.materialTexCoords, 0.0), vec4f(1));
 

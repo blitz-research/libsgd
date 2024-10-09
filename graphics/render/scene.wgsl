@@ -26,6 +26,10 @@ fn isNan(tz:f32) ->bool {
     return false;
 }
 
+fn fmod(x:vec3f, y:f32) -> vec3f {
+    return x - floor(x / y) * y;
+}
+
 // ***** Scene *****
 
 // Note: *MUST* stay in sync with scenebindgroup.h
