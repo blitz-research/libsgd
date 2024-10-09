@@ -19,4 +19,15 @@ An entity is a visual element in the scene. Every entity has the following prope
 
 * Enabled flag - flag indicating when the entity is enabled or not. Use :any:`sgd_SetEntityEnabled` and :any:`sgd_IsEntityEnabled` to set and get this property. For an entity to be collided with or picked, it and it's ancestor's enabled flags must be set to true.
 
+
+Types
+-----
+
+.. doxygengroup:: EntityTypes
+    :content-only:
+
+Functions
+---------
+
 .. doxygengroup:: Entity
+    :content-only:

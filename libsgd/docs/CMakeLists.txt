@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Requires python packages: sphinx, breathe, sphinx_tabs
+
 project(libsgd_docs)
 
 find_package(Doxygen)

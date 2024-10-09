@@ -16,6 +16,7 @@ To render a scene, use the :any:`sgd_RenderScene function`.
 Once the scene has been rendered, use the :any:`sgd_Present` function to copy the render result to the app window.
 
 Example code
+------------
 
 .. tabs::
 
@@ -88,4 +89,8 @@ Example code
 
         Wend
 
+Functions
+---------
+
 .. doxygengroup:: Scene
+    :content-only:

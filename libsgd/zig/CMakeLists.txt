@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Requires python package: pycparser
+
 project(libsgd_zig)
 
 find_package(Python3 COMPONENTS Interpreter)

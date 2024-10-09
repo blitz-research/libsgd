@@ -126,7 +126,7 @@ void SceneRenderer::updateCameraUniforms() {
 		auto mouse = window->mouse()->position().xy() / Vec2f(window->size()) * 2.0f - 1.0f;
 		worldMatrix = AffineMat4r::rotation({-mouse.y * halfPi, -mouse.x * pi, 0});
 		auto aspect = (float)window->size().x / (float)window->size().y;
-		projMatrix = Mat4f::perspective(45, aspect, .1, 100);
+		projMatrix = Mat4f::perspective(90, aspect, .1, 100);
 	} else {
 		worldMatrix = m_camera->worldMatrix();
 		projMatrix = m_camera->projectionMatrix();

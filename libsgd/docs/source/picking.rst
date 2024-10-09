@@ -1,4 +1,10 @@
-Collider Picking
-================
+Picking
+=======
+
+Picking...
+
+Functions
+---------
 
 .. doxygengroup:: Picking
+    :content-only:

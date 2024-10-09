@@ -1,4 +1,0 @@
-Types
-=====
-
-.. doxygengroup:: Types

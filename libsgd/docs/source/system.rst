@@ -7,6 +7,14 @@ To startup and shutdown LibSGD, use the :any:`sgd_Init` and :any:`sgd_Terminate`
 
 Use :any:`sgd_PollEvents` to poll for user input and system events. You need to call this fairly regularly or the OS may start displaying a 'busy' icon or pointer, or even think your app has crash and terminate it completely.
 
+Types
+-----
 
+.. doxygengroup:: SystemTypes
+    :content-only:
+
+Functions
+---------
 
 .. doxygengroup:: System
+    :content-only:

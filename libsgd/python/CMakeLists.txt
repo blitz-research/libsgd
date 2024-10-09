@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Requires python packages: build, twine
+
 project(libsgd_python)
 
 # 64 bit only for now

@@ -6,7 +6,7 @@ namespace sgd {
 
 SGD_SHARED(Camera);
 
-enum struct CameraType { undefined, perspective, orthographic };
+enum struct CameraType { perspective, orthographic };
 
 struct Camera : Entity {
 	SGD_OBJECT_TYPE(Camera, Entity);
@@ -15,9 +15,9 @@ struct Camera : Entity {
 	explicit Camera(const Camera* that);
 
 	Property<Vec2u> viewportSize{Vec2u(640u, 480u)};
-	Property<float> fov{45};
-	Property<float> near{.125f};
-	Property<float> far{1024.0f};
+	Property<float> fov{90};
+	Property<float> near{.1};
+	Property<float> far{1000};
 
 	CameraType type() const {
 		return m_type;

@@ -49,7 +49,6 @@ Mat4f Camera::projectionMatrix() const {
 	auto aspect = (float)viewportSize().x / (float)viewportSize().y;
 
 	switch (m_type) {
-	case CameraType::undefined:
 	case CameraType::perspective:
 		return m_projMatrix = Mat4f::perspective(fov(), aspect, near(), far());
 	case CameraType::orthographic:

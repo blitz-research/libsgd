@@ -390,6 +390,10 @@ SGD_Camera SGD_DECL sgd_CreateOrthographicCamera() {
 	return sgdx::createHandle(camera);
 }
 
+SGD_CameraType SGD_DECL sgd_GetCameraType(SGD_Camera hcamera) {
+	return (SGD_CameraType)sgdx::resolveHandle<sgdx::Camera>(hcamera)->type();
+}
+
 void SGD_DECL sgd_SetCameraFOV(SGD_Camera hcamera, float fov) {
 	sgdx::resolveHandle<sgdx::Camera>(hcamera)->fov = fov;
 }
@@ -458,6 +462,26 @@ SGD_Light SGD_DECL sgd_CreateSpotLight() {
 	return sgdx::createHandle(light);
 }
 
+SGD_LightType SGD_DECL sgd_GetLightType(SGD_Light hlight) {
+	return (SGD_LightType)sgdx::resolveHandle<sgdx::Light>(hlight)->type();
+}
+
+void SGD_DECL sgd_SetLightShadowsEnabled(SGD_Light hlight, SGD_Bool enabled) {
+	sgdx::resolveHandle<sgdx::Light>(hlight)-> shadowsEnabled = enabled;
+}
+
+SGD_Bool SGD_DECL sgd_IsLightShadowsEnabled(SGD_Light hlight) {
+	return sgdx::resolveHandle<sgdx::Light>(hlight) -> shadowsEnabled();
+}
+
+void SGD_DECL sgd_SetLightPriority(SGD_Light hlight, int priority) {
+	sgdx::resolveHandle<sgdx::Light>(hlight)->priority= priority;
+}
+
+int SGD_DECL sgd_GetLightPriority(SGD_Light hlight) {
+	return sgdx::resolveHandle<sgdx::Light>(hlight)->priority();
+}
+
 void SGD_DECL sgd_SetLightColor(SGD_Light hlight, float red, float green, float blue, float alpha) {
 	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
 	light->color = sgdx::Vec4f(red, green, blue, alpha);
@@ -481,21 +505,6 @@ void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light hlight, float angle) {
 void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light hlight, float angle) {
 	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
 	light->outerConeAngle = angle;
-}
-
-void SGD_DECL sgd_SetLightShadowsEnabled(SGD_Light hlight, SGD_Bool enabled) {
-	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-	light->shadowsEnabled = enabled;
-}
-
-SGD_Bool SGD_DECL sgd_IsLightShadowsEnabled(SGD_Light hlight) {
-	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-	return light->shadowsEnabled();
-}
-
-void SGD_DECL sgd_SetLightPriority(SGD_Light hlight, int priority) {
-	auto light = sgdx::resolveHandle<sgdx::Light>(hlight);
-	light->priority = priority;
 }
 
 // ***** Model *****

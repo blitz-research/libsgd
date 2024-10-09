@@ -1,4 +1,0 @@
-Collisions
-==========
-
-.. doxygengroup:: Collisions

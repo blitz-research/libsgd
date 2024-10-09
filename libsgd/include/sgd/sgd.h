@@ -10,7 +10,7 @@
 #define SGD_VERSION_PATCH 0
 #define SGD_VERSION "0.16.0" // How to macro-ize this?
 
-#if SGD_GENAPI
+#if defined(SWIG) || defined(SGD_GENAPI)
 
 #define SGD_API
 #define SGD_DECL
@@ -55,16 +55,11 @@
 
 //! @endcond
 
-//! @defgroup Types Types
+//! @defgroup CoreTypes CoreTypes
 //! @{
 
-static const int SGD_NULL = 0;
-
 //! Boolean type. Non-0 values indicate true, 0 indicates false.
-typedef enum SGD_Bool {
-	SGD_FALSE = 0,
-	SGD_TRUE = 1
-} SGD_Bool;
+typedef int SGD_Bool;
 
 //! Flags type used to pass bitmask style enums to functions.
 typedef int SGD_Flags;
@@ -75,13 +70,37 @@ typedef int SGD_Handle;
 //! String type. Strings are assumed to be UTF-8 encoded.
 typedef const char* SGD_String;
 
-#if defined(SWIG) || UINTPTR_MAX == 0xffffffffffffffff
+#if defined(SWIG) || defined(SGD_GENAPI) || UINTPTR_MAX == 0xffffffffffffffff
 //! Floating point type.
 typedef double SGD_Real;
 #else
 //! Flat point type.
 typedef float SGD_Real;
 #endif
+
+//! @}
+
+//! @defgroup CoreConsts CoreConsts
+//! @{
+
+static const int SGD_NULL = 0;
+static const int SGD_TRUE = 1;
+static const int SGD_FALSE = 0;
+
+//! @}
+
+//! @defgroup SystemTypes SystemTypes
+//! @{
+
+//! Events returned by sgd_PollEvents.
+typedef enum SGD_EventMask {
+	SGD_EVENT_MASK_CLOSE_CLICKED = 0x01, //!< Window close clicked.
+	SGD_EVENT_MASK_SIZE_CHANGED = 0x02,	 //!< Window size changed.
+	SGD_EVENT_MASK_LOST_FOCUS = 0x04,	 //!< Window lost focus.
+	SGD_EVENT_MASK_GOT_FOCUS = 0x08,	 //!< Window got focus.
+	SGD_EVENT_MASK_SUSPENDED = 0x10,	 //!< App suspended.
+	SGD_EVENT_MASK_RESUMED = 0x20		 //!< App resumed.
+} SGD_EventMask;
 
 //! @}
 
@@ -117,7 +136,7 @@ SGD_API void SGD_DECL sgd_Terminate();
 SGD_API void SGD_DECL sgd_SetConfigVar(SGD_String name, SGD_String value);
 
 //! Set global configuration variable. The returned value is valid until the next call to sgd_GetConfigVar.
-// SGD_API SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name);
+SGD_API SGD_String SGD_DECL sgd_GetConfigVar(SGD_String name);
 
 //! Set error handler callback.
 SGD_API void SGD_DECL sgd_SetErrorHandler(void(SGD_DECL* handler)(SGD_String error, void* context), void* context);
@@ -137,19 +156,9 @@ SGD_API int SGD_DECL sgd_GetDesktopWidth();
 //! Return height of desktop in pixels.
 SGD_API int SGD_DECL sgd_GetDesktopHeight();
 
-//! Eevents returned by sgd_PollEvents.
-typedef enum SGD_EventMask {
-	SGD_EVENT_MASK_CLOSE_CLICKED = 0x01, //!< Window close clicked.
-	SGD_EVENT_MASK_SIZE_CHANGED = 0x02,	 //!< Window size changed.
-	SGD_EVENT_MASK_LOST_FOCUS = 0x04,	 //!< Window lost focus.
-	SGD_EVENT_MASK_GOT_FOCUS = 0x08,	 //!< Window got focus.
-	SGD_EVENT_MASK_SUSPENDED = 0x10,	 //!< App suspended.
-	SGD_EVENT_MASK_RESUMED = 0x20		 //!< App resumed.
-} SGD_EventMask;
-
 //! Poll system for events, returns a bit mask of event types that occured.
 //!
-//! The returned return value should be bitwise 'and'ed with one of the SGD_EventMask
+//! The returned return value should be bitwise 'and'ed with one of the @ref SGD_EventMask
 //! values to determine whether a particular event occured or not.
 SGD_API SGD_EventMask SGD_DECL sgd_PollEvents();
 
@@ -174,7 +183,7 @@ SGD_API void SGD_DECL sgd_DebugMemory();
 
 //! @}
 
-//! @defgroup Window Window
+//! @defgroup WindowTypes WindowTypes
 //! @{
 
 //! Window states.
@@ -188,11 +197,16 @@ typedef enum SGD_WindowState {
 
 //! Window flags.
 typedef enum SGD_WindowFlags {
-	SGD_WINDOW_FLAGS_NONE = 0x00,		 //!< No special flags.
+	SGD_WINDOW_FLAGS_NONE = 0x00,		//!< No special flags.
 	SGD_WINDOW_FLAGS_FULLSCREEN = 0x01, //!< Create fullscreen window.
-	SGD_WINDOW_FLAGS_RESIZABLE = 0x02,	 //!< Create resizable window.
-	SGD_WINDOW_FLAGS_CENTERED = 0x04	 //!< Create window centered on desktop.
+	SGD_WINDOW_FLAGS_RESIZABLE = 0x02,	//!< Create resizable window.
+	SGD_WINDOW_FLAGS_CENTERED = 0x04	//!< Create window centered on desktop.
 } SGD_WindowFlags;
+
+//! @}
+
+//! @defgroup Window Window
+//! @{
 
 //! Create a new window. See @ref SGD_WindowFlags for possible values for `flags`.
 SGD_API void SGD_DECL sgd_CreateWindow(int width, int height, SGD_String title, SGD_Flags flags);
@@ -235,6 +249,19 @@ SGD_API SGD_WindowState SGD_DECL sgd_GetWindowState();
 
 //! @}
 
+//! @defgroup InputTypes InputTypes
+//! @{
+
+//! Mouse cursor modes.
+typedef enum SGD_MouseCursorMode {
+	SGD_MOUSE_CURSOR_MODE_NORMAL = 1,
+	SGD_MOUSE_CURSOR_MODE_HIDDEN = 2,
+	SGD_MOUSE_CURSOR_MODE_DISABLED = 3,
+	SGD_MOUSE_CURSOR_MODE_CAPTURED = 4
+} SGD_MouseCursorMode;
+
+//! @}
+
 //! @defgroup Input Input
 //! @{
 
@@ -271,14 +298,6 @@ SGD_API float SGD_DECL sgd_GetMouseVZ();
 //! Set Mouse Z (scrollwheel) position.
 SGD_API void SGD_DECL sgd_SetMouseZ(float z);
 
-//! Mouse cursor modes.
-typedef enum SGD_MouseCursorMode {
-	SGD_MOUSE_CURSOR_MODE_NORMAL = 1,
-	SGD_MOUSE_CURSOR_MODE_HIDDEN = 2,
-	SGD_MOUSE_CURSOR_MODE_DISABLED = 3,
-	SGD_MOUSE_CURSOR_MODE_CAPTURED = 4
-} SGD_MouseCursorMode;
-
 //! Set mouse cursor mode.
 SGD_API void SGD_DECL sgd_SetMouseCursorMode(SGD_MouseCursorMode cursorMode);
 
@@ -302,7 +321,7 @@ SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, SGD_GamepadAxis axis);
 
 //! @}
 
-//! @defgroup Texture Texture
+//! @defgroup TextureTypes TextureTypes
 //! @{
 
 //! Texture handle type.
@@ -351,6 +370,11 @@ typedef enum SGD_TextureFlags {
 	SGD_TEXTURE_FLAGS_IMAGE = 0x01f, //!< Combination of SGD_TEXTURE_FLAGS_FILTER, SGD_TEXTURE_FLAGS_MIPMAP and all clamp flags.
 } SGD_TextureFlags;
 
+//! @}
+
+//! @defgroup Texture Texture
+//! @{
+
 //! Load a new 2D texture. See also @ref SGD_TextureFlags.
 //!
 //! @param path is the file path of the texture to load.
@@ -397,7 +421,7 @@ SGD_API int SGD_DECL sgd_GetTexelSRGBA(SGD_Texture texture, int x, int y);
 
 //! @}
 
-//! @defgroup Material Material
+//! @defgroup MaterialTypes MaterialTypes
 //! @{
 
 //! Material handle type.
@@ -407,7 +431,7 @@ typedef SGD_Handle SGD_Material;
 typedef enum SGD_BlendMode {
 	SGD_BLEND_MODE_OPAQUE = 1,
 	SGD_BLEND_MODE_ALPHA_MASK = 2,
-	SGD_BLEND_MODE_ALPHA_BLEND = 3
+	SGD_BLEND_MODE_ALPHA_BLEND = 3,
 } SGD_BlendMode;
 
 //! Depth Comparison function.
@@ -419,11 +443,20 @@ typedef enum SGD_DepthFunc {
 	SGD_DEPTH_FUNC_GREATER = 5,
 	SGD_DEPTH_FUNC_NOT_EQUAL = 6,
 	SGD_DEPTH_FUNC_GREATER_EQUAL = 7,
-	SGD_DEPTH_FUNC_ALWAYS = 8
+	SGD_DEPTH_FUNC_ALWAYS = 8,
 } SGD_DepthFunc;
 
 //! Cull modes.
-typedef enum SGD_CullMode { SGD_CULL_MODE_NONE = 1, SGD_CULL_MODE_FRONT = 2, SGD_CULL_MODE_BACK = 3 } SGD_CullMode;
+typedef enum SGD_CullMode {
+	SGD_CULL_MODE_NONE = 1,
+	SGD_CULL_MODE_FRONT = 2,
+	SGD_CULL_MODE_BACK = 3,
+} SGD_CullMode;
+
+//! @}
+
+//! @defgroup Material Material
+//! @{
 
 //! Load a new PBR material.
 SGD_API SGD_Material SGD_DECL sgd_LoadPBRMaterial(SGD_String path);
@@ -458,11 +491,26 @@ SGD_API void SGD_DECL sgd_SetMaterialFloat(SGD_Material material, SGD_String par
 
 //! @}
 
+//! @defgroup MeshTypes MeshTypes
+//! @{
+
+//! Mesh flags.
+typedef enum SGD_MeshFlags {
+	SGD_MESH_FLAGS_NONE = 0,			 //!< No special mesh flags.
+	SGD_MESH_FLAGS_TANGENTS_ENABLED = 1, //!< Mesh contains materials with normal maps.
+	SGD_MESH_FLAGS_BLENDED_SURFACES = 2, //!< Mesh contains materials that use alphaBlend blend mode.
+} SGD_MeshFlags;
+
+//! @}
+
 //! @defgroup Mesh Mesh
 //! @{
 
 //! Mesh handle type
 typedef SGD_Handle SGD_Mesh;
+
+//! Surface handle type.
+typedef SGD_Handle SGD_Surface;
 
 //! Load a new mesh.
 SGD_API SGD_Mesh SGD_DECL sgd_LoadMesh(SGD_String path);
@@ -530,18 +578,6 @@ SGD_API float SGD_DECL sgd_GetMeshBoundsMaxY(SGD_Mesh mesh);
 
 //! Get mesh bounding box max z coordinate.
 SGD_API float SGD_DECL sgd_GetMeshBoundsMaxZ(SGD_Mesh mesh);
-
-//! @}
-
-//! @defgroup MeshBuilding Mesh Building
-//! @{
-
-//! Mesh flags.
-typedef enum SGD_MeshFlags {
-	SGD_MESH_FLAGS_NONE = 0,			 //!< No special mesh flags.
-	SGD_MESH_FLAGS_TANGENTS_ENABLED = 1, //!< Mesh contains materials with normal maps.
-	SGD_MESH_FLAGS_BLENDED_SURFACES = 2, //!< Mesh contains materials that use alphaBlend blend mode.
-} SGD_MeshFlags;
 
 //! Create a new custom mesh. See also @ref SGD_MeshFlags.
 SGD_API SGD_Mesh SGD_DECL sgd_CreateMesh(int vertexCount, SGD_Flags flags);
@@ -622,11 +658,6 @@ SGD_API float SGD_DECL sgd_GetVertexU0(SGD_Mesh mesh, int vertex);
 //! Get vertex tangent coorindate 1 y component.
 SGD_API float SGD_DECL sgd_GetVertexV0(SGD_Mesh mesh, int vertex);
 
-// ***** Surfaces *****
-
-//! Surface handle type.
-typedef SGD_Handle SGD_Surface;
-
 //! Create a new Surface and add it to mesh.
 SGD_API SGD_Surface SGD_DECL sgd_CreateSurface(SGD_Mesh mesh, SGD_Material material, int triangleCount);
 
@@ -656,11 +687,16 @@ SGD_API int SGD_DECL sgd_GetTriangleVertex(SGD_Surface surface, int triangle, in
 
 //! @}
 
-//! @defgroup Font Font
+//! @defgroup FontTypes FontTypes
 //! @{
 
 //! Font handle type.
 typedef SGD_Handle SGD_Font;
+
+//! @}
+
+//! @defgroup Font Font
+//! @{
 
 //! Load a new font.
 SGD_API SGD_Font SGD_DECL sgd_LoadFont(SGD_String path, float height);
@@ -673,11 +709,16 @@ SGD_API float SGD_DECL sgd_GetFontHeight(SGD_Font font);
 
 //! @}
 
-//! @defgroup Image Image
+//! @defgroup ImageTypes ImageTypes
 //! @{
 
 //! Image type
 typedef SGD_Handle SGD_Image;
+
+//! @}
+
+//! @defgroup Image Image
+//! @{
 
 //! Load an image for use with 3D sprites or Draw2DImage.
 SGD_API SGD_Image SGD_DECL sgd_LoadImage(SGD_String path);
@@ -844,11 +885,16 @@ SGD_API float SGD_DECL sgd_GetRPS();
 
 //! @}
 
-//! @defgroup Entity Entity
+//! @defgroup EntityTypes EntityTypes
 //! @{
 
 //! Entity handle type.
 typedef SGD_Handle SGD_Entity;
+
+//! @}
+
+//! @defgroup Entity Entity
+//! @{
 
 //! Enable or diasable entity.
 SGD_API void SGD_DECL sgd_SetEntityEnabled(SGD_Entity entity, SGD_Bool enabled);
@@ -996,25 +1042,38 @@ SGD_API SGD_Real SGD_DECL sgd_GetTransformedZ();
 
 //! @}
 
-//! @defgroup Camera Camera
+//! @defgroup CameraTypes CameraTypes
 //! @{
 
 //! Camera handle type.
 typedef SGD_Entity SGD_Camera;
 
-//! Create a perspective camera.
+typedef enum SGD_CameraType {
+	SGD_CAMERA_TYPE_PERSPECTIVE = 1,
+	SGD_CAMERA_TYPE_ORTHOGRAPHIC = 2,
+} SGD_CameraType;
+
+//! @}
+
+//! @defgroup Camera Camera
+//! @{
+
+//! Create a new perspective camera.
 SGD_API SGD_Camera SGD_DECL sgd_CreatePerspectiveCamera();
 
-//! Create an orthographic camera.
+//! Create a new orthographic camera.
 SGD_API SGD_Camera SGD_DECL sgd_CreateOrthographicCamera();
 
-//! Set camera vertical field of view in degrees. Defaults to 45.
+//! Get camera type.
+SGD_API SGD_CameraType SGD_DECL sgd_GetCameraType(SGD_Camera camera);
+
+//! Set camera vertical field of view in degrees. Defaults to 90.
 SGD_API void SGD_DECL sgd_SetCameraFOV(SGD_Camera camera, float fovY);
 
-//! Set camera near clipping plane. Defaults to 0.125.
+//! Set camera near clipping plane. Defaults to 0.1.
 SGD_API void SGD_DECL sgd_SetCameraNear(SGD_Camera camera, float near);
 
-//! Set camera far clipping plane. Defaults to 1024.
+//! Set camera far clipping plane. Defaults to 1000.
 SGD_API void SGD_DECL sgd_SetCameraFar(SGD_Camera camera, float far);
 
 //! Project 3d point in world space to window coordinates.
@@ -1040,35 +1099,46 @@ SGD_API SGD_Real SGD_DECL sgd_GetUnprojectedZ();
 
 //! @}
 
-//! @defgroup Light Light
+//! @defgroup LightTypes LightTypes
 //! @{
 
 //! Light handle type.
 typedef SGD_Entity SGD_Light;
 
-//! Create a directional light. Max directional lights is currently hardcoded at 4.
+//! Light type.
+typedef enum SGD_LightType {
+	SGD_LIGHT_TYPE_DIRECTIONAL = 1,
+	SGD_LIGHT_TYPE_POINT = 2,
+	SGD_LIGHT_TYPE_SPOT = 3,
+} SGD_LightType;
+
+//! @}
+
+//! @defgroup Light Light
+//! @{
+
+//! Create a new directional light.
+//!
+//! A maximum of 4 directional lights are supported by the renderer. If you create more than that, the 4 with the highest
+//! priority will be used. See @ref sgd_SetLightPriority.
 SGD_API SGD_Light SGD_DECL sgd_CreateDirectionalLight();
 
-//! Create a point light. Max point lights is currently hardcoded at 32.
+//! Create a new point light.
+//!
+//! A maximum of 32 point lights are supported by the renderer. If you create more than that, the 32 with the highest priority
+//! will be used. See @ref sgd_SetLightPriority. If there are more than 32 with the highest priority, the 32 nearest the camera
+//! will be used.
 SGD_API SGD_Light SGD_DECL sgd_CreatePointLight();
 
-//! Create a spot light. Max spot lights is currently hardcodeded at 16.
+//! Create a new spot light.
+//!
+//! A maximum of 16 spot lights are supported by the renderer. If you create more than that, the 16 with the highest priority
+//! will be used. See @ref sgd_SetLightPriority. If there are more than 16 with the highest priority, the 16 nearest the camera
+//! will be used.
 SGD_API SGD_Light SGD_DECL sgd_CreateSpotLight();
 
-//! Set a light's color.
-SGD_API void SGD_DECL sgd_SetLightColor(SGD_Light light, float red, float green, float blue, float alpha);
-
-//! Set a point/spot light's range.
-SGD_API void SGD_DECL sgd_SetLightRange(SGD_Light light, float range);
-
-//! Set a point/spot light's falloff.
-SGD_API void SGD_DECL sgd_SetLightFalloff(SGD_Light light, float falloff);
-
-//! Set a spot light's inner cone angle in degrees.
-SGD_API void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light light, float angle);
-
-//! Set a spot light's outer cone angle in degrees.
-SGD_API void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light light, float angle);
+//! Get Light type.
+SGD_API SGD_LightType SGD_DECL sgd_GetLightType(SGD_Light light);
 
 //! Set light shadow mapping enabled, defaults to false.
 SGD_API void SGD_DECL sgd_SetLightShadowsEnabled(SGD_Light light, SGD_Bool enabled);
@@ -1076,8 +1146,26 @@ SGD_API void SGD_DECL sgd_SetLightShadowsEnabled(SGD_Light light, SGD_Bool enabl
 //! Get light shadow mapping enabled.
 SGD_API SGD_Bool SGD_DECL sgd_IsLightShadowsEnabled(SGD_Light light);
 
-//! Set light priority.
+//! Set light priority, defaults to 0.
 SGD_API void SGD_DECL sgd_SetLightPriority(SGD_Light light, int priority);
+
+//! Get light priority.
+SGD_API int SGD_DECL sgd_GetLightPriority(SGD_Light light);
+
+//! Set light color.
+SGD_API void SGD_DECL sgd_SetLightColor(SGD_Light light, float red, float green, float blue, float alpha);
+
+//! Set point/spot light range.
+SGD_API void SGD_DECL sgd_SetLightRange(SGD_Light light, float range);
+
+//! Set point/spot light falloff.
+SGD_API void SGD_DECL sgd_SetLightFalloff(SGD_Light light, float falloff);
+
+//! Set spot light inner cone angle in degrees.
+SGD_API void SGD_DECL sgd_SetLightInnerConeAngle(SGD_Light light, float angle);
+
+//! Set spot light outer cone angle in degrees.
+SGD_API void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light light, float angle);
 
 //! @}
 
@@ -1093,6 +1181,11 @@ typedef enum SGD_AnimationMode {
 	SGD_ANIMATION_MODE_LOOP = 2,
 	SGD_ANIMATION_MODE_PING_PONG = 3
 } SGD_AnimationMode;
+
+//! @}
+
+//! @defgroup Model Model
+//! @{
 
 //! Load a model.
 SGD_API SGD_Model SGD_DECL sgd_LoadModel(SGD_String path);
@@ -1118,11 +1211,16 @@ SGD_API void SGD_DECL sgd_AnimateModel(SGD_Model model, int animation, float tim
 
 //! @}
 
-//! @defgroup Skybox Skybox
+//! @defgroup SkyboxTypes SkyboxTypes
 //! @{
 
 //! Skybox handle type.
 typedef SGD_Entity SGD_Skybox;
+
+//! @}
+
+//! @defgroup Skybox Skybox
+//! @{
 
 //! Load a skybox.
 SGD_API SGD_Skybox SGD_DECL sgd_LoadSkybox(SGD_String path, float roughness);
@@ -1138,10 +1236,16 @@ SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox skybox, float roughness)
 
 //! @}
 
-//! @defgroup Terrain Terrain
+//! @defgroup TerrainTypes TerrainTypes
+//! @{
 
 //! Terrain handle type.
 typedef SGD_Entity SGD_Terrain;
+
+//! @}
+
+//! @defgroup Terrain Terrain
+//! @{
 
 //! Create a new terrain.
 SGD_API SGD_Terrain SGD_DECL sgd_CreateTerrain();
@@ -1169,11 +1273,16 @@ SGD_API void SGD_DECL sgd_SetTerrainDebugMode(SGD_Terrain terrain, int debugMode
 
 //! @}
 
-//! @defgroup Sprite Sprite
+//! @defgroup SpriteTypes SpriteTypes
 //! @{
 
 //! Sprite handle type.
 typedef SGD_Entity SGD_Sprite;
+
+//! @}
+
+//! @defgroup Sprite Sprite
+//! @{
 
 //! Create a new sprite.
 SGD_API SGD_Sprite SGD_DECL sgd_CreateSprite(SGD_Image image);
@@ -1189,7 +1298,7 @@ SGD_API void SGD_DECL sgd_SetSpriteFrame(SGD_Sprite sprite, float frame);
 
 //! @}
 
-//! @defgroup Collisions Collisions
+//! @defgroup CollisionTypes CollisionTypes
 //! @{
 
 //! Collider handle type.
@@ -1202,6 +1311,11 @@ typedef enum SGD_CollisionResponse {
 	SGD_COLLISION_RESPONSE_SLIDE = 2,
 	SGD_COLLISION_RESPONSE_SLIDEXZ = 3
 } SGD_CollisionResponse;
+
+//! @}
+
+//! @defgroup Collision Collision
+//! @{
 
 //! Create a new sphere collider and attach it to entity.
 SGD_API SGD_Collider SGD_DECL sgd_CreateSphereCollider(SGD_Entity entity, int colliderType, float radius);
@@ -1262,7 +1376,8 @@ SGD_API SGD_Real SGD_DECL sgd_GetCollisionNZ(SGD_Collider collider, int index);
 //! Pick first collider along ray passing from camera eye through window coordinates.
 //!
 //! Note that the colliderMask parameter is a 'bitmask' value, where each '1' bit in the value's binary representation
-//! repesents a collider type you want to be included in the pick, allowing you to pick more than 1 collider type in a single pick.
+//! repesents a collider type you want to be included in the pick, allowing you to pick more than 1 collider type in a single
+//! pick.
 //!
 //! For example, if you want the pick to include collider types 0 and 3, you would set bits 0 and 3 in the colliderMask,
 //! resuling in a value of 2^0 | 2^3 == 9.
@@ -1296,11 +1411,16 @@ SGD_API SGD_Real SGD_DECL sgd_GetPickedNZ();
 
 //! @}
 
-//! @defgroup RenderEffects RenderEffects
+//! @defgroup RenderEffectTypes RenderEffectTypes
 //! @{
 
 //! Render effect handle type.
 typedef SGD_Handle SGD_RenderEffect;
+
+//! @}
+
+//! @defgroup RenderEffect RenderEffect
+//! @{
 
 //! Create a new bloom effect and add it to the scene.
 SGD_API SGD_RenderEffect SGD_DECL sgd_CreateBloomEffect();
@@ -1352,8 +1472,13 @@ SGD_API SGD_Bool SGD_DECL sgd_IsRenderEffectEnabled(SGD_RenderEffect effect);
 //! Sound handle type.
 typedef SGD_Handle SGD_Sound;
 
-//! Audo listener handle type
+//! Audo listener handle type.
 typedef SGD_Handle SGD_AudioListener;
+
+//! @}
+
+//! @defgroup Audio Audio
+//! @{
 
 //! Load a new sound.
 SGD_API SGD_Sound SGD_DECL sgd_LoadSound(SGD_String path);

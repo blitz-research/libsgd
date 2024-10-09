@@ -50,7 +50,15 @@ Prelit Materials
 Prelit materials are the simplest type of material you can use. Prelit materials support a single "emissive" texture and a single "emissive" color, which are multiplied together to produce a final surface color. Prelit materials are completed unaffecrted by scene lighting.
 
 
-API
----
+Types
+-----
+
+.. doxygengroup:: MaterialTypes
+    :content-only:
+
+
+Functions
+---------
 
 .. doxygengroup:: Material
+    :content-only:
