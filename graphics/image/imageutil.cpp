@@ -8,9 +8,9 @@ namespace sgd {
 
 Expected<Image*, FileioEx> loadImage(CPath path) {
 
-	auto flags = TextureFlags::array | TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clamp;
+//	auto flags = TextureFlags::array | TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clamp;
 
-	auto texture = loadArrayTexture(path, TextureFormat::any, flags);
+	auto texture = loadArrayTexture(path, TextureFormat::any, TextureFlags::image);
 	if (!texture) return texture.error();
 
 	return new Image(texture.result());
@@ -21,9 +21,7 @@ Expected<Image*, FileioEx> loadArrayImage(CPath path, uint32_t frameCount, uint3
 
 	if (!frameCount || !framesX || !framesY) SGD_ERROR("Invalid frame layout parameters");
 
-	auto flags = TextureFlags::array | TextureFlags::mipmap | TextureFlags::filter | TextureFlags::clamp;
-
-	auto texture = loadArrayTexture(path, TextureFormat::any, flags, frameCount, framesX, framesY, frameSpacing);
+	auto texture = loadArrayTexture(path, TextureFormat::any, TextureFlags::image, frameCount, framesX, framesY, frameSpacing);
 	if(!texture) return texture.error();
 
 	return new Image(texture.result());

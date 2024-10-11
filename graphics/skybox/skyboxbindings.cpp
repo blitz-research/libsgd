@@ -24,15 +24,15 @@ SkyboxBindings::SkyboxBindings() {
 	unlockUniforms();
 
 	skyTexture.changed.connect(this, [=](CTexture* ctexture) { //
-		if(!ctexture) ctexture = blackTexture(TextureFlags::cube);
+		if(!ctexture) ctexture = blackTexture(TextureType::cube);
 		int type;
-		if(bool(ctexture->flags() & TextureFlags::cube)) {
+		if(ctexture->type() == TextureType::cube) {
 			m_bindGroup->setTexture(1, ctexture, false);
 			m_bindGroup->setTexture(2, blackTexture(), false);
 			m_bindGroup->setSampler(3, ctexture);
 			type = 1;
 		}else {
-			m_bindGroup->setTexture(1, blackTexture(TextureFlags::cube), false);
+			m_bindGroup->setTexture(1, blackTexture(TextureType::cube), false);
 			m_bindGroup->setTexture(2, ctexture);
 			type = 2;
 		}

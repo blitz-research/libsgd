@@ -6,7 +6,7 @@ namespace sgd {
 
 Image::Image(Texture* texture)
 	: m_texture(texture),																				 //
-	  m_material(new Material(bool(texture->flags() & TextureFlags::array) ? &imageMaterialDescriptorMX	 //
+	  m_material(new Material(bool(texture->type() & TextureType::array) ? &imageMaterialDescriptorMX	 //
 																		   : &imageMaterialDescriptor)), //
 	  m_bindGroup(new BindGroup(&imageBindGroupDescriptor)),											 //
 	  m_uniforms(new Buffer(BufferType::uniform, nullptr, sizeof(ImageUniforms))) {

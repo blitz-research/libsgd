@@ -8,6 +8,13 @@
 
 namespace sgd {
 
+enum struct TextureType {
+	e2d = 1,
+	cube = 2,
+	array = 3,
+	cubeArray = 4,
+};
+
 //! TextureFlags enum
 enum struct TextureFlags {
 	none = 0x00,
@@ -23,8 +30,8 @@ enum struct TextureFlags {
 	//
 	// TODO: Move to texture type enum.
 	//
-	cube = 0x00100,
-	array = 0x00200,
+//	cube = 0x00100,
+//	array = 0x00200,
 	renderTarget = 0x00400,
 	layerView = 0x00800,
 	msaa = 0x01000,
@@ -36,11 +43,15 @@ SGD_SHARED(Texture);
 struct Texture : GraphicsResource {
 	SGD_OBJECT_TYPE(Texture, Shared);
 
-	Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags, TextureData* data);
-	Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags);
+	Texture(TextureType type, CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags, TextureData* data);
+	Texture(TextureType type, CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags);
 	Texture(Texture* texture, uint32_t layer);
 
 	Property<Path> path;
+
+	TextureType type() const {
+		return m_type;
+	}
 
 	CVec2u size() const {
 		return m_size;
@@ -90,6 +101,7 @@ struct Texture : GraphicsResource {
 	};
 
 private:
+	TextureType m_type;
 	Vec2u m_size;
 	uint32_t m_depth;
 	TextureFormat m_format;

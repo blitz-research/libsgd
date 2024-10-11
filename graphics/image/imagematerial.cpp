@@ -34,7 +34,7 @@ BindGroupDescriptor bindGroupDescriptorMX( //
 	}, //
 	String("#define IMAGE_MATERIAL_MX 1\n") + shaderSource);
 
-TexturePtr g_defaultTextureMX = new Texture({1, 1}, 1, TextureFormat::r8, TextureFlags::array | TextureFlags::clamp);
+TexturePtr g_defaultTextureMX = new Texture(TextureType::array, {1, 1}, 1, TextureFormat::r8, TextureFlags::clamp);
 
 } // namespace
 

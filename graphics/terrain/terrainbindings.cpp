@@ -52,7 +52,7 @@ TerrainBindings::TerrainBindings()
 	worldMatrix.update();
 
 	size.changed.connect(nullptr, [=](uint32_t n){
-		lockUniforms().size = n;
+		lockUniforms().size = (float)n;
 		unlockUniforms();
 		invalidate();
 	});
@@ -73,25 +73,27 @@ TerrainBindings::TerrainBindings()
 	});
 	materialSize.update();
 
+	heightTexture.changed.connect(nullptr, [=](CTexture* ttexture) { //
+		auto size = ttexture->size().x;
+		if(size!=ttexture->size().y) SGD_ERROR("Terrain height texture must be square");
+		if(size & (size - 1)) SGD_ERROR("Terrain height texture size must be a power of 2");
+//		if(size<512) SGD_ERROR("Terrain height texture size must be at least 512");
+		lockUniforms().heightTexelSize = 1.0f / (float)size;
+		unlockUniforms();
+		m_bindGroup->setTexture(1, ttexture);
+	});
+	heightTexture = blackTexture();
+
+	normalTexture.changed.connect(nullptr, [=](CTexture* ttexture) { //
+		m_bindGroup->setTexture(3, ttexture);
+	});
+	normalTexture = flatTexture();
+
 	debugMode.changed.connect(nullptr, [=](int mode) {
 		lockUniforms().debugMode = mode;
 		unlockUniforms();
 	});
 	debugMode.changed.emit(debugMode());
-
-	heightTexture.changed.connect(nullptr, [=](CTexture* ttexture) { //
-//		auto size = ttexture->size().x;
-		//if(size!=ttexture->size().y) SGD_ERROR("Terrain height texture must be square");
-//		if(size & (size - 1)) SGD_ERROR("Terrain height texture size must be a power of 2");
-//		if(size<512) SGD_ERROR("Terrain height texture size must be at least 512");
-		m_bindGroup->setTexture(1, ttexture);
-	});
-	heightTexture = blackTexture(TextureFlags::none);
-
-	normalTexture.changed.connect(nullptr, [=](CTexture* ttexture) { //
-		m_bindGroup->setTexture(3, ttexture);
-	});
-	normalTexture = flatTexture(TextureFlags::none);
 
 	material = new Material(&prelitMaterialDescriptor);
 }
@@ -108,7 +110,7 @@ void TerrainBindings::onValidate() const {
 
 	auto quadsPerTile = (size() >> (lods() - 1)) / 4;
 
-	lockUniforms().quadsPerTile = quadsPerTile;
+	lockUniforms().quadsPerTile = (float)quadsPerTile;
 	unlockUniforms();
 
 	for (uint32_t lod = 0; lod < lods(); ++lod) {

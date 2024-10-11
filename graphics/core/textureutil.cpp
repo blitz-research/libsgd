@@ -222,7 +222,7 @@ Expected<TextureData*, FileioEx> loadTextureData(CData fileData, TextureFormat f
 			return SGD_FILEIOEX(String("TinyEXR error decoding image data: ") + (err ? err : "unknown error"));
 		}
 		//
-		//SGD_ASSERT(channels == 1 || channels == 4);
+		// SGD_ASSERT(channels == 1 || channels == 4);
 		//
 		auto srcFormat = (channels > 1) ? TextureFormat::rgba32f : TextureFormat::r32f;
 		if (format == TextureFormat::any) format = floatFormat(channels);
@@ -310,8 +310,8 @@ Expected<Texture*, FileioEx> load2DTexture(CPath path, TextureFormat format, Tex
 
 	TextureDataPtr data = texData.result();
 
-	auto texture = new Texture({data->size().x, data->size().y}, 1, data->format(), flags, data);
-	texture->path=path;
+	auto texture = new Texture(TextureType::e2d, {data->size().x, data->size().y}, 1, data->format(), flags, data);
+	texture->path = path;
 	return texture;
 }
 
@@ -325,8 +325,8 @@ Expected<Texture*, FileioEx> loadCubeTexture(CPath path, TextureFormat format, T
 		if (!data) return SGD_PATHEX("Invalid cubemap texture layout", path);
 	}
 
-	auto texture = new Texture({data->size().x, data->size().y / 6}, 6, data->format(), flags | TextureFlags::cube, data);
-	texture->path=path;
+	auto texture = new Texture(TextureType::cube, {data->size().x, data->size().y / 6}, 6, data->format(), flags, data);
+	texture->path = path;
 	return texture;
 }
 
@@ -337,7 +337,8 @@ Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, 
 	TextureDataPtr data = texData.result();
 	uint32_t depth = 1;
 
-	auto texture = new Texture({data->size().x, data->size().y / depth}, depth, data->format(), flags | TextureFlags::array, data);
+	auto texture =
+		new Texture(TextureType::array, {data->size().x, data->size().y / depth}, depth, data->format(), flags, data);
 	texture->path = path;
 	return texture;
 }
@@ -367,9 +368,8 @@ Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, 
 		}
 	}
 
-	auto texture = new Texture(frameSize, frameCount, srcData->format(), flags);
-
-	texture->path=path;
+	auto texture = new Texture(TextureType::array, frameSize, frameCount, srcData->format(), flags);
+	texture->path = path;
 
 	auto dstData = texture->lock();
 
@@ -389,30 +389,43 @@ Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, 
 	return texture;
 }
 
-CTexture* rgbaTexture(uint32_t rgba, TextureFlags flags) {
+CTexture* dummyTexture(TextureFormat format, TextureType type) {
+	static Map<std::pair<TextureFormat, TextureType>, TexturePtr> cache;
 
-	static Map<std::pair<uint32_t, TextureFlags>, TexturePtr> cache;
-
-	auto& texture = cache[std::make_pair(rgba, flags)];
+	auto& texture = cache[std::make_pair(format, type)];
 	if (texture) return texture;
 
-	uint32_t depth = bool(flags & TextureFlags::cube) ? 6 : 1;
-	texture = new Texture({1, 1}, depth, TextureFormat::rgba8, flags);
+	auto flags = TextureFlags::none;
+
+	return texture = new Texture(type, {1, 1}, type == TextureType::cube ? 6 : 1, format, flags);
+}
+
+CTexture* rgbaTexture(uint32_t rgba, TextureType type) {
+	static Map<std::pair<uint32_t, TextureType>, TexturePtr> cache;
+
+	auto& texture = cache[std::make_pair(rgba, type)];
+	if (texture) return texture;
+
+	auto format = TextureFormat::rgba8;
+	auto flags = TextureFlags::none;
+
+	texture = new Texture(type, {1, 1}, type == TextureType::cube ? 6 : 1, format, flags);
 	uint32_t data[]{rgba, rgba, rgba, rgba, rgba, rgba};
 	texture->update(data, sizeof(rgba));
 
 	return texture;
 }
 
-CTexture* dummyTexture(TextureFormat format, TextureFlags flags) {
+CTexture* blackTexture(TextureType type) {
+	return rgbaTexture(0xff000000, type);
+}
 
-	static Map<std::pair<TextureFormat, TextureFlags>, TexturePtr> cache;
+CTexture* whiteTexture(TextureType type) {
+	return rgbaTexture(0xffffffff, type);
+}
 
-	auto& texture = cache[std::make_pair(format, flags)];
-	if (texture) return texture;
-
-	uint32_t depth = bool(flags & TextureFlags::cube) ? 6 : 1;
-	return texture = new Texture({1, 1}, depth, format, flags);
+CTexture* flatTexture(TextureType type) {
+	return rgbaTexture(0xffff8080, type);
 }
 
 } // namespace sgd

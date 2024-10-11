@@ -51,11 +51,11 @@ TextureFormat getFormat(wgpu::TextureFormat format) {
 				{wgpu::TextureFormat::RG8Snorm, TextureFormat::rgba8s},
 				{wgpu::TextureFormat::RGBA8Snorm, TextureFormat::rgba8s},
 				//
-				{wgpu::TextureFormat::R16Unorm,TextureFormat::r16},
+				{wgpu::TextureFormat::R16Unorm, TextureFormat::r16},
 				{wgpu::TextureFormat::RG16Unorm, TextureFormat::rg16},
 				{wgpu::TextureFormat::RGBA16Unorm, TextureFormat::rgba16},
 				//
-				{wgpu::TextureFormat::R16Snorm,TextureFormat::r16s},
+				{wgpu::TextureFormat::R16Snorm, TextureFormat::r16s},
 				{wgpu::TextureFormat::RG16Snorm, TextureFormat::rg16s},
 				{wgpu::TextureFormat::RGBA16Snorm, TextureFormat::rgba16s},
 				//
@@ -98,8 +98,9 @@ wgpu::Sampler getOrCreateWGPUSampler(GraphicsContext* gc, TextureFlags flags) {
 
 } // namespace
 
-Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags, TextureData* data)
-	: m_size(size),		//
+Texture::Texture(TextureType type, CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags, TextureData* data)
+	: m_type(type),		//
+	  m_size(size),		//
 	  m_depth(depth),	//
 	  m_format(format), //
 	  m_flags(flags),	//
@@ -109,8 +110,9 @@ Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags
 	m_dirty = true;
 }
 
-Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags)
-	: m_size(size),		//
+Texture::Texture(TextureType type, CVec2u size, uint32_t depth, TextureFormat format, TextureFlags flags)
+	: m_type(type),		//
+	  m_size(size),		//
 	  m_depth(depth),	//
 	  m_format(format), //
 	  m_flags(flags),
@@ -118,7 +120,8 @@ Texture::Texture(CVec2u size, uint32_t depth, TextureFormat format, TextureFlags
 }
 
 Texture::Texture(Texture* texture, uint32_t layer)
-	: m_size(texture->size()),			//
+	: m_type(TextureType::e2d),			//
+	  m_size(texture->size()),			//
 	  m_depth(1),						//
 	  m_format(texture->format()),		//
 	  m_flags(TextureFlags::layerView), //
@@ -171,16 +174,19 @@ void Texture::updateTexture() const {
 	tvDesc.arrayLayerCount = m_depth;
 	tvDesc.format = m_wgpuTexture.GetFormat();
 
-	if (bool(m_flags & TextureFlags::array)) {
-		if (bool(m_flags & TextureFlags::cube)) {
-			tvDesc.dimension = wgpu::TextureViewDimension::CubeArray;
-		} else {
-			tvDesc.dimension = wgpu::TextureViewDimension::e2DArray;
-		}
-	} else if (bool(m_flags & TextureFlags::cube)) {
-		tvDesc.dimension = wgpu::TextureViewDimension::Cube;
-	} else {
+	switch(m_type) {
+	case TextureType::e2d:
 		tvDesc.dimension = wgpu::TextureViewDimension::e2D;
+		break;
+	case TextureType::array:
+		tvDesc.dimension = wgpu::TextureViewDimension::e2DArray;
+		break;
+	case TextureType::cube:
+		tvDesc.dimension = wgpu::TextureViewDimension::Cube;
+		break;
+	case TextureType::cubeArray:
+		tvDesc.dimension = wgpu::TextureViewDimension::CubeArray;
+		break;
 	}
 
 	m_wgpuTextureView = m_wgpuTexture.CreateView(&tvDesc);

@@ -28,7 +28,7 @@ constexpr int ssmMatricesBinding = 13;
 struct alignas(16) ConfigUniforms {
 
 	// CSM settings
-	Vec4f csmSplitDistances{Vec4f(16, 64, 256, 1024)};
+	Vec4f csmSplitDistances{Vec4f(15, 60, 250, 1000)};
 	uint32_t csmTextureSize{2048};
 	uint32_t maxCSMLights{4}; // max = 256/4, ie: max array index.
 	float csmClipRange{330.0f};
@@ -54,8 +54,8 @@ struct alignas(16) CameraUniforms {
 	Mat4f viewProjectionMatrix;
 	Mat4f worldMatrix;
 	Mat4f viewMatrix;
-	float clipNear{.125};
-	float clipFar{1024};
+	float clipNear{.1};
+	float clipFar{1000};
 };
 using CCameraUniforms = const CameraUniforms&;
 

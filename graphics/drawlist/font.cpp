@@ -98,8 +98,7 @@ Expected<Font*, FileioEx> loadFont(CPath path, float height) {
 		}
 	}
 
-//	auto texture = new Texture(Font::atlasSize, 1, TextureFormat::r8, TextureFlags::mipmap | TextureFlags::filter);
-	auto texture = new Texture(Font::atlasSize, 1, TextureFormat::r8, TextureFlags::none);
+	auto texture = new Texture(TextureType::e2d, Font::atlasSize, 1, TextureFormat::r8, TextureFlags::default_);
 	texture->update(atlasData.data(), Font::atlasSize.x);
 
 	auto atlas = new Material(&fontMaterialDescriptor);

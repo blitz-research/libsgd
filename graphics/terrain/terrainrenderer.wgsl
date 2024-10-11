@@ -2,12 +2,12 @@ R"(
 
 struct TerrainUniforms {
     worldMatrix: mat4x4f,
-    size: u32,
+    size: f32,
     lods: u32,
-    quadsPerTile: u32,
-    debugMode: u32,
+    quadsPerTile: f32,
     materialTexelSize: f32,
     heightTexelSize: f32,
+    debugMode: u32,
 };
 
 @group(2) @binding(0) var<uniform> terrainUniforms: TerrainUniforms;
@@ -27,15 +27,16 @@ struct Varying {
     @location(1) heightTexCoords: vec2f,
     @location(2) normalTexCoords: vec2f,
     @location(3) materialTexCoords: vec2f,
-    @location(4) color: vec4f,
+    @location(4) distance: f32,
+    @location(5) color: vec4f,
 }
 
 const lods = array<vec2f, 65>(
-	vec2f(0.0, 0.0), vec2f(0.0, 1.0),
+    vec2f(0.0, 0.0), vec2f(0.0, 1.0),
 
 	vec2f(1.0, 0.0), vec2f(1.0, 1.0),
 
-	vec2f(2.0, 0.0), vec2f(2.0, 0.0), vec2f(2.0, 0.0), vec2f(2.0, 1.0),
+    vec2f(2.0, 0.0), vec2f(2.0, 0.0), vec2f(2.0, 0.0), vec2f(2.0, 1.0),
 
 	vec2f(3.0, 0.0), vec2f(3.0, 0.0), vec2f(3.0, 0.0), vec2f(3.0, 0.0), vec2f(3.0, 0.0), vec2f(3.0, 0.0), vec2f(3.0, 0.0), vec2f(3.0, 1.0),
 
@@ -62,32 +63,40 @@ const offs = array<vec4f, 13>(
 
     let mvpMatrix = scene_camera.viewProjectionMatrix * terrainUniforms.worldMatrix;
 
-    let tileSize = f32(terrainUniforms.quadsPerTile);
+    let tileSize = terrainUniforms.quadsPerTile;
 
     var color = vertex.color;
 
     // ***** Compute position *****
 
     let eye = -terrainUniforms.worldMatrix[3].xyz;
-    var pos = round(eye / tileSize) * tileSize + vertex.position;
+    let org = round(eye / tileSize) * tileSize;
+    var pos = org + vertex.position;
     pos.y = 0.0;
 
     // ***** Compute LODs *****
 
     let v = pos - eye;
-    let d = max(abs(v.x), abs(v.z)) / tileSize - 0.5;
 
-    let i = i32(min(floor(d) + 1, 64));
+    var distance =max(abs(v.x), abs(v.z));
+
+    var d = distance / tileSize - 0.5;
+    var i = i32(clamp(floor(d) + 1, 0, 64));
 
     var lodNear = lods[i].x;
     var tween = lods[i].y * fract(d);
 
-	if(lodNear == vertex.position.y + 1 && tween == 0) {
-		lodNear -= 1.0;//= vertex.position.y;
-		tween = 1;
-	}else if(lodNear != vertex.position.y) {
-	    color = vec3f(1,0,1);
+//    if lodNear == vertex.position.y + 1 && tween == 0 { // Debug
+//	    color = vec3f(0,1,1);
+    if lodNear == vertex.position.y + 1 {         // Release
+        lodNear -= 1;
+        tween += 1;
 	}
+
+//    if lodNear != vertex.position.y { // Debug
+//	   color = vec3f(1,0,1);
+//    }
+
 	let lodFar = lodNear + 1;
 
     // ***** Compute height *****
@@ -95,7 +104,7 @@ const offs = array<vec4f, 13>(
     var off = offs[vertexId % 13] * exp2(lodNear);
 
     let texCoords = pos.xz;
-    let texelSize = 1.0 / vec2f(textureDimensions(terrainHeightTexture));
+    let texelSize = terrainUniforms.heightTexelSize;//1.0 / vec2f(textureDimensions(terrainHeightTexture));
 
     let heightNear = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, texCoords * texelSize + 0.5, lodNear).r;
     let heightFar0 = textureSampleLevel(terrainHeightTexture, terrainHeightSampler, (texCoords + off.xy) * texelSize + 0.5, lodFar).r;
@@ -112,6 +121,7 @@ const offs = array<vec4f, 13>(
     out.heightTexCoords = texCoords * texelSize + 0.5;
     out.normalTexCoords = texCoords / vec2f(textureDimensions(terrainNormalTexture)) + 0.5;
     out.materialTexCoords = texCoords * terrainUniforms.materialTexelSize + 0.5;
+    out.distance = distance;
     out.color = vec4f(color, 1.0);
     //
     return out;
@@ -121,10 +131,22 @@ const offs = array<vec4f, 13>(
 #if !RENDER_PASS_SHADOW
 
     if terrainUniforms.debugMode != 0 {
+    /*
+        let t = 0.0;
+        if in.heightTexCoords.x < t || in.heightTexCoords.y < t || in.heightTexCoords.x >= 1.0 - t || in.heightTexCoords.y >= 1.0 - t {
+            return vec4f(0,0,0,1);
+        }
+        let p = 0.5 - terrainUniforms.quadsPerTile * terrainUniforms.heightTexelSize * 2.0f;
+        if in.heightTexCoords.x < p || in.heightTexCoords.y < p || in.heightTexCoords.x >= 1.0 - p || in.heightTexCoords.y >= 1.0 - p {
+            return vec4f(1,1,1,1);
+        }
+
+        */
         return in.color;
     }
 
-    if in.heightTexCoords.x < 0.0 || in.heightTexCoords.y < 0.0 || in.heightTexCoords.x >= 1.0 || in.heightTexCoords.y >= 1.0 {
+    let t = 0.0;
+    if in.heightTexCoords.x < t || in.heightTexCoords.y < t || in.heightTexCoords.x >= 1.0 - t || in.heightTexCoords.y >= 1.0 - t {
         discard;
     }
 

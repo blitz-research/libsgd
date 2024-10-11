@@ -122,9 +122,9 @@ int main() {
 
 	auto resize = [](CVec2u size) {
 		if (renderTarget && renderTarget->size() == size) return;
-		renderTarget = new Texture(size, 1, TextureFormat::rgba16f,
+		renderTarget = new Texture(TextureType::e2d, size, 1, TextureFormat::rgba16f,
 								   TextureFlags::renderTarget | TextureFlags::filter | TextureFlags::clamp);
-		depthBuffer = new Texture(size, 1, TextureFormat::depth32f, TextureFlags::renderTarget);
+		depthBuffer = new Texture(TextureType::e2d, size, 1, TextureFormat::depth32f, TextureFlags::renderTarget);
 	};
 
 	window->closeClicked.connect(nullptr, [] { std::exit(0); });

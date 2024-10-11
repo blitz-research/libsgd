@@ -9,7 +9,7 @@ SceneBindings::SceneBindings()
 	  m_configUniforms(new Buffer(BufferType::uniform, nullptr, sizeof(ConfigUniforms))), //
 	  m_cameraUniforms(new Buffer(BufferType::uniform, nullptr, sizeof(CameraUniforms))), //
 	  m_lightingUniforms(new Buffer(BufferType::uniform, nullptr, sizeof(LightingUniforms))),
-	  envTexture(blackTexture(TextureFlags::cube)) { //
+	  envTexture(blackTexture(TextureType::cube)) { //
 
 	lockConfigUniforms() = {};
 	unlockConfigUniforms();
@@ -25,15 +25,15 @@ SceneBindings::SceneBindings()
 	m_bindGroup->setBuffer(lightingUniformsBinding, m_lightingUniforms);
 
 	envTexture.changed.connect(nullptr, [=](CTexture* ctexture) { //
-		if (!ctexture) ctexture = blackTexture(TextureFlags::cube);
+		if (!ctexture) ctexture = blackTexture(TextureType::cube);
 		int type;
-		if (bool(ctexture->flags() & TextureFlags::cube)) {
+		if (ctexture->type() == TextureType::cube) {
 			m_bindGroup->setTexture(envTextureCubeBinding, ctexture, false);
 			m_bindGroup->setTexture(envTexture2DBinding, blackTexture(), false);
 			m_bindGroup->setSampler(envSamplerBinding, ctexture);
 			type = 1;
 		} else {
-			m_bindGroup->setTexture(envTextureCubeBinding, blackTexture(TextureFlags::cube), false);
+			m_bindGroup->setTexture(envTextureCubeBinding, blackTexture(TextureType::cube), false);
 			m_bindGroup->setTexture(envTexture2DBinding, ctexture);
 			type = 2;
 		}
@@ -96,8 +96,8 @@ void SceneBindings::updateCSMConfig() const {
 
 	if (!m_csmTexture || m_csmTexture->size() != size || m_csmTexture->depth() != passes) {
 		m_csmTexture =
-			new Texture(size, passes, TextureFormat::depth32f, //
-						TextureFlags::filter | TextureFlags::clamp | TextureFlags::array | TextureFlags::renderTarget | TextureFlags::compare);
+			new Texture(TextureType::array, size, passes, TextureFormat::depth32f, //
+						TextureFlags::filter | TextureFlags::clamp | TextureFlags::renderTarget | TextureFlags::compare);
 		m_bindGroup->setTexture(csmTextureBinding, m_csmTexture);
 	}
 	m_csmShadowPasses.clear();
@@ -191,9 +191,8 @@ void SceneBindings::updatePSMConfig() const {
 	auto passes = config.maxPSMLights * 6;
 
 	if (!m_psmTexture || m_psmTexture->size() != size || m_psmTexture->depth() != passes) {
-		m_psmTexture = new Texture(size, passes, TextureFormat::depth32f,
-								   TextureFlags::filter | TextureFlags::cube | TextureFlags::array |
-									   TextureFlags::renderTarget | TextureFlags::compare);
+		m_psmTexture = new Texture(TextureType::cubeArray, size, passes, TextureFormat::depth32f,
+								   TextureFlags::filter | TextureFlags::renderTarget | TextureFlags::compare);
 		m_bindGroup->setTexture(psmTextureBinding, m_psmTexture);
 	}
 	m_psmShadowPasses.clear();
@@ -262,8 +261,8 @@ void SceneBindings::updateSSMConfig() const {
 
 	if (!m_ssmTexture || m_ssmTexture->size() != size || m_ssmTexture->depth() != passes) {
 		m_ssmTexture =
-			new Texture(size, passes, TextureFormat::depth32f, //
-						TextureFlags::filter | TextureFlags::array | TextureFlags::renderTarget | TextureFlags::compare);
+			new Texture(TextureType::array, size, passes, TextureFormat::depth32f, //
+						TextureFlags::filter | TextureFlags::renderTarget | TextureFlags::compare);
 		m_bindGroup->setTexture(ssmTextureBinding, m_ssmTexture);
 	}
 	m_ssmShadowPasses.clear();

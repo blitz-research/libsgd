@@ -17,20 +17,14 @@ Expected<Texture*, FileioEx> loadArrayTexture(CPath path, TextureFormat format, 
 
 Expected<Texture*, FileioEx> loadCubeTexture(CPath path, TextureFormat format, TextureFlags flags);
 
-CTexture* rgbaTexture(uint32_t rgba, TextureFlags flags = TextureFlags::none);
+CTexture* dummyTexture(TextureFormat format, TextureType type = TextureType::e2d);
 
-CTexture* dummyTexture(TextureFormat format, TextureFlags flags);
+CTexture* rgbaTexture(uint32_t rgba, TextureType type = TextureType::e2d);
 
-inline CTexture* blackTexture(TextureFlags flags = TextureFlags::none) {
-	return rgbaTexture(0xff000000, flags);
-}
+CTexture* blackTexture(TextureType type = TextureType::e2d);
 
-inline CTexture* whiteTexture(TextureFlags flags = TextureFlags::none) {
-	return rgbaTexture(0xffffffff, flags);
-}
+CTexture* whiteTexture(TextureType type = TextureType::e2d);
 
-inline CTexture* flatTexture(TextureFlags flags = TextureFlags::none) {
-	return rgbaTexture(0xffff8080, flags);
-}
+CTexture* flatTexture(TextureType type = TextureType::e2d);
 
 } // namespace sgd
