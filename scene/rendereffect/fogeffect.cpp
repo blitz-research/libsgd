@@ -6,9 +6,9 @@ namespace {
 
 struct alignas(16) FogEffectUniforms {
 	Vec4f color;
-	float near{};
-	float range{};
-	float power{};
+	float near;
+	float range;
+	float power;
 };
 
 auto shaderSource{
@@ -34,8 +34,8 @@ BindGroupDescriptor bindGroupDesc( //
 FogEffect::FogEffect() : m_bindGroup(new BindGroup(&bindGroupDesc)) {
 
 	m_bindGroup->setBuffer(0, new Buffer(BufferType::uniform, nullptr, sizeof(FogEffectUniforms)));
-	m_bindGroup->setTexture(1, dummyTexture(TextureFormat::rgba8,TextureFlags::none));
-	m_bindGroup->setTexture(3, dummyTexture(TextureFormat::depth32f,TextureFlags::none));
+	m_bindGroup->setTexture(1, blackTexture());
+	m_bindGroup->setTexture(3, dummyTexture(TextureFormat::depth32f));
 
 	color.changed.connect(nullptr,[=](CVec4f){invalidate();});
 	near.changed.connect(nullptr,[=](float){invalidate();});

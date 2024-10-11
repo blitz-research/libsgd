@@ -111,18 +111,24 @@ struct Deserializer {
 					m_assets.emplace_back(mesh.result());
 				} else if (clas == "Texture") {
 					auto path = item["path"].string_value();
+					auto type = (TextureType)item["type"].int_value();
 					auto format = (TextureFormat)item["format"].int_value();
 					auto flags = (TextureFlags)item["flags"].int_value();
-					if (bool(flags & TextureFlags::array)) {
-						auto texture = loadArrayTexture(Path(path), format, flags);
-						m_assets.emplace_back(texture.result());
-					} else if (bool(flags & TextureFlags::cube)) {
-						auto texture = loadCubeTexture(Path(path), format, flags);
-						m_assets.emplace_back(texture.result());
-					} else {
-						auto texture = load2DTexture(Path(path), format, flags);
-						m_assets.emplace_back(texture.result());
+					Texture* texture;
+					switch(type) {
+					case TextureType::e2d:
+						texture=load2DTexture(Path(path), format, flags).result();
+						break;
+					case TextureType::cube:
+						texture=loadCubeTexture(Path(path), format, flags).result();
+						break;
+					case TextureType::array:
+						texture=loadArrayTexture(Path(path), format, flags).result();
+						break;
+					case TextureType::cubeArray:
+						SGD_ERROR("OOPS");
 					}
+					m_assets.emplace_back(texture);
 				} else {
 					SGD_ERROR("OOPS");
 				}
@@ -195,6 +201,7 @@ struct Serializer {
 			Json::object json;
 			json["class"] = "Texture";
 			json["path"] = texture->path().str();
+			json["type"] = (int)texture->type();
 			json["format"] = (int)texture->format();
 			json["flags"] = (int)texture->flags();
 			return json;

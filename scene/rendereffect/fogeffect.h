@@ -12,9 +12,9 @@ struct FogEffect : RenderEffect {
 	FogEffect();
 
 	Property<Vec4f> color{Vec4f(.8f, .9f, 1, 1)};
-	Property<float> near{0};
-	Property<float> far{1024.0f};
-	Property<float> power{2.0f};
+	Property<float> near{.1};
+	Property<float> far{1000};
+	Property<float> power{2};
 
 private:
 	BindGroupPtr m_bindGroup;

@@ -36,7 +36,7 @@ Texture* RenderEffectStack::getOrCreateRenderTarget(CVec2u size, TextureFormat f
 //		if (target == m_outputTexture) continue;
 //		if (size == target->size() && format == target->format()) return target;
 	}
-	auto target = new Texture(size, 1, format, TextureFlags::renderTarget | TextureFlags::filter | TextureFlags::clamp);
+	auto target = new Texture(TextureType::e2d, size, 1, format, TextureFlags::renderTarget | TextureFlags::filter | TextureFlags::clamp);
 	m_newRenderTargets.emplace_back(target);
 	return target;
 }

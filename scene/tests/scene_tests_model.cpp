@@ -43,8 +43,8 @@ void entry() {
 	config.csmDepthBias = .0001f;
 	scene->sceneRenderer()->sceneBindings()->unlockConfigUniforms();
 
-//	FogEffectPtr fog = new FogEffect();
-//	scene->sceneRenderer()->add(fog);
+	FogEffectPtr fog = new FogEffect();
+	scene->sceneRenderer()->add(fog);
 
 	auto dc = overlay->drawList();
 

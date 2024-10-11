@@ -158,7 +158,7 @@ Texture* GLTFLoader::loadTexture(int id, TextureFormat format, bool pmAlpha) {
 		SGD_LOG << "  Creating texture:" << gltfTex.name << "size:" << data->size() << "format:" << (int)data->format()
 				<< "flags:" << (int)flags;
 
-	return cachedTextures[id] = new Texture(data->size(), 1, data->format(), flags, data);
+	return cachedTextures[id] = new Texture(TextureType::e2d, data->size(), 1, data->format(), flags, data);
 }
 
 Material* GLTFLoader::loadMaterial(int id) {

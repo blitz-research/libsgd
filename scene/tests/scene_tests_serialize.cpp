@@ -30,6 +30,7 @@ void entry() {
 	SGD_LOG << json;
 
 	scene->clear();
+
 	scene = deserialize(json)->as<Scene>();
 
 //	std::exit(0);

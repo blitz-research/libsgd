@@ -36,7 +36,7 @@ SceneRenderer::SceneRenderer()
 	  m_skinnedModelRenderer(new SkinnedModelRenderer()),										   //
 	  m_spriteRenderer(new SpriteRenderer()),													   //
 	  m_overlayRenderer(new OverlayRenderer()),													   //
-	  m_renderEffectStack(new RenderEffectStack()), envTexture(blackTexture(TextureFlags::cube)) { //
+	  m_renderEffectStack(new RenderEffectStack()), envTexture(blackTexture(TextureType::cube)) { //
 
 	auto resize = [=](CVec2u size) { //
 		if (size == m_renderTargetSize) return;
@@ -46,9 +46,9 @@ SceneRenderer::SceneRenderer()
 		m_depthBuffer = {};
 		if (!size.x || !size.y) return;
 
-		m_renderTarget = new Texture(size, 1, TextureFormat::rgba16f,
+		m_renderTarget = new Texture(TextureType::e2d, size, 1, TextureFormat::rgba16f,
 									 TextureFlags::renderTarget | TextureFlags::filter | TextureFlags::clamp);
-		m_depthBuffer = new Texture(size, 1, TextureFormat::depth32f,
+		m_depthBuffer = new Texture(TextureType::e2d, size, 1, TextureFormat::depth32f,
 									TextureFlags::renderTarget | TextureFlags::filter | TextureFlags::clamp);
 
 		m_renderEffectStack->setRenderTarget(m_renderTarget, m_depthBuffer);
@@ -120,7 +120,12 @@ void SceneRenderer::add(RenderEffect* effect) {
 void SceneRenderer::updateCameraUniforms() {
 	AffineMat4f worldMatrix;
 	Mat4f projMatrix;
+	float near;
+	float far;
 	if (!m_camera) {
+		// Should just make a dummy camera.
+		near=.1f;
+		far=1000.0f;
 		auto window = currentGC()->window();
 		// Quick mouselook hack for no camera
 		auto mouse = window->mouse()->position().xy() / Vec2f(window->size()) * 2.0f - 1.0f;
@@ -128,6 +133,8 @@ void SceneRenderer::updateCameraUniforms() {
 		auto aspect = (float)window->size().x / (float)window->size().y;
 		projMatrix = Mat4f::perspective(90, aspect, .1, 100);
 	} else {
+		near = m_camera->near();
+		far = m_camera->far();
 		worldMatrix = m_camera->worldMatrix();
 		projMatrix = m_camera->projectionMatrix();
 	}
@@ -140,6 +147,8 @@ void SceneRenderer::updateCameraUniforms() {
 	uniforms.viewMatrix = inverse(uniforms.worldMatrix);
 	uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
 	uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
+	uniforms.clipNear=near;
+	uniforms.clipFar=far;
 	m_sceneBindings->unlockCameraUniforms();
 }
 
