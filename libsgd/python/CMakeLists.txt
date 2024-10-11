@@ -129,8 +129,8 @@ endif()
 
 install(FILES ${SRC}/helloworld.py DESTINATION python)
 
-install(DIRECTORY ${SRC}/examples/ DESTINATION python/examples)
-
 install(DIRECTORY ${SRC}/pypi-package/ DESTINATION python/pypi-package)
 install(FILES ${BIN}/sgd.py DESTINATION python/pypi-package/libsgd)
 install(DIRECTORY ${BIN}/libs DESTINATION python/pypi-package/libsgd FILES_MATCHING PATTERN "_sgd.*")
+
+install(DIRECTORY ${SRC}/examples DESTINATION python FILES_MATCHING PATTERN "*.py" PATTERN "__pycache__" EXCLUDE)

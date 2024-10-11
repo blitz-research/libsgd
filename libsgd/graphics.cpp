@@ -9,13 +9,6 @@ SGD_Texture SGD_DECL sgd_Load2DTexture(SGD_String path, SGD_TextureFormat format
 	return sgdx::createHandle(texture.result());
 }
 
-SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags) {
-	sgdx::started();
-	auto texture = sgd::loadArrayTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
-	if (!texture) sgdx::error("Failed to load array texture", texture.error());
-	return sgdx::createHandle(texture.result());
-}
-
 SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
 	auto texture = sgd::loadCubeTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
@@ -23,22 +16,36 @@ SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, SGD_TextureFormat form
 	return sgdx::createHandle(texture.result());
 }
 
-SGD_Texture SGD_DECL sgd_Create2DTexture(int width, int height, SGD_TextureFormat format, SGD_Flags flags) {
+SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
-	auto texture = new sgd::Texture(sgd::Vec2u(width, height), 1, (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
-	return sgdx::createHandle(texture);
+	auto texture = sgd::loadArrayTexture(sgd::Path(path), (sgd::TextureFormat)format, (sgd::TextureFlags)flags);
+	if (!texture) sgdx::error("Failed to load array texture", texture.error());
+	return sgdx::createHandle(texture.result());
 }
 
-SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, SGD_TextureFormat format, SGD_Flags flags) {
+SGD_Texture SGD_DECL sgd_Create2DTexture(int width, int height, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
-	auto texture = new sgd::Texture(sgd::Vec2u(width, height), depth, (sgd::TextureFormat)format, (sgd::TextureFlags)flags | sgd::TextureFlags::array);
+	auto texture = new sgd::Texture(sgd::TextureType::e2d, sgd::Vec2u(width, height), 1, //
+									(sgd::TextureFormat)format, (sgd::TextureFlags)flags);
 	return sgdx::createHandle(texture);
 }
 
 SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, SGD_TextureFormat format, SGD_Flags flags) {
 	sgdx::started();
-	auto texture = new sgd::Texture(sgd::Vec2u(size), 6, (sgd::TextureFormat)format, (sgd::TextureFlags)flags | sgd::TextureFlags::cube);
+	auto texture = new sgd::Texture(sgd::TextureType::cube, sgd::Vec2u(size), 6, //
+									(sgd::TextureFormat)format, (sgd::TextureFlags)flags);
 	return sgdx::createHandle(texture);
+}
+
+SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, SGD_TextureFormat format, SGD_Flags flags) {
+	sgdx::started();
+	auto texture = new sgd::Texture(sgd::TextureType::array, sgd::Vec2u(width, height), depth, //
+									(sgd::TextureFormat)format, (sgd::TextureFlags)flags);
+	return sgdx::createHandle(texture);
+}
+
+SGD_TextureType SGD_DECL sgd_GetTextureType(SGD_Texture htexture) {
+	return (SGD_TextureType)sgdx::resolveHandle<sgd::Texture>(htexture)->type();
 }
 
 int SGD_DECL sgd_GetTextureWidth(SGD_Texture htexture) {
@@ -118,11 +125,11 @@ void SGD_DECL sgd_SetMaterialCullMode(SGD_Material hmaterial, SGD_CullMode cullM
 }
 
 void SGD_DECL sgd_SetMaterialTexture(SGD_Material hmaterial, SGD_String parameter, SGD_Texture htexture) {
-	sgdx::resolveHandle<sgd::Material>(hmaterial)->setTexture(parameter,sgdx::resolveHandle<sgd::Texture>(htexture));
+	sgdx::resolveHandle<sgd::Material>(hmaterial)->setTexture(parameter, sgdx::resolveHandle<sgd::Texture>(htexture));
 }
 
 void SGD_DECL sgd_SetMaterialColor(SGD_Material hmaterial, SGD_String parameter, float red, float green, float blue,
-										   float alpha){
+								   float alpha) {
 	sgdx::resolveHandle<sgd::Material>(hmaterial)->setColor(parameter, {red, green, blue, alpha});
 }
 
@@ -204,7 +211,7 @@ void SGD_DECL sgd_FitMesh(SGD_Mesh hmesh, float minX, float minY, float minZ, fl
 }
 
 void SGD_DECL sgd_TransformMesh(SGD_Mesh hmesh, float tx, float ty, float tz, float rx, float ry, float rz, float sx, float sy,
-							float sz) {
+								float sz) {
 	auto mesh = sgdx::resolveHandle<sgd::Mesh>(hmesh);
 	sgdx::transform(mesh, sgd::AffineMat4f::TRS({tx, ty, tz}, {rx, ry, rz}, {sx, sy, sz}));
 }

@@ -327,7 +327,14 @@ SGD_API float SGD_DECL sgd_GetGamepadAxis(int gamepad, SGD_GamepadAxis axis);
 //! Texture handle type.
 typedef SGD_Handle SGD_Texture;
 
-//! Texture formats
+//! Texture types.
+typedef enum SGD_TextureType {
+	SGD_TEXTURE_TYPE_2D = 1,
+	SGD_TEXTURE_TYPE_CUBE = 2,
+	SGD_TEXTURE_TYPE_ARRAY = 3,
+} SGD_TextureType;
+
+//! Texture formats.
 //!
 //! The 8 bit unsigned, normalized formats are converted to values in the range 0.0..1.0 in shader code.
 //!
@@ -382,21 +389,24 @@ typedef enum SGD_TextureFlags {
 //! @param flags is a valid combination of SGD_TextureFlags values.
 SGD_API SGD_Texture SGD_DECL sgd_Load2DTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags);
 
-//! Load a new array texture. See also @ref SGD_TextureFlags.
-SGD_API SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags);
-
 //! Load a new cube texture. See also @ref SGD_TextureFlags.
 SGD_API SGD_Texture SGD_DECL sgd_LoadCubeTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags);
 
+//! Load a new array texture. See also @ref SGD_TextureFlags.
+SGD_API SGD_Texture SGD_DECL sgd_LoadArrayTexture(SGD_String path, SGD_TextureFormat format, SGD_Flags flags);
+
 //! Create a new 2D texture. See also @ref SGD_TextureFlags.
 SGD_API SGD_Texture SGD_DECL sgd_Create2DTexture(int width, int height, SGD_TextureFormat format, SGD_Flags flags);
+
+//! Create a new cube texture. See also @ref SGD_TextureFlags.
+SGD_API SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, SGD_TextureFormat format, SGD_Flags flags);
 
 //! Create a new array texture. See also @ref SGD_TextureFlags.
 SGD_API SGD_Texture SGD_DECL sgd_CreateArrayTexture(int width, int height, int depth, SGD_TextureFormat format,
 													SGD_Flags flags);
 
-//! Create a new cube texture. See also @ref SGD_TextureFlags.
-SGD_API SGD_Texture SGD_DECL sgd_CreateCubeTexture(int size, SGD_TextureFormat format, SGD_Flags flags);
+//! Get texture type.
+SGD_API SGD_TextureType SGD_DECL sgd_GetTextureType(SGD_Texture texture);
 
 //! Get width of texture.
 SGD_API int SGD_DECL sgd_GetTextureWidth(SGD_Texture texture);
@@ -854,21 +864,21 @@ SGD_API void SGD_DECL sgd_SetEnvTexture(SGD_Texture texture);
 //!
 //! This function will update shadow mapping config variables from the current config vars, see sgd_SetConfigVar.
 //!
-//! Config Var         | Type  | Default          | Description
-//! -------------------|-------|------------------|------------
-//! csm.textureSize    | int   | "2048"           | Texture size of each of the 4 cascading shadow map textures.
-//! csm.maxLights      | int   | "4"              | Max directional light shadow casters.
-//! csm.clipRange      | float | "330.0"          | Max offscreen distance to render shadow casters.
-//! csm.depthBias      | float | "0.0001"         | Depth bias for cascading shadow maps.
-//! csm.SplitDistances | Vec4f | "16,64,256,1024" | Cascading shadow map split distances from the eye.
-//! psm.textureSize    | int   | "1024"           | Texture size of point light cube shadow textures.
-//! psm.maxLights      | int   | "32"             | Max point light shadow casters.
-//! psm.clipNear       | float | "0.25"           | Near clipping plane for point light shadow maps.
-//! psm.depthBias      | float | "0.0001"         | Depth bias value for p[oint light shadow maps.
-//! ssm.textureSize    | int   | "1024"           | Texture size of each spot light 2D shadow map.
-//! ssm.maxLights      | int   | "16"             | Max spot light shadow casters.
-//! ssm.clipNear       | float | "0.25"           | Max distance to render shadow casters.
-//! ssm.depthBias      | float | "0.0001"         | Depth bias value to prevent shadow acne.
+//! Config Var         | Type  | Default                | Description
+//! -------------------|-------|------------------------|------------
+//! csm.textureSize    | int   | "2048"                 | Texture size of each of the 4 cascading shadow map textures.
+//! csm.maxLights      | int   | "4"                    | Max directional light shadow casters.
+//! csm.clipRange      | float | "330.0"                | Max offscreen distance to render shadow casters.
+//! csm.depthBias      | float | "0.0001"               | Depth bias for cascading shadow maps.
+//! csm.SplitDistances | Vec4f | "15,60,250,1000"       | Cascading shadow map split distances from the eye.
+//! psm.textureSize    | int   | "1024"                 | Texture size of point light cube shadow textures.
+//! psm.maxLights      | int   | "32"                   | Max point light shadow casters.
+//! psm.clipNear       | float | "0.25"                 | Near clipping plane for point light shadow maps.
+//! psm.depthBias      | float | "0.0001"               | Depth bias value for p[oint light shadow maps.
+//! ssm.textureSize    | int   | "1024"                 | Texture size of each spot light 2D shadow map.
+//! ssm.maxLights      | int   | "16"                   | Max spot light shadow casters.
+//! ssm.clipNear       | float | "0.25"                 | Max distance to render shadow casters.
+//! ssm.depthBias      | float | "0.0001"               | Depth bias value to prevent shadow acne.
 SGD_API void SGD_DECL sgd_UpdateShadowMappingConfig();
 
 //! Render scene.
@@ -896,16 +906,16 @@ typedef SGD_Handle SGD_Entity;
 //! @defgroup Entity Entity
 //! @{
 
-//! Enable or diasable entity.
+//! Set entity enabled state. An entity is only enabled in the scene if both it and all its ancestors are enabled.
 SGD_API void SGD_DECL sgd_SetEntityEnabled(SGD_Entity entity, SGD_Bool enabled);
 
-//! Get entity enabled state. An entity is only enabled in the scene if both it and all its ancestors are enabled.
+//! Get entity enabled state.
 SGD_API SGD_Bool SGD_DECL sgd_IsEntityEnabled(SGD_Entity entity);
 
-//! Show or hide entity.
+//! Set entity visible state. An entity is only visible in the scene if both it and all its ancestors are visible.
 SGD_API void SGD_DECL sgd_SetEntityVisible(SGD_Entity entity, SGD_Bool visible);
 
-//! Get entity visible state. An entity is only visible in the scene if both it and all its ancestors are visible.
+//! Get entity visible state.
 SGD_API SGD_Bool SGD_DECL sgd_IsEntityVisible(SGD_Entity entity);
 
 //! Destroy entity and children recursively.
@@ -1169,7 +1179,7 @@ SGD_API void SGD_DECL sgd_SetLightOuterConeAngle(SGD_Light light, float angle);
 
 //! @}
 
-//! @defgroup Model Model
+//! @defgroup ModelTypes ModelTypes
 //! @{
 
 //! Model handle type.
@@ -1446,7 +1456,7 @@ SGD_API SGD_RenderEffect SGD_DECL sgd_CreateFogEffect();
 // Set fog render effect color. Defaults to .8, .9, 1, 1
 SGD_API void SGD_DECL sgd_SetFogEffectColor(SGD_RenderEffect effect, float red, float green, float blue, float alpha);
 
-// Set fog render effect range. Defaults to 0, 1024.
+// Set fog render effect range. Defaults to .1, 1000
 SGD_API void SGD_DECL sgd_SetFogEffectRange(SGD_RenderEffect effect, float near, float far);
 
 // Set fog render effect power. Defaults to 2.

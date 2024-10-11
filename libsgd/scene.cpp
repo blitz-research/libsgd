@@ -17,6 +17,7 @@ void unlockConfigUniforms() {
 
 void createOverlay() {
 	sgdx::g_overlay = new sgd::Overlay();
+	sgdx::g_mainScene->add(sgdx::g_overlay);
 	sgdx::g_drawList = sgdx::g_overlay->drawList();
 }
 

@@ -31,11 +31,35 @@ breathe_show_enumvalue_initializer = True
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'nature'
+html_theme = "nature"
+# html_theme = "sphinxdoc"
+
+# html_theme = "furo"
+# html_theme = "sphinxawesome_theme"
+# html_theme = "sphinx_book_theme"
+
 html_theme_options = {
-	"sidebarwidth": "280"
+	"rightsidebar": "true",
+	"sidebarwidth": "320",
+}
+html_sidebars = {
+	"**": ["searchbox.html","globaltoc.html"],
 }
 
-html_static_path = ['_static']
+html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_show_sourcelink = False
+
+if html_theme == "furo":
+
+	html_sidebars = {
+		"**": ["sidebar/search.html","sidebar/scroll-start.html","sidebar/navigation.html","sidebar/scroll-end.html"],
+	}
+
+elif html_theme == "pydata-sphinx-theme":
+
+	html_theme_options["header_links_before_dropdown"] = 8,
+
+elif html_theme == "sphinxawesome_theme":
+
+	html_permalinks_icon = '<span>#</span>'
