@@ -4,11 +4,11 @@ Added CameraType/LightType/TextureType enums to sgd.h
 
 Added TextureType enums.
 
-Added Python3.13 to build. Should really end-of-life 3.8, but will continue support until 1.0 release.
+Added Python3.13 to build.
 
-Added simple experimental serializer.
+Added very simple experimental serializer. Static meshes only, no material support. See serialize.bb
 
-Added terrain system! See docs for new terrain commands, and terrain.bb for demo. TerrainCollider coming soon.
+Added terrain system. See docs for new terrain commands, and terrain.bb for demo. TerrainCollider coming soon.
 
 Updated PyPi README.md links.
 

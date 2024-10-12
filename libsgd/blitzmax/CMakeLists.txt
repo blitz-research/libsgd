@@ -23,4 +23,4 @@ add_custom_target(libsgd_blitzmax ALL
 
 install(FILES ${OUT} ${SRC}/helloworld.bmx DESTINATION blitzmax)
 
-install(DIRECTORY ${SRC}/examples DESTINATION blitzmax FILES_MATCHING PATTERN "*.bmx")
+install(DIRECTORY ${SRC}/examples DESTINATION blitzmax FILES_MATCHING PATTERN "*.bmx" PATTERN ".bmx" EXCLUDE)
