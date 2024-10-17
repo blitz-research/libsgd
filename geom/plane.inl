@@ -17,6 +17,9 @@ template <class T>
 Plane<T>::Plane(CVec3<T> v0, CVec3<T> v1, CVec3<T> v2) : n(normalize(cross(v1 - v0, v2 - v0))), d(-dot(v0, n)) {
 }
 
+template <class T> template <class C> constexpr Plane<T>::Plane(CPlane<C> p) : n(p.n), d(p.d) {
+}
+
 // ***** Non-member operators ****
 
 template <class T> bool operator==(CPlane<T> p, CPlane<T> q) {

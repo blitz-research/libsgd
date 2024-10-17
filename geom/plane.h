@@ -25,6 +25,7 @@ template <class T> struct Plane {
 	Plane(CVec3<T> n, T d);
 	Plane(CVec3<T> p, CVec3<T> n);				  // Point, normal
 	Plane(CVec3<T> v0, CVec3<T> v1, CVec3<T> v2); // vertices
+	template <class C> constexpr Plane(CPlane<C> p);		 // NOLINT (non-explicit ctor)
 };
 
 template <class T> bool operator==(CPlane<T> p, CPlane<T> q);
