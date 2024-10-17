@@ -29,11 +29,13 @@ int main() {
 		std::exit(0);
 	});
 
+	auto gamepad = Gamepad::getGamepad(0);
+	SGD_LOG << "Gamepad name:"<<gamepad->name();
+
 	for (;;) {
 		pollEvents();
 
 		// Poll gamepad 0
-		auto gamepad = Gamepad::getGamepad(0);
 		String status{};
 		for (int i = 0; i < 15; ++i) {
 			if (gamepad->button(i).down()) status += toString(i) + " ";
