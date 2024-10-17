@@ -31,6 +31,15 @@ int main() {
 
 	for (;;) {
 		pollEvents();
+
+		// Poll gamepad 0
+		auto gamepad = Gamepad::getGamepad(0);
+		String status{};
+		for (int i = 0; i < 15; ++i) {
+			if (gamepad->button(i).down()) status += toString(i) + " ";
+		}
+		if (!status.empty()) SGD_LOG << status;
+
 		if (window->keyboard()->key(KeyCode::F11).hit()) {
 			if (window->state() != WindowState::fullscreen) {
 				window->setState(WindowState::fullscreen);
