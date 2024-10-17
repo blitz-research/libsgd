@@ -3,10 +3,11 @@
 #include <thread>
 
 #define SKYBOX 1
-#define TERRAIN 1
-#define MESH 1
-#define IMAGE 1
-#define DRAWLIST 1
+#define PLANE 1
+// #define TERRAIN 1
+// #define MESH 1
+// #define IMAGE 1
+// #define DRAWLIST 1
 
 using namespace sgd;
 
@@ -19,34 +20,54 @@ SceneBindingsPtr sceneBindings;
 RenderContextPtr renderContext;
 RenderQueuePtr renderQueue;
 
+float cameraNear = .1f, cameraFar = 1000.0f;
+AffineMat4f cameraMatrix = AffineMat4f::TRS({0, 1, 0});
+
 #if SKYBOX
 SkyboxBindingsPtr skyboxBindings;
 #endif
-
+#if PLANE
+PlaneBindingsPtr planeBindings;
+#endif
 #if TERRAIN
 TerrainBindingsPtr terrainBindings;
 #endif
-
 #if MESH
 MeshPtr mesh;
 MeshRendererPtr meshRenderer;
 #endif
-
 #if DRAWLIST
 DrawListPtr drawList;
 #endif
-
 #if IMAGE
 ImagePtr image;
 ImageRendererPtr imageRenderer;
 #endif
 
 void render() {
+	{
 
+		auto& uniforms = sceneBindings->lockCameraUniforms();
+		uniforms.worldMatrix = cameraMatrix;
+		uniforms.viewMatrix = inverse(cameraMatrix);
+		uniforms.projectionMatrix = Mat4f::frustum(-cameraNear, cameraNear, -cameraNear, cameraNear, cameraNear, cameraFar);
+		uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
+		uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
+		uniforms.clipNear = cameraNear;
+		uniforms.clipFar = cameraFar;
+		sceneBindings->unlockCameraUniforms();
+	}
+	{
+		auto& uniforms = sceneBindings->lockLightingUniforms();
+		uniforms.ambientLightColor = Vec4f(1, 1, 1, .1);
+		uniforms.numDirectionalLights = 1;
+		uniforms.directionalLights[0].worldMatrix = AffineMat4f::rotation({-45 * degreesToRadians, -45 * degreesToRadians, 0});
+		sceneBindings->unlockLightingUniforms();
+	}
 #if MESH
 	{
 		auto inst = meshRenderer->lockInstances(1);
-		inst->worldMatrix = AffineMat4f::TRS({0, 0, 2});
+		inst->worldMatrix = AffineMat4f::TRS({0, 0, 2}) * cameraMatrix;
 		inst->color = Vec4f(1, .5, 0, 1);
 		meshRenderer->unlockInstances();
 	}
@@ -54,7 +75,7 @@ void render() {
 #if IMAGE
 	{
 		auto instp = imageRenderer->lockInstances(1);
-		instp->worldMatrix = AffineMat4f::TRS({0, 0, 1});
+		instp->worldMatrix = AffineMat4f::TRS({0, 0, 3}) * cameraMatrix;
 		instp->color = Vec4f(1);
 		instp->frame = 0;
 		imageRenderer->unlockInstances();
@@ -70,7 +91,6 @@ void render() {
 		drawList->flush();
 	}
 #endif
-
 	runOnMainThread([] {
 		auto gc = currentGC();
 
@@ -80,6 +100,9 @@ void render() {
 
 #if SKYBOX
 		skyboxBindings->render(renderQueue);
+#endif
+#if PLANE
+		planeBindings->render(renderQueue);
 #endif
 #if TERRAIN
 		terrainBindings->render(renderQueue);
@@ -93,10 +116,9 @@ void render() {
 #if DRAWLIST
 		drawList->render(renderQueue);
 #endif
-
 		renderContext->beginRender();
 		{
-			renderContext->beginRenderPass(RenderPassType::opaque, renderTarget, depthBuffer, Vec4f(1, .25, 0, 1), 1,
+			renderContext->beginRenderPass(RenderPassType::opaque, renderTarget, depthBuffer, Vec4f(1, .75, 0, 1), 1,
 										   sceneBindings->bindGroup());
 
 			renderContext->render(renderQueue->renderOps(RenderPassType::opaque));
@@ -139,32 +161,24 @@ int main() {
 
 	sceneBindings = new SceneBindings();
 
-	{
-		float near = .125f, far = 1024.0f;
-		auto& uniforms = sceneBindings->lockCameraUniforms();
-		uniforms.projectionMatrix = Mat4f::frustum(-near, near, -near, near, near, far);
-		uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
-		uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
-		uniforms.clipNear = near;
-		uniforms.clipFar = far;
-		sceneBindings->unlockCameraUniforms();
-	}
-
-	{
-		auto& uniforms = sceneBindings->lockLightingUniforms();
-		uniforms.numDirectionalLights = 1;
-		sceneBindings->unlockLightingUniforms();
-	}
-
 	renderContext = new RenderContext();
 
 	renderQueue = new RenderQueue();
 
 #if SKYBOX
-	auto skyTexture = loadCubeTexture(Path("sgd://envmaps/stormy-cube.jpg"), TextureFormat::srgba8, TextureFlags::mipmap).result();
+	auto skyTexture =
+		loadCubeTexture(Path("sgd://envmaps/stormy-cube.jpg"), TextureFormat::srgba8, TextureFlags::mipmap).result();
 	skyboxBindings = new SkyboxBindings();
 	skyboxBindings->skyTexture = skyTexture;
 #endif
+
+	#if PLANE
+		planeBindings = new PlaneBindings();
+		planeBindings->material = loadPBRMaterial(Path("sgd://materials/Fabric048_1K-JPG")).result();
+		planeBindings->color = Vec4f(.7, 1, .25, 1);
+		planeBindings->worldMatrix = AffineMat4f();
+//		planeBindings->worldMatrix = inverse(AffineMat4f::TRS({}, {}, {4, 4, 4}));
+	#endif
 
 #if TERRAIN
 	terrainBindings = new TerrainBindings();
@@ -187,6 +201,16 @@ int main() {
 
 	for (;;) {
 		pollEvents();
+		if (window->keyboard()->key(KeyCode::LEFT).down()) {
+			cameraMatrix = cameraMatrix * AffineMat4f::TRS({}, {0, 0, -.1});
+		} else if (window->keyboard()->key(KeyCode::RIGHT).down()) {
+			cameraMatrix = cameraMatrix * AffineMat4f::TRS({}, {0, 0, .1});
+		}
+		if (window->keyboard()->key(KeyCode::A).down()) {
+			cameraMatrix.t.y += .02f;
+		} else if (window->keyboard()->key(KeyCode::Z).down()) {
+			cameraMatrix.t.y -= .02f;
+		}
 		render();
 	}
 }

@@ -127,6 +127,10 @@ struct LightingUniforms {
 @group(0) @binding(configUniformsBinding) var<uniform> scene_config: ConfigUniforms;
 @group(0) @binding(cameraUniformsBinding) var<uniform> scene_camera: CameraUniforms;
 
+fn viewZToFragDepth(z:f32) -> f32 {
+    return (scene_camera.clipFar * (scene_camera.clipNear - z)) / (z * (scene_camera.clipNear - scene_camera.clipFar));
+}
+
 #if !RENDER_PASS_SHADOWS
 
 @group(0) @binding(lightingUniformsBinding) var<uniform> scene_lighting: LightingUniforms;
@@ -209,10 +213,10 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
 	    // Shadow
         let vpos = (scene_camera.viewMatrix * vec4f(position, 1.0)).xyz;
 
-//        if vpos.z >= scene_config.csmSplitDistances.w {
-//            return vec4(1,1,0,1);
+        if vpos.z >= scene_config.csmSplitDistances.w {
+            return vec4(1,1,0,1);
 //            continue;
-//        }
+        }
 
         var split = i * 4;
         if vpos.z >= scene_config.csmSplitDistances.x {
@@ -257,7 +261,10 @@ fn evaluateLighting(position: vec3f, normal: vec3f, albedo: vec4f, emissive: vec
         let near = scene_config.psmClipNear;
         let far = light.range;
         let z = max(abs(lvec.x), max(abs(lvec.y), abs(lvec.z)));
+
+        // view z to shadow z
         let zw = (far * (near - z)) / (z * (near - far));
+
         var atten = textureSampleCompareLevel(scene_psmTexture, scene_psmSampler, -lvec, i, zw - scene_config.psmDepthBias);
         if atten == 0.0 {continue;}
 

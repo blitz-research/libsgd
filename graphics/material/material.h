@@ -38,11 +38,17 @@ struct Material : GraphicsResource {
 
 	explicit Material(const MaterialDescriptor* desc);
 
+	Property<Path> path;
+
 	Property<BlendMode> blendMode{BlendMode::opaque};
 
 	Property<DepthFunc> depthFunc{DepthFunc::lessEqual};
 
 	Property<CullMode> cullMode{CullMode::back};
+
+	String typeName()const{
+		return m_desc->typeName;
+	}
 
 	CTexture* mainTexture() const {
 		return m_desc->mainTexture ? m_bindGroup->getTexture(m_desc->mainTexture) : nullptr;

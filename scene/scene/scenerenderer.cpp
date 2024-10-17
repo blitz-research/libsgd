@@ -6,6 +6,7 @@
 #include "../model/skinnedmodelrenderer.h"
 #include "../overlay/overlayrenderer.h"
 #include "../skybox/skyboxrenderer.h"
+#include "../plane/planerenderer.h"
 #include "../sprite/spriterenderer.h"
 #include "../terrain/terrainrenderer.h"
 
@@ -26,16 +27,17 @@ SGD_BOOL_CONFIG_VAR(g_overlayPassEnabled, "render.overlayPassEnabled", true);
 } // namespace
 
 SceneRenderer::SceneRenderer()
-	: m_sceneBindings(new SceneBindings()),														   //
-	  m_renderContext(new RenderContext()),														   //
-	  m_renderQueue(new RenderQueue()),															   //
-	  m_overlayQueue(new RenderQueue()),														   //
-	  m_skyboxRenderer(new SkyboxRenderer()),													   //
-	  m_terrainRenderer(new TerrainRenderer()),													   //
-	  m_modelRenderer(new ModelRenderer()),														   //
-	  m_skinnedModelRenderer(new SkinnedModelRenderer()),										   //
-	  m_spriteRenderer(new SpriteRenderer()),													   //
-	  m_overlayRenderer(new OverlayRenderer()),													   //
+	: m_sceneBindings(new SceneBindings()),														  //
+	  m_renderContext(new RenderContext()),														  //
+	  m_renderQueue(new RenderQueue()),															  //
+	  m_overlayQueue(new RenderQueue()),														  //
+	  m_skyboxRenderer(new SkyboxRenderer()),													  //
+	  m_planeRenderer(new PlaneRenderer()),														  //
+	  m_terrainRenderer(new TerrainRenderer()),													  //
+	  m_modelRenderer(new ModelRenderer()),														  //
+	  m_skinnedModelRenderer(new SkinnedModelRenderer()),										  //
+	  m_spriteRenderer(new SpriteRenderer()),													  //
+	  m_overlayRenderer(new OverlayRenderer()),													  //
 	  m_renderEffectStack(new RenderEffectStack()), envTexture(blackTexture(TextureType::cube)) { //
 
 	auto resize = [=](CVec2u size) { //
@@ -124,8 +126,8 @@ void SceneRenderer::updateCameraUniforms() {
 	float far;
 	if (!m_camera) {
 		// Should just make a dummy camera.
-		near=.1f;
-		far=1000.0f;
+		near = .1f;
+		far = 1000.0f;
 		auto window = currentGC()->window();
 		// Quick mouselook hack for no camera
 		auto mouse = window->mouse()->position().xy() / Vec2f(window->size()) * 2.0f - 1.0f;
@@ -147,8 +149,8 @@ void SceneRenderer::updateCameraUniforms() {
 	uniforms.viewMatrix = inverse(uniforms.worldMatrix);
 	uniforms.inverseProjectionMatrix = inverse(uniforms.projectionMatrix);
 	uniforms.viewProjectionMatrix = uniforms.projectionMatrix * uniforms.viewMatrix;
-	uniforms.clipNear=near;
-	uniforms.clipFar=far;
+	uniforms.clipNear = near;
+	uniforms.clipFar = far;
 	m_sceneBindings->unlockCameraUniforms();
 }
 
@@ -247,6 +249,7 @@ void SceneRenderer::render() {
 	m_sceneBindings->envTexture = envTexture();
 
 	m_skyboxRenderer->update(m_eye);
+	m_planeRenderer->update(m_eye);
 	m_terrainRenderer->update(m_eye);
 	m_modelRenderer->update(m_eye);
 	m_skinnedModelRenderer->update(m_eye);
@@ -260,6 +263,7 @@ void SceneRenderer::render() {
 			m_renderQueue->clear();
 			m_overlayQueue->clear();
 			m_skyboxRenderer->render(m_renderQueue);
+			m_planeRenderer->render(m_renderQueue);
 			m_terrainRenderer->render(m_renderQueue);
 			m_modelRenderer->render(m_renderQueue);
 			m_skinnedModelRenderer->render(m_renderQueue);

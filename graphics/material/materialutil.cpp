@@ -25,6 +25,7 @@ Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
 		SGD_LOG << "Texture"<<path.str()<<"loaded, format:"<<(int)texture.result()->format();
 		auto material = new Material(&pbrMaterialDescriptor);
 		material->setTexture("albedo", texture.result());
+		material->path = path;
 		return material;
 	}
 
@@ -34,6 +35,7 @@ Expected<Material*, FileioEx> loadPBRMaterial(CPath path) {
 	};
 
 	auto material = new Material(&pbrMaterialDescriptor);
+	material->path=path;
 
 	if (auto texture = tryLoad("_Color.jpg", TextureFormat::any)) {
 		material->setTexture("albedo", texture);

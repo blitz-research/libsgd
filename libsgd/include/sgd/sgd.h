@@ -945,8 +945,8 @@ SGD_API int SGD_DECL sgd_GetEntityChildCount(SGD_Entity entity);
 //! Get entity child by index. childIndex must be >= 0 and < sgd_GetEntityChildCount(entity)
 SGD_API SGD_Entity SGD_DECL sgd_GetEntityChild(SGD_Entity entity, int childIndex);
 
-//! Recursively search for an entity by name.
-SGD_API SGD_Entity SGD_DECL sgd_FindEntityChild(SGD_Entity entity, SGD_String childName);
+//! Recursively search for an entity by name. If parent is 0, the entire scene is searched.
+SGD_API SGD_Entity SGD_DECL sgd_FindEntity(SGD_String name, SGD_Entity parent);
 
 //! Set entity's world space position.
 SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity entity, SGD_Real tx, SGD_Real ty, SGD_Real tz);
@@ -1246,6 +1246,28 @@ SGD_API void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox skybox, float roughness)
 
 //! @}
 
+//! @defgroup PlaneTypes PlaneTypes
+//! @{
+
+//! Plane handle type.
+typedef SGD_Entity SGD_Plane;
+
+//@}
+
+//! @defgroup Plane Plane
+//! @{
+
+//! Create a new Plane entity.
+SGD_API SGD_Plane SGD_DECL sgd_CreatePlane(SGD_Material material);
+
+//! Set plane material.
+SGD_API void SGD_DECL sgd_SetPlaneMaterial(SGD_Plane plane, SGD_Material material);
+
+//! Get plane material.
+SGD_API SGD_Material SGD_DECL sgd_GetPlaneMaterial(SGD_Plane plane);
+
+//! @}
+
 //! @defgroup TerrainTypes TerrainTypes
 //! @{
 
@@ -1335,6 +1357,9 @@ SGD_API SGD_Collider SGD_DECL sgd_CreateEllipsoidCollider(SGD_Entity entity, int
 
 //! Create a new mesh collider and attach it to entity.
 SGD_API SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity entity, int colliderType, SGD_Mesh mesh);
+
+//! Create a new plane collider and attach it to entity.
+SGD_API SGD_Collider SGD_DECL sgd_CreatePlaneCollider(SGD_Entity entity, int colliderType);
 
 //! Return entity a collider is attached to.
 SGD_API SGD_Entity SGD_DECL sgd_GetColliderEntity(SGD_Collider collider);

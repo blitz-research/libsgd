@@ -29,6 +29,8 @@
 #include "mesh/meshrenderer.h"
 #include "mesh/meshutil.h"
 #include "mesh/skinnedmeshrenderer.h"
+
+#include "plane/planebindings.h"
     
 #include "render/rendercontext.h"
 #include "render/renderpipeline.h"

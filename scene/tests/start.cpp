@@ -20,6 +20,10 @@ float player_rvy;
 CameraPtr camera;
 float camera_rx;
 
+void clear() {
+
+}
+
 void render() {
 	auto gc = currentGC();
 

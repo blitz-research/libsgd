@@ -59,7 +59,7 @@ template <class T> Line<T> operator*(CAffineMat4<T> m, CLine<T> l) {
 }
 
 template <class T> Plane<T> operator*(CAffineMat4<T> m, CPlane<T> p) {
-	return {m * (p.n * -p.d), m * p.n};
+	return {m * (p.n * -p.d), m.r * p.n};
 }
 
 template <class T> bool operator==(CAffineMat4<T> m, CAffineMat4<T> n) {

@@ -74,6 +74,12 @@ add_library(graphics
 	mesh/vertex.cpp
 	mesh/vertex.h
 
+	plane/planebindgroup.cpp
+	plane/planebindgroup.h
+	plane/planebindings.cpp
+	plane/planebindings.h
+	plane/planerenderer.wgsl
+
 	render/rendercontext.cpp
 	render/rendercontext.h
 	render/renderop.cpp

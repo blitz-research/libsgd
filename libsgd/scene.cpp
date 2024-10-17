@@ -623,6 +623,25 @@ void SGD_DECL sgd_SetSkyboxRoughness(SGD_Skybox hskybox, float roughness) {
 	skybox->roughness = roughness;
 }
 
+// ***** Planes *****
+
+SGD_Plane SGD_DECL sgd_CreatePlane(SGD_Material hmaterial) {
+	sgdx::started();
+	auto plane = new sgd::PlaneEntity();
+	sgdx::mainScene()->add(plane);
+	if (hmaterial) plane->bindings()->material = sgdx::resolveHandle<sgd::Material>(hmaterial);
+	return sgdx::createHandle(plane);
+}
+
+void SGD_DECL sgd_SetPlaneMaterial(SGD_Plane hplane, SGD_Material hmaterial) {
+	sgdx::resolveHandle<sgd::PlaneEntity>(hplane)->bindings()->material = hmaterial ? sgdx::resolveHandle<sgd::Material>(hmaterial) : nullptr;
+}
+
+SGD_Material SGD_DECL sgd_GetPlaneMaterial(SGD_Plane hplane) {
+	auto material = sgdx::resolveHandle<sgd::PlaneEntity>(hplane)->bindings()->material();
+	return material ? sgdx::getOrCreateHandle(material) : 0;
+}
+
 // ***** Terrains *****
 
 SGD_API SGD_Terrain SGD_DECL sgd_CreateTerrain() {
@@ -693,6 +712,13 @@ SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity hentity, int colliderTyp
 	}
 	auto data = sgd::getOrCreateMeshColliderData(mesh);
 	auto collider = new sgd::MeshCollider(entity, (uint32_t)colliderType, data);
+	return sgdx::createHandle(collider);
+}
+
+SGD_Collider SGD_DECL sgd_CreatePlaneCollider(SGD_Entity hentity, int colliderType) {
+	if ((uint32_t)colliderType > 31) sgdx::error("ColliderType must be in the range 0..31");
+	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+	auto collider = new sgd::PlaneCollider(entity, (uint32_t)colliderType, sgd::Planef({0,1,0},0));
 	return sgdx::createHandle(collider);
 }
 
