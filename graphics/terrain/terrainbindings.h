@@ -35,17 +35,9 @@ private:
 	mutable BufferPtr m_indexBuffer;
 	mutable uint32_t m_indexCount{};
 
-	CTerrainUniforms& uniforms() const {
-		return *(CTerrainUniforms*)m_uniformBuffer->data();
-	}
-
-	TerrainUniforms& lockUniforms() const {
-		return *(TerrainUniforms*)m_uniformBuffer->lock();
-	}
-
-	void unlockUniforms() const {
-		m_uniformBuffer->unlock();
-	}
+	CTerrainUniforms& uniforms() const;
+	TerrainUniforms& lockUniforms() const;
+	void unlockUniforms() const;
 
 	void onValidate() const override;
 };

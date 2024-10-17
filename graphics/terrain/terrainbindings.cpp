@@ -98,6 +98,18 @@ TerrainBindings::TerrainBindings()
 	material = new Material(&prelitMaterialDescriptor);
 }
 
+CTerrainUniforms& TerrainBindings::uniforms() const {
+	return *(CTerrainUniforms*)m_uniformBuffer->data();
+}
+
+TerrainUniforms& TerrainBindings::lockUniforms() const {
+	return *(TerrainUniforms*)m_uniformBuffer->lock();
+}
+
+void TerrainBindings::unlockUniforms() const {
+	m_uniformBuffer->unlock();
+}
+
 void TerrainBindings::onValidate() const {
 
 	using Vertex = TerrainVertex;
