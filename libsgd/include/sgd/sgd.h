@@ -948,6 +948,7 @@ SGD_API SGD_Entity SGD_DECL sgd_GetEntityChild(SGD_Entity entity, int childIndex
 //! Recursively search for an entity by name. If parent is 0, the entire scene is searched.
 SGD_API SGD_Entity SGD_DECL sgd_FindEntityChild(SGD_Entity entity, SGD_String childName);
 
+
 //! Set entity's world space position.
 SGD_API void SGD_DECL sgd_SetEntityPosition(SGD_Entity entity, SGD_Real tx, SGD_Real ty, SGD_Real tz);
 

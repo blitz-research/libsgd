@@ -196,8 +196,15 @@ SGD_Entity SGD_DECL sgd_GetEntityChild(SGD_Entity hentity, int childIndex) {
 }
 
 SGD_Entity SGD_DECL sgd_FindEntityChild(SGD_Entity hentity, SGD_String name) {
-	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	auto child = entity->findChild(name);
+	sgd::Entity* child;
+	if(hentity) {
+		auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
+		child = entity->findChild(name);
+	} else {
+		for(sgd::Entity* entity : sgdx::mainScene()->rootEntities()) {
+			if((child = entity->findChild(name))) break;
+		}
+	}
 	return child ? sgdx::getOrCreateHandle(child) : SGD_NULL;
 }
 
