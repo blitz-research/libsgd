@@ -46,7 +46,7 @@ EnableCollisions 1,0,2
 
 While (PollEvents() And 1)<>1
 
-	PlayerFly(.5)
+	PlayerFly(.25)
 	
 	RotateEntity light,0,.025,0
 	

@@ -1,3 +1,8 @@
+***** v0.17.1 *****
+
+Fixed duplicate entities in scene serialization bug.
+
+
 ***** V0.17.0 *****
 
 Added camera/plane/sprite/image serializers/deserializers.

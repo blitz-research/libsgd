@@ -28,7 +28,7 @@ void entry() {
 
 	ColliderPtr playerCollider = new EllipsoidCollider(player, COLLISION_TYPE_PLAYER, .2f, 1.8f);
 
-	MeshPtr sphereMesh = createSphereMesh(2.5f, 48, 24, createPBRMaterial(Vec4f(1,1,0,1)));
+	MeshPtr sphereMesh = createSphereMesh(2.5f, 48, 24, createPBRMaterial());
 	ModelPtr sphere = new Model(sphereMesh);
 	scene->add(sphere);
 

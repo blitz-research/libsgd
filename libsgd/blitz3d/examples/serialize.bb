@@ -22,7 +22,7 @@ treeMeshes(0) = LoadMesh("sgd://models/tree1.glb")
 treeMeshes(1) = LoadMesh("sgd://models/palm_tree1.glb")
 treeMeshes(2) = LoadMesh("sgd://models/birch_tree1.glb")
 
-Local n=10;000
+Local n=10000
 For i=1 To n
 	Local treeModel = CreateModel(treeMeshes(Rand(0,2)))
 	MoveEntity treeModel,Rnd(-sz,sz),0,Rnd(-sz,sz)

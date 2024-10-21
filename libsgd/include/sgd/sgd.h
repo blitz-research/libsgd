@@ -7,8 +7,8 @@
 
 #define SGD_VERSION_MAJOR 0
 #define SGD_VERSION_MINOR 17
-#define SGD_VERSION_PATCH 0
-#define SGD_VERSION "0.17.0" // How to macro-ize this?
+#define SGD_VERSION_PATCH 1
+#define SGD_VERSION "0.17.1" // How to macro-ize this?
 
 #if defined(SWIG) || defined(SGD_GENAPI)
 
