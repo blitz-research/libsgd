@@ -401,7 +401,8 @@ struct Serializer {
 		json["envTexture"] = serialize(scene->sceneRenderer()->envTexture());
 		json["clearColor"] = serialize(scene->sceneRenderer()->clearColor());
 		Json::array entities;
-		for (Entity* entity : scene->rootEntities()) {
+		for (Entity* entity : scene->entities()) {
+			if(entity->parent()) continue;
 			auto cjson = serializeObject(entity);
 			if (cjson.is_null()) continue;
 			entities.emplace_back(cjson);
