@@ -62,6 +62,11 @@ Function CreateScene()
 	
 	CreatePlayer(0)
 	MoveEntity player,0,50,-100
+
+	SetEntityName player,"Player"
+	
+	DebugLog player
+	DebugLog FindEntityChild(0,"Player")
 	
 	light = CreateSpotLight()
 	SetEntityParent light,player

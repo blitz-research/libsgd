@@ -62,19 +62,19 @@ End Function
 Function PlayerFly(speed#)
 
 	If IsKeyDown(KEY_LEFT)
-		player_rvy = player_rvy + (1.5-player_rvy) * .3
+		player_rvy = player_rvy + (1.25-player_rvy) * .2
 	Else If IsKeyDown(KEY_RIGHT)
-		player_rvy = player_rvy + (-1.5-player_rvy) * .3
+		player_rvy = player_rvy + (-1.25-player_rvy) * .2
 	Else
 		player_rvy = player_rvy * .9
 	EndIf
 	RotateEntity player,0,player_rvy,0
-	SetEntityRotation camera,0,0,player_rvy*-15
+	SetEntityRotation camera,0,0,player_rvy*-12
 	
 	If IsKeyDown(KEY_UP)
-		player_rvx = player_rvx + (-1.5-player_rvx) * .3
+		player_rvx = player_rvx + (-1.25-player_rvx) * .2
 	ElseIf IsKeyDown(KEY_DOWN)
-		player_rvx = player_rvx + (1.5-player_rvx) * .3
+		player_rvx = player_rvx + (1.25-player_rvx) * .2
 	Else 
 		player_rvx = player_rvx * .9
 	EndIf

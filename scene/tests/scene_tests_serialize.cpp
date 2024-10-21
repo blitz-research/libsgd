@@ -4,10 +4,10 @@ void entry() {
 
 	setConfigVar("debug.gltfLoader","1");
 
-	float sz = 100;
+	float sz = 10;///0;
 
-	int n_grasses=1000;
-	int n_trees=5000;
+	int n_grasses=10;//00;
+	int n_trees=5;//000;
 
 	{
 		MaterialPtr material = loadPBRMaterial(Path("sgd://misc/brownish-grass.jpg")).result();

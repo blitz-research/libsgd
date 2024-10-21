@@ -60,8 +60,12 @@ struct Deserializer {
 		if (!json["children"].is_null()) {
 			auto items = json["children"].array_items();
 			for (Json& item : items) {
-				auto child = deserializeObject(item);
-				if (child) child->as<Entity>()->setParent(entity);
+				auto obj = deserializeObject(item);
+				if(!obj) continue;
+				auto child = obj->as<Entity>();
+				auto matrix = child->worldMatrix();
+				child->setParent(entity);
+				child->setWorldMatrix(matrix);
 			}
 		}
 	}
@@ -206,11 +210,11 @@ struct Deserializer {
 		if (!json["clearColor"].is_null()) {
 			scene->sceneRenderer()->clearColor = deserializeVec4f(json["clearColor"]);
 		}
-
 		if (!json["entities"].is_null()) {
 			auto& items = json["entities"].array_items();
 			for (auto& item : items) {
 				auto root = deserializeObject(item)->as<Entity>();
+				if(!root) continue;
 				scene->add(root);
 			}
 		}
@@ -286,7 +290,7 @@ struct Serializer {
 			Json::object json;
 			json["class"] = "Material";
 			json["path"] = material->path().str();
-			json["type"] = material->typeName();
+			json["type"] = material->descriptor()->typeName;
 			return json;
 		});
 	}

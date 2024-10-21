@@ -18,6 +18,7 @@
 #include "image/imagerenderer.h"
 #include "image/imageutil.h"
     
+#include "material/emissivematerial.h"
 #include "material/material.h"
 #include "material/materialutil.h"
 #include "material/nullmaterial.h"

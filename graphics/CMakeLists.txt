@@ -42,7 +42,10 @@ add_library(graphics
 	image/imagerenderer.wgsl
 	image/imageutil.cpp
 	image/imageutil.h
-    
+
+	material/emissivematerial.cpp
+	material/emissivematerial.h
+	material/emissivematerial.wgsl
 	material/material.cpp
 	material/material.h
 	material/materialutil.cpp
