@@ -30,6 +30,8 @@ struct MaterialDescriptor {
 					   Map<String, UniformDesc> uniformDescs,			   //
 					   Map<String, TextureDesc> textureDescs,
 					   uint32_t mainTexture);
+
+	static const MaterialDescriptor* forTypeName(CString typeName);
 };
 using CMaterialDescriptor = const MaterialDescriptor;
 
@@ -46,12 +48,8 @@ struct Material : GraphicsResource {
 
 	Property<CullMode> cullMode{CullMode::back};
 
-	String typeName()const{
-		return m_desc->typeName;
-	}
-
-	CTexture* mainTexture() const {
-		return m_desc->mainTexture ? m_bindGroup->getTexture(m_desc->mainTexture) : nullptr;
+	CMaterialDescriptor* descriptor() const {
+		return m_desc;
 	}
 
 	bool hasNormalTexture() const {
@@ -59,7 +57,9 @@ struct Material : GraphicsResource {
 	}
 
 	void setTexture(CString name, CTexture* texture);
+
 	void setColor(CString name, CVec4f color);
+
 	void setFloat(CString name, float value);
 
 	wgpu::BindGroup wgpuBindGroup() const {
@@ -71,7 +71,7 @@ struct Material : GraphicsResource {
 	}
 
 protected:
-	const MaterialDescriptor* m_desc;
+	CMaterialDescriptor* m_desc{};
 	BindGroupPtr m_bindGroup;
 	BufferPtr m_uniformBuffer;
 	bool m_hasNormalTexture{};

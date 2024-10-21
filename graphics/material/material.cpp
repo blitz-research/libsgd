@@ -4,6 +4,19 @@
 
 namespace sgd {
 
+namespace {
+
+Map<String, CMaterialDescriptor*>* g_materialDescs;
+
+Map<String, CMaterialDescriptor*>& materialDescs() {
+	if (!g_materialDescs) g_materialDescs = new Map<String, CMaterialDescriptor*>();
+	return *g_materialDescs;
+}
+
+} // namespace
+
+// ***** MaterialDescriptor *****
+
 MaterialDescriptor::MaterialDescriptor(String typeName,								   //
 									   const BindGroupDescriptor* bindGroupDescriptor, //
 									   uint32_t uniformsSize,						   //
@@ -15,11 +28,18 @@ MaterialDescriptor::MaterialDescriptor(String typeName,								   //
 	  uniformsSize(uniformsSize),				//
 	  uniformDescs(std::move(uniformDescs)),	//
 	  textureDescs(std::move(textureDescs)), mainTexture(mainTexture) {
+	materialDescs().insert(std::make_pair(typeName, this));
 }
 
-Material::Material(const MaterialDescriptor* desc)
-	: m_desc(desc), //
-	  m_bindGroup(new BindGroup(m_desc->bindGroupDescriptor)) {
+CMaterialDescriptor* MaterialDescriptor::forTypeName(CString typeName) {
+	auto it = materialDescs().find(typeName);
+	return it != materialDescs().end() ? it->second : nullptr;
+}
+
+// ***** Material *****
+
+Material::Material(CMaterialDescriptor* desc) : m_desc(desc),
+	m_bindGroup(new BindGroup(m_desc->bindGroupDescriptor)) {
 
 	auto uniforms = (uint8_t*)std::malloc(m_desc->uniformsSize);
 	for (auto& kv : m_desc->uniformDescs) {
