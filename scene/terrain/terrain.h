@@ -13,6 +13,8 @@ struct Terrain : Entity {
 
 	Terrain();
 
+	real getHeight(real x, real z) const;
+
 	TerrainBindings* bindings()const {
 		return m_bindings;
 	}
