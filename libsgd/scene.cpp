@@ -27,7 +27,7 @@ void clearMainScene() {
 }
 
 void setMainScene(sgd::Scene* scene) {
-	if(sgdx::g_mainScene) clearMainScene();
+	if (sgdx::g_mainScene) clearMainScene();
 	sgdx::g_mainScene = scene;
 	createOverlay();
 }
@@ -52,7 +52,7 @@ void SGD_DECL sgd_ResetScene(SGD_Bool releaseAllHandles) {
 	sgdx::mainScene()->clear();
 	if (releaseAllHandles) {
 		sgdx::releaseAllHandles();
-	}else{
+	} else {
 		sgdx::releaseAllHandles(sgd::Entity::staticType());
 	}
 	sgd_CreateDefaultScene();
@@ -73,8 +73,8 @@ void SGD_DECL sgd_LoadScene(SGD_String path) {
 void SGD_DECL sgd_SaveScene(SGD_String path) {
 	auto jsrc = sgd::serialize(sgdx::mainScene());
 
-	auto r = sgd::saveString(jsrc,sgd::Path(path));
-	if(!r) sgdx::error(r.error());
+	auto r = sgd::saveString(jsrc, sgd::Path(path));
+	if (!r) sgdx::error(r.error());
 }
 
 void SGD_DECL sgd_SetClearColor(float red, float green, float blue, float alpha) {
@@ -197,12 +197,12 @@ SGD_Entity SGD_DECL sgd_GetEntityChild(SGD_Entity hentity, int childIndex) {
 
 SGD_Entity SGD_DECL sgd_FindEntityChild(SGD_Entity hentity, SGD_String name) {
 	sgd::Entity* child;
-	if(hentity) {
+	if (hentity) {
 		auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
 		child = entity->findChild(name);
 	} else {
-		for(sgd::Entity* entity : sgdx::mainScene()->entities()) {
-			if(!entity->parent() && (child = entity->findChild(name))) break;
+		for (sgd::Entity* entity : sgdx::mainScene()->entities()) {
+			if (!entity->parent() && (child = entity->findChild(name))) break;
 		}
 	}
 	return child ? sgdx::getOrCreateHandle(child) : SGD_NULL;
@@ -475,15 +475,15 @@ SGD_LightType SGD_DECL sgd_GetLightType(SGD_Light hlight) {
 }
 
 void SGD_DECL sgd_SetLightShadowsEnabled(SGD_Light hlight, SGD_Bool enabled) {
-	sgdx::resolveHandle<sgdx::Light>(hlight)-> shadowsEnabled = enabled;
+	sgdx::resolveHandle<sgdx::Light>(hlight)->shadowsEnabled = enabled;
 }
 
 SGD_Bool SGD_DECL sgd_IsLightShadowsEnabled(SGD_Light hlight) {
-	return sgdx::resolveHandle<sgdx::Light>(hlight) -> shadowsEnabled();
+	return sgdx::resolveHandle<sgdx::Light>(hlight)->shadowsEnabled();
 }
 
 void SGD_DECL sgd_SetLightPriority(SGD_Light hlight, int priority) {
-	sgdx::resolveHandle<sgdx::Light>(hlight)->priority= priority;
+	sgdx::resolveHandle<sgdx::Light>(hlight)->priority = priority;
 }
 
 int SGD_DECL sgd_GetLightPriority(SGD_Light hlight) {
@@ -641,7 +641,8 @@ SGD_Plane SGD_DECL sgd_CreatePlane(SGD_Material hmaterial) {
 }
 
 void SGD_DECL sgd_SetPlaneMaterial(SGD_Plane hplane, SGD_Material hmaterial) {
-	sgdx::resolveHandle<sgd::PlaneEntity>(hplane)->bindings()->material = hmaterial ? sgdx::resolveHandle<sgd::Material>(hmaterial) : nullptr;
+	sgdx::resolveHandle<sgd::PlaneEntity>(hplane)->bindings()->material =
+		hmaterial ? sgdx::resolveHandle<sgd::Material>(hmaterial) : nullptr;
 }
 
 SGD_Material SGD_DECL sgd_GetPlaneMaterial(SGD_Plane hplane) {
@@ -651,7 +652,7 @@ SGD_Material SGD_DECL sgd_GetPlaneMaterial(SGD_Plane hplane) {
 
 // ***** Terrains *****
 
-SGD_API SGD_Terrain SGD_DECL sgd_CreateTerrain() {
+SGD_Terrain SGD_DECL sgd_CreateTerrain() {
 	sgdx::started();
 	auto terrain = new sgd::Terrain();
 	sgdx::mainScene()->add(terrain);
@@ -659,37 +660,41 @@ SGD_API SGD_Terrain SGD_DECL sgd_CreateTerrain() {
 }
 
 //! Set terrain size.
-SGD_API void SGD_DECL sgd_SetTerrainSize(SGD_Terrain hterrain, int size) {
+void SGD_DECL sgd_SetTerrainSize(SGD_Terrain hterrain, int size) {
 	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->size = size;
 }
 
 //! Set terrain level-of-details.
-SGD_API void SGD_DECL sgd_SetTerrainLODs(SGD_Terrain hterrain, int lods) {
+void SGD_DECL sgd_SetTerrainLODs(SGD_Terrain hterrain, int lods) {
 	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->lods = lods;
 }
 
-SGD_API void SGD_DECL sgd_SetTerrainMaterial(SGD_Terrain hterrain, SGD_Material hmaterial) {
+void SGD_DECL sgd_SetTerrainMaterial(SGD_Terrain hterrain, SGD_Material hmaterial) {
 	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->material = sgdx::resolveHandle<sgd::Material>(hmaterial);
 }
 
 //! Set terrain material size.
-SGD_API void SGD_DECL sgd_SetTerrainMaterialSize(SGD_Terrain hterrain, int materialSize) {
+void SGD_DECL sgd_SetTerrainMaterialSize(SGD_Terrain hterrain, int materialSize) {
 	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->materialSize = materialSize;
 }
 
 //! Set terrain height texture.
-SGD_API void SGD_DECL sgd_SetTerrainHeightTexture(SGD_Terrain hterrain, SGD_Texture htexture) {
+void SGD_DECL sgd_SetTerrainHeightTexture(SGD_Terrain hterrain, SGD_Texture htexture) {
 	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->heightTexture = sgdx::resolveHandle<sgd::Texture>(htexture);
 }
 
 //! Set terrain normal texture.
-SGD_API void SGD_DECL sgd_SetTerrainNormalTexture(SGD_Terrain hterrain, SGD_Texture htexture) {
+void SGD_DECL sgd_SetTerrainNormalTexture(SGD_Terrain hterrain, SGD_Texture htexture) {
 	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->normalTexture = sgdx::resolveHandle<sgd::Texture>(htexture);
 }
 
 //! Set terrain debug mode.
 SGD_API void SGD_DECL sgd_SetTerrainDebugMode(SGD_Terrain hterrain, int debugMode) {
 	sgdx::resolveHandle<sgd::Terrain>(hterrain)->bindings()->debugMode = debugMode;
+}
+
+SGD_Real SGD_DECL sgd_GetTerrainHeight(SGD_Terrain hterrain, SGD_Real x, SGD_Real z) {
+	return sgdx::resolveHandle<sgd::Terrain>(hterrain)->getHeight(x, z);
 }
 
 // ***** Collisions *****
@@ -725,7 +730,7 @@ SGD_Collider SGD_DECL sgd_CreateMeshCollider(SGD_Entity hentity, int colliderTyp
 SGD_Collider SGD_DECL sgd_CreatePlaneCollider(SGD_Entity hentity, int colliderType) {
 	if ((uint32_t)colliderType > 31) sgdx::error("ColliderType must be in the range 0..31");
 	auto entity = sgdx::resolveHandle<sgd::Entity>(hentity);
-	auto collider = new sgd::PlaneCollider(entity, (uint32_t)colliderType, sgd::Planef({0,1,0},0));
+	auto collider = new sgd::PlaneCollider(entity, (uint32_t)colliderType, sgd::Planef({0, 1, 0}, 0));
 	return sgdx::createHandle(collider);
 }
 

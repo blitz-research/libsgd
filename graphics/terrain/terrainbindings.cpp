@@ -51,7 +51,7 @@ TerrainBindings::TerrainBindings()
 	});
 	worldMatrix.update();
 
-	size.changed.connect(nullptr, [=](uint32_t n){
+	size.changed.connect(nullptr, [=](uint32_t n) {
 		lockUniforms().size = (float)n;
 		unlockUniforms();
 		invalidate();
@@ -75,9 +75,9 @@ TerrainBindings::TerrainBindings()
 
 	heightTexture.changed.connect(nullptr, [=](CTexture* ttexture) { //
 		auto size = ttexture->size().x;
-		if(size!=ttexture->size().y) SGD_ERROR("Terrain height texture must be square");
-		if(size & (size - 1)) SGD_ERROR("Terrain height texture size must be a power of 2");
-//		if(size<512) SGD_ERROR("Terrain height texture size must be at least 512");
+		if (size != ttexture->size().y) SGD_ERROR("Terrain height texture must be square");
+		if (size & (size - 1)) SGD_ERROR("Terrain height texture size must be a power of 2");
+		//		if(size<512) SGD_ERROR("Terrain height texture size must be at least 512");
 		lockUniforms().heightTexelSize = 1.0f / (float)size;
 		unlockUniforms();
 		m_bindGroup->setTexture(1, ttexture);
@@ -185,6 +185,53 @@ void TerrainBindings::onValidate() const {
 	m_indexBuffer = new Buffer(BufferType::index, indices.data(), sizeof(uint32_t) * indices.size());
 
 	m_indexCount = indices.size();
+}
+
+float TerrainBindings::getLocalHeight(float x, float z) const {
+	float hsize = (float)size() / 2;
+	if (x < -hsize || x >= hsize - 1 || z < -hsize || z >= hsize - 1) { //
+		return 0;														// Off the map
+	}
+	x += hsize;
+	z += hsize;
+	auto fx = std::floor(x);
+	auto fz = std::floor(z);
+	auto ix = (uint32_t)fx;
+	auto iz = (uint32_t)fz;
+
+	auto data = heightTexture()->data();
+
+	float y0, y1, y2, y3;
+
+	switch (data->format()) {
+	case TextureFormat::rgba16f: {
+		auto p0 = (float16*)(data->data() + iz * data->pitch());
+		auto p1 = (float16*)(data->data() + (iz + 1u) * data->pitch());
+		y0 = p0[ix];
+		y1 = p0[ix + 1];
+		y2 = p1[ix];
+		y3 = p1[ix + 1];
+		break;
+	}
+	case TextureFormat::r32f: {
+		auto p0 = (float*)(data->data() + iz * data->pitch());
+		auto p1 = (float*)(data->data() + (iz + 1u) * data->pitch());
+		y0 = p0[ix];
+		y1 = p0[ix + 1];
+		y2 = p1[ix];
+		y3 = p1[ix + 1];
+		break;
+	}
+	default:
+		SGD_ERROR("TODO");
+	}
+
+	float y4 = (y1-y0) * (x-fx) + y0;
+	float y5 = (y3-y2) * (x-fx) + y2;
+
+	float y = (y5-y4)*(z-fz)+y4;
+
+	return y;
 }
 
 void TerrainBindings::render(RenderQueue* rq) const {

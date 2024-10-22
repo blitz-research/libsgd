@@ -1304,6 +1304,9 @@ SGD_API void SGD_DECL sgd_SetTerrainNormalTexture(SGD_Terrain terrain, SGD_Textu
 //! Set terrain debug mode.
 SGD_API void SGD_DECL sgd_SetTerrainDebugMode(SGD_Terrain terrain, int debugMode);
 
+//! Get terrain height at world x/z coordinates.
+SGD_API SGD_Real SGD_DECL sgd_GetTerrainHeight(SGD_Terrain terrain, SGD_Real x, SGD_Real z);
+
 //! @}
 
 //! @defgroup SpriteTypes SpriteTypes
